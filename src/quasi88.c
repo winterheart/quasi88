@@ -138,7 +138,7 @@ void	quasi88_start(void)
 
     emu_breakpoint_init();
 
-    if (verbose_proc) printf("Running QUASI88...\n");
+    if (verbose_proc) printf("Running QUASI88kai...\n");
 }
 
 /* ======================== メイン処理のメインループ ======================= */
@@ -625,7 +625,7 @@ void	quasi88_reset(const T_RESET_CFG *cfg)
     int sb_changed = FALSE;
     int empty[2];
 
-    if (verbose_proc) printf("Reset QUASI88...start\n");
+    if (verbose_proc) printf("Reset QUASI88kai...start\n");
 
     pc88main_term();
     pc88sub_term();
@@ -673,7 +673,7 @@ void	quasi88_reset(const T_RESET_CFG *cfg)
 
     emu_reset();
 
-    if (verbose_proc) printf("Reset QUASI88...done\n");
+    if (verbose_proc) printf("Reset QUASI88kai...done\n");
 }
 
 

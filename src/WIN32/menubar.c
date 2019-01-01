@@ -1352,7 +1352,7 @@ static	void	f_misc_status(UINT uItem)
 static	void	f_help_about (void)
 {
     MessageBox(g_hWnd,
-	       "QUASI88  ver. " Q_VERSION "  <" Q_COMMENT ">"
+	       "QUASI88kai  ver. " Q_VERSION "  <" Q_COMMENT ">"
 	       "\n  " Q_COPYRIGHT
 #ifdef	USE_SOUND
 	       "\n"
@@ -1364,5 +1364,5 @@ static	void	f_help_about (void)
 #endif
 #endif
 	       ,
-	       "About QUASI88", MB_OK);
+	       "About QUASI88kai", MB_OK);
 }

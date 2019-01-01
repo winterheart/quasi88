@@ -5787,7 +5787,7 @@ static	Q8tkWidget	*menu_about(void)
 		q8tk_widget_show(w);
 		q8tk_box_pack_start(hx, w);
 	    } else {
-		PACK_LABEL(hx, Q_TITLE);
+		PACK_LABEL(hx, menu_lang == MENU_JAPAN ? Q_TITLE_KANJI : Q_TITLE);
 	    }
 
 	    vbox = PACK_VBOX(hx);
