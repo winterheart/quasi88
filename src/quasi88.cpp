@@ -71,14 +71,6 @@ static	void	imagefile_all_open(int stateload);
 static	void	imagefile_all_close(void);
 static	void	status_override(void);
 
-#if USE_RETROACHIEVEMENTS
-BYTE *disk_data[2] = { 0 };
-unsigned long disk_len[2] = { 0 };
-
-BYTE *tape_data[2] = { 0 };
-unsigned long tape_len[2] = { 0 };
-#endif
-
 /***********************************************************************
  *
  *			QUASI88 メイン関数
@@ -716,10 +708,23 @@ void	quasi88_reset(const T_RESET_CFG *cfg)
 #if USE_RETROACHIEVEMENTS
     if (RA_HardcoreModeIsActive())
     {
-        if (disk_image_exist(DRIVE_1) && tape_len[CLOAD] > 0)
+        if (loaded_disk.data_len > 0 && loaded_tape.data_len > 0)
         {
-            /* ディスクイメージを優先して、テープを取り外す */
-            quasi88_load_tape_eject();
+            if (loaded_title != NULL)
+            {
+                switch (loaded_title->file_type)
+                {
+                case FTYPE_DISK:
+                    quasi88_load_tape_eject();
+                    break;
+                case FTYPE_TAPE_LOAD:
+                    quasi88_disk_eject(DRIVE_1);
+                    break;
+                default:
+                    /* ディスクイメージを優先して、テープを取り外す */
+                    quasi88_load_tape_eject();
+                }
+            }
         }
 
         if (quasi88_cfg_now_wait_rate() < 100)
@@ -730,7 +735,25 @@ void	quasi88_reset(const T_RESET_CFG *cfg)
         event_switch();
     }
 
+    if (loaded_title == NULL)
+    {
+        if (loaded_disk.data_len > 0)
+        {
+            loaded_title = &loaded_disk;
+        }
+        else if (loaded_tape.data_len > 0)
+        {
+            loaded_title = &loaded_tape;
+        }
+    }
+
     RA_OnReset();
+
+    if (loaded_title != NULL)
+    {
+        RA_UpdateAppTitle(loaded_title->name);
+        RA_ActivateGame(loaded_title->title_id);
+    }
 #endif
 
     emu_reset();
@@ -1055,26 +1078,13 @@ int	quasi88_disk_insert(int drv, const char *filename, int image, int ro)
     int success = FALSE;
 
 #if USE_RETROACHIEVEMENTS
-    /* 先にセットされたテープイメージを優先して、ディスクを無視する */
     if (drv == DRIVE_1)
     {
-        if (tape_len[CLOAD] > 0)
-        {
-            if (!RA_WarnDisableHardcore("load a disk while a load tape is present"))
-            {
-                return FALSE;
-            }
-        }
-
-        if (disk_image_exist(drv))
-        {
-            if (!RA_ConfirmLoadNewRom(false))
-            {
-                return FALSE;
-            }
-        }
+        if (!RA_PrepareLoadNewRom(filename, FTYPE_DISK))
+            return FALSE;
     }
 #endif
+
     quasi88_disk_eject(drv);
 
     if (strlen(filename) < QUASI88_MAX_FILENAME) {
@@ -1096,28 +1106,9 @@ int	quasi88_disk_insert(int drv, const char *filename, int image, int ro)
 	    }
 
 #if USE_RETROACHIEVEMENTS
-        FILE *f = fopen(filename, "rb");
-        fseek(f, 0, SEEK_END);
-        unsigned long disk_size = (unsigned long)ftell(f);
-        disk_data[drv] = (BYTE *)malloc(disk_size * sizeof(BYTE));
-        disk_len[drv] = disk_size;
-
-        fseek(f, 0, SEEK_SET);
-        fread(disk_data[drv], sizeof(BYTE), disk_size, f);
-        fflush(f);
-        fclose(f);
-
-        /* 実績システムのイメージデータを初期化する */
-        if (drv == DRIVE_1)
-        {
-            char basename[_MAX_FNAME];
-            _splitpath(filename, NULL, NULL, basename, NULL);
-            RA_SetGameTitle(basename);
-            RA_InitMemory();
-            RA_OnLoadNewRom(disk_data[drv], disk_len[drv]);
-        }
+        RA_CommitLoadNewRom();
 #endif
-	}
+    }
     }
 
     if (quasi88_is_exec()) {
@@ -1168,7 +1159,7 @@ void	quasi88_disk_eject(int drv)
 {
     if (disk_image_exist(drv)) {
 #if USE_RETROACHIEVEMENTS
-    if (drv == DRIVE_1)
+    if (drv == DRIVE_1 && loaded_title != NULL && loaded_title->file_type == FTYPE_DISK)
     {
         RA_ConfirmLoadNewRom(false);
     }
@@ -1183,12 +1174,9 @@ void	quasi88_disk_eject(int drv)
 	}
 
 #if USE_RETROACHIEVEMENTS
-    free(disk_data[drv]);
-    disk_len[drv] = 0;
-
     if (drv == DRIVE_1)
     {
-        RA_OnGameClose();
+        RA_OnGameClose(FTYPE_DISK);
     }
 #endif
     }
@@ -1284,20 +1272,8 @@ void	quasi88_disk_image_prev(int drv)
 int	quasi88_load_tape_insert(const char *filename)
 {
 #if USE_RETROACHIEVEMENTS
-    if (disk_image_exist(DRIVE_1))
-    {
-        if (!RA_WarnDisableHardcore("load a tape while a disk is present"))
-        {
-            return FALSE;
-        }
-    }
-    if (tape_data[CLOAD])
-    {
-        if (!RA_ConfirmLoadNewRom(false))
-        {
-            return FALSE;
-        }
-    }
+    if (!RA_PrepareLoadNewRom(filename, FTYPE_TAPE_LOAD))
+        return FALSE;
 #endif
 
     quasi88_load_tape_eject();
@@ -1308,26 +1284,7 @@ int	quasi88_load_tape_insert(const char *filename)
 	strcpy(file_tape[ CLOAD ], filename);
 
 #if USE_RETROACHIEVEMENTS
-    if (!disk_image_exist(DRIVE_1))
-    {
-        FILE *f = fopen(filename, "rb");
-        fseek(f, 0, SEEK_END);
-        unsigned long tape_size = (unsigned long)ftell(f);
-        tape_data[CLOAD] = (BYTE *)malloc(tape_size * sizeof(BYTE));
-        tape_len[CLOAD] = tape_size;
-
-        fseek(f, 0, SEEK_SET);
-        fread(tape_data[CLOAD], sizeof(BYTE), tape_size, f);
-        fflush(f);
-        fclose(f);
-
-        /* 実績システムのイメージデータを初期化する */
-        char basename[_MAX_FNAME];
-        _splitpath(filename, NULL, NULL, basename, NULL);
-        RA_SetGameTitle(basename);
-        RA_InitMemory();
-        RA_OnLoadNewRom(tape_data[CLOAD], tape_len[CLOAD]);
-    }
+    RA_CommitLoadNewRom();
 #endif
 
 	return TRUE;
@@ -1348,12 +1305,10 @@ int	quasi88_load_tape_rewind(void)
 void	quasi88_load_tape_eject(void)
 {
 #if USE_RETROACHIEVEMENTS
-    if (!disk_image_exist(DRIVE_1))
+    if (loaded_title != NULL && loaded_title->file_type == FTYPE_TAPE_LOAD && loaded_title->data_len > 0)
     {
         if (!RA_ConfirmLoadNewRom(false))
-        {
             return;
-        }
     }
 #endif
 
@@ -1361,15 +1316,9 @@ void	quasi88_load_tape_eject(void)
     memset(file_tape[ CLOAD ], 0, QUASI88_MAX_FILENAME);
 
 #if USE_RETROACHIEVEMENTS
-    if (tape_len[CLOAD] > 0)
+    if (loaded_tape.data_len > 0)
     {
-        free(tape_data[CLOAD]);
-        tape_len[CLOAD] = 0;
-
-        if (!disk_image_exist(DRIVE_1))
-        {
-            RA_OnGameClose();
-        }
+        RA_OnGameClose(FTYPE_TAPE_LOAD);
     }
 #endif
 }
