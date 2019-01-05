@@ -208,6 +208,8 @@ void RA_InitMemory()
 #endif
 }
 
+#define RA_RELOAD_MULTI_DISK TRUE /* ディスクを切り替えるときは同じタイトルが検出されても、
+                                     実績システムを再初期化する */
 int RA_PrepareLoadNewRom(const char *file_name, int file_type)
 {
     FILE *f = fopen(file_name, "rb");
@@ -241,8 +243,6 @@ int RA_PrepareLoadNewRom(const char *file_name, int file_type)
                 return FALSE; /* 読み込みを中止する */
             }
         }
-
-        RA_ConfirmLoadNewRom(false);
     }
 
     return TRUE;
@@ -250,6 +250,15 @@ int RA_PrepareLoadNewRom(const char *file_name, int file_type)
 
 void RA_CommitLoadNewRom()
 {
+    bool should_activate = true;
+#if !RA_RELOAD_MULTI_DISK
+    if (loaded_title != NULL && loaded_title->data_len > 0 &&
+        loaded_title->title_id > 0 && loaded_title->title_id == loading_file.title_id)
+    {
+        should_activate == false;
+    }
+#endif
+
     switch (loading_file.file_type)
     {
     case FTYPE_DISK:
@@ -268,8 +277,11 @@ void RA_CommitLoadNewRom()
 
     RA_UpdateAppTitle(loading_file.name);
 
-    /* 実績システムのイメージデータを初期化する */
-    RA_ActivateGame(loading_file.title_id);
+    if (should_activate)
+    {
+        /* 実績システムのイメージデータを初期化する */
+        RA_ActivateGame(loading_file.title_id);
+    }
 
     /* ロード中のデータをクリアする */
     reset_file_info(&loading_file);
