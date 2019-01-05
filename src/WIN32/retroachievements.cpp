@@ -268,11 +268,8 @@ void RA_CommitLoadNewRom()
 
     RA_UpdateAppTitle(loading_file.name);
 
-    if (loaded_title == NULL || loading_file.title_id != loaded_title->title_id)
-    {
-        /* 実績システムのイメージデータを初期化する */
-        RA_ActivateGame(loading_file.title_id);
-    }
+    /* 実績システムのイメージデータを初期化する */
+    RA_ActivateGame(loading_file.title_id);
 
     /* ロード中のデータをクリアする */
     reset_file_info(&loading_file);

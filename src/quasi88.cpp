@@ -738,22 +738,18 @@ void	quasi88_reset(const T_RESET_CFG *cfg)
     if (loaded_title == NULL)
     {
         if (loaded_disk.data_len > 0)
-        {
             loaded_title = &loaded_disk;
-        }
         else if (loaded_tape.data_len > 0)
-        {
             loaded_title = &loaded_tape;
+
+        if (loaded_title != NULL)
+        {
+            RA_UpdateAppTitle(loaded_title->name);
+            RA_ActivateGame(loaded_title->title_id);
         }
     }
 
     RA_OnReset();
-
-    if (loaded_title != NULL)
-    {
-        RA_UpdateAppTitle(loaded_title->name);
-        RA_ActivateGame(loaded_title->title_id);
-    }
 #endif
 
     emu_reset();
