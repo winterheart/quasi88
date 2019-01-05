@@ -208,7 +208,7 @@ void RA_InitMemory()
 #endif
 }
 
-#define RA_RELOAD_MULTI_DISK TRUE /* ディスクを切り替えるときは同じタイトルが検出されても、
+#define RA_RELOAD_MULTI_DISK FALSE /* ディスクを切り替えるときは同じタイトルが検出されても、
                                      実績システムを再初期化する */
 int RA_PrepareLoadNewRom(const char *file_name, int file_type)
 {

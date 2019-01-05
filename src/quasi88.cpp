@@ -1053,7 +1053,8 @@ int	quasi88_disk_insert_all(const char *filename, int ro)
 {
     int success = FALSE;
 
-    quasi88_disk_eject_all();
+    if (!quasi88_disk_eject_all())
+        return FALSE;
 
     success = quasi88_disk_insert(DRIVE_1, filename, 0, ro);
 
@@ -1081,7 +1082,8 @@ int	quasi88_disk_insert(int drv, const char *filename, int image, int ro)
     }
 #endif
 
-    quasi88_disk_eject(drv);
+    if (!quasi88_disk_eject(drv))
+        return FALSE;
 
     if (strlen(filename) < QUASI88_MAX_FILENAME) {
 
@@ -1116,7 +1118,8 @@ int	quasi88_disk_insert_A_to_B(int src, int dst, int img)
 {
     int success;
 
-    quasi88_disk_eject(dst);
+    if (!quasi88_disk_eject(dst))
+        return FALSE;
 
     if (disk_insert_A_to_B(src, dst, img) == 0) success = TRUE;
     else                                        success = FALSE;
@@ -1137,12 +1140,13 @@ int	quasi88_disk_insert_A_to_B(int src, int dst, int img)
     }
     return success;
 }
-void	quasi88_disk_eject_all(void)
+int quasi88_disk_eject_all(void)
 {
     int drv;
 
     for (drv = 0; drv<2; drv++) {
-	quasi88_disk_eject(drv);
+    if (!quasi88_disk_eject(drv))
+        return FALSE;
     }
 
     boot_from_rom = TRUE;
@@ -1150,15 +1154,17 @@ void	quasi88_disk_eject_all(void)
     if (quasi88_is_exec()) {
 	status_message_default(1, NULL);
     }
+
+    return TRUE;
 }
-void	quasi88_disk_eject(int drv)
+int quasi88_disk_eject(int drv)
 {
     if (disk_image_exist(drv)) {
 #if USE_RETROACHIEVEMENTS
     if (drv == DRIVE_1 && loaded_title != NULL && loaded_title->file_type == FTYPE_DISK)
     {
         if (!RA_ConfirmLoadNewRom(false))
-            return;
+            return FALSE;
     }
 #endif
 	disk_eject(drv);
@@ -1181,6 +1187,8 @@ void	quasi88_disk_eject(int drv)
     if (quasi88_is_exec()) {
 	status_message_default(1, NULL);
     }
+
+    return TRUE;
 }
 
 /***********************************************************************
@@ -1273,7 +1281,8 @@ int	quasi88_load_tape_insert(const char *filename)
         return FALSE;
 #endif
 
-    quasi88_load_tape_eject();
+    if (!quasi88_load_tape_eject())
+        return FALSE;
 
     if (strlen(filename) < QUASI88_MAX_FILENAME &&
 	sio_open_tapeload(filename)) {
@@ -1299,13 +1308,13 @@ int	quasi88_load_tape_rewind(void)
     quasi88_load_tape_eject();
     return FALSE;
 }
-void	quasi88_load_tape_eject(void)
+int quasi88_load_tape_eject(void)
 {
 #if USE_RETROACHIEVEMENTS
     if (loaded_title != NULL && loaded_title->file_type == FTYPE_TAPE_LOAD && loaded_title->data_len > 0)
     {
         if (!RA_ConfirmLoadNewRom(false))
-            return;
+            return FALSE;
     }
 #endif
 
@@ -1318,6 +1327,8 @@ void	quasi88_load_tape_eject(void)
         RA_OnGameClose(FTYPE_TAPE_LOAD);
     }
 #endif
+
+    return TRUE;
 }
 
 int	quasi88_save_tape_insert(const char *filename)
@@ -1333,10 +1344,12 @@ int	quasi88_save_tape_insert(const char *filename)
     }
     return FALSE;
 }
-void	quasi88_save_tape_eject(void)
+int quasi88_save_tape_eject(void)
 {
     sio_close_tapesave();
     memset(file_tape[ CSAVE ], 0, QUASI88_MAX_FILENAME);
+
+    return TRUE;
 }
 
 /*======================================================================
