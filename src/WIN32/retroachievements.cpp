@@ -235,7 +235,7 @@ int RA_PrepareLoadNewRom(const char *file_name, int file_type)
     {
         if (loaded_title->title_id != loading_file.title_id || loaded_title->file_type != loading_file.file_type)
         {
-            if (!RA_WarnDisableHardcore("loading a new title without ejecting all images and resetting the emulator"))
+            if (!RA_WarnDisableHardcore("load a new title without ejecting all images and resetting the emulator"))
             {
                 free_file_info(&loading_file);
                 return FALSE; /* 読み込みを中止する */
