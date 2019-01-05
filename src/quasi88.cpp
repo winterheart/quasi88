@@ -1157,7 +1157,8 @@ void	quasi88_disk_eject(int drv)
 #if USE_RETROACHIEVEMENTS
     if (drv == DRIVE_1 && loaded_title != NULL && loaded_title->file_type == FTYPE_DISK)
     {
-        RA_ConfirmLoadNewRom(false);
+        if (!RA_ConfirmLoadNewRom(false))
+            return;
     }
 #endif
 	disk_eject(drv);
