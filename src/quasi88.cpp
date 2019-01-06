@@ -1179,6 +1179,9 @@ int quasi88_disk_eject(int drv)
 #if USE_RETROACHIEVEMENTS
     if (drv == DRIVE_1)
     {
+#if !RA_RELOAD_MULTI_DISK
+        if (loaded_title != NULL && loaded_title->title_id != loading_file.title_id)
+#endif
         RA_OnGameClose(FTYPE_DISK);
     }
 #endif
@@ -1324,6 +1327,9 @@ int quasi88_load_tape_eject(void)
 #if USE_RETROACHIEVEMENTS
     if (loaded_tape.data_len > 0)
     {
+#if !RA_RELOAD_MULTI_DISK
+        if (loaded_title != NULL && loaded_title->title_id != loading_file.title_id)
+#endif
         RA_OnGameClose(FTYPE_TAPE_LOAD);
     }
 #endif

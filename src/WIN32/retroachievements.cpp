@@ -18,7 +18,7 @@ FileInfo loaded_disk = FINFO_DEFAULT;
 FileInfo loaded_tape = FINFO_DEFAULT;
 FileInfo loading_file = FINFO_DEFAULT;
 FileInfo *loaded_title = 0;
-bool should_activate = false;
+bool should_activate = true;
 
 void reset_file_info(FileInfo *file)
 {
@@ -247,8 +247,9 @@ int RA_PrepareLoadNewRom(const char *file_name, int file_type)
     }
 
 #if !RA_RELOAD_MULTI_DISK
-    should_activate = loaded_title != NULL && loaded_title->data_len > 0 &&
-        loaded_title->title_id > 0 && loaded_title->title_id == loading_file.title_id ?
+    should_activate = loaded_title != NULL &&
+        loaded_title->title_id > 0 &&
+        loaded_title->title_id == loading_file.title_id ?
         false :
         true;
 #endif
@@ -280,7 +281,7 @@ void RA_CommitLoadNewRom()
     {
         /* 実績システムのイメージデータを初期化する */
         RA_ActivateGame(loading_file.title_id);
-        should_activate = false;
+        should_activate = true;
     }
 
     /* ロード中のデータをクリアする */
