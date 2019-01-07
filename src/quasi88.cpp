@@ -475,6 +475,7 @@ void	quasi88_exec(void)
 {
     set_mode(EXEC);
     set_emu_exec_mode(GO);
+
 #if USE_RETROACHIEVEMENTS
     RA_SetPaused(false);
 #endif
@@ -532,6 +533,11 @@ void	quasi88_debug(void)
 
 void	quasi88_quit(void)
 {
+#if USE_RETROACHIEVEMENTS
+    if (mode == QUIT || !RA_ConfirmLoadNewRom(true))
+        return;
+#endif
+
     set_mode(QUIT);
     quasi88_event_flags |= EVENT_QUIT;
 }
@@ -1161,7 +1167,8 @@ int quasi88_disk_eject(int drv)
 {
     if (disk_image_exist(drv)) {
 #if USE_RETROACHIEVEMENTS
-    if (drv == DRIVE_1 && loaded_title != NULL && loaded_title->file_type == FTYPE_DISK)
+    if (drv == DRIVE_1 && loaded_title != NULL &&
+        loaded_title->file_type == FTYPE_DISK)
     {
         if (!RA_ConfirmLoadNewRom(false))
             return FALSE;
@@ -1314,7 +1321,8 @@ int	quasi88_load_tape_rewind(void)
 int quasi88_load_tape_eject(void)
 {
 #if USE_RETROACHIEVEMENTS
-    if (loaded_title != NULL && loaded_title->file_type == FTYPE_TAPE_LOAD && loaded_title->data_len > 0)
+    if (loaded_title != NULL && loaded_title->file_type == FTYPE_TAPE_LOAD &&
+        loaded_title->data_len > 0)
     {
         if (!RA_ConfirmLoadNewRom(false))
             return FALSE;

@@ -544,7 +544,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 	fprintf(debugfp, "Close\n");
 */
 	/*return 0;*/
-	break;
+    quasi88_quit();
+    return 0;
 
     case WM_DESTROY:
 /*

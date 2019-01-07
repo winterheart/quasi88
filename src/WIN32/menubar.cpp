@@ -595,7 +595,7 @@ static void menubar_item_setup(void)
  *	  ------	6
  *	   Menu		7	*
  *	  ------	8
- *         Save		9	*
+ *     Save		9	*
  *	   Exit		10
  *
  *		* が、不可にする対象
