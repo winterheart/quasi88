@@ -604,7 +604,7 @@ void	event_update(void)
 	    DispatchMessage(&msg);		/* プロシージャに送る */
 
 	} else {				/* 取得失敗 */
-	    quasi88_quit();
+        quasi88_exit(-1);
 	    break;
 	}
     }
@@ -637,7 +637,7 @@ void	event_update(void)
 	    }
 
 	} else {	/* エラー！ */
-	    quasi88_quit();
+        quasi88_exit(-1);
 	    break;
 	}
     }
