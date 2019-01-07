@@ -410,4 +410,344 @@ enum {
 };
 
 
+
+/*---------------------------------------------------------------------------
+ *	キーコード と I/O ポートの対応
+ *---------------------------------------------------------------------------*/
+
+#define	Port0	0x00
+#define	Port1	0x01
+#define	Port2	0x02
+#define	Port3	0x03
+#define	Port4	0x04
+#define	Port5	0x05
+#define	Port6	0x06
+#define	Port7	0x07
+#define	Port8	0x08
+#define	Port9	0x09
+#define	PortA	0x0a
+#define	PortB	0x0b
+#define	PortC	0x0c
+#define	PortD	0x0d
+#define	PortE	0x0e
+#define	PortX	0x0f
+
+#define	Bit0	0x01
+#define	Bit1	0x02
+#define	Bit2	0x04
+#define	Bit3	0x08
+#define	Bit4	0x10
+#define	Bit5	0x20
+#define	Bit6	0x40
+#define	Bit7	0x80
+
+#define	PadA	Bit4
+#define	PadB	Bit5
+
+#define	PadU	Bit0
+#define	PadD	Bit1
+#define	PadL	Bit2
+#define	PadR	Bit3
+
+
+enum {
+    /* 後期型キーの別名定義 */
+
+    KEY88_EXT_F6 = KEY88_END + 0,
+    KEY88_EXT_F7 = KEY88_END + 1,
+    KEY88_EXT_F8 = KEY88_END + 2,
+    KEY88_EXT_F9 = KEY88_END + 3,
+    KEY88_EXT_F10 = KEY88_END + 4,
+    KEY88_EXT_BS = KEY88_END + 5,
+    KEY88_EXT_INS = KEY88_END + 6,
+    KEY88_EXT_DEL = KEY88_END + 7,
+    KEY88_EXT_HENKAN = KEY88_END + 8,
+    KEY88_EXT_KETTEI = KEY88_END + 9,
+    KEY88_EXT_PC = KEY88_END + 10,
+    KEY88_EXT_ZENKAKU = KEY88_END + 11,
+    KEY88_EXT_RETURNL = KEY88_END + 12,
+    KEY88_EXT_RETURNR = KEY88_END + 13,
+    KEY88_EXT_SHIFTL = KEY88_END + 14,
+    KEY88_EXT_SHIFTR = KEY88_END + 15,
+
+    KEY88_EXT_END = KEY88_END + 16
+};
+
+
+typedef struct {
+    unsigned char	port;
+    unsigned char	mask;
+} T_KEYPORT;
+
+static const T_KEYPORT keyport[KEY88_EXT_END] =
+{
+  { 0,0 },			/*	  KEY88_INVALID		= 0,	*/
+
+  { 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+
+  { Port9, Bit6 },		/*	  KEY88_SPACE		= 32,	*/
+  { Port6, Bit1 },		/*	  KEY88_EXCLAM		= 33,	*/
+  { Port6, Bit2 },		/*	  KEY88_QUOTEDBL	= 34,	*/
+  { Port6, Bit3 },		/*	  KEY88_NUMBERSIGN	= 35,	*/
+  { Port6, Bit4 },		/*	  KEY88_DOLLAR		= 36,	*/
+  { Port6, Bit5 },		/*	  KEY88_PERCENT		= 37,	*/
+  { Port6, Bit6 },		/*	  KEY88_AMPERSAND	= 38,	*/
+  { Port6, Bit7 },		/*	  KEY88_APOSTROPHE	= 39,	*/
+  { Port7, Bit0 },		/*	  KEY88_PARENLEFT	= 40,	*/
+  { Port7, Bit1 },		/*	  KEY88_PARENRIGHT	= 41,	*/
+  { Port7, Bit2 },		/*	  KEY88_ASTERISK	= 42,	*/
+  { Port7, Bit3 },		/*	  KEY88_PLUS		= 43,	*/
+  { Port7, Bit4 },		/*	  KEY88_COMMA		= 44,	*/
+  { Port5, Bit7 },		/*	  KEY88_MINUS		= 45,	*/
+  { Port7, Bit5 },		/*	  KEY88_PERIOD		= 46,	*/
+  { Port7, Bit6 },		/*	  KEY88_SLASH		= 47,	*/
+  { Port6, Bit0 },		/*	  KEY88_0		= 48,	*/
+  { Port6, Bit1 },		/*	  KEY88_1		= 49,	*/
+  { Port6, Bit2 },		/*	  KEY88_2		= 50,	*/
+  { Port6, Bit3 },		/*	  KEY88_3		= 51,	*/
+  { Port6, Bit4 },		/*	  KEY88_4		= 52,	*/
+  { Port6, Bit5 },		/*	  KEY88_5		= 53,	*/
+  { Port6, Bit6 },		/*	  KEY88_6		= 54,	*/
+  { Port6, Bit7 },		/*	  KEY88_7		= 55,	*/
+  { Port7, Bit0 },		/*	  KEY88_8		= 56,	*/
+  { Port7, Bit1 },		/*	  KEY88_9		= 57,	*/
+  { Port7, Bit2 },		/*	  KEY88_COLON		= 58,	*/
+  { Port7, Bit3 },		/*	  KEY88_SEMICOLON	= 59,	*/
+  { Port7, Bit4 },		/*	  KEY88_LESS		= 60,	*/
+  { Port5, Bit7 },		/*	  KEY88_EQUAL		= 61,	*/
+  { Port7, Bit5 },		/*	  KEY88_GREATER		= 62,	*/
+  { Port7, Bit6 },		/*	  KEY88_QUESTION	= 63,	*/
+  { Port2, Bit0 },		/*	  KEY88_AT		= 64,	*/
+  { Port2, Bit1 },		/*	  KEY88_A		= 65,	*/
+  { Port2, Bit2 },		/*	  KEY88_B		= 66,	*/
+  { Port2, Bit3 },		/*	  KEY88_C		= 67,	*/
+  { Port2, Bit4 },		/*	  KEY88_D		= 68,	*/
+  { Port2, Bit5 },		/*	  KEY88_E		= 69,	*/
+  { Port2, Bit6 },		/*	  KEY88_F		= 70,	*/
+  { Port2, Bit7 },		/*	  KEY88_G		= 71,	*/
+  { Port3, Bit0 },		/*	  KEY88_H		= 72,	*/
+  { Port3, Bit1 },		/*	  KEY88_I		= 73,	*/
+  { Port3, Bit2 },		/*	  KEY88_J		= 74,	*/
+  { Port3, Bit3 },		/*	  KEY88_K		= 75,	*/
+  { Port3, Bit4 },		/*	  KEY88_L		= 76,	*/
+  { Port3, Bit5 },		/*	  KEY88_M		= 77,	*/
+  { Port3, Bit6 },		/*	  KEY88_N		= 78,	*/
+  { Port3, Bit7 },		/*	  KEY88_O		= 79,	*/
+  { Port4, Bit0 },		/*	  KEY88_P		= 80,	*/
+  { Port4, Bit1 },		/*	  KEY88_Q		= 81,	*/
+  { Port4, Bit2 },		/*	  KEY88_R		= 82,	*/
+  { Port4, Bit3 },		/*	  KEY88_S		= 83,	*/
+  { Port4, Bit4 },		/*	  KEY88_T		= 84,	*/
+  { Port4, Bit5 },		/*	  KEY88_U		= 85,	*/
+  { Port4, Bit6 },		/*	  KEY88_V		= 86,	*/
+  { Port4, Bit7 },		/*	  KEY88_W		= 87,	*/
+  { Port5, Bit0 },		/*	  KEY88_X		= 88,	*/
+  { Port5, Bit1 },		/*	  KEY88_Y		= 89,	*/
+  { Port5, Bit2 },		/*	  KEY88_Z		= 90,	*/
+  { Port5, Bit3 },		/*	  KEY88_BRACKETLEFT	= 91,	*/
+  { Port5, Bit4 },		/*	  KEY88_YEN		= 92,	*/
+  { Port5, Bit5 },		/*	  KEY88_BRACKETRIGHT	= 93,	*/
+  { Port5, Bit6 },		/*	  KEY88_CARET		= 94,	*/
+  { Port7, Bit7 },		/*	  KEY88_UNDERSCORE	= 95,	*/
+  { Port2, Bit0 },		/*	  KEY88_BACKQUOTE	= 96,	*/
+  { Port2, Bit1 },		/*	  KEY88_a		= 97,	*/
+  { Port2, Bit2 },		/*	  KEY88_b		= 98,	*/
+  { Port2, Bit3 },		/*	  KEY88_c		= 99,	*/
+  { Port2, Bit4 },		/*	  KEY88_d		= 100,	*/
+  { Port2, Bit5 },		/*	  KEY88_e		= 101,	*/
+  { Port2, Bit6 },		/*	  KEY88_f		= 102,	*/
+  { Port2, Bit7 },		/*	  KEY88_g		= 103,	*/
+  { Port3, Bit0 },		/*	  KEY88_h		= 104,	*/
+  { Port3, Bit1 },		/*	  KEY88_i		= 105,	*/
+  { Port3, Bit2 },		/*	  KEY88_j		= 106,	*/
+  { Port3, Bit3 },		/*	  KEY88_k		= 107,	*/
+  { Port3, Bit4 },		/*	  KEY88_l		= 108,	*/
+  { Port3, Bit5 },		/*	  KEY88_m		= 109,	*/
+  { Port3, Bit6 },		/*	  KEY88_n		= 110,	*/
+  { Port3, Bit7 },		/*	  KEY88_o               = 111,	*/
+  { Port4, Bit0 },		/*	  KEY88_p               = 112,	*/
+  { Port4, Bit1 },		/*	  KEY88_q               = 113,  */
+  { Port4, Bit2 },		/*	  KEY88_r               = 114,  */
+  { Port4, Bit3 },		/*	  KEY88_s               = 115,  */
+  { Port4, Bit4 },		/*	  KEY88_t               = 116,  */
+  { Port4, Bit5 },		/*	  KEY88_u               = 117,  */
+  { Port4, Bit6 },		/*	  KEY88_v               = 118,  */
+  { Port4, Bit7 },		/*	  KEY88_w               = 119,  */
+  { Port5, Bit0 },		/*	  KEY88_x		= 120,	*/
+  { Port5, Bit1 },		/*	  KEY88_y		= 121,	*/
+  { Port5, Bit2 },		/*	  KEY88_z		= 122,	*/
+  { Port5, Bit3 },		/*	  KEY88_BRACELEFT	= 123,	*/
+  { Port5, Bit4 },		/*	  KEY88_BAR		= 124,	*/
+  { Port5, Bit5 },		/*	  KEY88_BRACERIGHT	= 125,	*/
+  { Port5, Bit6 },		/*	  KEY88_TILDE		= 126,	*/
+  {     0,    0 },
+  { Port0, Bit0 },		/*	  KEY88_KP_0		= 128,	*/
+  { Port0, Bit1 },		/*	  KEY88_KP_1		= 129,	*/
+  { Port0, Bit2 },		/*	  KEY88_KP_2		= 130,	*/
+  { Port0, Bit3 },		/*	  KEY88_KP_3		= 131,	*/
+  { Port0, Bit4 },		/*	  KEY88_KP_4		= 132,	*/
+  { Port0, Bit5 },		/*	  KEY88_KP_5		= 133,	*/
+  { Port0, Bit6 },		/*	  KEY88_KP_6		= 134,	*/
+  { Port0, Bit7 },		/*	  KEY88_KP_7		= 135,	*/
+  { Port1, Bit0 },		/*	  KEY88_KP_8		= 136,	*/
+  { Port1, Bit1 },		/*	  KEY88_KP_9		= 137,	*/
+  { Port1, Bit2 },		/*	  KEY88_KP_MULTIPLY	= 138,	*/
+  { Port1, Bit3 },		/*	  KEY88_KP_ADD		= 139,	*/
+  { Port1, Bit4 },		/*	  KEY88_KP_EQUAL	= 140,	*/
+  { Port1, Bit5 },		/*	  KEY88_KP_COMMA	= 141,	*/
+  { Port1, Bit6 },		/*	  KEY88_KP_PERIOD	= 142,	*/
+  { PortA, Bit5 },		/*	  KEY88_KP_SUB		= 143,	*/
+  { PortA, Bit6 },		/*	  KEY88_KP_DIVIDE	= 144,	*/
+
+  { Port1, Bit7 },		/*	  KEY88_RETURN		= 145,	*/
+  { Port8, Bit0 },		/*	  KEY88_HOME		= 146,	*/
+  { Port8, Bit1 },		/*	  KEY88_UP		= 147,	*/
+  { Port8, Bit2 },		/*	  KEY88_RIGHT		= 148,	*/
+  { Port8, Bit3 },		/*	  KEY88_INS_DEL		= 149,	*/
+  { Port8, Bit4 },		/*	  KEY88_GRAPH		= 150,	*/
+  { Port8, Bit5 },		/*	  KEY88_KANA		= 151,	*/
+  { Port8, Bit6 },		/*	  KEY88_SHIFT		= 152,	*/
+  { Port8, Bit7 },		/*	  KEY88_CTRL		= 153,	*/
+  { Port9, Bit0 },		/*	  KEY88_STOP		= 154,	*/
+  { Port9, Bit6 },		/*	  KEY88_SPACE		= 155,	*/
+  { Port9, Bit7 },		/*	  KEY88_ESC		= 156,	*/
+  { PortA, Bit0 },		/*	  KEY88_TAB		= 157,	*/
+  { PortA, Bit1 },		/*	  KEY88_DOWN		= 158,	*/
+  { PortA, Bit2 },		/*	  KEY88_LEFT		= 159,	*/
+  { PortA, Bit3 },		/*	  KEY88_HELP		= 160,	*/
+  { PortA, Bit4 },		/*	  KEY88_COPY		= 161,	*/
+  { PortA, Bit7 },		/*	  KEY88_CAPS		= 162,	*/
+  { PortB, Bit0 },		/*	  KEY88_ROLLUP		= 163,	*/
+  { PortB, Bit1 },		/*	  KEY88_ROLLDOWN	= 164,	*/
+
+  { Port9, Bit1 },		/*	  KEY88_F1		= 165,	*/
+  { Port9, Bit2 },		/*	  KEY88_F2		= 166,	*/
+  { Port9, Bit3 },		/*	  KEY88_F3		= 167,	*/
+  { Port9, Bit4 },		/*	  KEY88_F4		= 168,	*/
+  { Port9, Bit5 },		/*	  KEY88_F5		= 169,	*/
+
+  { 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+
+  { Port9, Bit1 },	/*f-1*/	/*	  KEY88_F6		= 180,	*/
+  { Port9, Bit2 },	/*f-2*/	/*	  KEY88_F7		= 181,	*/
+  { Port9, Bit3 },	/*f-3*/	/*	  KEY88_F8		= 182,	*/
+  { Port9, Bit4 },	/*f-4*/	/*	  KEY88_F9		= 183,	*/
+  { Port9, Bit5 },	/*f-5*/	/*	  KEY88_F10		= 184,	*/
+  { Port8, Bit3 },	/*del*/	/*	  KEY88_BS		= 185,	*/
+  { Port8, Bit3 },	/*del*/	/*	  KEY88_INS		= 186,	*/
+  { Port8, Bit3 },	/*del*/	/*	  KEY88_DEL		= 187,	*/
+  { Port9, Bit6 },	/*spc*/	/*	  KEY88_HENKAN		= 188,	*/
+  { Port9, Bit6 },	/*spc*/	/*	  KEY88_KETTEI		= 189,	*/
+  {     0,    0 },		/*	  KEY88_PC		= 190,	*/
+  {     0,    0 },		/*	  KEY88_ZENKAKU		= 191,	*/
+  { Port1, Bit7 },	/*ret*/	/*	  KEY88_RETURNL		= 192,	*/
+  { Port1, Bit7 },	/*ret*/	/*	  KEY88_RETURNR		= 193,	*/
+  { Port8, Bit6 },	/*sft*/	/*	  KEY88_SHIFTL		= 194,	*/
+  { Port8, Bit6 },	/*sft*/	/*	  KEY88_SHIFTR		= 195,	*/
+
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+
+  {     0,    0 },		/*	  KEY88_MOUSE_UP        = 208,	*/
+  {     0,    0 },		/*	  KEY88_MOUSE_DOWN      = 209,	*/
+  {     0,    0 },		/*	  KEY88_MOUSE_LEFT      = 210,	*/
+  {     0,    0 },		/*	  KEY88_MOUSE_RIGHT     = 211,	*/
+  {     0,    0 },		/*	  KEY88_MOUSE_L         = 212,	*/
+  {     0,    0 },		/*	  KEY88_MOUSE_M         = 213,	*/
+  {     0,    0 },		/*	  KEY88_MOUSE_R         = 214,	*/
+  {     0,    0 },		/*	  KEY88_MOUSE_WUP       = 215,	*/
+  {     0,    0 },		/*	  KEY88_MOUSE_WDN       = 216,	*/
+
+  { 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+
+  { PortX, PadU }, 		/*	  KEY88_PAD1_UP         = 224,	*/
+  { PortX, PadD }, 		/*	  KEY88_PAD1_DOWN       = 225,	*/
+  { PortX, PadL }, 		/*	  KEY88_PAD1_LEFT       = 226,	*/
+  { PortX, PadR }, 		/*	  KEY88_PAD1_RIGHT      = 227,	*/
+  { PortX, PadA }, 		/*	  KEY88_PAD1_A          = 228,	*/
+  { PortX, PadB }, 		/*	  KEY88_PAD1_B          = 229,	*/
+  {     0,    0 },		/*	  KEY88_PAD1_C          = 230,	*/
+  {     0,    0 },		/*	  KEY88_PAD1_D          = 231,	*/
+  {     0,    0 },		/*	  KEY88_PAD1_E          = 232,	*/
+  {     0,    0 },		/*	  KEY88_PAD1_F          = 233,	*/
+  {     0,    0 },		/*	  KEY88_PAD1_G          = 234,	*/
+  {     0,    0 },		/*	  KEY88_PAD1_H          = 235,	*/
+
+  {     0,    0 }, 		/*	  KEY88_PAD2_UP         = 236,	*/
+  {     0,    0 }, 		/*	  KEY88_PAD2_DOWN       = 237,	*/
+  {     0,    0 }, 		/*	  KEY88_PAD2_LEFT       = 238,	*/
+  {     0,    0 }, 		/*	  KEY88_PAD2_RIGHT      = 239,	*/
+  {     0,    0 }, 		/*	  KEY88_PAD2_A          = 240,	*/
+  {     0,    0 }, 		/*	  KEY88_PAD2_B          = 241,	*/
+  {     0,    0 },		/*	  KEY88_PAD2_C          = 242,	*/
+  {     0,    0 },		/*	  KEY88_PAD2_D          = 243,	*/
+  {     0,    0 },		/*	  KEY88_PAD2_E          = 244,	*/
+  {     0,    0 },		/*	  KEY88_PAD2_F          = 245,	*/
+  {     0,    0 },		/*	  KEY88_PAD2_G          = 246,	*/
+  {     0,    0 },		/*	  KEY88_PAD2_H          = 247,	*/
+
+  { 0,0 },{ 0,0 },{ 0,0 },{ 0,0 },
+  { 0,0 },{ 0,0 },
+  { 0,0 },			/*	  KEY88_SYS_STATUS      = 254,	*/
+  { 0,0 },			/*	  KEY88_SYS_MENU        = 255,	*/
+
+  { PortC, Bit0 },		/*	  KEY88_EXT_F6		= 256,	*/
+  { PortC, Bit1 },		/*	  KEY88_EXT_F7		= 257,	*/
+  { PortC, Bit2 },		/*	  KEY88_EXT_F8		= 258,	*/
+  { PortC, Bit3 },		/*	  KEY88_EXT_F9		= 259,	*/
+  { PortC, Bit4 },		/*	  KEY88_EXT_F10		= 260,	*/
+  { PortC, Bit5 },		/*	  KEY88_EXT_BS		= 261,	*/
+  { PortC, Bit6 },		/*	  KEY88_EXT_INS		= 262,	*/
+  { PortC, Bit7 },		/*	  KEY88_EXT_DEL		= 263,	*/
+  { PortD, Bit0 },		/*	  KEY88_EXT_HENKAN	= 264,	*/
+  { PortD, Bit1 },		/*	  KEY88_EXT_KETTEI	= 265,	*/
+  { PortD, Bit2 },		/*	  KEY88_EXT_PC		= 266,	*/
+  { PortD, Bit3 },		/*	  KEY88_EXT_ZENKAKU	= 267,	*/
+  { PortE, Bit0 },		/*	  KEY88_EXT_RETURNL	= 268,	*/
+  { PortE, Bit1 },		/*	  KEY88_EXT_RETURNR	= 269,	*/
+  { PortE, Bit2 },		/*	  KEY88_EXT_SHIFTL	= 270,	*/
+  { PortE, Bit3 },		/*	  KEY88_EXT_SHIFTR	= 271,	*/
+};
+
+
+
+/*---------------------------------------------------------------------------
+ *
+ *---------------------------------------------------------------------------*/
+
+#define	IS_JOY_STATUS()		key_scan[ PortX ]
+
+
+#define	KEY88_PRESS(code)	\
+	key_scan[ keyport[(code)].port ] &= ~keyport[(code)].mask
+
+#define	KEY88_RELEASE(code)	\
+	key_scan[ keyport[(code)].port ] |=  keyport[(code)].mask
+
+#define	KEY88_TOGGLE(code)	\
+	key_scan[ keyport[(code)].port ] ^=  keyport[(code)].mask
+
+#define	IS_KEY88_PRESS(code)	\
+	(~key_scan[ keyport[(code)].port ] & keyport[(code)].mask)
+
+#define	IS_KEY88_RELEASE(code)	\
+	( key_scan[ keyport[(code)].port ] & keyport[(code)].mask)
+
+
+#define	IS_KEY88_PRINTTABLE(c)	(32 <= (c) && (c) <= 144)
+#define	IS_KEY88_FUNCTION(c)	(KEY88_F1 <= (c) && (c) <= KEY88_F20)
+#define	IS_KEY88_LATTERTYPE(c)	(KEY88_F6 <= (c) && (c) <= KEY88_SHIFTR)
+
+
 #endif	/* KEYBOARD_H_INCLUDED */

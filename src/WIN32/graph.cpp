@@ -4,12 +4,17 @@
  *	詳細は、 graph.h 参照
  ************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
+extern "C"
+{
+    #include <stdio.h>
+    #include <stdlib.h>
 
-#include "quasi88.h"
-#include "graph.h"
-#include "device.h"
+    #include "quasi88.h"
+    #include "graph.h"
+    #include "device.h"
+}
+
+#include "retroachievements.h"
 
 
 
@@ -78,7 +83,7 @@ const T_GRAPH_INFO	*graph_setup(int width, int height,
 	free(buffer);
     }
 
-    buffer = malloc(width * height * sizeof(unsigned long));
+    buffer = (unsigned char *)malloc(width * height * sizeof(unsigned long));
     if (buffer == FALSE) {
 	return NULL;
     }
@@ -295,6 +300,15 @@ int	graph_update_WM_PAINT(void)
 
     hdc = BeginPaint(g_hWnd, &ps);
 
+#if USE_RETROACHIEVEMENTS
+    HDC hdc_main = hdc;
+    HDC hdc_buffer = CreateCompatibleDC(hdc);
+    HBITMAP hbm_buffer = CreateCompatibleBitmap(hdc, graph_info.width, graph_info.height);
+    SelectObject(hdc_buffer, hbm_buffer);
+
+    hdc = hdc_buffer;
+#endif
+
     /* graph_update() により、 WM_PAINT イベントが発生した場合、描画する。
        OS が勝手に発生させた WM_PAINT イベントの場合は、なにもしない。
        (quasi88_expose() の処理により、 graph_update() が呼び出されるため) */
@@ -316,6 +330,14 @@ int	graph_update_WM_PAINT(void)
     } else {
 	drawn = FALSE;
     }
+
+#if USE_RETROACHIEVEMENTS
+    RA_RenderOverlayFrame(hdc);
+    BitBlt(hdc_main, 0, 0, graph_info.width, graph_info.height, hdc, 0, 0, SRCCOPY);
+
+    DeleteObject(hbm_buffer);
+    DeleteDC(hdc_buffer);
+#endif
 
 /*
     fprintf(debugfp,

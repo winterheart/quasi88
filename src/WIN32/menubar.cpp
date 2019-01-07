@@ -2,25 +2,32 @@
  * メニューバー処理
  ************************************************************************/
 
-#include "quasi88.h"
-#include "device.h"
-#include "event.h"
+extern "C"
+{
+    #include "quasi88.h"
+    #include "device.h"
+    #include "event.h"
 
-#include "initval.h"
-#include "pc88main.h"		/* boot_basic, ...		*/
-#include "memory.h"		/* use_pcg			*/
-#include "soundbd.h"		/* sound_board			*/
-#include "intr.h"		/* cpu_clock_mhz		*/
-#include "keyboard.h"		/* mouse_mode			*/
-#include "fdc.h"		/* fdc_wait			*/
-#include "getconf.h"		/* config_save			*/
-#include "screen.h"		/* SCREEN_INTERLACE_NO ...	*/
-#include "emu.h"		/* cpu_timing, emu_reset()	*/
-#include "menu.h"		/* menu_sound_restart()		*/
-#include "drive.h"
-#include "snddrv.h"
+    #include "initval.h"
+    #include "pc88main.h"	/* boot_basic, ...		*/
+    #include "memory.h"		/* use_pcg			*/
+    #include "soundbd.h"	/* sound_board			*/
+    #include "intr.h"		/* cpu_clock_mhz		*/
+    #include "keyboard.h"	/* mouse_mode			*/
+    #include "fdc.h"		/* fdc_wait			*/
+    #include "getconf.h"	/* config_save			*/
+    #include "screen.h"		/* SCREEN_INTERLACE_NO ...	*/
+    #include "emu.h"		/* cpu_timing, emu_reset()	*/
+    #include "menu.h"		/* menu_sound_restart()		*/
+    #include "drive.h"
+    #include "snddrv.h"
 
-#include "resource.h"
+    #include "resource.h"
+}
+
+#if USE_RETROACHIEVEMENTS
+#include "retroachievements.h"
+#endif
 
 
 static	int	menubar_active = TRUE;
@@ -588,7 +595,7 @@ static void menubar_item_setup(void)
  *	  ------	6
  *	   Menu		7	*
  *	  ------	8
- *         Save		9	*
+ *	   Save		9	*
  *	   Exit		10
  *
  *		* が、不可にする対象
@@ -813,8 +820,12 @@ int	menubar_event(int id)
     case M_HELP_ABOUT:		f_help_about();			break;
 
     default:
-	/* 未知のイベントは FALSE を返す */
-	return FALSE;
+#if USE_RETROACHIEVEMENTS
+    return RA_HandleMenuEvent(id);
+#else
+    /* 未知のイベントは FALSE を返す */
+    return FALSE;
+#endif
     }
 
     return TRUE;
@@ -904,10 +915,14 @@ static	void	f_set_speed(UINT uItem, int data)
 {
     if (menubar_active == FALSE) { return; }
 
-    CheckMenuRadioItem(g_hMenu, M_SET_SPD_25, M_SET_SPD_400, uItem,
-		       MF_BYCOMMAND);
     {
 	quasi88_cfg_set_wait_rate((int)data);
+    }
+
+    if (quasi88_cfg_now_wait_rate() == data)
+    {
+        CheckMenuRadioItem(g_hMenu, M_SET_SPD_25, M_SET_SPD_400, uItem,
+            MF_BYCOMMAND);
     }
 }
 
@@ -1352,7 +1367,7 @@ static	void	f_misc_status(UINT uItem)
 static	void	f_help_about (void)
 {
     MessageBox(g_hWnd,
-	       "QUASI88  ver. " Q_VERSION "  <" Q_COMMENT ">"
+	       Q_TITLE "  ver. " Q_VERSION "  <" Q_COMMENT ">"
 	       "\n  " Q_COPYRIGHT
 #ifdef	USE_SOUND
 	       "\n"
@@ -1364,5 +1379,5 @@ static	void	f_help_about (void)
 #endif
 #endif
 	       ,
-	       "About QUASI88", MB_OK);
+	       "About " Q_TITLE, MB_OK);
 }

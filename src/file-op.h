@@ -9,6 +9,8 @@
 #ifndef FILE_OP_H_INCLUDED
 #define FILE_OP_H_INCLUDED
 
+#include "filename.h"
+
 
 /****************************************************************************
  * 扱えるパス名の最大長
@@ -301,6 +303,15 @@ int	osd_fputs  (const char *str, OSD_FILE *stream);
 #define	FILE_STAT_DIR		(1)	/* ディレクトリ			*/
 #define	FILE_STAT_FILE		(2)	/* ファイル			*/
 int	osd_file_stat(const char *filename);
+
+/****************************************************************************
+ * 上書き用ファイルのパスの取得
+ *  fullname で与えられたファイル名に相当する上書き用ファイルのパスを
+ *  localname にセットする
+ *
+ * メモリ確保は呼び出し元から行う。
+ ****************************************************************************/
+void osd_file_localname(const char *fullname, char *localname);
 
 
 

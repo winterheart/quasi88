@@ -650,7 +650,7 @@ SOUND_OBJS.linux   = $(DSP_DIR)/oss.o $(MIXER_DIR)/oss.o
 SOUND_OBJS.freebsd = $(DSP_DIR)/oss.o $(MIXER_DIR)/oss.o
 SOUND_OBJS.netbsd  = $(DSP_DIR)/netbsd.o
 #SOUND_OBJS.openbsd = $(DSP_DIR)/oss.o $(MIXER_DIR)/oss.o
-SOUND_OBJS.openbsd = $(DSP_DIR)/netbsd.o 
+SOUND_OBJS.openbsd = $(DSP_DIR)/netbsd.o
 SOUND_OBJS.solaris = $(DSP_DIR)/solaris.o $(MIXER_DIR)/solaris.o
 SOUND_OBJS.next    = $(DSP_DIR)/soundkit.o
 SOUND_OBJS.macosx  = $(DSP_DIR)/coreaudio.o
@@ -1014,6 +1014,7 @@ install-suid:
 
 SOURCES		= $(subst $(OBJDIR)/, src/, $(OBJECTS) )
 SOURCES		:= $(patsubst %.o, %.c, $(SOURCES) )
+SOURCES		:= $(patsubst src/quasi88.c, src/quasi88.cpp, $(SOURCES) )
 SOURCES		:= $(patsubst src/fmgen/%.c, src/fmgen/%.cpp, $(SOURCES) )
 SOURCES		:= $(subst src/snddrv/quasi88/2203fmgen.c, src/snddrv/quasi88/2203fmgen.cpp, $(SOURCES) )
 SOURCES		:= $(subst src/snddrv/quasi88/2608fmgen.c, src/snddrv/quasi88/2608fmgen.cpp, $(SOURCES) )
