@@ -39,8 +39,13 @@
 #include "q8tk.h"
 
 
+/* メニューの言語           */
+#if LANG_EN
+int	menu_lang = MENU_ENGLISH;
+#else
+int	menu_lang = MENU_JAPAN;
+#endif
 
-int	menu_lang	= MENU_JAPAN;		/* メニューの言語           */
 int	menu_readonly	= FALSE;		/* ディスク選択ダイアログの */
 						/* 初期状態は ReadOnly ?    */
 int	menu_swapdrv	= FALSE;		/* ドライブの表示順序       */
@@ -1060,6 +1065,12 @@ static	void	cb_cpu_clock(Q8tkWidget *widget, void *mode)
     char buf[16], *conv_end;
     double val = 0;
     int fit = FALSE;
+#if USE_RETROACHIEVEMENTS
+    double min_val = CONST_4MHZ_CLOCK;
+#else
+    double min_val = 0.1;
+#endif
+    double max_val = CONST_4MHZ_CLOCK * 250;
 
     /* COMBO BOX から ENTRY に一致するものを探す */
     for (i=0; i<COUNTOF(data_cpu_clock_combo); i++, p++) {
@@ -1092,10 +1103,17 @@ static	void	cb_cpu_clock(Q8tkWidget *widget, void *mode)
     }
 
     if (fit) {				/* 適用した値が有効範囲なら、セット */
-	if (0.1 <= val && val < 1000.0) {
+	if (min_val <= val && val < max_val) {
 	    cpu_clock_mhz = val;
-	    interval_work_init_all();
 	}
+    else if (val < min_val) {
+        cpu_clock_mhz = min_val;
+    }
+    else /* if (val > max_val) */ {
+        cpu_clock_mhz = max_val;
+    }
+
+    interval_work_init_all();
     }
 
     if ((int)mode == 0) {		/* COMBO ないし ENTER時は、値を再表示*/
@@ -1157,6 +1175,12 @@ static	void	cb_cpu_wait(Q8tkWidget *widget, void *mode)
     char buf[16], *conv_end;
     int val = 0;
     int fit = FALSE;
+#if USE_RETROACHIEVEMENTS
+    int min_val = 100;
+#else
+    int min_val = 5;
+#endif
+    int max_val = 5000;
 
     /* COMBO BOX から ENTRY に一致するものを探す */
     for (i=0; i<COUNTOF(data_cpu_wait_combo); i++, p++) {
@@ -1188,9 +1212,15 @@ static	void	cb_cpu_wait(Q8tkWidget *widget, void *mode)
     }
 
     if (fit) {				/* 適用した値が有効範囲なら、セット */
-	if (5 <= val && val <= 5000) {
+	if (min_val <= val && val <= max_val) {
 	    wait_rate = val;
 	}
+    else if (val < min_val) {
+        wait_rate = min_val;
+    }
+    else /* if (val > max_val) */ {
+        wait_rate = max_val;
+    }
     }
 
     if ((int)mode == 0) {		/* COMBO ないし ENTER時は、値を再表示*/

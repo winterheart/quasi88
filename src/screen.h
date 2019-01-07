@@ -95,6 +95,7 @@ enum {					/* 画面サイズ			*/
     SCREEN_SIZE_END
 };
 extern	int	screen_size;		/* 画面サイズ指定		*/
+extern  int now_screen_size;    /*実際の、画面サイズ  */
 
 extern	int	use_fullscreen;		/* 全画面表示指定		*/
 

@@ -19,17 +19,19 @@
 #endif
 #endif
 
+extern "C"
+{
+    #include <stdio.h>
+    #include <stdlib.h>
 
-#include <stdio.h>
-#include <stdlib.h>
+    #include "device.h"
+    #include "quasi88.h"
 
-#include "quasi88.h"
-#include "device.h"
-
-#include "getconf.h"	/* config_init */
-#include "keyboard.h"	/* romaji_type */
-#include "suspend.h"	/* stateload_system */
-#include "menu.h"	/* menu_about_osd_msg */
+    #include "getconf.h"	/* config_init */
+    #include "keyboard.h"	/* romaji_type */
+    #include "suspend.h"	/* stateload_system */
+    #include "menu.h"	/* menu_about_osd_msg */
+}
 
 FILE	*debugfp;
 /***********************************************************************
@@ -75,6 +77,7 @@ int WINAPI WinMain(HINSTANCE hInst,
 
 	quasi88_atexit(finish);		/* quasi88() 実行中に強制終了した際の
 					   コールバック関数を登録する */
+
 	quasi88();			/* PC-8801 エミュレーション */
 
 	config_exit();			/* 引数処理後始末 */

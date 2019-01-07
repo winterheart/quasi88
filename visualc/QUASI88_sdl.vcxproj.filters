@@ -132,9 +132,6 @@
     <ClCompile Include="..\src\q8tk.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\quasi88.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\snddrv\src\restrack.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -196,6 +193,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\z80.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\WIN32\retroachievements.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\RAIntegration\src\RA_Interface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\quasi88.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

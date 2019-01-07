@@ -56,18 +56,18 @@
     <_ProjectFileVersion>15.0.27625.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>./sdl/Release\</OutDir>
-    <IntDir>./sdl/Release\</IntDir>
+    <OutDir>$(SolutionDir)\sdl\Release\</OutDir>
+    <IntDir>$(SolutionDir)\sdl\Release\obj\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Monitor|Win32'">
-    <OutDir>./sdl/Monitor\</OutDir>
-    <IntDir>./sdl/Monitor\</IntDir>
+    <OutDir>$(SolutionDir)\sdl\Monitor\</OutDir>
+    <IntDir>$(SolutionDir)\sdl\Monitor\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>./sdl/Debug\</OutDir>
-    <IntDir>./sdl/Debug\</IntDir>
+    <OutDir>$(SolutionDir)\sdl\Debug\</OutDir>
+    <IntDir>$(SolutionDir)\sdl\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -76,7 +76,7 @@
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>./sdl/Release/QUASI88_sdl.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)QUASI88_sdl.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -87,10 +87,10 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>sdl/Release/QUASI88.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>./sdl/Release/</AssemblerListingLocation>
-      <ObjectFileName>./sdl/Release/</ObjectFileName>
-      <ProgramDataBaseFileName>./sdl/Release/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)QUASI88_sdl.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(OutDir)</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DisableSpecificWarnings>
@@ -102,17 +102,18 @@
       <Culture>0x0411</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>sdl/Release/QUASI88.exe</OutputFile>
+      <OutputFile>$(OutDir)QUASI88_sdl.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ProgramDatabaseFile>./sdl/Release/QUASI88.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)QUASI88_sdl.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>sdl/Release/QUASI88.bsc</OutputFile>
+      <OutputFile>$(IntDir)QUASI88_sdl.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
       <Command>copy /Y "$(SolutionDir)lib\Release_Win32\SDL.dll" "$(TargetDir)"</Command>
@@ -124,7 +125,7 @@
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>./sdl/Monitor/QUASI88_sdl.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)QUASI88_sdl.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -135,10 +136,10 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>sdl/Monitor/QUASI88mon.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>./sdl/Monitor/</AssemblerListingLocation>
-      <ObjectFileName>./sdl/Monitor/</ObjectFileName>
-      <ProgramDataBaseFileName>./sdl/Monitor/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)QUASI88_sdl.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(OutDir)</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DisableSpecificWarnings>
@@ -150,17 +151,18 @@
       <Culture>0x0411</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>sdl/Monitor/QUASI88mon.exe</OutputFile>
+      <OutputFile>$(OutDir)QUASI88_sdl.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ProgramDatabaseFile>./sdl/Monitor/QUASI88mon.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)QUASI88_sdl.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>sdl/Monitor/QUASI88mon.bsc</OutputFile>
+      <OutputFile>$(IntDir)QUASI88mon.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
       <Command>copy /Y "$(SolutionDir)lib\Release_Win32\SDL.dll" "$(TargetDir)"</Command>
@@ -172,7 +174,7 @@
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>./sdl/Debug/QUASI88_sdl.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)QUASI88_sdl.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
@@ -182,10 +184,10 @@
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>sdl/Debug/QUASI88.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>./sdl/Debug/</AssemblerListingLocation>
-      <ObjectFileName>./sdl/Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>./sdl/Debug/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)QUASI88_sdl.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(OutDir)</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -198,18 +200,19 @@
       <Culture>0x0411</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>sdl/Debug/QUASI88.exe</OutputFile>
+      <OutputFile>$(OutDir)QUASI88_sdl.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>./sdl/Debug/QUASI88.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)QUASI88_sdl.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>sdl/Debug/QUASI88.bsc</OutputFile>
+      <OutputFile>$(IntDir)QUASI88_sdl.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
       <Command>copy /Y "$(SolutionDir)lib\Release_Win32\SDL.dll" "$(TargetDir)"</Command>
@@ -239,7 +242,7 @@
     <ClCompile Include="..\src\pio.c" />
     <ClCompile Include="..\src\q8tk-glib.c" />
     <ClCompile Include="..\src\q8tk.c" />
-    <ClCompile Include="..\src\quasi88.c" />
+    <ClCompile Include="..\src\quasi88.cpp" />
     <ClCompile Include="..\src\romaji.c" />
     <ClCompile Include="..\src\screen-16bpp.c" />
     <ClCompile Include="..\src\screen-32bpp.c" />

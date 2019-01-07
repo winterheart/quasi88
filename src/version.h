@@ -1,27 +1,61 @@
 #ifndef	VERSION_H
 #define	VERSION_H
 
-#ifndef	Q_TITLE
-#define	Q_TITLE				"QUASI88kai"
+#ifndef	BASE_TITLE
+#define	BASE_TITLE	"QUASI88"
+#endif
+
+#ifndef	BASE_VERSION
+#define	BASE_VERSION	"0.6.5"
+#endif
+
+#ifndef	BASE_COMMENT
+#define	BASE_COMMENT	""
+#endif
+
+#if USE_RETROACHIEVEMENTS
+
+#ifndef RAQ_TITLE
+#define RAQ_TITLE 	"RAQUASI88"
+#endif
+
+#ifndef RAQ_VERSION
+#define RAQ_VERSION 	"1.0.0"
+#endif
+
+#ifndef Q_TITLE
+#define Q_TITLE RAQ_TITLE
 #endif
 
 #ifndef Q_TITLE_KANJI
-#define	Q_TITLE_KANJI		"QUASI88改"
+#define Q_TITLE_KANJI RAQ_TITLE
 #endif
 
-#ifndef	Q_VERSION
-#define	Q_VERSION			"0.6.5"
+#ifndef Q_VERSION
+#define Q_VERSION RAQ_VERSION
 #endif
 
-#ifndef	Q_COMMENT
-#define	Q_COMMENT			""
+#else
+
+#ifndef Q_TITLE
+#define Q_TITLE BASE_TITLE
+#endif
+
+#ifndef Q_TITLE_KANJI
+#define Q_TITLE_KANJI BASE_TITLE "改"
+#endif
+
+#ifndef Q_VERSION
+#define Q_VERSION BASE_VERSION
+#endif
+
 #endif
 
 
 
 
 #ifndef	Q_COPYRIGHT
-#define	Q_COPYRIGHT			"(c) 1998-2018 S.Fukunaga, R.Zumer"
+#define	Q_COPYRIGHT		"(c) 1998-2018 S.Fukunaga, R.Zumer"
 #endif
 
 #ifdef	USE_SOUND

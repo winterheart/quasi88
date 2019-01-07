@@ -102,7 +102,7 @@ static const SCREEN_SIZE_TABLE screen_size_tbl[ SCREEN_SIZE_END ] =
 static	int	screen_size_max = SCREEN_SIZE_END - 1; /*変更可能な最大サイズ*/
 static	int	screen_size_min = SCREEN_SIZE_HALF;    /*変更可能な最小サイズ*/
 /*CFG*/	int	screen_size	= SCREEN_SIZE_FULL;    /*画面サイズ指定      */
-static	int	now_screen_size;		       /*実際の、画面サイズ  */
+/*CFG*/	int	now_screen_size;		       /*実際の、画面サイズ  */
 
 
 static	int	enable_fullscreen = 0;	/* 全画面表示可能かどうか	*/
@@ -1688,6 +1688,10 @@ void	screen_update(void)
 	profiler_lapse( PROF_LAPSE_VIDEO );
     }
 
+#if USE_RETROACHIEVEMENTS
+    put_image_all();
+    drawn_count++;
+#else
     if (all_area) {
 
 	put_image_all();
@@ -1705,6 +1709,7 @@ void	screen_update(void)
 		      (flag & 1), (flag & 2), (flag & 4));
 	}
     }
+#endif
 }
 
 void	screen_update_immidiate(void)
