@@ -843,31 +843,36 @@ int	quasi88_waveout(int start)
 
 /***********************************************************************
  * ドラッグアンドドロップ
- *	TODO 戻り値をもう一工夫
  ************************************************************************/
 int	quasi88_drag_and_drop(const char *filename)
 {
-    if (quasi88_is_exec() ||
-	quasi88_is_pause()) {
-
-	if (quasi88_disk_insert_all(filename, FALSE)) {
-
-	    status_message(1, STATUS_INFO_TIME, "Disk Image Set and Reset");
-	    quasi88_reset(NULL);
-
-	    if (quasi88_is_pause()) {
-		quasi88_exec();
-	    }
-
-	} else {
-
-	    status_message(1, STATUS_WARN_TIME, "D&D Failed !  Disk Unloaded ...");
-	}
-
-	return TRUE;
+    if (!quasi88_is_exec() && !quasi88_is_pause()) {
+        return FALSE;
     }
 
-    return FALSE;
+    int success;
+
+    if (quasi88_disk_insert_all(filename, FALSE)) {
+        status_message(1, STATUS_INFO_TIME, "Disk Image Set and Reset");
+        success = TRUE;
+    } else if (quasi88_load_tape_insert(filename)) {
+        status_message(1, STATUS_INFO_TIME, "Tape Image Set and Reset");
+        success = TRUE;
+    } else {
+        status_message(1, STATUS_WARN_TIME, "D&D Failed !  Disk Unloaded ...");
+        success = FALSE;
+    }
+
+    if (success)
+    {
+        quasi88_reset(NULL);
+
+        if (quasi88_is_pause()) {
+            quasi88_exec();
+        }
+    }
+
+    return success;
 }
 
 
