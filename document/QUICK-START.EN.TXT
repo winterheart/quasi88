@@ -60,7 +60,7 @@ legitimate PC-8801 ROM files.
 
 ROM files may be named in QUASI88 or M88 formats:
 
-QUASI88 Name	 M88 Name		 Contents
+QUASI88 Name     M88 Name        Contents
 
 N88.ROM          N88.ROM         N88 BASIC ROM
 N88EXT0.ROM      N88_0.ROM       N88 BASIC Exp. ROM Bank 0

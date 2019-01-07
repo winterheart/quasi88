@@ -4,12 +4,12 @@
 -------------------------------------------------------------------------------
 [Contents]
 
-    1)	What is RAQUASI88?
-    2)	What is RetroAchievements?
-    3)	Changes from QUASI88
-    4)	Compilation/Installation
-    5)	Usage
-    6)	Copyright/Disclaimer
+    1)  What is RAQUASI88?
+    2)  What is RetroAchievements?
+    3)  Changes from QUASI88
+    4)  Compilation/Installation
+    5)  Usage
+    6)  Copyright/Disclaimer
     7)  Authors/Contact
 
 -------------------------------------------------------------------------------
