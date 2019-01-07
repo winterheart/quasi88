@@ -317,7 +317,7 @@ void RA_OnGameClose(int file_type)
         break;
     }
 
-    if (loaded_title == NULL)
+    if (loaded_title == NULL && loading_file.data_len == 0)
     {
         RA_UpdateAppTitle("");
         RA_OnLoadNewRom(NULL, 0);
