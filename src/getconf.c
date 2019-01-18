@@ -271,6 +271,7 @@ static int oo_setdir(int type, char *dir)
     case 2:  opt = "tapedir";  result = osd_set_dir_tape(dir);  break;
     case 3:  opt = "snapdir";  result = osd_set_dir_snap(dir);  break;
     case 4:  opt = "statedir"; result = osd_set_dir_state(dir); break;
+    case 5:  opt = "savedir";  result = osd_set_dir_save(dir);  break;
     }
 
     if (result == FALSE) {
@@ -1280,6 +1281,7 @@ int config_init(int argc,
     d = osd_dir_tape(); printf("tape directory = %s\n", d ? d : "(undef)");
     d = osd_dir_snap(); printf("snap directory = %s\n", d ? d : "(undef)");
     d = osd_dir_state();printf("stat directory = %s\n", d ? d : "(undef)");
+    d = osd_dir_save(); printf("save directory = %s\n", d ? d : "(undef)");
     d = osd_dir_gcfg(); printf("gcfg directory = %s\n", d ? d : "(undef)");
     d = osd_dir_lcfg(); printf("lcfg directory = %s\n", d ? d : "(undef)");
     }

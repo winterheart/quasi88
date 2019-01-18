@@ -39,6 +39,7 @@ static char *dir_disk;  /* DISKイメージファイルの検索ディレクト�
 static char *dir_tape;  /* TAPEイメージファイルの基準ディレクトリ  */
 static char *dir_snap;  /* 画面スナップショットファイルの保存先       */
 static char *dir_state; /* サスペンドファイルの保存先          */
+static char *dir_save;  /* 上書き用のイメージファイルの保存先        */
 static char *dir_home;  /* 共通設定ファイルを置いてるディレクトリ    */
 static char *dir_ini;   /* 個別設定ファイルを置いてるディレクトリ    */
 
@@ -53,6 +54,7 @@ const char *osd_dir_disk (void) { return dir_disk;  }
 const char *osd_dir_tape (void) { return dir_tape;  }
 const char *osd_dir_snap (void) { return dir_snap;  }
 const char *osd_dir_state(void) { return dir_state; }
+const char *osd_dir_save(void) { return dir_save; }
 const char *osd_dir_gcfg (void) { return dir_home;  }
 const char *osd_dir_lcfg (void) { return dir_ini;   }
 
@@ -75,6 +77,7 @@ int osd_set_dir_disk (const char *d) { return set_new_dir(d, &dir_disk);  }
 int osd_set_dir_tape (const char *d) { return set_new_dir(d, &dir_tape);  }
 int osd_set_dir_snap (const char *d) { return set_new_dir(d, &dir_snap);  }
 int osd_set_dir_state(const char *d) { return set_new_dir(d, &dir_state); }
+int osd_set_dir_save(const char *d) { return set_new_dir(d, &dir_save); }
 int osd_set_dir_gcfg (const char *d) { return set_new_dir(d, &dir_home);  }
 int osd_set_dir_lcfg (const char *d) { return set_new_dir(d, &dir_ini);   }
 
@@ -978,7 +981,7 @@ void osd_file_localname(const char *fullname, char *localname)
     char    fullpath[_MAX_DIR];
 
     _splitpath(fullname, NULL, NULL, filename, fileext); /* 上書き用ファイル名を取得する */
-    strcpy(fullpath, osd_dir_disk());
+    strcpy(fullpath, osd_dir_save());
     strcat(fullpath, "\\");
     strcat(fullpath, filename);
     strcat(fullpath, fileext);
@@ -1112,11 +1115,16 @@ int osd_file_config_init(void)
     set_dir(&dir_state, "QUASI88_STATE_DIR", "STATE");
 
 
+    /* SAVEディレクトリ */
+
+    set_dir(&dir_save, "QUASI88_SAVE_DIR", "SAVE");
+
+
 
     /* 各ディレクトリが設定できなければ異常終了 */
 
     if (! dir_cwd  || ! dir_home || ! dir_ini  || ! dir_rom  ||
-    ! dir_disk || ! dir_tape || ! dir_snap || ! dir_state)  return FALSE;
+    ! dir_disk || ! dir_tape || ! dir_snap || ! dir_state || !dir_save)  return FALSE;
 
 
     return TRUE;
@@ -1200,4 +1208,5 @@ void    osd_file_config_exit(void)
     if (dir_tape)  free(dir_tape);
     if (dir_snap)  free(dir_snap);
     if (dir_state) free(dir_state);
+    if (dir_save)  free(dir_save);
 }
