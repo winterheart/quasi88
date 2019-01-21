@@ -40,6 +40,18 @@ void free_file_info(FileInfo *file)
 /****************************************************************************
  * 実績処理に使用するメモリの読み書き関数
  *****************************************************************************/
+#ifndef RA_ENABLE_TVRAM
+#define RA_ENABLE_TVRAM 1 /* プログラムデータは高速RAMに保存されることがあるため、有効にする */
+#endif
+
+#ifndef RA_ENABLE_GVRAM
+#define RA_ENABLE_GVRAM 0 /* アドレス空間をできるだけ締めるため、有用性の低いグラフィックVRAMを無効にする */
+#endif
+
+#ifndef RA_ENABLE_EXTRAM
+#define RA_ENABLE_EXTRAM 0 /* 拡張RAMの有無は期待できないため、とにかく無効にする */
+#endif
+
 unsigned char ByteReader(byte *buf, size_t nOffs)
 {
     return *(buf + nOffs);
@@ -72,7 +84,6 @@ void TVRAMWriter(size_t nOffs, unsigned char nVal)
 }
 #endif
 
-/* アドレス空間をできるだけ締めるため、有用性の低いグラフィックVRAMを無効にする */
 #if RA_ENABLE_GVRAM
 unsigned char GVRAMReader(size_t nOffs)
 {
@@ -85,7 +96,6 @@ void GVRAMWriter(size_t nOffs, unsigned char nVal)
 }
 #endif
 
-/* 拡張RAMの有無は期待できないため、とにかく無効にする */
 #if RA_ENABLE_EXTRAM
 unsigned char ExtRAMReader(size_t nOffs)
 {
