@@ -62,6 +62,16 @@ void ByteWriter(byte *buf, size_t nOffs, unsigned char nVal)
     *(buf + nOffs) = nVal;
 }
 
+unsigned char DummyReader(size_t nOffs)
+{
+    return 0;
+}
+
+void DummyWriter(size_t nOffs, unsigned char nVal)
+{
+    return;
+}
+
 unsigned char MainRAMReader(size_t nOffs)
 {
     return ByteReader(main_ram, nOffs);
@@ -231,10 +241,14 @@ void RA_InitMemory()
 
 #if RA_ENABLE_TVRAM
     RA_InstallMemoryBank(bank_id++, TVRAMReader, TVRAMWriter, 0x1000);
+#elif RA_ENABLE_GVRAM || RA_ENABLE_EXTRAM
+    RA_InstallMemoryBank(bank_id++, DummyReader, DummyWriter, 0x1000);
 #endif
 
 #if RA_ENABLE_GVRAM
     RA_InstallMemoryBank(bank_id++, GVRAMReader, GVRAMWriter, 0x4000 * 4);
+#elif RA_ENABLE_EXTRAM
+    RA_InstallMemoryBank(bank_id++, DummyReader, DummyWriter, 0x4000 * 4);
 #endif
 
     /* 注意：RA_ENABLE_EXTRAM をセットする場合は、
