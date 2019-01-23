@@ -141,7 +141,7 @@ int GetMenuItemIndex(HMENU hMenu, const char* ItemName)
 
 bool GameIsActive()
 {
-    return quasi88_is_exec();
+    return loaded_title != NULL;
 }
 
 void CauseUnpause()
