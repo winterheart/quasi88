@@ -172,7 +172,7 @@ void    quasi88_main(void)
 #if USE_RETROACHIEVEMENTS
         RA_HandleHTTPResults();
 
-        if (RA_GameIsActive())
+        if (quasi88_is_exec())
             RA_DoAchievementsFrame();
 #endif
     }
