@@ -1115,7 +1115,8 @@ int quasi88_disk_insert(int drv, const char *filename, int image, int ro)
         }
 
 #if USE_RETROACHIEVEMENTS
-        RA_CommitLoadNewRom();
+        if (drv == DRIVE_1)
+            RA_CommitLoadNewRom();
 #endif
     }
     }
