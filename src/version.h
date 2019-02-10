@@ -20,7 +20,7 @@
 #endif
 
 #ifndef RAQ_VERSION
-#define RAQ_VERSION     "1.0.0"
+#define RAQ_VERSION     "1.1.1"
 #endif
 
 #ifndef Q_TITLE
