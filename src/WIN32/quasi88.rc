@@ -68,8 +68,8 @@ QUASI88 MENU {
 		}
 
 		POPUP "Screen Size" {
-			MENUITEM "Normal size",		M_SET_SIZ_FULL
 			MENUITEM "Half size",		M_SET_SIZ_HALF
+			MENUITEM "Normal size",		M_SET_SIZ_FULL
 #ifdef	SUPPORT_DOUBLE
 			MENUITEM "Double size",		M_SET_SIZ_DOUBLE
 #endif
