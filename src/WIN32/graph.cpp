@@ -29,6 +29,7 @@ static  T_GRAPH_SPEC    graph_spec;     /* 基本情報     */
 
 static  int     graph_exist;        /* 真で、画面生成済み  */
 static  T_GRAPH_INFO    graph_info;     /* その時の、画面情報  */
+static  T_GRAPH_INFO    graph_info_windowed; /* ウィンドウモード時の情報 */
 
 
 /************************************************************************
@@ -74,9 +75,13 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
                      int fullscreen, double aspect)
 {
     int win_width, win_height;
+    int win_offx, win_offy;
     int scaled_width, scaled_height;
     int scaled_offx, scaled_offy;
+    int prev_fullscreen = graph_info.fullscreen;
 
+    win_offx = 0;
+    win_offy = 0;
     scaled_width = width;
     scaled_height = height;
     scaled_offx = 0;
@@ -122,8 +127,18 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
     } else {                /* ウインドウが有ればリサイズ */
 
         DWORD style = GetWindowLong(g_hWnd, GWL_STYLE);
+        RECT win_rect;
         
         if (fullscreen) {
+            if (!prev_fullscreen) {
+                GetWindowRect(g_hWnd, &win_rect);
+                graph_info.window_offx = win_rect.left;
+                graph_info.window_offy = win_rect.top;
+
+                /* ウィンドウモードの画面情報を保存 */
+                graph_info_windowed = graph_info;
+            }
+
             MONITORINFO mi = { sizeof(MONITORINFO) };
             
             if (!GetMonitorInfo(MonitorFromWindow(g_hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
@@ -148,7 +163,6 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
             scaled_offy = (win_height - scaled_height) / 2;
 
             /* 残像を消す為に画面を更新する */
-            RECT win_rect;
             HDC hdc = GetDC(g_hWnd);
             GetWindowRect(g_hWnd, &win_rect);
             FillRect(hdc, &win_rect, (HBRUSH)GetStockObject(BLACK_BRUSH));
@@ -157,12 +171,18 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
         else {
             win_width = scaled_width;
             win_height = scaled_height;
+
+            if (prev_fullscreen) {
+                win_offx = graph_info_windowed.window_offx;
+                win_offy = graph_info_windowed.window_offy;
+            }
+
             calc_window_size(&win_width, &win_height);
             SetWindowLong(g_hWnd, GWL_STYLE, style | winStyle);
-            SetWindowPos(g_hWnd,
-                HWND_TOP, 0, 0,
-                win_width, win_height, /* ウィンドウの幅・高さ   */
-                SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            SetWindowPos(g_hWnd, HWND_TOP,
+                win_offx, win_offy,       /* ウィンドウのオフセット */
+                win_width, win_height,    /* ウィンドウの幅・高さ   */
+                SWP_NOZORDER | SWP_FRAMECHANGED);
         }
     }
 
@@ -175,6 +195,8 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
     graph_info.scaled_height    = scaled_height;
     graph_info.scaled_offx      = scaled_offx;
     graph_info.scaled_offy      = scaled_offy;
+    graph_info.window_offx      = win_offx;
+    graph_info.window_offy      = win_offy;
     graph_info.byte_per_pixel   = 4;
     graph_info.byte_per_line    = width * 4;
     graph_info.buffer           = buffer;

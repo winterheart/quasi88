@@ -67,6 +67,8 @@ typedef struct {
     int     scaled_height; /* Win32用 スケール後の高さ */
     int     scaled_offx; /* Win32用 スケール後のオフセット */
     int     scaled_offy;
+    int     window_offx; /* ウィンドウモード時のフレームのオフセット */
+    int     window_offy;
 
     int     byte_per_pixel; /* 確保した画面のピクセルあたりバイト数   */
                 /*  1, 2, 4 のいずれか     */
