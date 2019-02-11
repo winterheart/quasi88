@@ -128,6 +128,11 @@ char    *screen_start;          /* 画面先頭         */
 static  int screen_bx;      /* ボーダー(枠)の幅 x (ドット)    */
 static  int screen_by;      /*     〃      y (ドット)   */
 
+double screen_scale_x = 0.0;  /* 画面のスケール因子 */
+double screen_scale_y = 0.0;
+int screen_scale_dx = 0; /* 画面のスケール後のオフセット */
+int screen_scale_dy = 0;
+
 
 
 /*CFG*/ int status_fg = 0x000000;   /* ステータス前景色     */
@@ -383,7 +388,7 @@ static  int open_window(void)
             break;
         }
 
-        if (w <= spec->window_max_width &&
+        if (w * (mon_aspect ? mon_aspect : 1) <= spec->window_max_width &&
             h <= spec->window_max_height) {
             found = TRUE;
             break;
@@ -411,10 +416,14 @@ static  int open_window(void)
     status_displayable = FALSE;
     }
     now_screen_size = size;
-
     info = graph_setup(w, h, use_fullscreen, (float)mon_aspect);
 
     if (info) {
+
+    screen_scale_x = info->scaled_width / info->width;
+    screen_scale_y = info->scaled_height / info->height;
+    screen_scale_dx = info->scaled_offx;
+    screen_scale_dy = info->scaled_offy + (info->fullscreen && status_displayable ? STATUS_HEIGHT : 0);
 
     /* フルスクリーンで、ステータス表示が可能なサイズが確保できたか確認 */
     if ((info->fullscreen) &&
