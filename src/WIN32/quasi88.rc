@@ -73,6 +73,8 @@ QUASI88 MENU {
 #ifdef SUPPORT_DOUBLE
             MENUITEM "Double size",     M_SET_SIZ_DOUBLE
 #endif
+            MENUITEM SEPARATOR
+            MENUITEM "Full screen",     M_SET_FULLSCREEN
         }
 
         MENUITEM "Use PCG-8100",        M_SET_PCG
