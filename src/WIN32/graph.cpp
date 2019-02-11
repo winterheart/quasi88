@@ -137,7 +137,8 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
 
             SetWindowLong(g_hWnd, GWL_STYLE, style & ~winStyle);
             SetWindowPos(g_hWnd, HWND_TOP,
-                mi.rcMonitor.left, mi.rcMonitor.top, win_width, win_height,
+                mi.rcMonitor.left, mi.rcMonitor.top - GetSystemMetrics(SM_CYMENU),
+                win_width, win_height + GetSystemMetrics(SM_CYMENU),
                 SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 
             int scale_factor = MIN(win_width / width, win_height / height);
