@@ -1010,6 +1010,10 @@ static  void    f_set_size(UINT uItem, int data)
     {
     quasi88_cfg_set_size((int)data);
     }
+
+    /*if (data > SCREEN_SIZE_FULL && quasi88_cfg_now_fullscreen()) {
+        f_set_fullscreen(M_SET_FULLSCREEN);
+    }*/
 }
 
 static  void    f_set_fullscreen(UINT uItem)
@@ -1025,6 +1029,10 @@ static  void    f_set_fullscreen(UINT uItem)
         MF_BYCOMMAND | (active ? MFS_CHECKED : MFS_UNCHECKED));
 
     quasi88_cfg_set_fullscreen(active);
+
+    /*if (active && quasi88_cfg_now_size() > SCREEN_SIZE_FULL) {
+        f_set_size(M_SET_SIZ_FULL, SCREEN_SIZE_FULL);
+    }*/
 }
 
 static  void    f_set_pcg(UINT uItem)
