@@ -182,7 +182,7 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
             SetWindowPos(g_hWnd, HWND_TOP,
                 win_offx, win_offy,       /* ウィンドウのオフセット */
                 win_width, win_height,    /* ウィンドウの幅・高さ   */
-                SWP_NOZORDER | SWP_FRAMECHANGED);
+                (prev_fullscreen ? 0 : SWP_NOMOVE) | SWP_NOZORDER | SWP_FRAMECHANGED);
         }
     }
 
