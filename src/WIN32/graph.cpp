@@ -353,7 +353,8 @@ int graph_update_WM_PAINT(void)
 #if USE_RETROACHIEVEMENTS
     HDC hdc_main = hdc;
     HDC hdc_buffer = CreateCompatibleDC(hdc);
-    HBITMAP hbm_buffer = CreateCompatibleBitmap(hdc, graph_info.width, graph_info.height);
+    HBITMAP hbm_buffer = CreateCompatibleBitmap(hdc,
+        graph_info.width, graph_info.height);
     SelectObject(hdc_buffer, hbm_buffer);
 
     hdc = hdc_buffer;
@@ -365,11 +366,18 @@ int graph_update_WM_PAINT(void)
 
     if (graph_update_counter > 0) {
 #if 1   /* どちらの API でもよさげ。速度は？ */
+#if USE_RETROACHIEVEMENTS
+        StretchDIBits(hdc,
+            0, 0, graph_info.width, graph_info.height,
+            0, 0, graph_info.width, graph_info.height,
+            buffer, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
+#else
     StretchDIBits(hdc,
               graph_info.scaled_offx, graph_info.scaled_offy,
               graph_info.scaled_width, graph_info.scaled_height,
               0, 0, graph_info.width, graph_info.height,
               buffer, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
+#endif
 #else   /* こっちは、転送先の高さしか指定できない */
     SetDIBitsToDevice(hdc,
               0, 0, graph_info.width, graph_info.scaled_height,
@@ -384,7 +392,10 @@ int graph_update_WM_PAINT(void)
 
 #if USE_RETROACHIEVEMENTS
     RA_RenderOverlayFrame(hdc);
-    BitBlt(hdc_main, 0, 0, graph_info.scaled_width, graph_info.scaled_height, hdc, 0, 0, SRCCOPY);
+    StretchBlt(hdc_main,
+        graph_info.scaled_offx, graph_info.scaled_offy,
+        graph_info.scaled_width, graph_info.scaled_height,
+        hdc, 0, 0, graph_info.width, graph_info.height, SRCCOPY);
 
     DeleteObject(hbm_buffer);
     DeleteDC(hdc_buffer);

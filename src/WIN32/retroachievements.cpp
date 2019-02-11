@@ -421,7 +421,7 @@ void RA_RenderOverlayFrame(HDC hdc)
     input.m_bUpPressed = IS_KEY88_PRESS(KEY88_UP);
     input.m_bDownPressed = IS_KEY88_PRESS(KEY88_DOWN);
 
-    RA_UpdateRenderOverlay(hdc, &input, delta_time, &window_size, use_fullscreen, (bool)quasi88_is_pause());
+    RA_UpdateRenderOverlay(hdc, &input, delta_time, &window_size, (bool)quasi88_cfg_now_fullscreen(), (bool)quasi88_is_pause());
 
     last_tick = timeGetTime();
 }
