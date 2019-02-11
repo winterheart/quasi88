@@ -1775,6 +1775,8 @@ void    quasi88_focus_in(void)
 
 void    quasi88_focus_out(void)
 {
+    softkey_release_all(); /* キーの押下解除 */
+
     if (quasi88_is_exec()) {
 
     pause_event_focus_out_when_exec();
