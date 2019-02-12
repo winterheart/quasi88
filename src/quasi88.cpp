@@ -962,6 +962,10 @@ int quasi88_drag_and_drop(const char *filename)
 
     int success;
 
+#if USE_RETROACHIEVEMENTS
+    RA_ToggleLoad(FALSE);
+#endif
+
     if (quasi88_disk_insert_all(filename, FALSE)) {
         status_message(1, STATUS_INFO_TIME, "Disk Image Set and Reset");
         success = TRUE;
@@ -973,6 +977,10 @@ int quasi88_drag_and_drop(const char *filename)
         success = FALSE;
     }
 
+#if USE_RETROACHIEVEMENTS
+    RA_ToggleLoad(TRUE);
+#endif
+
     if (success)
     {
         quasi88_reset(NULL);
@@ -980,7 +988,15 @@ int quasi88_drag_and_drop(const char *filename)
         if (quasi88_is_pause()) {
             quasi88_exec();
         }
+
+#if USE_RETROACHIEVEMENTS
+        RA_UpdateAppTitle(loaded_title->name);
+        RA_ActivateGame(loaded_title->title_id);
+#endif
     }
+#if USE_RETROACHIEVEMENTS
+    else RA_AbortLoadNewRom();
+#endif
 
     return success;
 }
