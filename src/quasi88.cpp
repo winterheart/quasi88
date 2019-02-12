@@ -712,6 +712,9 @@ void    quasi88_reset(const T_RESET_CFG *cfg)
     /*if (xmame_has_sound()) xmame_sound_reset();*/
 
 #if USE_RETROACHIEVEMENTS
+    if (empty[0]) RA_OnGameClose(FTYPE_DISK);
+    if (!tape_readable()) RA_OnGameClose(FTYPE_TAPE_LOAD);
+
     if (RA_HardcoreModeIsActive())
     {
         if (loaded_disk.data_len > 0 && loaded_tape.data_len > 0)
@@ -1193,9 +1196,10 @@ int quasi88_disk_eject(int drv)
     if (drv == DRIVE_1)
     {
 #if !RA_RELOAD_MULTI_DISK
-        if (loaded_title != NULL && loaded_title->title_id != loading_file.title_id)
+        if (loaded_title != NULL &&
+            (loaded_title->title_id == 0 || loaded_title->title_id != loading_file.title_id))
 #endif
-        RA_OnGameClose(FTYPE_DISK);
+        RA_ClearTitle();
     }
 #endif
     }
@@ -1342,9 +1346,10 @@ int quasi88_load_tape_eject(void)
     if (loaded_tape.data_len > 0)
     {
 #if !RA_RELOAD_MULTI_DISK
-        if (loaded_title != NULL && loaded_title->title_id != loading_file.title_id)
+        if (loaded_title != NULL &&
+            (loaded_title->title_id == 0 || loaded_title->title_id != loading_file.title_id))
 #endif
-        RA_OnGameClose(FTYPE_TAPE_LOAD);
+        RA_ClearTitle();
     }
 #endif
 

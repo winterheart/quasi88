@@ -368,9 +368,14 @@ void RA_OnGameClose(int file_type)
 
     if (loaded_title == NULL && loading_file.data_len == 0)
     {
-        RA_UpdateAppTitle("");
-        RA_OnLoadNewRom(NULL, 0);
+        RA_ClearTitle();
     }
+}
+
+void RA_ClearTitle()
+{
+    RA_UpdateAppTitle("");
+    RA_OnLoadNewRom(NULL, 0);
 }
 
 int RA_HandleMenuEvent(int id)
