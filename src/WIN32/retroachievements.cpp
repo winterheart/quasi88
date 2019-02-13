@@ -297,7 +297,8 @@ int RA_PrepareLoadNewRom(const char *file_name, int file_type)
     }
 
 #if !RA_RELOAD_MULTI_DISK
-    should_activate = loaded_title != NULL &&
+    should_activate = should_activate ? true :
+        loaded_title != NULL &&
         loaded_title->title_id > 0 &&
         loaded_title->title_id == loading_file.title_id ?
         false :
@@ -331,7 +332,7 @@ void RA_CommitLoadNewRom()
     {
         /* 実績システムのイメージデータを初期化する */
         RA_ActivateGame(loading_file.title_id);
-        should_activate = true;
+        should_activate = false;
     }
 
     /* ロード中のデータをクリアする */
@@ -382,6 +383,7 @@ void RA_ClearTitle()
 {
     RA_UpdateAppTitle("");
     RA_OnLoadNewRom(NULL, 0);
+    should_activate = true;
 }
 
 void RA_ToggleLoad(int enabled)
