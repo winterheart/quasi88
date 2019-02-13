@@ -1775,7 +1775,16 @@ void    quasi88_focus_in(void)
 
 void    quasi88_focus_out(void)
 {
+    int kana_on, caps_on;
+
+    kana_on = IS_KEY88_PRESS(KEY88_KANA);
+    caps_on = IS_KEY88_PRESS(KEY88_CAPS);
+
     softkey_release_all(); /* キーの押下解除 */
+
+    /* カナ、CAPSの状態を戻す */
+    if (kana_on) KEY88_PRESS(KEY88_KANA);
+    if (caps_on) KEY88_PRESS(KEY88_CAPS);
 
     if (quasi88_is_exec()) {
 
