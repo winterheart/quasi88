@@ -124,66 +124,67 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
         return NULL;
     }
 
-    } else {                /* ウインドウが有ればリサイズ */
+    }
 
-        DWORD style = GetWindowLong(g_hWnd, GWL_STYLE);
-        RECT win_rect;
+    /* ウインドウが有ればリサイズ */
+
+    DWORD style = GetWindowLong(g_hWnd, GWL_STYLE);
+    RECT win_rect;
         
-        if (fullscreen) {
-            if (!prev_fullscreen) {
-                GetWindowRect(g_hWnd, &win_rect);
-                graph_info.window_offx = win_rect.left;
-                graph_info.window_offy = win_rect.top;
-
-                /* ウィンドウモードの画面情報を保存 */
-                graph_info_windowed = graph_info;
-            }
-
-            MONITORINFO mi = { sizeof(MONITORINFO) };
-            
-            if (!GetMonitorInfo(MonitorFromWindow(g_hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
-                free(buffer);
-                buffer = NULL;
-                return NULL;
-            }
-
-            win_width = mi.rcMonitor.right - mi.rcMonitor.left;
-            win_height = mi.rcMonitor.bottom - mi.rcMonitor.top;
-
-            SetWindowLong(g_hWnd, GWL_STYLE, style & ~winStyle);
-            SetWindowPos(g_hWnd, HWND_TOP,
-                mi.rcMonitor.left, mi.rcMonitor.top - GetSystemMetrics(SM_CYMENU),
-                win_width, win_height + GetSystemMetrics(SM_CYMENU),
-                SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-
-            int scale_factor = MIN(win_width / width, win_height / height);
-            scaled_width = width * scale_factor;
-            scaled_height = height * scale_factor;
-            scaled_offx = (win_width - scaled_width) / 2;
-            scaled_offy = (win_height - scaled_height) / 2;
-
-            /* 残像を消す為に画面を更新する */
-            HDC hdc = GetDC(g_hWnd);
+    if (fullscreen) {
+        if (!prev_fullscreen) {
             GetWindowRect(g_hWnd, &win_rect);
-            FillRect(hdc, &win_rect, (HBRUSH)GetStockObject(BLACK_BRUSH));
-            ReleaseDC(g_hWnd, hdc);
-        }
-        else {
-            win_width = scaled_width;
-            win_height = scaled_height;
+            graph_info.window_offx = win_rect.left;
+            graph_info.window_offy = win_rect.top;
 
-            if (prev_fullscreen) {
-                win_offx = graph_info_windowed.window_offx;
-                win_offy = graph_info_windowed.window_offy;
-            }
-
-            calc_window_size(&win_width, &win_height);
-            SetWindowLong(g_hWnd, GWL_STYLE, style | winStyle);
-            SetWindowPos(g_hWnd, HWND_TOP,
-                win_offx, win_offy,       /* ウィンドウのオフセット */
-                win_width, win_height,    /* ウィンドウの幅・高さ   */
-                (prev_fullscreen ? 0 : SWP_NOMOVE) | SWP_NOZORDER | SWP_FRAMECHANGED);
+            /* ウィンドウモードの画面情報を保存 */
+            graph_info_windowed = graph_info;
         }
+
+        MONITORINFO mi = { sizeof(MONITORINFO) };
+            
+        if (!GetMonitorInfo(MonitorFromWindow(g_hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
+            free(buffer);
+            buffer = NULL;
+            return NULL;
+        }
+
+        win_width = mi.rcMonitor.right - mi.rcMonitor.left;
+        win_height = mi.rcMonitor.bottom - mi.rcMonitor.top;
+
+        SetWindowLong(g_hWnd, GWL_STYLE, style & ~winStyle);
+        SetWindowPos(g_hWnd, HWND_TOP,
+            mi.rcMonitor.left, mi.rcMonitor.top - GetSystemMetrics(SM_CYMENU),
+            win_width, win_height + GetSystemMetrics(SM_CYMENU),
+            SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+
+        int scale_factor = MIN(win_width / width, win_height / height);
+        scaled_width = width * scale_factor;
+        scaled_height = height * scale_factor;
+        scaled_offx = (win_width - scaled_width) / 2;
+        scaled_offy = (win_height - scaled_height) / 2;
+
+        /* 残像を消す為に画面を更新する */
+        HDC hdc = GetDC(g_hWnd);
+        GetWindowRect(g_hWnd, &win_rect);
+        FillRect(hdc, &win_rect, (HBRUSH)GetStockObject(BLACK_BRUSH));
+        ReleaseDC(g_hWnd, hdc);
+    }
+    else {
+        win_width = scaled_width;
+        win_height = scaled_height;
+
+        if (prev_fullscreen) {
+            win_offx = graph_info_windowed.window_offx;
+            win_offy = graph_info_windowed.window_offy;
+        }
+
+        calc_window_size(&win_width, &win_height);
+        SetWindowLong(g_hWnd, GWL_STYLE, style | winStyle);
+        SetWindowPos(g_hWnd, HWND_TOP,
+            win_offx, win_offy,       /* ウィンドウのオフセット */
+            win_width, win_height,    /* ウィンドウの幅・高さ   */
+            (prev_fullscreen ? 0 : SWP_NOMOVE) | SWP_NOZORDER | SWP_FRAMECHANGED);
     }
 
     /* graph_info に諸言をセットする */
