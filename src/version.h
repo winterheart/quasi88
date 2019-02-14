@@ -38,7 +38,7 @@
 #else
 
 #ifndef Q_TITLE
-#define Q_TITLE BASE_TITLE
+#define Q_TITLE BASE_TITLE "kai"
 #endif
 
 #ifndef Q_TITLE_KANJI
