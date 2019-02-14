@@ -152,17 +152,17 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
         win_width = mi.rcMonitor.right - mi.rcMonitor.left;
         win_height = mi.rcMonitor.bottom - mi.rcMonitor.top;
 
+        int scale_factor = MIN(win_width / width, win_height / (height - (graph_spec.forbid_status || !show_status ? STATUS_HEIGHT : 0)));
+        scaled_width = width * scale_factor;
+        scaled_height = height * scale_factor;
+        scaled_offx = (win_width - scaled_width) / 2;
+        scaled_offy = (win_height - scaled_height) / 2;
+
         SetWindowLong(g_hWnd, GWL_STYLE, style & ~winStyle);
         SetWindowPos(g_hWnd, HWND_TOP,
             mi.rcMonitor.left, mi.rcMonitor.top - GetSystemMetrics(SM_CYMENU),
             win_width, win_height + GetSystemMetrics(SM_CYMENU),
             SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-
-        int scale_factor = MIN(win_width / width, win_height / height);
-        scaled_width = width * scale_factor;
-        scaled_height = height * scale_factor;
-        scaled_offx = (win_width - scaled_width) / 2;
-        scaled_offy = (win_height - scaled_height) / 2;
 
         /* 残像を消す為に画面を更新する */
         HDC hdc = GetDC(g_hWnd);
