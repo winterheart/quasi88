@@ -951,22 +951,7 @@ void    quasi88_cfg_set_showstatus(int show)
     if (now_status != show) {       /* ステータス表示有無が変わった */
     show_status = show;
 
-    if (now_fullscreen == FALSE) {  /* ウインドウの場合・・・ */
-
-        open_window_or_exit();      /* 画面サイズ切替     */
-
-    } else {            /* 全画面の場合・・・ */
-
-        now_status = show_status;
-
-        if (now_status) {
-        screen_set_dirty_status_show(); /* ステータス領域 初期化 */
-        screen_set_dirty_status();  /* ステータス領域 更新 */
-        } else {
-        screen_set_dirty_status_hide(); /* ステータス領域 消去 */
-        }
-
-    }
+    open_window_or_exit();          /* 画面サイズ切替     */
 
     status_setup(now_status);       /* ステータス変数等初期化 */
     }
@@ -1775,6 +1760,17 @@ void    quasi88_focus_in(void)
 
 void    quasi88_focus_out(void)
 {
+    int kana_on, caps_on;
+
+    kana_on = IS_KEY88_PRESS(KEY88_KANA);
+    caps_on = IS_KEY88_PRESS(KEY88_CAPS);
+
+    softkey_release_all(); /* キーの押下解除 */
+
+    /* カナ、CAPSの状態を戻す */
+    if (kana_on) KEY88_PRESS(KEY88_KANA);
+    if (caps_on) KEY88_PRESS(KEY88_CAPS);
+
     if (quasi88_is_exec()) {
 
     pause_event_focus_out_when_exec();

@@ -173,7 +173,8 @@ void    q8gr_set_focus_screen(int x, int y, int sx, int sy, void *p)
 }
 void    *q8gr_get_focus_screen(int x, int y)
 {
-    int off_x = (screen_scale_dx+SCREEN_DX)/8, off_y = (screen_scale_dy+SCREEN_DY)/16;
+    int off_x = (screen_scale_dx + SCREEN_DX) * Q8GR_SCREEN_X / SCREEN_W;
+    int off_y = (screen_scale_dy + SCREEN_DY) * Q8GR_SCREEN_Y / SCREEN_H;
     x -= off_x;
     y -= off_y;
     if (screen_scale_x) { x /= screen_scale_x; }
