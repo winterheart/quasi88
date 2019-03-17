@@ -963,8 +963,6 @@ int quasi88_drag_and_drop(const char *filename)
     int success;
 
 #if USE_RETROACHIEVEMENTS
-    int should_activate = loaded_title != NULL;
-
     RA_ToggleLoad(FALSE);
 #endif
 
@@ -992,11 +990,8 @@ int quasi88_drag_and_drop(const char *filename)
         }
 
 #if USE_RETROACHIEVEMENTS
-        if (should_activate)
-        {
-            RA_UpdateAppTitle(loaded_title->name);
-            RA_ActivateGame(loaded_title->title_id);
-        }
+        RA_UpdateAppTitle(loaded_title->name);
+        RA_ActivateGame(loaded_title->title_id);
 #endif
     }
 #if USE_RETROACHIEVEMENTS
