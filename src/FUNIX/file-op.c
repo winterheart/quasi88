@@ -30,6 +30,7 @@ static char *dir_cwd;   /* デフォルトのディレクトリ (カレント)  
 static char *dir_rom;   /* ROMイメージファイルの検索ディレクトリ   */
 static char *dir_disk;  /* DISKイメージファイルの検索ディレクトリ  */
 static char *dir_tape;  /* TAPEイメージファイルの基準ディレクトリ  */
+static char *dir_save;  /* 上書き用のイメージファイルの保存先        */
 static char *dir_snap;  /* 画面スナップショットファイルの保存先       */
 static char *dir_state; /* サスペンドファイルの保存先          */
 static char *dir_g_cfg; /* 共通設定ファイルのディレクトリ        */
@@ -44,6 +45,7 @@ const char *osd_dir_cwd  (void) { return dir_cwd;   }
 const char *osd_dir_rom  (void) { return dir_rom;   }
 const char *osd_dir_disk (void) { return dir_disk;  }
 const char *osd_dir_tape (void) { return dir_tape;  }
+const char *osd_dir_save(void) { return dir_save; }
 const char *osd_dir_snap (void) { return dir_snap;  }
 const char *osd_dir_state(void) { return dir_state; }
 const char *osd_dir_gcfg (void) { return dir_g_cfg[0] ? dir_g_cfg : NULL; }
@@ -62,6 +64,7 @@ int osd_set_dir_cwd  (const char *d) { return set_new_dir(d, dir_cwd);   }
 int osd_set_dir_rom  (const char *d) { return set_new_dir(d, dir_rom);   }
 int osd_set_dir_disk (const char *d) { return set_new_dir(d, dir_disk);  }
 int osd_set_dir_tape (const char *d) { return set_new_dir(d, dir_tape);  }
+int osd_set_dir_save(const char *d) { return set_new_dir(d, dir_save); }
 int osd_set_dir_snap (const char *d) { return set_new_dir(d, dir_snap);  }
 int osd_set_dir_state(const char *d) { return set_new_dir(d, dir_state); }
 int osd_set_dir_gcfg (const char *d) { return set_new_dir(d, dir_g_cfg); }
