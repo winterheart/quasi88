@@ -336,7 +336,7 @@ static int namecmp(const void *p1, const void *p2)
  *---------------------------------------------------------------------------*/
 T_DIR_INFO  *osd_opendir(const char *filename)
 {
-    int  len;
+    size_t len;
     char *p;
     int  i;
     T_DIR_INFO *dir;
@@ -614,7 +614,7 @@ int osd_path_normalize(const char *path, char resolved_path[], int size)
  *---------------------------------------------------------------------------*/
 int osd_path_split(const char *path, char dir[], char file[], int size)
 {
-    int pos = strlen(path);
+    size_t pos = strlen(path);
 
     /* dir, file は十分なサイズを確保しているはずなので、軽くチェック */
     if (pos == 0 || size <= pos) {
@@ -676,7 +676,7 @@ int osd_path_split(const char *path, char dir[], char file[], int size)
  *---------------------------------------------------------------------------*/
 int osd_path_join(const char *dir, const char *file, char path[], int size)
 {
-    int len;
+    size_t len;
     char *p;
 
     if (dir == NULL    ||
@@ -959,7 +959,7 @@ int osd_file_config_init(void)
 static int parse_tilda(const char *home, const char *path,
                char *result_path, int result_size)
 {
-    int  i;
+    size_t i;
     char *buf;
 
     if (home           &&
