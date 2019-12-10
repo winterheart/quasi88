@@ -2412,7 +2412,7 @@ static  void    PACK_CHECK_BUTTONS(Q8tkWidget *box,
     if ((*f_initval)(p->val))
         q8tk_toggle_button_set_state(button, TRUE);
 
-    q8tk_signal_connect(button, "toggled", callback, (void *)(p->val));
+    q8tk_signal_connect(button, "toggled", callback, (void *)((intptr_t)p->val));
 
     q8tk_widget_show(button);
     q8tk_box_pack_start(box, button);
@@ -2444,7 +2444,7 @@ static  Q8List  *PACK_RADIO_BUTTONS(Q8tkWidget *box,
 
     q8tk_widget_show(button);
     q8tk_box_pack_start(box, button);
-    q8tk_signal_connect(button, "clicked", callback, (void *)(p->val));
+    q8tk_signal_connect(button, "clicked", callback, (void *)((intptr_t)p->val));
 
     if (initval == p->val) {
         q8tk_toggle_button_set_state(button, TRUE);
@@ -2517,7 +2517,7 @@ static  Q8tkWidget *MAKE_KEY_COMBO(Q8tkWidget *box,
 
     q8tk_combo_set_text(combo, initstr);
     q8tk_misc_set_size(combo, 6, 0);
-    q8tk_signal_connect(combo, "activate", callback, (void*)(p->val));
+    q8tk_signal_connect(combo, "activate", callback, (void *)((intptr_t)p->val));
 
     q8tk_box_pack_start(box, combo);
     q8tk_widget_show(combo);

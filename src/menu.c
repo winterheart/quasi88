@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "quasi88.h"
 #include "initval.h"
@@ -16,7 +15,6 @@
 
 #include "pc88main.h"
 #include "pc88sub.h"
-#include "graph.h"
 #include "intr.h"
 #include "keyboard.h"
 #include "memory.h"
@@ -28,7 +26,6 @@
 #include "status.h"
 #include "monitor.h"
 #include "snddrv.h"
-#include "wait.h"
 #include "file-op.h"
 #include "suspend.h"
 #include "snapshot.h"
@@ -173,10 +170,10 @@ static  int get_reset_basic(void)
 }
 static  void    cb_reset_basic(UNUSED_WIDGET, void *p)
 {
-    if (reset_req.boot_basic != (int)p) {
-    reset_req.boot_basic = (int)p;
+    if (reset_req.boot_basic != (intptr_t)p) {
+        reset_req.boot_basic = (intptr_t)p;
 
-    q8tk_toggle_button_set_state(widget_reset_basic[ 1 ][ (int)p ], TRUE);
+        q8tk_toggle_button_set_state(widget_reset_basic[ 1 ][ (intptr_t)p ], TRUE);
     }
 }
 
@@ -210,10 +207,10 @@ static  int get_reset_clock(void)
 }
 static  void    cb_reset_clock(UNUSED_WIDGET, void *p)
 {
-    if (reset_req.boot_clock_4mhz != (int)p) {
-    reset_req.boot_clock_4mhz = (int)p;
+    if (reset_req.boot_clock_4mhz != (intptr_t)p) {
+        reset_req.boot_clock_4mhz = (intptr_t)p;
 
-    q8tk_toggle_button_set_state(widget_reset_clock[ 1 ][ (int)p ], TRUE);
+        q8tk_toggle_button_set_state(widget_reset_clock[ 1 ][ (intptr_t)p ], TRUE);
     }
 }
 static  int get_reset_clock_async(void)
@@ -265,7 +262,7 @@ static  int get_reset_sound(void)
 }
 static  void    cb_reset_sound(UNUSED_WIDGET, void *p)
 {
-    reset_req.sound_board = (int)p;
+    reset_req.sound_board = (intptr_t)p;
 }
 
 
@@ -465,7 +462,7 @@ static  int get_reset_jisho(void)
 }
 static  void    cb_reset_jisho(UNUSED_WIDGET, void *p)
 {
-    reset_req.use_jisho_rom = (int)p;
+    reset_req.use_jisho_rom = (intptr_t)p;
 }
 
 
@@ -682,8 +679,8 @@ static  int get_dipsw_b(int p)
 }
 static  void    cb_dipsw_b(UNUSED_WIDGET, void *p)
 {
-    int shift = data_dipsw_b[ (int)p >> 1 ].val;
-    int on    = (int)p & 1;
+    int shift = data_dipsw_b[ (intptr_t)p >> 1 ].val;
+    int on    = (intptr_t)p & 1;
 
     if (on) reset_req.boot_dipsw |=  (1 << shift);
     else    reset_req.boot_dipsw &= ~(1 << shift);
@@ -694,8 +691,8 @@ static  int get_dipsw_b2(void)
 }
 static  void    cb_dipsw_b2(UNUSED_WIDGET, void *p)
 {
-    if ((int)p) reset_req.boot_from_rom = TRUE;
-    else        reset_req.boot_from_rom = FALSE;
+    if ((intptr_t)p) reset_req.boot_from_rom = TRUE;
+    else             reset_req.boot_from_rom = FALSE;
 
     set_reset_dipsw_boot();
 }
@@ -737,7 +734,7 @@ static  Q8tkWidget  *menu_dipsw_b(void)
                       b,
                       GET_LABEL(p, 0), 
                       (get_dipsw_b2() == p->val) ?TRUE :FALSE,
-                      cb_dipsw_b2, (void *)(p->val));
+                      cb_dipsw_b2, (void *)(intptr_t)(p->val));
 
         if (i == 0) widget_dipsw_b_boot_disk = b;  /*これらのボタンは*/
         else        widget_dipsw_b_boot_rom  = b;  /*覚えておく      */
@@ -758,8 +755,8 @@ static  int get_dipsw_r(int p)
 }
 static  void    cb_dipsw_r(UNUSED_WIDGET, void *p)
 {
-    int shift = data_dipsw_r[ (int)p >> 1 ].val;
-    int on    = (int)p & 1;
+    int shift = data_dipsw_r[ (intptr_t)p >> 1 ].val;
+    int on    = (intptr_t)p & 1;
 
     if (on) reset_req.boot_dipsw |=  (1 << shift);
     else    reset_req.boot_dipsw &= ~(1 << shift);
@@ -918,7 +915,7 @@ static  int get_cpu_cpu(void)
 }
 static  void    cb_cpu_cpu(UNUSED_WIDGET, void *p)
 {
-    cpu_timing = (int)p;
+    cpu_timing = (intptr_t)p;
 }
 
 
@@ -1088,7 +1085,7 @@ static  void    cb_cpu_clock(Q8tkWidget *widget, void *mode)
 
     val = strtod(buf, &conv_end);
 
-    if (((int)mode == 0) &&             /* 空白 + ENTER や   */
+    if (((intptr_t)mode == 0) &&             /* 空白 + ENTER や   */
         (strlen(buf) == 0 || val == 0.0)) {     /*   0  + ENTER 時は */
                             /* デフォルト値を適用*/
         val = boot_clock_4mhz ? CONST_4MHZ_CLOCK
@@ -1117,9 +1114,9 @@ static  void    cb_cpu_clock(Q8tkWidget *widget, void *mode)
     interval_work_init_all();
     }
 
-    if ((int)mode == 0) {       /* COMBO ないし ENTER時は、値を再表示*/
-    sprintf(buf, "%8.4f", get_cpu_clock());
-    q8tk_combo_set_text(widget, buf);
+    if ((intptr_t)mode == 0) {       /* COMBO ないし ENTER時は、値を再表示*/
+        sprintf(buf, "%8.4f", get_cpu_clock());
+        q8tk_combo_set_text(widget, buf);
     }
 }
 
@@ -1185,48 +1182,48 @@ static  void    cb_cpu_wait(Q8tkWidget *widget, void *mode)
 
     /* COMBO BOX から ENTRY に一致するものを探す */
     for (i=0; i<COUNTOF(data_cpu_wait_combo); i++, p++) {
-    if (strcmp(p->str[menu_lang], combo_str) == 0) {
-        val = p->val;
-        fit = TRUE;                 /* 一致した値を適用 */
-        break;
-    }
+        if (strcmp(p->str[menu_lang], combo_str) == 0) {
+            val = p->val;
+            fit = TRUE;                 /* 一致した値を適用 */
+            break;
+        }
     }
 
     if (fit == FALSE) {         /* COMBO BOX に該当がない場合 */
-    strncpy(buf, combo_str, 15);
-    buf[15] = '\0';
+        strncpy(buf, combo_str, 15);
+        buf[15] = '\0';
 
-    val = strtoul(buf, &conv_end, 10);
+        val = strtoul(buf, &conv_end, 10);
 
-    if (((int)mode == 0) &&             /* 空白 + ENTER や   */
-        (strlen(buf) == 0 || val == 0)) {       /*   0  + ENTER 時は */
-                            /* デフォルト値を適用*/
-        val = 100;
-        fit = TRUE;
+        if (((intptr_t)mode == 0) &&             /* 空白 + ENTER や   */
+            (strlen(buf) == 0 || val == 0)) {       /*   0  + ENTER 時は */
+                                /* デフォルト値を適用*/
+            val = 100;
+            fit = TRUE;
 
-    } else if (*conv_end != '\0') {         /* 数字変換失敗なら */
-        fit = FALSE;                /* その値は使えない */
+        } else if (*conv_end != '\0') {         /* 数字変換失敗なら */
+            fit = FALSE;                /* その値は使えない */
 
-    } else {                    /* 数字変換成功なら */
-        fit = TRUE;                 /* その値を適用する */
-    }
+        } else {                    /* 数字変換成功なら */
+            fit = TRUE;                 /* その値を適用する */
+        }
     }
 
     if (fit) {              /* 適用した値が有効範囲なら、セット */
-    if (min_val <= val && val <= max_val) {
-        wait_rate = val;
-    }
-    else if (val < min_val) {
-        wait_rate = min_val;
-    }
-    else /* if (val > max_val) */ {
-        wait_rate = max_val;
-    }
+        if (min_val <= val && val <= max_val) {
+            wait_rate = val;
+        }
+        else if (val < min_val) {
+            wait_rate = min_val;
+        }
+        else /* if (val > max_val) */ {
+            wait_rate = max_val;
+        }
     }
 
-    if ((int)mode == 0) {       /* COMBO ないし ENTER時は、値を再表示*/
-    sprintf(buf, "%4d", get_cpu_wait());
-    q8tk_combo_set_text(widget, buf);
+    if ((intptr_t)mode == 0) {       /* COMBO ないし ENTER時は、値を再表示*/
+        sprintf(buf, "%4d", get_cpu_wait());
+        q8tk_combo_set_text(widget, buf);
     }
 }
 
@@ -1291,36 +1288,36 @@ static  void    cb_cpu_boost(Q8tkWidget *widget, void *mode)
     }
 
     if (fit == FALSE) {         /* COMBO BOX に該当がない場合 */
-    strncpy(buf, combo_str, 15);
-    buf[15] = '\0';
+        strncpy(buf, combo_str, 15);
+        buf[15] = '\0';
 
-    val = strtoul(buf, &conv_end, 10);
+        val = strtoul(buf, &conv_end, 10);
 
-    if (((int)mode == 0) &&             /* 空白 + ENTER や   */
-        (strlen(buf) == 0 || val == 0)) {       /*   0  + ENTER 時は */
-                            /* デフォルト値を適用*/
-        val = 1;
-        fit = TRUE;
+        if (((intptr_t)mode == 0) &&             /* 空白 + ENTER や   */
+            (strlen(buf) == 0 || val == 0)) {       /*   0  + ENTER 時は */
+                                /* デフォルト値を適用*/
+            val = 1;
+            fit = TRUE;
 
-    } else if (*conv_end != '\0') {         /* 数字変換失敗なら */
-        fit = FALSE;                /* その値は使えない */
+        } else if (*conv_end != '\0') {         /* 数字変換失敗なら */
+            fit = FALSE;                /* その値は使えない */
 
-    } else {                    /* 数字変換成功なら */
-        fit = TRUE;                 /* その値を適用する */
-    }
+        } else {                    /* 数字変換成功なら */
+            fit = TRUE;                 /* その値を適用する */
+        }
     }
 
     if (fit) {              /* 適用した値が有効範囲なら、セット */
-    if (1 <= val && val <= 100) {
-        if (boost != val) {
-        boost_change(val);
+        if (1 <= val && val <= 100) {
+            if (boost != val) {
+                boost_change(val);
+            }
         }
     }
-    }
 
-    if ((int)mode == 0) {       /* COMBO ないし ENTER時は、値を再表示*/
-    sprintf(buf, "%4d", get_cpu_boost());
-    q8tk_combo_set_text(widget, buf);
+    if ((intptr_t)mode == 0) {       /* COMBO ないし ENTER時は、値を再表示*/
+        sprintf(buf, "%4d", get_cpu_boost());
+        q8tk_combo_set_text(widget, buf);
     }
 }
 
@@ -1372,25 +1369,25 @@ static  void    cb_cpu_misc(Q8tkWidget *widget, void *p)
 {
     int key = (Q8TK_TOGGLE_BUTTON(widget)->active) ? TRUE : FALSE;
 
-    switch ((int)p) {
-    case DATA_CPU_MISC_FDCWAIT:
-    fdc_wait = (key) ? 1 : 0;
-    return;
+    switch ((intptr_t)p) {
+        case DATA_CPU_MISC_FDCWAIT:
+            fdc_wait = (key) ? 1 : 0;
+            return;
 
-    case DATA_CPU_MISC_HSBASIC:
-    highspeed_mode = (key) ? TRUE : FALSE;
-    return;
+        case DATA_CPU_MISC_HSBASIC:
+            highspeed_mode = (key) ? TRUE : FALSE;
+            return;
 
-    case DATA_CPU_MISC_MEMWAIT:
-    memory_wait = (key) ? TRUE : FALSE;
-    return;
+        case DATA_CPU_MISC_MEMWAIT:
+            memory_wait = (key) ? TRUE : FALSE;
+            return;
 
-    case DATA_CPU_MISC_CMDSING:
-    use_cmdsing = (key) ? TRUE : FALSE;
+        case DATA_CPU_MISC_CMDSING:
+            use_cmdsing = (key) ? TRUE : FALSE;
 #ifdef  USE_SOUND
-    xmame_dev_beep_cmd_sing((byte) use_cmdsing);
+            xmame_dev_beep_cmd_sing((byte) use_cmdsing);
 #endif
-    return;
+            return;
     }
 }
 
@@ -1408,7 +1405,7 @@ static  Q8tkWidget  *menu_cpu_misc(void)
         PACK_CHECK_BUTTON(vbox,
                   GET_LABEL(p, 0),
                   get_cpu_misc(p->val),
-                  cb_cpu_misc, (void *)(p->val));
+                  cb_cpu_misc, (void *)(intptr_t)(p->val));
         } else {
         l = PACK_LABEL(vbox, GET_LABEL(p, 0));
         q8tk_misc_set_placement(l, Q8TK_PLACEMENT_X_RIGHT, 0);
@@ -1551,7 +1548,7 @@ static  int get_graph_resize(void)
 }
 static  void    cb_graph_resize(UNUSED_WIDGET, void *p)
 {
-    int new_size = (int)p;
+    int new_size = (intptr_t)p;
 
     quasi88_cfg_set_size(new_size);
 
@@ -1627,20 +1624,20 @@ static  void    cb_graph_misc(Q8tkWidget *widget, void *p)
 {
     int key = (Q8TK_TOGGLE_BUTTON(widget)->active) ? TRUE : FALSE;
 
-    switch ((int)p) {
-    case DATA_GRAPH_MISC_15K:
-    monitor_15k = (key) ? 0x02 : 0x00;
-    return;
+    switch ((intptr_t)p) {
+        case DATA_GRAPH_MISC_15K:
+            monitor_15k = (key) ? 0x02 : 0x00;
+            return;
 
-    case DATA_GRAPH_MISC_DIGITAL:
-    monitor_analog = (key) ? FALSE : TRUE;
-    return;
+        case DATA_GRAPH_MISC_DIGITAL:
+            monitor_analog = (key) ? FALSE : TRUE;
+            return;
 
-    case DATA_GRAPH_MISC_NOINTERP:
-    if (quasi88_cfg_can_interp()) {
-        quasi88_cfg_set_interp((key) ? FALSE : TRUE);
-    }
-    return;
+        case DATA_GRAPH_MISC_NOINTERP:
+            if (quasi88_cfg_can_interp()) {
+                quasi88_cfg_set_interp((key) ? FALSE : TRUE);
+            }
+            return;
     }
 }
 static  int get_graph_misc2(void)
@@ -1649,7 +1646,7 @@ static  int get_graph_misc2(void)
 }
 static  void    cb_graph_misc2(UNUSED_WIDGET, void *p)
 {
-    quasi88_cfg_set_interlace((int)p);
+    quasi88_cfg_set_interlace((intptr_t)p);
 }
 
 
@@ -1689,8 +1686,8 @@ static  int get_graph_pcg(void)
 static  void    cb_graph_pcg(Q8tkWidget *widget, void *p)
 {
     if (widget) {
-    use_pcg = (int)p;
-    memory_set_font();
+        use_pcg = (intptr_t)p;
+        memory_set_font();
     }
 
     if (use_pcg) { q8tk_widget_set_sensitive(graph_font_widget, FALSE); }
@@ -1703,7 +1700,7 @@ static  int get_graph_font(void)
 }
 static  void    cb_graph_font(UNUSED_WIDGET, void *p)
 {
-    font_type = (int)p;
+    font_type = (intptr_t)p;
     memory_set_font();
 }
 
@@ -1815,15 +1812,15 @@ static  void    cb_volume(Q8tkWidget *widget, void *p)
 {
     int vol = Q8TK_ADJUSTMENT(widget)->value;
 
-    switch ((int)p) {
-    case VOL_TOTAL:  xmame_cfg_set_mastervolume(vol);            break;
-    case VOL_FM:     xmame_cfg_set_mixer_volume(XMAME_MIXER_FM, vol);    break;
-    case VOL_PSG:    xmame_cfg_set_mixer_volume(XMAME_MIXER_PSG, vol);   break;
-    case VOL_BEEP:   xmame_cfg_set_mixer_volume(XMAME_MIXER_BEEP, vol);  break;
-    case VOL_RHYTHM: xmame_cfg_set_mixer_volume(XMAME_MIXER_RHYTHM, vol);break;
-    case VOL_ADPCM:  xmame_cfg_set_mixer_volume(XMAME_MIXER_ADPCM, vol); break;
-    case VOL_FMGEN:  xmame_cfg_set_mixer_volume(XMAME_MIXER_FMGEN, vol); break;
-    case VOL_SAMPLE: xmame_cfg_set_mixer_volume(XMAME_MIXER_SAMPLE, vol);break;
+    switch ((intptr_t)p) {
+        case VOL_TOTAL:  xmame_cfg_set_mastervolume(vol);                    break;
+        case VOL_FM:     xmame_cfg_set_mixer_volume(XMAME_MIXER_FM, vol);    break;
+        case VOL_PSG:    xmame_cfg_set_mixer_volume(XMAME_MIXER_PSG, vol);   break;
+        case VOL_BEEP:   xmame_cfg_set_mixer_volume(XMAME_MIXER_BEEP, vol);  break;
+        case VOL_RHYTHM: xmame_cfg_set_mixer_volume(XMAME_MIXER_RHYTHM, vol);break;
+        case VOL_ADPCM:  xmame_cfg_set_mixer_volume(XMAME_MIXER_ADPCM, vol); break;
+        case VOL_FMGEN:  xmame_cfg_set_mixer_volume(XMAME_MIXER_FMGEN, vol); break;
+        case VOL_SAMPLE: xmame_cfg_set_mixer_volume(XMAME_MIXER_SAMPLE, vol);break;
     }
 }
 
@@ -1844,7 +1841,7 @@ static  Q8tkWidget  *menu_volume_unit(const t_volume *p, int count)
         PACK_HSCALE(hbox,
                 p,
                 get_volume(p->val),
-                cb_volume, (void*)(p->val));
+                cb_volume, (void*)(intptr_t)(p->val));
         }
     }
     }
@@ -2117,7 +2114,7 @@ static  void    cb_volume_audio_freq(Q8tkWidget *widget, void *mode)
 
     val = strtoul(buf, &conv_end, 10);
 
-    if (((int)mode == 0) &&             /* 空白 + ENTER や   */
+    if (((intptr_t)mode == 0) &&             /* 空白 + ENTER や   */
         (strlen(buf) == 0 || val == 0)) {       /*   0  + ENTER 時は */
                             /* デフォルト値を適用*/
         val = 44100;
@@ -2137,9 +2134,9 @@ static  void    cb_volume_audio_freq(Q8tkWidget *widget, void *mode)
     }
     }
 
-    if ((int)mode == 0) {       /* COMBO ないし ENTER時は、値を再表示*/
-    sprintf(buf, "%5d", get_volume_audio_freq());
-    q8tk_combo_set_text(widget, buf);
+    if ((intptr_t)mode == 0) {       /* COMBO ないし ENTER時は、値を再表示*/
+        sprintf(buf, "%5d", get_volume_audio_freq());
+        q8tk_combo_set_text(widget, buf);
     }
 }
 
@@ -2174,7 +2171,7 @@ static  int get_volume_audio_sample(void)
 }
 static  void    cb_volume_audio_sample(UNUSED_WIDGET, void *p)
 {
-    sd_cfg_now.use_samples = xmame_cfg_set_use_samples((int)p);
+    sd_cfg_now.use_samples = xmame_cfg_set_use_samples((intptr_t)p);
 }
 
 
@@ -2199,8 +2196,8 @@ static  Q8tkWidget  *volume_audio_sample(void)
 
 static  void    cb_audio_config(Q8tkWidget *widget, void *modes)
 {
-    int index = ((int)modes) / 2;
-    int mode  = ((int)modes) & 1;   /* 0:ENTER 1:INPUT */
+    int index = ((intptr_t)modes) / 2;
+    int mode  = ((intptr_t)modes) & 1;   /* 0:ENTER 1:INPUT */
 
     T_SNDDRV_CONFIG *p       = sd_cfg_now.local[index].info;
     SD_CFG_LOCAL_VAL def_val = sd_cfg_now.local[index].val;
@@ -2302,8 +2299,8 @@ static  int audio_config_widget(Q8tkWidget *box)
 
         PACK_ENTRY(hbox,
                8, 9, buf,
-               cb_audio_config, (void *)(i*2),
-               cb_audio_config, (void *)(i*2 + 1));
+               cb_audio_config, (void *)(intptr_t)(i*2),
+               cb_audio_config, (void *)(intptr_t)(i*2 + 1));
     }
     q8tk_box_pack_start(box, hbox);
     PACK_LABEL(box, "");
@@ -2597,15 +2594,15 @@ static  void    cb_disk_attr_rename_activate(UNUSED_WIDGET, void *p)
 {
     char wk[16 + 1];
 
-    if ((int)p) {       /* dialog_destroy() の前にエントリをゲット */
-    strncpy(wk, dialog_get_entry(), 16);
-    wk[16] = '\0';
+    if ((intptr_t)p) {       /* dialog_destroy() の前にエントリをゲット */
+        strncpy(wk, dialog_get_entry(), 16);
+        wk[16] = '\0';
     }
 
     dialog_destroy();
 
-    if ((int)p) {
-    sub_disk_attr_file_ctrl(disk_drv, disk_img, ATTR_RENAME, wk);
+    if ((intptr_t)p) {
+        sub_disk_attr_file_ctrl(disk_drv, disk_img, ATTR_RENAME, wk);
     }
 }
 static  void    sub_disk_attr_rename(const char *image_name)
@@ -2652,11 +2649,11 @@ static  void    cb_disk_attr_protect_clicked(UNUSED_WIDGET, void *p)
 
     dialog_destroy();
 
-    if ((int)p) {
-    if ((int)p == 1) c = DISK_PROTECT_TRUE;
-    else             c = DISK_PROTECT_FALSE;
+    if ((intptr_t)p) {
+        if ((intptr_t)p == 1) c = DISK_PROTECT_TRUE;
+        else                  c = DISK_PROTECT_FALSE;
 
-    sub_disk_attr_file_ctrl(disk_drv, disk_img, ATTR_PROTECT, &c);
+        sub_disk_attr_file_ctrl(disk_drv, disk_img, ATTR_PROTECT, &c);
     }
 }
 static  void    sub_disk_attr_protect(const char *image_name)
@@ -2697,11 +2694,9 @@ static  void    cb_disk_attr_format_clicked(UNUSED_WIDGET, void *p)
 {
     dialog_destroy();
 
-    if ((int)p) {
-    if ((int)p == 1)
-        sub_disk_attr_file_ctrl(disk_drv, disk_img, ATTR_FORMAT,   NULL);
-    else 
-        sub_disk_attr_file_ctrl(disk_drv, disk_img, ATTR_UNFORMAT, NULL);
+    if ((intptr_t)p) {
+        if ((intptr_t)p == 1) sub_disk_attr_file_ctrl(disk_drv, disk_img, ATTR_FORMAT,   NULL);
+        else                  sub_disk_attr_file_ctrl(disk_drv, disk_img, ATTR_UNFORMAT, NULL);
     }
 }
 static  void    sub_disk_attr_format(const char *image_name)
@@ -2744,8 +2739,8 @@ static  void    cb_disk_attr_blank_clicked(UNUSED_WIDGET, void *p)
 {
     dialog_destroy();
 
-    if ((int)p) {
-    sub_disk_attr_file_ctrl(disk_drv, disk_img, ATTR_APPEND, NULL);
+    if ((intptr_t)p) {
+        sub_disk_attr_file_ctrl(disk_drv, disk_img, ATTR_APPEND, NULL);
     }
 }
 static  void    sub_disk_attr_blank(void)
@@ -2781,11 +2776,11 @@ static  void    cb_disk_attr_clicked(UNUSED_WIDGET, void *p)
 
     dialog_destroy();
 
-    switch ((int)p) {
-    case DATA_DISK_ATTR_RENAME:  sub_disk_attr_rename(name);    break;
-    case DATA_DISK_ATTR_PROTECT: sub_disk_attr_protect(name);   break;
-    case DATA_DISK_ATTR_FORMAT:  sub_disk_attr_format(name);    break;
-    case DATA_DISK_ATTR_BLANK:   sub_disk_attr_blank();     break;
+    switch ((intptr_t)p) {
+    case DATA_DISK_ATTR_RENAME:  sub_disk_attr_rename(name);   break;
+    case DATA_DISK_ATTR_PROTECT: sub_disk_attr_protect(name);  break;
+    case DATA_DISK_ATTR_FORMAT:  sub_disk_attr_format(name);   break;
+    case DATA_DISK_ATTR_BLANK:   sub_disk_attr_blank();        break;
     }
 }
 
@@ -2979,14 +2974,14 @@ static void sub_disk_copy(void)
 
 static  void    cb_disk_image(UNUSED_WIDGET, void *p)
 {
-    int drv = ((int)p) & 0xff;
-    int img = ((int)p) >> 8;
+    int drv = ((intptr_t)p) & 0xff;
+    int img = ((intptr_t)p) >> 8;
 
     if (img < 0) {          /* img == -1 で <<なし>> */
-    drive_set_empty(drv);
+        drive_set_empty(drv);
     } else {                /* img >= 0 なら イメージ番号 */
-    drive_unset_empty(drv);
-    disk_change_image(drv, img);
+        drive_unset_empty(drv);
+        disk_change_image(drv, img);
     }
 }
 
@@ -2995,8 +2990,8 @@ static  void    cb_disk_image(UNUSED_WIDGET, void *p)
 
 static  void    cb_disk_button(UNUSED_WIDGET, void *p)
 {
-    int drv    = ((int)p) & 0xff;
-    int button = ((int)p) >> 8;
+    int drv    = ((intptr_t)p) & 0xff;
+    int button = ((intptr_t)p) >> 8;
 
     disk_drv = drv;
     disk_img = disk_image_selected(drv);
@@ -3056,7 +3051,7 @@ static  void    set_disk_widget(void)
     q8tk_widget_show(item);
     q8tk_container_add(w->list, item);      /* <<なし>> ITEM */
     q8tk_signal_connect(item, "select",
-                cb_disk_image, (void *)((-1 << 8) + drv));
+                cb_disk_image, (void *)(intptr_t)((-1 << 8) + drv));
 
     if (disk_image_exist(drv)) {        /* ---- ディスク挿入済 ---- */
         save_code = q8tk_set_kanjicode(Q8TK_KANJI_SJIS);
@@ -3071,7 +3066,7 @@ static  void    set_disk_widget(void)
             q8tk_widget_show(item);
             q8tk_container_add(w->list, item);
             q8tk_signal_connect(item, "select",
-                    cb_disk_image, (void *)((i<<8) + drv));
+                    cb_disk_image, (void *)(intptr_t)((i<<8) + drv));
         }
         }
         q8tk_set_kanjicode(save_code);
@@ -3208,9 +3203,9 @@ static  void    cb_disk_blank_warn_clicked(UNUSED_WIDGET, void *p)
 {
     dialog_destroy();
 
-    if ((int)p) {
-    /* ファイルに、ブランクを追記 */
-    sub_disk_attr_file_ctrl(0, 0, ATTR_CREATE, disk_filename);
+    if ((intptr_t)p) {
+        /* ファイルに、ブランクを追記 */
+        sub_disk_attr_file_ctrl(0, 0, ATTR_CREATE, disk_filename);
     }
 }
 
@@ -3418,7 +3413,7 @@ static  Q8tkWidget  *menu_disk(void)
             q8tk_container_add(btn, w->label[j]);
             q8tk_signal_connect(btn, "clicked",
                         cb_disk_button,
-                        (void *)((j << 8) + i));
+                        (void *)(intptr_t)((j << 8) + i));
 
             q8tk_box_pack_start(vbox, btn);
 #endif
@@ -3527,8 +3522,8 @@ static  void    cb_key_fkey(Q8tkWidget *widget, void *fn_key)
 
     for (i=0; i<COUNTOF(data_key_fkey_fn); i++, p++) {
     if (strcmp(p->str[menu_lang], combo_str) == 0) {
-        function_f[ (int)fn_key ] = p->val;
-        q8tk_combo_set_text(fkey_widget[(int)fn_key][1],
+        function_f[ (intptr_t)fn_key ] = p->val;
+        q8tk_combo_set_text(fkey_widget[(intptr_t)fn_key][1],
                 keymap_assign[0].str);
         return;
     }
@@ -3548,8 +3543,8 @@ static  void    cb_key_fkey2(Q8tkWidget *widget, void *fn_key)
 
     for (i=0; i<COUNTOF(keymap_assign); i++, q++) {
     if (strcmp(q->str, combo_str) == 0) {
-        function_f[ (int)fn_key ] = q->code;
-        q8tk_combo_set_text(fkey_widget[(int)fn_key][0],
+        function_f[ (intptr_t)fn_key ] = q->code;
+        q8tk_combo_set_text(fkey_widget[(intptr_t)fn_key][0],
                 data_key_fkey_fn[0].str[menu_lang]);
         return;
     }
@@ -3575,7 +3570,7 @@ static  Q8tkWidget  *menu_key_fkey(void)
             PACK_COMBO(hbox,
                    data_key_fkey_fn, COUNTOF(data_key_fkey_fn),
                    get_key_fkey(p->val), NULL, 42,
-                   cb_key_fkey, (void*)(p->val),
+                   cb_key_fkey, (void*)((intptr_t)p->val),
                    NULL, NULL);
 
         fkey_widget[p->val][1] =
@@ -3598,13 +3593,12 @@ static  int get_key_cfg(int type)
     case DATA_KEY_CFG_TENKEY:   return  tenkey_emu;
     case DATA_KEY_CFG_NUMLOCK:  return  numlock_emu;
     }
-    return FALSE;
 }
 static  void    cb_key_cfg(Q8tkWidget *widget, void *type)
 {
     int key = (Q8TK_TOGGLE_BUTTON(widget)->active) ? TRUE : FALSE;
 
-    switch ((int)type) {
+    switch ((intptr_t)type) {
     case DATA_KEY_CFG_TENKEY:   tenkey_emu  = (key) ? TRUE : FALSE; break;
     case DATA_KEY_CFG_NUMLOCK:  numlock_emu = (key) ? TRUE : FALSE; break;
     }
@@ -3664,7 +3658,7 @@ static  int get_key_cursor_key_mode(void)
 }
 static  void    cb_key_cursor_key_mode(UNUSED_WIDGET, void *p)
 {
-    cursor_key_mode = (int)p;
+    cursor_key_mode = (intptr_t)p;
 
     menu_key_cursor_setting();
 }
@@ -3679,10 +3673,10 @@ static  void    cb_key_cursor_key(Q8tkWidget *widget, void *type)
     const char     *combo_str = q8tk_combo_get_text(widget);
 
     for (i=0; i<COUNTOF(keymap_assign); i++, q++) {
-    if (strcmp(q->str, combo_str) == 0) {
-        cursor_key_assign[ (int)type ] = q->code;
-        return;
-    }
+        if (strcmp(q->str, combo_str) == 0) {
+            cursor_key_assign[ (intptr_t)type ] = q->code;
+            return;
+        }
     }
 }
 
@@ -3827,8 +3821,8 @@ static  int get_key_softkey(int code)
 }
 static  void    cb_key_softkey(Q8tkWidget *button, void *code)
 {
-    if (Q8TK_TOGGLE_BUTTON(button)->active) softkey_press  ((int)code);
-    else                                    softkey_release((int)code);
+    if (Q8TK_TOGGLE_BUTTON(button)->active) softkey_press((intptr_t)code);
+    else                                    softkey_release((intptr_t)code);
 }
 
 static  void    cb_key_softkey_release(UNUSED_WIDGET, UNUSED_PARM)
@@ -3949,7 +3943,7 @@ static  void    keymap_start(void)
             q8tk_toggle_button_set_state(n, TRUE);
         }
         q8tk_signal_connect(n, "toggled",
-                    cb_key_softkey, (void *)p[i].code);
+                    cb_key_softkey, (void *)(intptr_t)p[i].code);
         }
         else                /* パディング用空白 (ラベル) */
         {
@@ -4094,7 +4088,7 @@ static  int get_mouse_mouse_key_mode(void)
 }
 static  void    cb_mouse_mouse_key_mode(UNUSED_WIDGET, void *p)
 {
-    mouse_key_mode = (int)p;
+    mouse_key_mode = (intptr_t)p;
 
     menu_mouse_mouse_setting();
 }
@@ -4109,10 +4103,10 @@ static  void    cb_mouse_swap(Q8tkWidget *widget, void *p)
     int key = (Q8TK_TOGGLE_BUTTON(widget)->active) ? TRUE : FALSE;
 
     if (mouse_swap_button != key) {
-    mouse_swap_button = key;
-    if ((int)p >= 0) {
-        q8tk_toggle_button_set_state(mouse_swap_widget[(int)p], -1);
-    }
+        mouse_swap_button = key;
+        if ((intptr_t)p >= 0) {
+            q8tk_toggle_button_set_state(mouse_swap_widget[(intptr_t)p], -1);
+        }
     }
 }
 
@@ -4139,7 +4133,7 @@ static  void    cb_mouse_mouse_key(Q8tkWidget *widget, void *type)
 
     for (i=0; i<COUNTOF(keymap_assign); i++, q++) {
     if (strcmp(q->str, combo_str) == 0) {
-        mouse_key_assign[ (int)type ] = q->code;
+        mouse_key_assign[ (intptr_t)type ] = q->code;
         return;
     }
     }
@@ -4306,7 +4300,7 @@ static  int get_mouse_joy_key_mode(void)
 }
 static  void    cb_mouse_joy_key_mode(UNUSED_WIDGET, void *p)
 {
-    joy_key_mode = (int)p;
+    joy_key_mode = (intptr_t)p;
 
     menu_mouse_joy_setting();
 }
@@ -4333,10 +4327,10 @@ static  void    cb_mouse_joy_key(Q8tkWidget *widget, void *type)
     const char     *combo_str = q8tk_combo_get_text(widget);
 
     for (i=0; i<COUNTOF(keymap_assign); i++, q++) {
-    if (strcmp(q->str, combo_str) == 0) {
-        joy_key_assign[ (int)type ] = q->code;
-        return;
-    }
+        if (strcmp(q->str, combo_str) == 0) {
+            joy_key_assign[ (intptr_t)type ] = q->code;
+            return;
+        }
     }
 }
 
@@ -4458,7 +4452,7 @@ static  int get_mouse_joy2_key_mode(void)
 }
 static  void    cb_mouse_joy2_key_mode(UNUSED_WIDGET, void *p)
 {
-    joy2_key_mode = (int)p;
+    joy2_key_mode = (intptr_t)p;
 
     menu_mouse_joy2_setting();
 }
@@ -4486,7 +4480,7 @@ static  void    cb_mouse_joy2_key(Q8tkWidget *widget, void *type)
 
     for (i=0; i<COUNTOF(keymap_assign); i++, q++) {
     if (strcmp(q->str, combo_str) == 0) {
-        joy2_key_assign[ (int)type ] = q->code;
+        joy2_key_assign[ (intptr_t)type ] = q->code;
         return;
     }
     }
@@ -4634,8 +4628,8 @@ static  Q8tkWidget  *menu_mouse_device(void)
 /* デバッグ用：全マウス設定の組合せを検証 */
 static int  get_mouse_debug_hide(void) { return hide_mouse; }
 static int  get_mouse_debug_grab(void) { return grab_mouse; }
-static void cb_mouse_debug_hide(UNUSED_WIDGET, void *p) { hide_mouse = (int)p;}
-static void cb_mouse_debug_grab(UNUSED_WIDGET, void *p) { grab_mouse = (int)p;}
+static void cb_mouse_debug_hide(UNUSED_WIDGET, void *p) { hide_mouse = (intptr_t)p; }
+static void cb_mouse_debug_grab(UNUSED_WIDGET, void *p) { grab_mouse = (intptr_t)p; }
 
 static  Q8tkWidget  *menu_mouse_debug(void)
 {
@@ -4808,18 +4802,18 @@ static  void    set_tape_rate(int c)
 
 static  void    cb_tape_eject_do(UNUSED_WIDGET, void *c)
 {
-    if ((int)c == CLOAD) {
-    quasi88_load_tape_eject();
+    if ((intptr_t)c == CLOAD) {
+        quasi88_load_tape_eject();
     } else {
-    quasi88_save_tape_eject();
+        quasi88_save_tape_eject();
     }
 
-    set_tape_name((int)c);
-    set_tape_rate((int)c);
+    set_tape_name((intptr_t)c);
+    set_tape_rate((intptr_t)c);
 
-    q8tk_widget_set_sensitive(tape_button_eject[(int)c], FALSE);
-    if ((int)c == CLOAD) {
-    q8tk_widget_set_sensitive(tape_button_rew, FALSE);
+    q8tk_widget_set_sensitive(tape_button_eject[(intptr_t)c], FALSE);
+    if ((intptr_t)c == CLOAD) {
+        q8tk_widget_set_sensitive(tape_button_rew, FALSE);
     }
     q8tk_widget_set_focus(NULL);
 }
@@ -4829,14 +4823,14 @@ static  void    cb_tape_eject_do(UNUSED_WIDGET, void *c)
 
 static  void    cb_tape_rew_do(UNUSED_WIDGET, void *c)
 {
-    if ((int)c == CLOAD) {
+    if ((intptr_t)c == CLOAD) {
                     /* イメージを巻き戻す */
-    if (quasi88_load_tape_rewind()) {           /* 成功 */
-        ;
-    } else {                        /* 失敗 */
-        set_tape_name((int)c);
-    }
-    set_tape_rate((int)c);
+        if (quasi88_load_tape_rewind()) {           /* 成功 */
+            ;
+        } else {                        /* 失敗 */
+            set_tape_name((intptr_t)c);
+        }
+        set_tape_rate((intptr_t)c);
     }
 }
 
@@ -4850,10 +4844,10 @@ static  void    cb_tape_open_warn_clicked(Q8tkWidget *, void *);
 static  void    cb_tape_open(UNUSED_WIDGET, void *c)
 {
     const char *initial;
-    const t_menulabel *l = ((int)c == CLOAD) ? data_tape_load : data_tape_save;
+    const t_menulabel *l = ((intptr_t)c == CLOAD) ? data_tape_load : data_tape_save;
 
                 /* 今から生成するファイルセレクションは */
-    tape_mode = (int)c;     /* LOAD用 か SAVE用か を覚えておく      */
+    tape_mode = (intptr_t)c;     /* LOAD用 か SAVE用か を覚えておく      */
 
     initial = filename_get_tape_or_dir(tape_mode);
 
@@ -4941,8 +4935,8 @@ static  void    cb_tape_open_warn_clicked(UNUSED_WIDGET, void *p)
 {
     dialog_destroy();
 
-    if ((int)p) {
-    sub_tape_open_do();
+    if ((intptr_t)p) {
+        sub_tape_open_do();
     }
 }
 
@@ -4983,18 +4977,18 @@ INLINE  Q8tkWidget  *menu_tape_image_unit(const t_menulabel *l, int c)
     {
         PACK_BUTTON(hbox,
             GET_LABEL(l, DATA_TAPE_CHANGE),
-            cb_tape_open, (void*)c);
+            cb_tape_open, (void*)(intptr_t)c);
 
         PACK_VSEP(hbox);
 
         tape_button_eject[c] = PACK_BUTTON(hbox,
                            GET_LABEL(l, DATA_TAPE_EJECT),
-                           cb_tape_eject_do, (void*)c);
+                           cb_tape_eject_do, (void*)(intptr_t)c);
 
         if (c == CLOAD) {
         tape_button_rew = PACK_BUTTON(hbox,
                           GET_LABEL(l, DATA_TAPE_REWIND),
-                          cb_tape_rew_do, (void*)c);
+                          cb_tape_rew_do, (void*)(intptr_t)c);
         }
         if (c == CLOAD) {
         w = PACK_LABEL(hbox, "");
@@ -5044,7 +5038,7 @@ static  int get_tape_intr(void)
 }
 static  void    cb_tape_intr(UNUSED_WIDGET, void *p)
 {
-    cmt_intr = (int)p;
+    cmt_intr = (intptr_t)p;
 }
 
 
@@ -5101,9 +5095,9 @@ static  void    cb_misc_suspend_dialog_ok(UNUSED_WIDGET, void *result)
 {
     dialog_destroy();
 
-    if ((int)result == DATA_MISC_RESUME_OK ||
-    (int)result == DATA_MISC_RESUME_ERR) {
-    quasi88_exec();     /* ← q8tk_main_quit() 呼出済み */
+    if ((intptr_t)result == DATA_MISC_RESUME_OK ||
+    (intptr_t)result == DATA_MISC_RESUME_ERR) {
+        quasi88_exec();     /* ← q8tk_main_quit() 呼出済み */
     }
 }
 
@@ -5143,8 +5137,8 @@ static  void    sub_misc_suspend_dialog(int result)
         }
 
         for (i=0; i<4; i++) {
-        sprintf(filename, "%s %-*.*s", dev[i], width, width, ptr[i]);
-        dialog_set_title(filename);
+            sprintf(filename, "%s %-*.*s", dev[i], width, width, ptr[i]);
+            dialog_set_title(filename);
         }
 
         q8tk_set_kanjicode(save_code);
@@ -5153,7 +5147,7 @@ static  void    sub_misc_suspend_dialog(int result)
     dialog_set_separator();
 
     dialog_set_button(GET_LABEL(l, DATA_MISC_SUSPEND_AGREE),
-              cb_misc_suspend_dialog_ok, (void*)result);
+              cb_misc_suspend_dialog_ok, (void*)(intptr_t)result);
 
     dialog_accel_key(Q8TK_KEY_ESC);
     }
@@ -5430,7 +5424,7 @@ static  int get_misc_snapshot_format(void)
 }
 static  void    cb_misc_snapshot_format(UNUSED_WIDGET, void *p)
 {
-    snapshot_format = (int)p;
+    snapshot_format = (intptr_t)p;
 }
 
 
@@ -6056,10 +6050,10 @@ static  int get_quickres_basic(void)
 }
 static  void    cb_quickres_basic(UNUSED_WIDGET, void *p)
 {
-    if (reset_req.boot_basic != (int)p) {
-    reset_req.boot_basic = (int)p;
+    if (reset_req.boot_basic != (intptr_t)p) {
+        reset_req.boot_basic = (intptr_t)p;
 
-    q8tk_toggle_button_set_state(widget_reset_basic[ 0 ][ (int)p ], TRUE);
+        q8tk_toggle_button_set_state(widget_reset_basic[ 0 ][ (intptr_t)p ], TRUE);
     }
 }
 static  int get_quickres_clock(void)
@@ -6068,10 +6062,10 @@ static  int get_quickres_clock(void)
 }
 static  void    cb_quickres_clock(UNUSED_WIDGET, void *p)
 {
-    if (reset_req.boot_clock_4mhz != (int)p) {
-    reset_req.boot_clock_4mhz = (int)p;
+    if (reset_req.boot_clock_4mhz != (intptr_t)p) {
+        reset_req.boot_clock_4mhz = (intptr_t)p;
 
-    q8tk_toggle_button_set_state(widget_reset_clock[ 0 ][ (int)p ], TRUE);
+        q8tk_toggle_button_set_state(widget_reset_clock[ 0 ][ (intptr_t)p ], TRUE);
     }
 }
 
@@ -6181,16 +6175,16 @@ static  void    sub_top_quit(void);
 
 static  void    cb_top_button(UNUSED_WIDGET, void *p)
 {
-    switch ((int)p) {
-    case DATA_TOP_SAVECFG:
-    sub_top_savecfg();
-    break;
+    switch ((intptr_t)p) {
+        case DATA_TOP_SAVECFG:
+        sub_top_savecfg();
+        break;
     case DATA_TOP_EXIT:
-    quasi88_exec();     /* ← q8tk_main_quit() 呼出済み */
-    break;
+        quasi88_exec();     /* ← q8tk_main_quit() 呼出済み */
+        break;
     case DATA_TOP_QUIT:
-    sub_top_quit();
-    return;
+        sub_top_quit();
+        return;
     }
 }
 
@@ -6210,7 +6204,7 @@ static  Q8tkWidget  *menu_top_button(void)
     for (i=0; i<COUNTOF(data_top_button); i++, p++) {
 
         w = PACK_BUTTON(hbox, GET_LABEL(p, 0),
-                cb_top_button, (void *)(p->val));
+                cb_top_button, (void *)((intptr_t)p->val));
 
         if (p->val == DATA_TOP_QUIT) {
         q8tk_accel_group_add(menu_accel, Q8TK_KEY_F12, w, "clicked");
@@ -6235,8 +6229,8 @@ static  void    cb_top_savecfg_clicked(UNUSED_WIDGET, void *p)
 {
     dialog_destroy();
 
-    if ((int)p) {
-    config_save(top_savecfg_filename);
+    if ((intptr_t)p) {
+        config_save(top_savecfg_filename);
     }
 
     free(top_savecfg_filename);
@@ -6294,8 +6288,8 @@ static  void    cb_top_quit_clicked(UNUSED_WIDGET, void *p)
 {
     dialog_destroy();
 
-    if ((int)p) {
-    quasi88_quit();     /* ← q8tk_main_quit() 呼出済み */
+    if ((intptr_t)p) {
+        quasi88_quit();     /* ← q8tk_main_quit() 呼出済み */
     }
 }
 static  void    sub_top_quit(void)
