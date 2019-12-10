@@ -7,11 +7,7 @@
 #ifdef  USE_DGA
 #include <unistd.h>
 #include <sys/types.h>
-#if 1   /* obsolete? */
-#include <X11/extensions/xf86dga.h>
-#else
 #include <X11/extensions/Xxf86dga.h>
-#endif
 #include <X11/extensions/xf86vmode.h>
 #endif
 
