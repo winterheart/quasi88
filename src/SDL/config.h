@@ -21,7 +21,9 @@
 /* エンディアンネスをチェック */
 
 #if (SDL_BYTEORDER == SDL_LIL_ENDIAN)
+#ifndef LSB_FIRST
 #define LSB_FIRST
+#endif
 #else
 #undef  LSB_FIRST
 #endif
