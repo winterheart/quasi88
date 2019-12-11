@@ -1523,13 +1523,11 @@ static int lang = -1;
 
 static  void    set_lang(void)
 {
-    /*char *p;*/
-
     if (lang >= 0) return;
 
 #ifdef USE_LOCALE
     setlocale(LC_ALL, "");
-    p = nl_langinfo(CODESET);
+    char *p = nl_langinfo(CODESET);
     if (strncmp(p, "JIS_", 4) == 0) {
     lang = LANG_JIS;
     } else if (strncmp(p, "SHIFT_JIS", 9) == 0) {
