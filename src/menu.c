@@ -2062,7 +2062,7 @@ static  int get_volume_audio_fmgen(void)
 }
 static  void    cb_volume_audio_fmgen(UNUSED_WIDGET, void *p)
 {
-    sd_cfg_now.use_fmgen = xmame_cfg_set_use_fmgen((int)p);
+    sd_cfg_now.use_fmgen = xmame_cfg_set_use_fmgen((intptr_t)p);
 }
 
 

@@ -4817,7 +4817,7 @@ char **fileman_completion( char *text, int start, int end );
 static void initialize_readline( void )
 {
   rl_readline_name = "QUASI88kai";   /*よくわからんが ~/.inputrc に関係あるらしい*/
-  rl_attempted_completion_function = (CPPFunction *)fileman_completion;
+  rl_attempted_completion_function = (rl_completion_func_t *)fileman_completion;
 }
 
 char **fileman_completion( char *text, int start, int end )
