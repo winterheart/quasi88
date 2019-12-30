@@ -36,8 +36,12 @@
 
 /* 画面の bpp の定義。最低でもどれか一つは定義しなくてはならない */
 
+#ifndef SUPPORT_8BPP
 #define SUPPORT_8BPP
+#endif
+#ifndef SUPPORT_16BPP
 #define SUPPORT_16BPP
+#endif
 #undef  SUPPORT_32BPP
 
 
