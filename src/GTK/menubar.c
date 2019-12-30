@@ -122,6 +122,7 @@ enum {
 
     M_SET_SIZ,
     M_SET_SIZ_DUMMY,
+    M_SET_SIZ_DOUBLE,
     M_SET_SIZ_FULL,
     M_SET_SIZ_HALF,
 
@@ -404,6 +405,9 @@ static T_MENUTABLE menutable[] =
 
     { TP_SUB,   M_SET_SIZ,  "Screen Size",      M_SET,      0,      0,      0       },
     { TP_RADIO, M_SET_SIZ_DUMMY,0,          M_SET_SIZ,  GRP_SIZE,   0,      0       },
+#ifdef SUPPORT_DOUBLE
+    { TP_RADIO, M_SET_SIZ_DOUBLE, "Double size",    M_SET_SIZ,  GRP_SIZE,   f_set_size, SCREEN_SIZE_DOUBLE},
+#endif
     { TP_RADIO, M_SET_SIZ_FULL, "Normal size",      M_SET_SIZ,  GRP_SIZE,   f_set_size, SCREEN_SIZE_FULL},
     { TP_RADIO, M_SET_SIZ_HALF, "Half size",        M_SET_SIZ,  GRP_SIZE,   f_set_size, SCREEN_SIZE_HALF},
 
@@ -1041,9 +1045,12 @@ static void menubar_item_setup(void)
 
     i = quasi88_cfg_now_size();                 /* ＊＊＊＊ */
     switch (i) {
-    case SCREEN_SIZE_FULL:  uItem = M_SET_SIZ_FULL; break;
-    case SCREEN_SIZE_HALF:  uItem = M_SET_SIZ_HALF; break;
-    default:            uItem = M_SET_SIZ_DUMMY;break;
+#ifdef SUPPORT_DOUBLE
+    case SCREEN_SIZE_DOUBLE: uItem = M_SET_SIZ_DOUBLE; break;
+#endif
+    case SCREEN_SIZE_FULL:   uItem = M_SET_SIZ_FULL;   break;
+    case SCREEN_SIZE_HALF:   uItem = M_SET_SIZ_HALF;   break;
+    default:                 uItem = M_SET_SIZ_DUMMY;  break;
     }
     gtk_check_menu_item_set_active(
             GTK_CHECK_MENU_ITEM(mwidget[uItem].widget), TRUE);
