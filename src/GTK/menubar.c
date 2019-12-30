@@ -1201,7 +1201,7 @@ static  void    f_sys_reset_as(GtkMenuItem *widget, gpointer data)
 
     LOCK_MENUBAR()
 
-    menubar_reset_cfg.boot_basic = (int)data;
+    menubar_reset_cfg.boot_basic = (intptr_t)data;
     switch (menubar_reset_cfg.boot_basic) {
     case BASIC_V2:  uItem = M_SYS_MODE_V2;      break;
     case BASIC_V1H: uItem = M_SYS_MODE_V1H;     break;
@@ -1223,8 +1223,8 @@ static  void    f_sys_basic(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    menubar_reset_cfg.boot_basic = (int)data;
-    update_sys_reset();
+        menubar_reset_cfg.boot_basic = (intptr_t)data;
+        update_sys_reset();
     }
 }
 
@@ -1234,8 +1234,8 @@ static  void    f_sys_clock(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    menubar_reset_cfg.boot_clock_4mhz = (int)data;
-    update_sys_reset();
+        menubar_reset_cfg.boot_clock_4mhz = (intptr_t)data;
+        update_sys_reset();
     }
 }
 
@@ -1245,8 +1245,8 @@ static  void    f_sys_sb(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    menubar_reset_cfg.sound_board = (int)data;
-    update_sys_reset();
+        menubar_reset_cfg.sound_board = (intptr_t)data;
+        update_sys_reset();
     }
 }
 
@@ -1275,7 +1275,7 @@ static  void    f_set_speed(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    quasi88_cfg_set_wait_rate((int)data);
+        quasi88_cfg_set_wait_rate((intptr_t)data);
     }
 }
 
@@ -1296,8 +1296,8 @@ static  void    f_set_subcpu(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    if (cpu_timing != (int)data) {
-        cpu_timing = (int)data;
+    if (cpu_timing != (intptr_t)data) {
+        cpu_timing = (intptr_t)data;
         emu_reset();
         /* 他に再初期化すべきものはないのか？ */
     }
@@ -1321,7 +1321,7 @@ static  void    f_set_refresh(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    quasi88_cfg_set_frameskip_rate((int)data);
+    quasi88_cfg_set_frameskip_rate((intptr_t)data);
     }
 }
 
@@ -1331,7 +1331,7 @@ static  void    f_set_interlace(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    quasi88_cfg_set_interlace((int)data);
+        quasi88_cfg_set_interlace((intptr_t)data);
     }
 }
 
@@ -1341,7 +1341,7 @@ static  void    f_set_size(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    quasi88_cfg_set_size((int)data);
+        quasi88_cfg_set_size((intptr_t)data);
     }
 }
 
@@ -1362,7 +1362,7 @@ static  void    f_set_mouse(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    mouse_mode = (int)data;
+        mouse_mode = (intptr_t)data;
     keyboard_switch();
     }
 }
@@ -1373,12 +1373,12 @@ static  void    f_set_cursor(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    if ((int)data) {
-        cursor_key_mode = 1;
-    } else {
-        cursor_key_mode = 0;
-    }
-    keyboard_switch();
+        if ((intptr_t)data) {
+            cursor_key_mode = 1;
+        } else {
+            cursor_key_mode = 0;
+        }
+        keyboard_switch();
     }
 }
 
@@ -1412,15 +1412,15 @@ static  void    f_set_fm(GtkRadioMenuItem *widget, gpointer data)
 #ifdef  USE_FMGEN
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    /* やっかい */
-    if (((xmame_cfg_get_use_fmgen())          && ((int)data == FALSE)) ||
-        ((xmame_cfg_get_use_fmgen() == FALSE) && ((int)data))) {
+        /* やっかい */
+        if (((xmame_cfg_get_use_fmgen())          && ((intptr_t)data == FALSE)) ||
+            ((xmame_cfg_get_use_fmgen() == FALSE) && ((intptr_t)data))) {
 
-        xmame_cfg_set_use_fmgen((int)data);
+            xmame_cfg_set_use_fmgen((intptr_t)data);
 
-        menu_sound_restart(TRUE);
-        update_misc_record();
-    }
+            menu_sound_restart(TRUE);
+            update_misc_record();
+        }
     }
 #endif
 }
@@ -1432,12 +1432,12 @@ static  void    f_set_frq(GtkRadioMenuItem *widget, gpointer data)
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
     /* やっかい */
-    if (xmame_cfg_get_sample_freq() != (int)data) {
-        if (8000 <= (int)data && (int)data <= 48000) {
-        xmame_cfg_set_sample_freq((int)data);
+    if (xmame_cfg_get_sample_freq() != (intptr_t)data) {
+        if (8000 <= (intptr_t)data && (intptr_t)data <= 48000) {
+            xmame_cfg_set_sample_freq((intptr_t)data);
 
-        menu_sound_restart(TRUE);
-        update_misc_record();
+            menu_sound_restart(TRUE);
+            update_misc_record();
         }
     }
     }
@@ -1450,12 +1450,12 @@ static  void    f_set_buf(GtkRadioMenuItem *widget, gpointer data)
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
     /* やっかい */
-    if (sdl_buffersize != (int)data) {
-        if (32 <= (int)data && (int)data <= 65536) {
-        sdl_buffersize = (int)data;
+    if (sdl_buffersize != (intptr_t)data) {
+        if (32 <= (intptr_t)data && (intptr_t)data <= 65536) {
+            sdl_buffersize = (intptr_t)data;
 
-        menu_sound_restart(TRUE);
-        update_misc_record();
+            menu_sound_restart(TRUE);
+            update_misc_record();
         }
     }
     }
@@ -1474,13 +1474,13 @@ static  void    f_drv_chg(GtkMenuItem *widget, gpointer data)
 
     if (menubar_active == FALSE) { return; }
 
-    switch ((int)data) {
+    switch ((intptr_t)data) {
     case DRIVE_1:   headline = "Open Disk-Image-File (Drive 1:)";   break;
     case DRIVE_2:   headline = "Open Disk-Image-File (Drive 2:)";   break;
     default:        headline = "Open Disk-Image-File";      break;
     }   
 
-    data_drv_chg = (int)data;
+    data_drv_chg = (intptr_t)data;
 
     select_file(headline,
         cb_drv_chg,
@@ -1516,10 +1516,10 @@ static  void    f_drv_drv1(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    if ((int)data <  0) {
+    if ((intptr_t)data <  0) {
         quasi88_disk_image_empty(DRIVE_1);
     } else {
-        quasi88_disk_image_select(DRIVE_1, (int)data);
+        quasi88_disk_image_select(DRIVE_1, (intptr_t)data);
     }
     }
 }
@@ -1530,10 +1530,10 @@ static  void    f_drv_drv2(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    if ((int)data <  0) {
+    if ((intptr_t)data <  0) {
         quasi88_disk_image_empty(DRIVE_2);
     } else {
-        quasi88_disk_image_select(DRIVE_2, (int)data);
+        quasi88_disk_image_select(DRIVE_2, (intptr_t)data);
     }
     }
 }
@@ -1660,7 +1660,7 @@ static  void    f_misc_sload(GtkMenuItem *widget, gpointer data)
 {
     if (menubar_active == FALSE) { return; }
 
-    quasi88_stateload((int) data);
+    quasi88_stateload((intptr_t) data);
 
     /* 設定やファイル名が変更されたはずなので、メニューバーを全て更新 */
     menubar_setup(TRUE);
@@ -1670,7 +1670,7 @@ static  void    f_misc_ssave(GtkMenuItem *widget, gpointer data)
 {
     if (menubar_active == FALSE) { return; }
 
-    quasi88_statesave((int) data);
+    quasi88_statesave((intptr_t) data);
 }
 
 static  void    f_misc_status(GtkCheckMenuItem *widget, gpointer data)
