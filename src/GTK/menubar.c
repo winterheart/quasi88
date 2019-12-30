@@ -574,7 +574,7 @@ void    create_menubar(GtkWidget *target_window,
     case TP_SUB:
         item = gtk_menu_item_new();
         if (label)
-        gtk_container_add(GTK_CONTAINER(item), label);
+            gtk_container_add(GTK_CONTAINER(item), label);
 
         submenu = gtk_menu_new();
         gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
@@ -585,39 +585,39 @@ void    create_menubar(GtkWidget *target_window,
     case TP_ITEM:
         item = gtk_menu_item_new();
         if (label)
-        gtk_container_add(GTK_CONTAINER(item), label);
+            gtk_container_add(GTK_CONTAINER(item), label);
 
         if (p->callback) {
-        gtk_signal_connect(GTK_OBJECT(item), "activate",
-                   GTK_SIGNAL_FUNC(p->callback),
-                   (gpointer)p->data);
+            gtk_signal_connect(GTK_OBJECT(item), "activate",
+                GTK_SIGNAL_FUNC(p->callback),
+                (gpointer)(glong)p->data);
         }
         break;
 
     case TP_CHECK:
         item = gtk_check_menu_item_new();
         if (label)
-        gtk_container_add(GTK_CONTAINER(item), label);
+            gtk_container_add(GTK_CONTAINER(item), label);
 
         if (p->callback) {
-        gtk_signal_connect(GTK_OBJECT(item), "toggled",
-                   GTK_SIGNAL_FUNC(p->callback),
-                   (gpointer)p->data);
+            gtk_signal_connect(GTK_OBJECT(item), "toggled",
+                GTK_SIGNAL_FUNC(p->callback),
+                (gpointer)(glong)p->data);
         }
         break;
 
     case TP_RADIO:
         item = gtk_radio_menu_item_new(mlist[p->group]);
         if (label)
-        gtk_container_add(GTK_CONTAINER(item), label);
+            gtk_container_add(GTK_CONTAINER(item), label);
 
         mlist[p->group]
         = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(item));
 
         if (p->callback) {
-        gtk_signal_connect(GTK_OBJECT(item), "toggled",
-                   GTK_SIGNAL_FUNC(p->callback),
-                   (gpointer)p->data);
+            gtk_signal_connect(GTK_OBJECT(item), "toggled",
+                GTK_SIGNAL_FUNC(p->callback),
+                (gpointer)(glong)p->data);
         }
         break;
 
