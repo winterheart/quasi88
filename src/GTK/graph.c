@@ -36,32 +36,6 @@ const T_GRAPH_SPEC  *graph_init(void)
     printf("Initializing Graphic System ... ");
     }
 
-    /* ??? よくわからん */
-    {
-    GtkStyle *style = gtk_widget_get_default_style();
-    if (style != NULL) {
-        GdkFont* font = NULL;
-#if 0
-#ifdef ウインドウズ？
-        font = gdk_font_load("-*-*-*-*-*--*-*-*-*-*-*-windows-shiftjis");
-#else
-#ifdef __CYGWIN__
-        font = gdk_fontset_load("-*-*-*-*-*--*-*-*-*-*-*-iso8859-1,"
-                    "-*-*-*-*-*--*-*-*-*-*-*-jisx0208.*-*");
-#endif
-#endif
-#endif
-        if (font != NULL) {
-        if (style->font != NULL) {
-            gdk_font_unref(style->font);
-        }
-        style->font = font;
-        gdk_font_ref(style->font);
-        gtk_widget_set_default_style(style);
-        }
-    }
-    }
-
     /* やはりわからん */
     {
     int found = FALSE;
@@ -324,9 +298,6 @@ void    graph_add_color(const PC88_PALETTE_T color[],
         (((guint32)color_cell[nr_color_cell + i].red   & 0xff00) << 8)|
          ((guint32)color_cell[nr_color_cell + i].green & 0xff00)      |
          ((guint32)color_cell[nr_color_cell + i].blue            >> 8);
-        indexrgb.lut[nr_color_cell + i] =
-        (guchar)color_cell[nr_color_cell + i].pixel;
-
         pixel[i] = nr_color_cell + i;
     }
 
@@ -407,27 +378,10 @@ void    graph_set_window_title(const char *title)
 
 static  int gtksys_keyrepeat_on = TRUE;
 
-void    gtksys_set_attribute_focus_out(void)
-{
-    gdk_key_repeat_restore();
-}
-
-void    gtksys_set_attribute_focus_in(void)
-{
-    if (gtksys_keyrepeat_on == FALSE) {
-    gdk_key_repeat_disable();
-    } else {
-    gdk_key_repeat_restore();
-    }
-}
 
 void    graph_set_attribute(int mouse_show, int grab, int keyrepeat_on)
 {
     /* マウスは未対応 */
     /* グラブは未対応 */
     gtksys_keyrepeat_on = keyrepeat_on;
-
-    if (gtksys_get_focus) {
-    gtksys_set_attribute_focus_in();
-    }
 }

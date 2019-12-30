@@ -282,7 +282,7 @@ SDL_CONFIG	= sdl-config
 # (GTK)
 # GTK_VERSION を選択した場合のみ、以下の設定が必要です。
 
-GTK_CONFIG	= gtk-config
+GTK_CONFIG	= pkg-config gtk+-2.0
 
 
 

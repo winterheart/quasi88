@@ -7,7 +7,7 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "quasi88.h"
-#include "getconf.h"
+#include "device.h"
 #include "keyboard.h"
 
 #include "event.h"
@@ -681,7 +681,6 @@ static gboolean focusin_event(GtkWidget *widget, GdkEventFocus *event,
     quasi88_focus_in();
 
     gtksys_get_focus = TRUE;
-    gtksys_set_attribute_focus_in();
 
     return TRUE;
 }
@@ -692,7 +691,6 @@ static gboolean focusout_event(GtkWidget *widget, GdkEventFocus *event,
     quasi88_focus_out();
 
     gtksys_get_focus = FALSE;
-    gtksys_set_attribute_focus_out();
 
     return TRUE;
 }
