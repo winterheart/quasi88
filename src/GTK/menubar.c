@@ -562,86 +562,86 @@ void    create_menubar(GtkWidget *target_window,
 
     for (i=0; i<COUNTOF(menutable); i++, p++) {
 
-    show = TRUE;
+        show = TRUE;
 
-    if (p->type == TP_SEP) label = NULL;
-    else {
-        if (p->label) { label = gtk_label_new(p->label); }
-        else          { label = NULL;    show = FALSE;   }
-    }
-
-    switch (p->type) {
-    case TP_SUB:
-        item = gtk_menu_item_new();
-        if (label)
-            gtk_container_add(GTK_CONTAINER(item), label);
-
-        submenu = gtk_menu_new();
-        gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-        mwidget[p->id].submenu = submenu;
-
-        break;
-
-    case TP_ITEM:
-        item = gtk_menu_item_new();
-        if (label)
-            gtk_container_add(GTK_CONTAINER(item), label);
-
-        if (p->callback) {
-            gtk_signal_connect(GTK_OBJECT(item), "activate",
-                GTK_SIGNAL_FUNC(p->callback),
-                (gpointer)(glong)p->data);
+        if (p->type == TP_SEP) label = NULL;
+        else {
+            if (p->label) { label = gtk_label_new(p->label); }
+            else          { label = NULL;    show = FALSE;   }
         }
-        break;
 
-    case TP_CHECK:
-        item = gtk_check_menu_item_new();
-        if (label)
-            gtk_container_add(GTK_CONTAINER(item), label);
+        switch (p->type) {
+        case TP_SUB:
+            item = gtk_menu_item_new();
+            if (label)
+                gtk_container_add(GTK_CONTAINER(item), label);
 
-        if (p->callback) {
-            gtk_signal_connect(GTK_OBJECT(item), "toggled",
-                GTK_SIGNAL_FUNC(p->callback),
-                (gpointer)(glong)p->data);
+            submenu = gtk_menu_new();
+            gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
+            mwidget[p->id].submenu = submenu;
+
+            break;
+
+        case TP_ITEM:
+            item = gtk_menu_item_new();
+            if (label)
+                gtk_container_add(GTK_CONTAINER(item), label);
+
+            if (p->callback) {
+                gtk_signal_connect(GTK_OBJECT(item), "activate",
+                    GTK_SIGNAL_FUNC(p->callback),
+                    (gpointer)(glong)p->data);
+            }
+            break;
+
+        case TP_CHECK:
+            item = gtk_check_menu_item_new();
+            if (label)
+                gtk_container_add(GTK_CONTAINER(item), label);
+
+            if (p->callback) {
+                gtk_signal_connect(GTK_OBJECT(item), "toggled",
+                    GTK_SIGNAL_FUNC(p->callback),
+                    (gpointer)(glong)p->data);
+            }
+            break;
+
+        case TP_RADIO:
+            item = gtk_radio_menu_item_new(mlist[p->group]);
+            if (label)
+                gtk_container_add(GTK_CONTAINER(item), label);
+
+            mlist[p->group]
+            = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(item));
+
+            if (p->callback) {
+                gtk_signal_connect(GTK_OBJECT(item), "toggled",
+                    GTK_SIGNAL_FUNC(p->callback),
+                    (gpointer)(glong)p->data);
+            }
+            break;
+
+        case TP_SEP:
+            item = gtk_menu_item_new();
+            break;
         }
-        break;
 
-    case TP_RADIO:
-        item = gtk_radio_menu_item_new(mlist[p->group]);
-        if (label)
-            gtk_container_add(GTK_CONTAINER(item), label);
+        if (p->type == TP_SEP) ;
+        else                   mwidget[p->id].widget = item;
 
-        mlist[p->group]
-        = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(item));
-
-        if (p->callback) {
-            gtk_signal_connect(GTK_OBJECT(item), "toggled",
-                GTK_SIGNAL_FUNC(p->callback),
-                (gpointer)(glong)p->data);
+        if (label) {
+            mwidget[p->id].label = label;
+            gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+            gtk_widget_show(label);
         }
-        break;
+        if (show)
+            gtk_widget_show(item);
 
-    case TP_SEP:
-        item = gtk_menu_item_new();
-        break;
-    }
-
-    if (p->type == TP_SEP) ;
-    else                   mwidget[p->id].widget = item;
-
-    if (label) {
-        mwidget[p->id].label = label;
-        gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
-        gtk_widget_show(label);
-    }
-    if (show)
-        gtk_widget_show(item);
-
-    if (p->parent == M_TOP) {
-        gtk_menu_bar_append(GTK_MENU_BAR(menubar), item);
-    } else {
-        gtk_menu_append(GTK_MENU(mwidget[p->parent].submenu), item);
-    }
+        if (p->parent == M_TOP) {
+            gtk_menu_bar_append(GTK_MENU_BAR(menubar), item);
+        } else {
+            gtk_menu_append(GTK_MENU(mwidget[p->parent].submenu), item);
+        }
     }
 
     /* アクセラレータキーを設定する場合は、 target_window に対して登録する */
@@ -658,20 +658,20 @@ void    menubar_setup(int active)
 {
     if (active) {
 
-    /*  メニューバーの内容を設定 */
-    menubar_item_setup();
+        /*  メニューバーの内容を設定 */
+        menubar_item_setup();
 
-    /* 使えなくした項目を使えるようにする (エミュモード開始時) */
-    menubar_item_sensitive(TRUE);
+        /* 使えなくした項目を使えるようにする (エミュモード開始時) */
+        menubar_item_sensitive(TRUE);
 
-    menubar_active = TRUE;
+        menubar_active = TRUE;
 
     } else {
 
-    /* ほとんどの項目を使えなくする (メニューモード開始時) */
-    menubar_item_sensitive(FALSE);
+        /* ほとんどの項目を使えなくする (メニューモード開始時) */
+        menubar_item_sensitive(FALSE);
 
-    menubar_active = FALSE;
+        menubar_active = FALSE;
     }
 }
 
@@ -799,17 +799,17 @@ static void update_drive(void)
         /* イメージの数の分、メニューアイテムを表示する。
            ラベルは、イメージ名にセットし直す。           */
         for (i = 0; i < MIN(disk_image_num(drv), 9); i++) {
-        uItem = i + base;
+            uItem = i + base;
 
-        sprintf(buf, "%d  ", i + 1);
-        my_strncat(buf, drive[drv].image[i].name, sizeof(buf));
+            sprintf(buf, "%d  ", i + 1);
+            my_strncat(buf, drive[drv].image[i].name, sizeof(buf));
 
-        gtk_label_set(GTK_LABEL(mwidget[uItem].label), buf);
-        gtk_widget_show(mwidget[uItem].widget);
+            gtk_label_set(GTK_LABEL(mwidget[uItem].label), buf);
+            gtk_widget_show(mwidget[uItem].widget);
         }
         for (   ; i<9; i++) {
-        uItem = i + base;
-        gtk_widget_hide(mwidget[uItem].widget);
+            uItem = i + base;
+            gtk_widget_hide(mwidget[uItem].widget);
         }
         has_image = TRUE;
 
@@ -844,17 +844,17 @@ static void update_drive(void)
     /* メニューの名前を変えたり、無効にしたり */
 
     for (drv = 0; drv < NR_DRIVE; drv ++) {
-    const char *s;
-    s = filename_get_disk_name(drv);
+        const char *s;
+        s = filename_get_disk_name(drv);
 
-    if (s) {
-        sprintf(buf, "Drive %d: ", drv + 1);
-        my_strncat(buf, s, sizeof(buf));
-    } else {
-        sprintf(buf, "Drive %d:", drv + 1);
-    }
-    i = (drv == DRIVE_1) ? M_DRV_DRV1 : M_DRV_DRV2;
-    gtk_label_set(GTK_LABEL(mwidget[ i ].label), buf);
+        if (s) {
+            sprintf(buf, "Drive %d: ", drv + 1);
+            my_strncat(buf, s, sizeof(buf));
+        } else {
+            sprintf(buf, "Drive %d:", drv + 1);
+        }
+        i = (drv == DRIVE_1) ? M_DRV_DRV1 : M_DRV_DRV2;
+        gtk_label_set(GTK_LABEL(mwidget[ i ].label), buf);
     }
 
     gtk_label_set(GTK_LABEL(mwidget[M_DRV_CHG].label),
@@ -1138,12 +1138,12 @@ static void menubar_item_setup(void)
     /* Misc -------------------------------------------------------------*/
 
     if (xmame_has_sound()) {
-    i = xmame_wavout_opened();
-    uItem = M_MISC_RECORD;
-    gtk_check_menu_item_set_active(
-            GTK_CHECK_MENU_ITEM(mwidget[uItem].widget), i);
+        i = xmame_wavout_opened();
+        uItem = M_MISC_RECORD;
+        gtk_check_menu_item_set_active(
+                GTK_CHECK_MENU_ITEM(mwidget[uItem].widget), i);
     } else {
-    gtk_widget_set_sensitive(mwidget[M_MISC_RECORD].widget, FALSE);
+        gtk_widget_set_sensitive(mwidget[M_MISC_RECORD].widget, FALSE);
     }
 
     update_misc_cload();
@@ -1188,15 +1188,15 @@ static void menubar_item_sensitive(int sensitive)
 static  void    f_sys_reset(GtkMenuItem *widget, gpointer data)
 {
     if (menubar_reset_cfg.boot_clock_4mhz) {
-    cpu_clock_mhz = CONST_4MHZ_CLOCK;
+        cpu_clock_mhz = CONST_4MHZ_CLOCK;
     } else {
-    cpu_clock_mhz = CONST_8MHZ_CLOCK;
+        cpu_clock_mhz = CONST_8MHZ_CLOCK;
     }
 
     if (drive_check_empty(DRIVE_1)) {
-    menubar_reset_cfg.boot_from_rom = TRUE;
+        menubar_reset_cfg.boot_from_rom = TRUE;
     } else {
-    menubar_reset_cfg.boot_from_rom = FALSE;
+        menubar_reset_cfg.boot_from_rom = FALSE;
     }
 
     quasi88_reset(&menubar_reset_cfg);
@@ -1303,11 +1303,11 @@ static  void    f_set_subcpu(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    if (cpu_timing != (intptr_t)data) {
-        cpu_timing = (intptr_t)data;
-        emu_reset();
-        /* 他に再初期化すべきものはないのか？ */
-    }
+        if (cpu_timing != (intptr_t)data) {
+            cpu_timing = (intptr_t)data;
+            emu_reset();
+            /* 他に再初期化すべきものはないのか？ */
+        }
     }
 }
 
@@ -1328,7 +1328,7 @@ static  void    f_set_refresh(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    quasi88_cfg_set_frameskip_rate((intptr_t)data);
+        quasi88_cfg_set_frameskip_rate((intptr_t)data);
     }
 }
 
@@ -1370,7 +1370,7 @@ static  void    f_set_mouse(GtkRadioMenuItem *widget, gpointer data)
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
         mouse_mode = (intptr_t)data;
-    keyboard_switch();
+        keyboard_switch();
     }
 }
 
@@ -1457,14 +1457,14 @@ static  void    f_set_buf(GtkRadioMenuItem *widget, gpointer data)
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
     /* やっかい */
-    if (sdl_buffersize != (intptr_t)data) {
-        if (32 <= (intptr_t)data && (intptr_t)data <= 65536) {
-            sdl_buffersize = (intptr_t)data;
+        if (sdl_buffersize != (intptr_t)data) {
+            if (32 <= (intptr_t)data && (intptr_t)data <= 65536) {
+                sdl_buffersize = (intptr_t)data;
 
-            menu_sound_restart(TRUE);
-            update_misc_record();
+                menu_sound_restart(TRUE);
+                update_misc_record();
+            }
         }
-    }
     }
 }
 #endif
@@ -1499,21 +1499,21 @@ static  void    f_drv_chg(GtkMenuItem *widget, gpointer data)
 static  void    cb_drv_chg(int result)
 {
     if (result) {
-    int ok = FALSE;
-    int ro = (result < 0) ? TRUE : FALSE;
+        int ok = FALSE;
+        int ro = (result < 0) ? TRUE : FALSE;
 
-    if ((data_drv_chg == DRIVE_1) || (data_drv_chg == DRIVE_2)) {
+        if ((data_drv_chg == DRIVE_1) || (data_drv_chg == DRIVE_2)) {
 
-        ok = quasi88_disk_insert(data_drv_chg, menubar_filename, 0, ro);
+            ok = quasi88_disk_insert(data_drv_chg, menubar_filename, 0, ro);
 
-    } else if (data_drv_chg < 0) {
+        } else if (data_drv_chg < 0) {
 
-        ok = quasi88_disk_insert_all(menubar_filename, ro);
+            ok = quasi88_disk_insert_all(menubar_filename, ro);
 
-    }
+        }
 
-    /* すでにファイルを閉じているので、失敗してもメニューバー更新 */
-    update_drive();
+        /* すでにファイルを閉じているので、失敗してもメニューバー更新 */
+        update_drive();
     }
 }
 
@@ -1523,11 +1523,11 @@ static  void    f_drv_drv1(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    if ((intptr_t)data <  0) {
-        quasi88_disk_image_empty(DRIVE_1);
-    } else {
-        quasi88_disk_image_select(DRIVE_1, (intptr_t)data);
-    }
+        if ((intptr_t)data <  0) {
+            quasi88_disk_image_empty(DRIVE_1);
+        } else {
+            quasi88_disk_image_select(DRIVE_1, (intptr_t)data);
+        }
     }
 }
 
@@ -1537,11 +1537,11 @@ static  void    f_drv_drv2(GtkRadioMenuItem *widget, gpointer data)
 
     if (GTK_CHECK_MENU_ITEM(widget)->active)
     {
-    if ((intptr_t)data <  0) {
-        quasi88_disk_image_empty(DRIVE_2);
-    } else {
-        quasi88_disk_image_select(DRIVE_2, (intptr_t)data);
-    }
+        if ((intptr_t)data <  0) {
+            quasi88_disk_image_empty(DRIVE_2);
+        } else {
+            quasi88_disk_image_select(DRIVE_2, (intptr_t)data);
+        }
     }
 }
 
@@ -1577,15 +1577,15 @@ static  void    f_misc_record(GtkCheckMenuItem *widget, gpointer data)
     active = xmame_wavout_opened() ? FALSE : TRUE;  /* 逆にする */
 
     if (active == FALSE) {
-    if (xmame_wavout_opened()) {
-        quasi88_waveout(FALSE);
-    }
-    } else {
-    if (xmame_wavout_opened() == FALSE) {
-        if (quasi88_waveout(TRUE) == FALSE) {
-        active = FALSE;
+        if (xmame_wavout_opened()) {
+            quasi88_waveout(FALSE);
         }
-    }
+    } else {
+        if (xmame_wavout_opened() == FALSE) {
+            if (quasi88_waveout(TRUE) == FALSE) {
+                active = FALSE;
+            }
+        }
     }
 
     uItem = M_MISC_RECORD;
@@ -1613,10 +1613,10 @@ static  void    cb_misc_cload_s(int result)
 {
     if (result) {
 
-    int ok = quasi88_load_tape_insert(menubar_filename);
+        int ok = quasi88_load_tape_insert(menubar_filename);
 
-    /* すでにファイルを閉じているので、失敗してもメニューバー更新 */
-    update_misc_cload();
+        /* すでにファイルを閉じているので、失敗してもメニューバー更新 */
+        update_misc_cload();
     }
 }
 
@@ -1647,10 +1647,10 @@ static  void    cb_misc_csave_s(int result)
 {
     if (result) {
 
-    int ok = quasi88_save_tape_insert(menubar_filename);
+        int ok = quasi88_save_tape_insert(menubar_filename);
 
-    /* すでにファイルを閉じているので、失敗してもメニューバー更新 */
-    update_misc_csave();
+        /* すでにファイルを閉じているので、失敗してもメニューバー更新 */
+        update_misc_csave();
     }
 }
 
@@ -1735,11 +1735,11 @@ static  void    f_help_about(GtkMenuItem *widget, gpointer data)
     /*----*/
 
     for (i=0; i<COUNTOF(message); i++) {
-    label = gtk_label_new(message[i]);
-    /*gtk_misc_set_padding(GTK_MISC(label), 10, 10);*/
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-               label, FALSE, TRUE, 0);
-    gtk_widget_show(label);
+        label = gtk_label_new(message[i]);
+        /*gtk_misc_set_padding(GTK_MISC(label), 10, 10);*/
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+                   label, FALSE, TRUE, 0);
+        gtk_widget_show(label);
     }
 
     /*----*/
