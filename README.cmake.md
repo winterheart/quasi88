@@ -9,6 +9,7 @@ Currently cmake build framework supports modern Linux distributions (such as rec
 * cmake 3.10
 * libSDL 1.2 (for SDL backend)
 * libX11 1.6.9 (for X.Org backend)
+* libxxf86dga (for X.Org backend)
 * GTK2+ 2.24 (for GTK backend)
 * ReadLine 7 (optional for Monitor)
 
@@ -48,7 +49,7 @@ make
 Here list of all options that can be enabled/disabled via -DENABLE_FOO=ON/OFF directives:
 
 | Option          | Meaning                           | Default |
-+-----------------+-----------------------------------+-----|
+|-----------------|-----------------------------------|-----|
 | ENABLE_GTK2     | Enable GTK2 backend               | OFF |
 | ENABLE_SDL      | Enable SDL backend                | OFF |
 | ENABLE_X11      | Enable X.Org backend              |  ON |
