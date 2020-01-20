@@ -6,15 +6,21 @@ jobs:
   build:
     name: Build all
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config:
+        - {cc: gcc, cxx: g++}
+        - {cc: clang, cxx: clang++}
     steps:
       - uses: actions/checkout@v1
-      # - name: Setup cmake
-      #   uses: jwlawson/actions-setup-cmake@v1.0
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install libgtk2.0-dev libsdl1.2-dev libx11-dev libxxf86dga-dev libreadline-dev
-      - name: Build
+      - name: Build with ${{ matrix.config.cc }}/${{ matrix.config.cxx }}
+        env:
+          CC: ${{ matrix.config.cc }}
+          CXX: ${{ matrix.config.cxx }}
         run: |
           mkdir build && cd build
           cmake -DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL ..
