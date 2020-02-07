@@ -1,7 +1,7 @@
 ## QUASI88改 / QUASI88kai
 ---
 
-![](https://github.com/rzumer/quasi88/workflows/build/badge.svg)
+![](../../workflows/build/badge.svg)
 
 QUASI88改は、福永省三氏の [QUASI88](http://www.eonet.ne.jp/~showtime/quasi88/) の改良版です。  
 ソースやビルドシステムを必要以上に変えず、バグを修正し新機能を実装する方針です。
