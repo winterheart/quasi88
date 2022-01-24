@@ -16,12 +16,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install libgtk2.0-dev libsdl1.2-dev libx11-dev libxxf86dga-dev libreadline-dev
+          sudo apt-get install libgtk2.0-dev libsdl1.2-dev libx11-dev libxxf86dga-dev libxxf86vm-dev libreadline-dev
       - name: Build with ${{ matrix.config.cc }}/${{ matrix.config.cxx }}
         env:
           CC: ${{ matrix.config.cc }}
           CXX: ${{ matrix.config.cxx }}
         run: |
-          mkdir build && cd build
-          cmake -DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL ..
-          make -j2
+          cmake -B build -DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL
+          cmake --build build -j2
+
