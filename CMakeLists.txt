@@ -19,7 +19,7 @@ option(ENABLE_8BPP "Enable 8bpp support" ON)
 option(ENABLE_16BPP "Enable 16bpp support" ON)
 option(ENABLE_32BPP "Enable 32bpp support" ON)
 option(ENABLE_SNAPSHOT "Enable snapshot command support" ON)
-option(ENABLE_MONITOR "Enable Monitor (Debbuger) support" OFF)
+option(ENABLE_MONITOR "Enable Monitor (Debugger) support" OFF)
 
 # Joystick select for X
 set(ENABLE_JOYSTICK "SDL" CACHE STRING "Enable Joystick support for X.org (NO/SDL/LINUX_USB/BSD_USB, default NO)")
@@ -342,7 +342,6 @@ if(ENABLE_GTK2)
 	list(APPEND GTK_INCLUDES
 		src/FUNIX
 		src/GTK
-		${GTK2_INCLUDE_DIRS}
 		${SDL_INCLUDE_DIR}
 	)
 
@@ -367,6 +366,7 @@ if(ENABLE_GTK2)
 		${PROJECT_NAME}.gtk ${COMMON_SOURCES} ${GTK_SOURCES} ${SOUND_SOURCES} ${GTK_SOUND_SOURCES}
 	)
 	target_include_directories(${PROJECT_NAME}.gtk PRIVATE ${GTK_INCLUDES})
+	target_include_directories(${PROJECT_NAME}.gtk SYSTEM PRIVATE ${GTK2_INCLUDE_DIRS})
 	target_link_libraries(${PROJECT_NAME}.gtk ${COMMON_LIBS} ${GTK_LIBS})
 
 endif(ENABLE_GTK2)
