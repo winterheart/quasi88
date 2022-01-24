@@ -114,7 +114,7 @@ const T_GRAPH_SPEC *graph_init(void) {
 }
 
 /************************************************************************/
-static GtkWidget *main_window;
+GtkWidget *main_window;
 static GtkWidget *menu_bar;
 static GtkWidget *drawing_area;
 
@@ -133,7 +133,7 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen,
     /* ウインドウを生成する */
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     {
-      gtk_window_set_policy(GTK_WINDOW(main_window), FALSE, FALSE, TRUE);
+      gtk_window_set_resizable(GTK_WINDOW(main_window), FALSE);
       gtksys_set_signal_frame(main_window);
     }
 

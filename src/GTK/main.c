@@ -42,7 +42,7 @@ static void gtksys_exit(void);
 static void finish(void);
 
 int main(int argc, char **argv) {
-  gtk_set_locale();
+  //gtk_set_locale();
 #ifdef __CYGWIN__
   _Xsetlocale(LC_ALL, "ja_JP.EUC"); /* ??? */
 #endif                              // __CYGWIN__

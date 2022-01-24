@@ -755,20 +755,20 @@ static gboolean motionnotify_event(GtkWidget *, GdkEventMotion *, gpointer);
 
 /* メインウインドウのシグナルを設定 */
 void gtksys_set_signal_frame(GtkWidget *widget) {
-  gtk_signal_connect(GTK_OBJECT(widget), "destroy",
-                     GTK_SIGNAL_FUNC(destroy_event), NULL);
+  g_signal_connect(G_OBJECT(widget), "destroy",
+                     G_CALLBACK(destroy_event), NULL);
 
-  gtk_signal_connect(GTK_OBJECT(widget), "focus_in_event",
-                     GTK_SIGNAL_FUNC(focusin_event), NULL);
+  g_signal_connect(G_OBJECT(widget), "focus_in_event",
+                     G_CALLBACK(focusin_event), NULL);
 
-  gtk_signal_connect(GTK_OBJECT(widget), "focus_out_event",
-                     GTK_SIGNAL_FUNC(focusout_event), NULL);
+  g_signal_connect(G_OBJECT(widget), "focus_out_event",
+                     G_CALLBACK(focusout_event), NULL);
 
-  gtk_signal_connect(GTK_OBJECT(widget), "key_press_event",
-                     GTK_SIGNAL_FUNC(keypress_event), NULL);
+  g_signal_connect(G_OBJECT(widget), "key_press_event",
+                     G_CALLBACK(keypress_event), NULL);
 
-  gtk_signal_connect(GTK_OBJECT(widget), "key_release_event",
-                     GTK_SIGNAL_FUNC(keyrelease_event), NULL);
+  g_signal_connect(G_OBJECT(widget), "key_release_event",
+                     G_CALLBACK(keyrelease_event), NULL);
 
   gtk_widget_set_events(widget, gtk_widget_get_events(widget) |
                                     GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK);
@@ -776,18 +776,18 @@ void gtksys_set_signal_frame(GtkWidget *widget) {
 
 /* ドローイングエリアのシグナルを設定 */
 void gtksys_set_signal_view(GtkWidget *widget) {
-  gtk_signal_connect(GTK_OBJECT(widget), "expose_event",
-                     GTK_SIGNAL_FUNC(expose_event), NULL);
+  g_signal_connect(G_OBJECT(widget), "expose_event",
+                     G_CALLBACK(expose_event), NULL);
 
-  gtk_signal_connect(GTK_OBJECT(widget), "button_press_event",
-                     GTK_SIGNAL_FUNC(buttonpress_event), NULL);
+  g_signal_connect(G_OBJECT(widget), "button_press_event",
+                     G_CALLBACK(buttonpress_event), NULL);
 
-  gtk_signal_connect(GTK_OBJECT(widget), "button_release_event",
-                     GTK_SIGNAL_FUNC(buttonrelease_event), NULL);
+  g_signal_connect(G_OBJECT(widget), "button_release_event",
+                     G_CALLBACK(buttonrelease_event), NULL);
 
 #ifdef ENABLE_MOTION_EVENT
-  gtk_signal_connect(GTK_OBJECT(widget), "motion_notify_event",
-                     GTK_SIGNAL_FUNC(motionnotify_event), NULL);
+  g_signal_connect(G_OBJECT(widget), "motion_notify_event",
+                     G_CALLBACK(motionnotify_event), NULL);
 #endif
 
   gtk_widget_set_events(widget, gtk_widget_get_events(widget) |

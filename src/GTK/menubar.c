@@ -14,6 +14,7 @@
 
 
 #include "quasi88.h"
+#include "main.h"
 #include "device.h"
 #include "event.h"
 
@@ -605,9 +606,8 @@ void create_menubar(GtkWidget *target_window, GtkWidget **created_menubar) {
         gtk_container_add(GTK_CONTAINER(item), label);
 
       if (p->callback) {
-        gtk_signal_connect(GTK_OBJECT(item), "activate",
-                           GTK_SIGNAL_FUNC(p->callback),
-                           (gpointer)(glong)p->data);
+        g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(p->callback),
+                         (gpointer)(glong)p->data);
       }
       break;
 
@@ -617,9 +617,8 @@ void create_menubar(GtkWidget *target_window, GtkWidget **created_menubar) {
         gtk_container_add(GTK_CONTAINER(item), label);
 
       if (p->callback) {
-        gtk_signal_connect(GTK_OBJECT(item), "toggled",
-                           GTK_SIGNAL_FUNC(p->callback),
-                           (gpointer)(glong)p->data);
+        g_signal_connect(G_OBJECT(item), "toggled", G_CALLBACK(p->callback),
+                         (gpointer)(glong)p->data);
       }
       break;
 
@@ -628,12 +627,12 @@ void create_menubar(GtkWidget *target_window, GtkWidget **created_menubar) {
       if (label)
         gtk_container_add(GTK_CONTAINER(item), label);
 
-      mlist[p->group] = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(item));
+      mlist[p->group] =
+          gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item));
 
       if (p->callback) {
-        gtk_signal_connect(GTK_OBJECT(item), "toggled",
-                           GTK_SIGNAL_FUNC(p->callback),
-                           (gpointer)(glong)p->data);
+        g_signal_connect(G_OBJECT(item), "toggled", G_CALLBACK(p->callback),
+                         (gpointer)(glong)p->data);
       }
       break;
 
@@ -656,9 +655,9 @@ void create_menubar(GtkWidget *target_window, GtkWidget **created_menubar) {
       gtk_widget_show(item);
 
     if (p->parent == M_TOP) {
-      gtk_menu_bar_append(GTK_MENU_BAR(menubar), item);
+      gtk_menu_shell_append(GTK_MENU_SHELL(menubar), item);
     } else {
-      gtk_menu_append(GTK_MENU(mwidget[p->parent].submenu), item);
+      gtk_menu_shell_append(GTK_MENU_SHELL(mwidget[p->parent].submenu), item);
     }
   }
 
@@ -695,25 +694,7 @@ void menubar_setup(int active) {
 static char *select_file_fullname; /* ファイル名はここに格納 */
 static int select_file_n_fullname; /* そのバッファのサイズ   */
 static void (*select_file_callback)(int result); /* 終了時に呼び出す関数   */
-static void cb_select_file_ok(GtkWidget *widget, gpointer data) {
-  my_strncpy(select_file_fullname,
-             gtk_file_selection_get_filename(GTK_FILE_SELECTION(data)),
-             select_file_n_fullname);
 
-  (select_file_callback)(1); /* ファイル選択あり  */
-
-  gtk_widget_destroy(GTK_WIDGET(data));
-}
-static void cb_select_file_cancel(GtkWidget *widget, gpointer data) {
-  (select_file_callback)(0); /* ファイル選択せず  */
-
-  gtk_widget_destroy(GTK_WIDGET(data));
-}
-static void cb_select_file_destroy(GtkWidget *widget, gpointer data) {
-  (select_file_callback)(0); /* ファイル選択せず  */
-
-  gtk_grab_remove(GTK_WIDGET(widget));
-}
 static int select_file(const char *title, void (*callback)(int result),
                        char fullname[], int n_fullname) {
   GtkWidget *fsel;
@@ -724,22 +705,18 @@ static int select_file(const char *title, void (*callback)(int result),
   select_file_n_fullname = n_fullname;
   memset(fullname, 0, n_fullname);
 
-  fsel = gtk_file_selection_new(title);
+  fsel = gtk_file_chooser_dialog_new(title, GTK_WINDOW(main_window),
+                                     GTK_FILE_CHOOSER_ACTION_OPEN,
+                                     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
-  /*gtk_file_selection_set_filename(fsel, fullname);*/
-
-  gtk_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fsel)->ok_button), "clicked",
-                     GTK_SIGNAL_FUNC(cb_select_file_ok), fsel);
-
-  gtk_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fsel)->cancel_button),
-                     "clicked", GTK_SIGNAL_FUNC(cb_select_file_cancel), fsel);
-
-  gtk_signal_connect(GTK_OBJECT(fsel), "destroy",
-                     GTK_SIGNAL_FUNC(cb_select_file_destroy), NULL);
-
-  gtk_widget_show(fsel);
-
-  gtk_grab_add(fsel);
+  if (gtk_dialog_run(GTK_DIALOG(fsel)) == GTK_RESPONSE_ACCEPT) {
+    my_strncpy(select_file_fullname,
+               gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fsel)),
+               select_file_n_fullname);
+    (select_file_callback)(1);
+  }
+  gtk_widget_destroy(fsel);
 
   return 0;
 }
@@ -780,7 +757,7 @@ static void update_sys_reset(void) {
 
   strcat(buf, "]");
 
-  gtk_label_set(GTK_LABEL(mwidget[M_SYS_RESET].label), buf);
+  gtk_label_set_text(GTK_LABEL(mwidget[M_SYS_RESET].label), buf);
 
   UNLOCK_MENUBAR()
 }
@@ -810,7 +787,7 @@ static void update_drive(void) {
         sprintf(buf, "%d  ", i + 1);
         my_strncat(buf, drive[drv].image[i].name, sizeof(buf));
 
-        gtk_label_set(GTK_LABEL(mwidget[uItem].label), buf);
+        gtk_label_set_text(GTK_LABEL(mwidget[uItem].label), buf);
         gtk_widget_show(mwidget[uItem].widget);
       }
       for (; i < 9; i++) {
@@ -860,11 +837,11 @@ static void update_drive(void) {
       sprintf(buf, "Drive %d:", drv + 1);
     }
     i = (drv == DRIVE_1) ? M_DRV_DRV1 : M_DRV_DRV2;
-    gtk_label_set(GTK_LABEL(mwidget[i].label), buf);
+    gtk_label_set_text(GTK_LABEL(mwidget[i].label), buf);
   }
 
-  gtk_label_set(GTK_LABEL(mwidget[M_DRV_CHG].label),
-                (has_image) ? "Change ..." : "Set ...");
+  gtk_label_set_text(GTK_LABEL(mwidget[M_DRV_CHG].label),
+                     (has_image) ? "Change ..." : "Set ...");
   gtk_widget_set_sensitive(mwidget[M_DRV_UNSET].widget,
                            (has_image) ? TRUE : FALSE);
 
@@ -889,7 +866,7 @@ static void update_misc_cload(void) {
     } else {
       strcpy(buf, "Set ...");
     }
-    gtk_label_set(GTK_LABEL(mwidget[uItem].label), buf);
+    gtk_label_set_text(GTK_LABEL(mwidget[uItem].label), buf);
   }
 
   /* テープありなら、ラジオメニューをアクティブに */
@@ -925,7 +902,7 @@ static void update_misc_csave(void) {
     } else {
       strcpy(buf, "Set ...");
     }
-    gtk_label_set(GTK_LABEL(mwidget[uItem].label), buf);
+    gtk_label_set_text(GTK_LABEL(mwidget[uItem].label), buf);
   }
 
   /* テープありなら、ラジオメニューをアクティブに */
@@ -1840,12 +1817,11 @@ static void f_help_about(GtkMenuItem *widget, gpointer data) {
 
   dialog = gtk_dialog_new();
 
-  gtk_signal_connect(GTK_OBJECT(dialog), "destroy",
-                     GTK_SIGNAL_FUNC(cb_help_about_destroy), NULL);
+  g_signal_connect(G_OBJECT(dialog), "destroy",
+                   G_CALLBACK(cb_help_about_destroy), NULL);
 
   gtk_window_set_title(GTK_WINDOW(dialog), "About...");
-
-  gtk_container_border_width(GTK_CONTAINER(dialog), 5);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 5);
 
   /*----*/
 
@@ -1860,15 +1836,15 @@ static void f_help_about(GtkMenuItem *widget, gpointer data) {
   /*----*/
 
   button = gtk_button_new_with_label("OK");
-  GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default(button, TRUE);
 
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button, TRUE,
                      TRUE, 0);
 
   gtk_widget_show(button);
 
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                     GTK_SIGNAL_FUNC(cb_help_about_button), dialog);
+  g_signal_connect(G_OBJECT(button), "clicked",
+                   G_CALLBACK(cb_help_about_button), dialog);
 
   gtk_widget_grab_default(button);
 
