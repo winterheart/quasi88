@@ -709,7 +709,7 @@ static int select_file(const char *title, void (*callback)(int result),
                                      GTK_FILE_CHOOSER_ACTION_OPEN,
                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-
+  gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fsel), osd_dir_disk());
   if (gtk_dialog_run(GTK_DIALOG(fsel)) == GTK_RESPONSE_ACCEPT) {
     my_strncpy(select_file_fullname,
                gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fsel)),
