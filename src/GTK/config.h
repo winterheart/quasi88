@@ -28,6 +28,8 @@
 #ifndef SUPPORT_16BPP
 #define SUPPORT_16BPP
 #endif
-#undef SUPPORT_32BPP
+#ifndef SUPPORT_32BPP
+#define SUPPORT_32BPP
+#endif
 
 #endif /* CONFIG_H_INCLUDED */

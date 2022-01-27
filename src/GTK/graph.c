@@ -6,14 +6,10 @@
 
 #include <gtk/gtk.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "quasi88.h"
 #include "graph.h"
 #include "device.h"
-
-
-int use_gdk_image = TRUE; /* 真で、GdkImageを使用 */
 
 static T_GRAPH_SPEC graph_spec; /* 基本情報     */
 
@@ -33,67 +29,39 @@ const T_GRAPH_SPEC *graph_init(void) {
   if (verbose_proc) {
     printf("Initializing Graphic System ... ");
   }
+  int found = FALSE;
 
-  /* やはりわからん */
-  {
-    int found = FALSE;
-    GdkVisual *v = gdk_visual_get_system();
+  visual = gdk_visual_get_system();
 
-    if (use_gdk_image) {
-      if (v->type == GDK_VISUAL_TRUE_COLOR ||
-          v->type == GDK_VISUAL_PSEUDO_COLOR) {
-        if (v->depth == 32) {
+  if (visual->type == GDK_VISUAL_TRUE_COLOR ||
+      visual->type == GDK_VISUAL_PSEUDO_COLOR) {
+    if (visual->depth == 24 || visual->depth == 32) {
 #ifdef SUPPORT_32BPP
-          found = TRUE;
+      found = TRUE;
 #endif
-        } else if (v->depth == 16 || v->depth == 15) {
+    } else if (visual->depth == 16 || visual->depth == 15) {
 #ifdef SUPPORT_16BPP
-          found = TRUE;
+      found = TRUE;
 #endif
-        } else if (v->depth == 8) {
+    } else if (visual->depth == 8) {
 #ifdef SUPPORT_8BPP
-          found = TRUE;
-#endif
-        }
-      }
-
-      if (found) {
-#ifdef LSB_FIRST
-        if (v->byte_order != GDK_LSB_FIRST)
-          found = FALSE;
-#else
-        if (v->byte_order != GDK_MSB_FIRST)
-          found = FALSE;
-#endif
-      }
-    }
-
-    if (found) {
-      use_gdk_image = TRUE;
-
-      visual = v;
-      colormap = gdk_colormap_get_system();
-    } else {
-      use_gdk_image = FALSE;
-
-#ifdef SUPPORT_8BPP
-
-      gdk_rgb_init();
-      gtk_widget_set_default_colormap(gdk_rgb_get_cmap());
-      gtk_widget_set_default_visual(gdk_rgb_get_visual());
-
-      visual = gdk_rgb_get_visual(); /* 未使用だけど */
-      colormap = gdk_rgb_get_cmap();
-
-#else
-      visual = NULL;
-      colormap = NULL;
+      found = TRUE;
 #endif
     }
   }
 
-  if (visual && colormap) {
+  if (found) {
+#ifdef LSB_FIRST
+    if (visual->byte_order != GDK_LSB_FIRST)
+      found = FALSE;
+#else
+    if (v->byte_order != GDK_MSB_FIRST)
+      found = FALSE;
+#endif
+  }
 
+  if (found) {
+    colormap = gdk_colormap_get_system();
     graph_spec.window_max_width = 10000;
     graph_spec.window_max_height = 10000;
     graph_spec.fullscreen_max_width = 0;
@@ -102,13 +70,14 @@ const T_GRAPH_SPEC *graph_init(void) {
     graph_spec.forbid_half = FALSE;
 
     if (verbose_proc)
-      printf("OK (%s)\n", (use_gdk_image) ? "GdkImage" : "GdkRGB");
+      printf("OK (GdkImage)\n");
 
     return &graph_spec;
 
   } else {
     if (verbose_proc)
       printf("FAILED\n");
+    visual = NULL;
     return NULL;
   }
 }
@@ -181,51 +150,25 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen,
 /*----------------------------------------------------------------------*/
 
 static GdkImage *image;
-static guchar *indexbuf;
-static GdkRgbCmap indexrgb;
 
 static void color_trash(void);
 
 static int create_image(int width, int height) {
-  if (use_gdk_image) {
+  if (image) {
+    color_trash();
 
-    if (image) {
-      color_trash();
-
-      gdk_image_destroy(image);
-      image = NULL;
-    }
-
-    image = gdk_image_new(GDK_IMAGE_FASTEST, visual, width, height);
-
-    if (image == NULL)
-      return FALSE;
-
-    graph_info.byte_per_pixel = image->bpp;
-    graph_info.byte_per_line = image->bpl;
-    graph_info.buffer = image->mem;
-
-  } else {
-
-    if (indexbuf) {
-      color_trash();
-
-      free(indexbuf);
-      indexbuf = NULL;
-    }
-
-    indexbuf = malloc(width * height * sizeof(guchar));
-
-    if (indexbuf == NULL)
-      return FALSE;
-
-    memset(indexbuf, 0, width * height * sizeof(guchar));
-
-    graph_info.byte_per_pixel = sizeof(guchar);
-    graph_info.byte_per_line = width;
-    graph_info.buffer = indexbuf;
+    gdk_image_destroy(image);
+    image = NULL;
   }
 
+  image = gdk_image_new(GDK_IMAGE_FASTEST, visual, width, height);
+
+  if (image == NULL)
+    return FALSE;
+
+  graph_info.byte_per_pixel = image->bpp;
+  graph_info.byte_per_line = image->bpl;
+  graph_info.buffer = image->mem;
   graph_info.fullscreen = FALSE;
   graph_info.width = width;
   graph_info.height = height;
@@ -268,21 +211,8 @@ void graph_add_color(const PC88_PALETTE_T color[], int nr_color,
   if (i != 0)
     printf("Color Alloc Failed %d/%d\n", i, nr_color);
 
-  if (use_gdk_image) {
-
-    for (i = 0; i < nr_color; i++) {
-      pixel[i] = color_cell[nr_color_cell + i].pixel;
-    }
-
-  } else {
-
-    for (i = 0; i < nr_color; i++) {
-      indexrgb.colors[nr_color_cell + i] =
-          (((guint32)color_cell[nr_color_cell + i].red & 0xff00) << 8) |
-          ((guint32)color_cell[nr_color_cell + i].green & 0xff00) |
-          ((guint32)color_cell[nr_color_cell + i].blue >> 8);
-      pixel[i] = nr_color_cell + i;
-    }
+  for (i = 0; i < nr_color; i++) {
+    pixel[i] = color_cell[nr_color_cell + i].pixel;
   }
 
   nr_color_cell += nr_color;
@@ -311,21 +241,10 @@ static void color_trash(void) {
  ************************************************************************/
 
 void graph_update(int nr_rect, T_GRAPH_RECT rect[]) {
-  int i;
-
-  if (use_gdk_image) {
-    for (i = 0; i < nr_rect; i++) {
-      gdk_draw_image(drawing_area->window, graphic_context, image, rect[i].x,
-                     rect[i].y, rect[i].x, rect[i].y, rect[i].width,
-                     rect[i].height);
-    }
-
-  } else {
-
-    gdk_draw_indexed_image(drawing_area->window, graphic_context, 0, 0,
-                           graph_info.width, graph_info.height,
-                           GDK_RGB_DITHER_NONE, indexbuf, graph_info.width,
-                           &indexrgb);
+  for (int i = 0; i < nr_rect; i++) {
+    gdk_draw_image(drawing_area->window, graphic_context, image, rect[i].x,
+                   rect[i].y, rect[i].x, rect[i].y, rect[i].width,
+                   rect[i].height);
   }
 }
 

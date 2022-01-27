@@ -21,8 +21,6 @@ static const T_CONFIG_TABLE gtksys_options[] = {
     /* 300〜349: システム依存オプション */
 
     /*  -- GRAPHIC -- */
-    {300, "gdkimage", X_FIX, &use_gdk_image, TRUE, 0, 0, 0},
-    {300, "nogdkimage", X_FIX, &use_gdk_image, FALSE, 0, 0, 0},
 
     /* 終端 */
     {0, NULL, X_INV, 0, 0, 0, 0, 0},
