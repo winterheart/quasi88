@@ -1316,7 +1316,7 @@ static void f_sys_basic(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     menubar_reset_cfg.boot_basic = (intptr_t)data;
     update_sys_reset();
   }
@@ -1327,7 +1327,7 @@ static void f_sys_clock(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     menubar_reset_cfg.boot_clock_4mhz = (intptr_t)data;
     update_sys_reset();
   }
@@ -1338,7 +1338,7 @@ static void f_sys_sb(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     menubar_reset_cfg.sound_board = (intptr_t)data;
     update_sys_reset();
   }
@@ -1361,7 +1361,7 @@ static void f_set_speed(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     quasi88_cfg_set_wait_rate((intptr_t)data);
   }
 }
@@ -1373,7 +1373,7 @@ static void f_set_nowait(GtkCheckMenuItem *widget, gpointer data) {
     return;
   }
 
-  active = (int)widget->active;
+  active = (int)gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 
   quasi88_cfg_set_no_wait(active);
 }
@@ -1383,7 +1383,7 @@ static void f_set_subcpu(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     if (cpu_timing != (intptr_t)data) {
       cpu_timing = (intptr_t)data;
       emu_reset();
@@ -1399,7 +1399,9 @@ static void f_set_fdcwait(GtkCheckMenuItem *widget, gpointer data) {
     return;
   }
 
-  active = ((int)widget->active) ? TRUE : FALSE;
+  active = ((int)gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)))
+               ? TRUE
+               : FALSE;
 
   fdc_wait = active;
 }
@@ -1409,7 +1411,7 @@ static void f_set_refresh(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     quasi88_cfg_set_frameskip_rate((intptr_t)data);
   }
 }
@@ -1419,7 +1421,7 @@ static void f_set_interlace(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     quasi88_cfg_set_interlace((intptr_t)data);
   }
 }
@@ -1429,7 +1431,7 @@ static void f_set_size(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     quasi88_cfg_set_size((intptr_t)data);
   }
 }
@@ -1441,7 +1443,9 @@ static void f_set_pcg(GtkCheckMenuItem *widget, gpointer data) {
     return;
   }
 
-  active = ((int)widget->active) ? TRUE : FALSE;
+  active = ((int)gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)))
+               ? TRUE
+               : FALSE;
 
   use_pcg = active;
 }
@@ -1451,7 +1455,7 @@ static void f_set_mouse(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     mouse_mode = (intptr_t)data;
     keyboard_switch();
   }
@@ -1462,7 +1466,7 @@ static void f_set_cursor(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     if ((intptr_t)data) {
       cursor_key_mode = 1;
     } else {
@@ -1479,7 +1483,7 @@ static void f_set_numlock(GtkCheckMenuItem *widget, gpointer data) {
     return;
   }
 
-  active = (int)widget->active;
+  active = (int)gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 
   quasi88_cfg_key_numlock(active);
 }
@@ -1491,7 +1495,7 @@ static void f_set_romaji(GtkCheckMenuItem *widget, gpointer data) {
     return;
   }
 
-  active = (int)widget->active;
+  active = (int)gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 
   quasi88_cfg_key_romaji(active);
 }
@@ -1503,7 +1507,7 @@ static void f_set_fm(GtkRadioMenuItem *widget, gpointer data) {
   }
 
 #ifdef USE_FMGEN
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     /* やっかい */
     if (((xmame_cfg_get_use_fmgen()) && ((intptr_t)data == FALSE)) ||
         ((xmame_cfg_get_use_fmgen() == FALSE) && ((intptr_t)data))) {
@@ -1522,7 +1526,7 @@ static void f_set_frq(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     /* やっかい */
     if (xmame_cfg_get_sample_freq() != (intptr_t)data) {
       if (8000 <= (intptr_t)data && (intptr_t)data <= 48000) {
@@ -1540,7 +1544,7 @@ static void f_set_buf(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     /* やっかい */
     if (sdl_buffersize != (intptr_t)data) {
       if (32 <= (intptr_t)data && (intptr_t)data <= 65536) {
@@ -1609,7 +1613,7 @@ static void f_drv_drv1(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     if ((intptr_t)data < 0) {
       quasi88_disk_image_empty(DRIVE_1);
     } else {
@@ -1623,7 +1627,7 @@ static void f_drv_drv2(GtkRadioMenuItem *widget, gpointer data) {
     return;
   }
 
-  if (GTK_CHECK_MENU_ITEM(widget)->active) {
+  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     if ((intptr_t)data < 0) {
       quasi88_disk_image_empty(DRIVE_2);
     } else {
@@ -1781,74 +1785,31 @@ static void f_misc_status(GtkCheckMenuItem *widget, gpointer data) {
     return;
   }
 
-  active = (int)widget->active;
+  active = (int)gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 
   quasi88_cfg_set_showstatus(active);
 }
 
 /*----------------------------------------------------------------------
- * Help メニュー
+ * About メニュー
  *----------------------------------------------------------------------*/
-
-static void cb_help_about_destroy(GtkWidget *widget, gpointer data) {
-  gtk_grab_remove(GTK_WIDGET(widget));
-}
-static void cb_help_about_button(GtkWidget *widget, gpointer data) {
-  gtk_widget_destroy(GTK_WIDGET(data));
-}
 static void f_help_about(GtkMenuItem *widget, gpointer data) {
-  GtkWidget *dialog, *label, *button;
-  int i;
-  static const char *message[] = {
-      "",
-      "QUASI88  ver. " Q_VERSION "  <" Q_COMMENT ">",
-      "  " Q_COPYRIGHT,
-      "",
+  static const char *message = Q_COPYRIGHT "\n\n"
 #ifdef USE_SOUND
-      "MAME Sound-Engine included",
-      "  " Q_MAME_COPYRIGHT,
+    "MAME Sound-Engine included\n" Q_MAME_COPYRIGHT "\n\n"
 #ifdef USE_FMGEN
-      "FM Sound Generator (fmgen) included",
-      "  " Q_FMGEN_COPYRIGHT,
+    "FM Sound Generator (fmgen) included\n" Q_FMGEN_COPYRIGHT "\n\n"
 #endif
-      "",
 #endif
-  };
+    ;
 
-  dialog = gtk_dialog_new();
-
-  g_signal_connect(G_OBJECT(dialog), "destroy",
-                   G_CALLBACK(cb_help_about_destroy), NULL);
-
-  gtk_window_set_title(GTK_WINDOW(dialog), "About...");
-  gtk_container_set_border_width(GTK_CONTAINER(dialog), 5);
-
-  /*----*/
-
-  for (i = 0; i < COUNTOF(message); i++) {
-    label = gtk_label_new(message[i]);
-    /*gtk_misc_set_padding(GTK_MISC(label), 10, 10);*/
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label, FALSE, TRUE,
-                       0);
-    gtk_widget_show(label);
-  }
-
-  /*----*/
-
-  button = gtk_button_new_with_label("OK");
-  gtk_widget_set_can_default(button, TRUE);
-
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button, TRUE,
-                     TRUE, 0);
-
-  gtk_widget_show(button);
-
-  g_signal_connect(G_OBJECT(button), "clicked",
-                   G_CALLBACK(cb_help_about_button), dialog);
-
-  gtk_widget_grab_default(button);
-
-  gtk_widget_show(dialog);
-
-  gtk_grab_add(dialog);
+  GtkWidget *dialog = gtk_about_dialog_new();
+  gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), Q_TITLE);
+  gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), Q_VERSION);
+  gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog), message);
+  gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog), Q_COMMENT);
+  gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog),
+                               "https://github.com/winterheart/quasi88");
+  gtk_dialog_run(GTK_DIALOG(dialog));
+  gtk_widget_destroy(dialog);
 }

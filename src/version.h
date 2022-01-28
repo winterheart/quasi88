@@ -60,12 +60,12 @@
 
 #ifdef  USE_SOUND
 #ifndef Q_MAME_COPYRIGHT
-#define Q_MAME_COPYRIGHT    "Copyright (c) 1997-2007, Nicola Salmoria and the MAME team"
+#define Q_MAME_COPYRIGHT    "(c) 1997-2007 Nicola Salmoria and the MAME team"
 #endif
 
 #ifdef  USE_FMGEN
 #ifndef Q_FMGEN_COPYRIGHT
-#define Q_FMGEN_COPYRIGHT   "Copyright (C) by cisc 1998, 2003."
+#define Q_FMGEN_COPYRIGHT   "(c) 1998, 2003 cisc"
 #endif
 #endif
 #endif

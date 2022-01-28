@@ -33,17 +33,17 @@ const T_GRAPH_SPEC *graph_init(void) {
 
   visual = gdk_visual_get_system();
 
-  if (visual->type == GDK_VISUAL_TRUE_COLOR ||
-      visual->type == GDK_VISUAL_PSEUDO_COLOR) {
-    if (visual->depth == 24 || visual->depth == 32) {
+  if (gdk_visual_get_visual_type(visual) == GDK_VISUAL_TRUE_COLOR ||
+      gdk_visual_get_visual_type(visual) == GDK_VISUAL_PSEUDO_COLOR) {
+    if (gdk_visual_get_depth(visual) == 24 || gdk_visual_get_depth(visual) == 32) {
 #ifdef SUPPORT_32BPP
       found = TRUE;
 #endif
-    } else if (visual->depth == 16 || visual->depth == 15) {
+    } else if (gdk_visual_get_depth(visual) == 16 || gdk_visual_get_depth(visual) == 15) {
 #ifdef SUPPORT_16BPP
       found = TRUE;
 #endif
-    } else if (visual->depth == 8) {
+    } else if (gdk_visual_get_depth(visual) == 8) {
 #ifdef SUPPORT_8BPP
       found = TRUE;
 #endif
@@ -52,7 +52,7 @@ const T_GRAPH_SPEC *graph_init(void) {
 
   if (found) {
 #ifdef LSB_FIRST
-    if (visual->byte_order != GDK_LSB_FIRST)
+    if (gdk_visual_get_byte_order(visual) != GDK_LSB_FIRST)
       found = FALSE;
 #else
     if (v->byte_order != GDK_MSB_FIRST)
@@ -133,7 +133,7 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen,
     gtk_widget_show(main_window);
 
     /* グラフィックコンテキストの設定 (表示後でないとだめ) ? */
-    cairo_render = gdk_cairo_create(drawing_area->window);
+    cairo_render = gdk_cairo_create(gtk_widget_get_window(drawing_area));
   }
 
   if (create_image(width, height)) {
