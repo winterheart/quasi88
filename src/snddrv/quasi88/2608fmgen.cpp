@@ -112,6 +112,7 @@ static void fmgen2608_stop(void *token)
 {
     struct fmgen2608_info *info = (struct fmgen2608_info *)token;
 
+    free(info->buf);
     delete info->opna;
 }
 static void fmgen2608_reset(void *token)

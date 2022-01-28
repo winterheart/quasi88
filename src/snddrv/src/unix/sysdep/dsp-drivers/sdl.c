@@ -172,6 +172,7 @@ static void *sdl_dsp_create(const void *flags)
    }
 
    sample.dataSize = audiospec->size * 4;
+   free(audiospec);
    if (!(sample.data = calloc(sample.dataSize, sizeof(Uint8))))
    {
         fprintf(stderr, "error malloc failed for data\n");
