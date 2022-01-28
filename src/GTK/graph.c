@@ -70,7 +70,7 @@ const T_GRAPH_SPEC *graph_init(void) {
     graph_spec.forbid_half = FALSE;
 
     if (verbose_proc)
-      printf("OK (GdkImage)\n");
+      printf("OK (Cairo)\n");
 
     return &graph_spec;
 
@@ -87,7 +87,8 @@ GtkWidget *main_window;
 static GtkWidget *menu_bar;
 static GtkWidget *drawing_area;
 
-static GdkGC *graphic_context;
+static cairo_t *cairo_render;
+static cairo_surface_t *cairo_surface;
 
 static int create_image(int width, int height);
 
@@ -115,7 +116,7 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen,
     /* 描画領域を生成する */
     drawing_area = gtk_drawing_area_new();
     {
-      gtk_drawing_area_size(GTK_DRAWING_AREA(drawing_area), width, height);
+      gtk_widget_set_size_request(GTK_WIDGET(drawing_area), width, height);
       gtksys_set_signal_view(drawing_area);
     }
     gtk_widget_show(drawing_area);
@@ -132,12 +133,11 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen,
     gtk_widget_show(main_window);
 
     /* グラフィックコンテキストの設定 (表示後でないとだめ) ? */
-    graphic_context = gdk_gc_new(drawing_area->window);
+    cairo_render = gdk_cairo_create(drawing_area->window);
   }
 
   if (create_image(width, height)) {
-
-    gtk_drawing_area_size(GTK_DRAWING_AREA(drawing_area), width, height);
+    cairo_set_source_surface(cairo_render, cairo_surface, 0, 0);
 
     graph_exist = TRUE;
 
@@ -149,26 +149,23 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen,
 
 /*----------------------------------------------------------------------*/
 
-static GdkImage *image;
-
 static void color_trash(void);
 
 static int create_image(int width, int height) {
-  if (image) {
+  if (cairo_surface) {
     color_trash();
-
-    gdk_image_destroy(image);
-    image = NULL;
+    cairo_surface_destroy(cairo_surface);
+    cairo_surface = NULL;
   }
 
-  image = gdk_image_new(GDK_IMAGE_FASTEST, visual, width, height);
+  cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
 
-  if (image == NULL)
+  if (cairo_surface == NULL)
     return FALSE;
 
-  graph_info.byte_per_pixel = image->bpp;
-  graph_info.byte_per_line = image->bpl;
-  graph_info.buffer = image->mem;
+  graph_info.byte_per_pixel = 4; // CAIRO_FORMAT_RGB24 is 32 bit;
+  graph_info.byte_per_line = cairo_image_surface_get_stride(cairo_surface);
+  graph_info.buffer = cairo_image_surface_get_data(cairo_surface);
   graph_info.fullscreen = FALSE;
   graph_info.width = width;
   graph_info.height = height;
@@ -241,11 +238,7 @@ static void color_trash(void) {
  ************************************************************************/
 
 void graph_update(int nr_rect, T_GRAPH_RECT rect[]) {
-  for (int i = 0; i < nr_rect; i++) {
-    gdk_draw_image(drawing_area->window, graphic_context, image, rect[i].x,
-                   rect[i].y, rect[i].x, rect[i].y, rect[i].width,
-                   rect[i].height);
-  }
+  cairo_paint(cairo_render);
 }
 
 /************************************************************************

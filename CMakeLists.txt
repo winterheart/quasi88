@@ -336,8 +336,10 @@ if(ENABLE_GTK2)
 	add_definitions(-DQUASI88_GTK)
 	find_package(GTK2 REQUIRED)
 	find_package(SDL REQUIRED)
+	include(FindPkgConfig)
+	pkg_check_modules(CAIRO REQUIRED cairo)
 
-	list(APPEND GTK_LIBS ${GTK2_LIBRARIES} ${SDL_LIBRARY})
+	list(APPEND GTK_LIBS ${GTK2_LIBRARIES} ${CAIRO_LIBRARIES} ${SDL_LIBRARY})
 
 	list(APPEND GTK_INCLUDES
 		src/FUNIX
@@ -366,7 +368,7 @@ if(ENABLE_GTK2)
 		${PROJECT_NAME}.gtk ${COMMON_SOURCES} ${GTK_SOURCES} ${SOUND_SOURCES} ${GTK_SOUND_SOURCES}
 	)
 	target_include_directories(${PROJECT_NAME}.gtk PRIVATE ${GTK_INCLUDES})
-	target_include_directories(${PROJECT_NAME}.gtk SYSTEM PRIVATE ${GTK2_INCLUDE_DIRS})
+	target_include_directories(${PROJECT_NAME}.gtk SYSTEM PRIVATE ${GTK2_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS})
 	target_link_libraries(${PROJECT_NAME}.gtk ${COMMON_LIBS} ${GTK_LIBS})
 
 endif(ENABLE_GTK2)
