@@ -10,9 +10,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: ubuntu-latest, c: "gcc", cxx: "g++", opts: "-DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
-          - { os: ubuntu-latest, c: "clang", cxx: "clang++", opts: "-DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
-          - { os: windows-latest, c: "cl", cxx: "cl", opts: "-DENABLE_WIN=ON -DENABLE_X11=OFF -DENABLE_SDL=OFF -DENABLE_MONITOR=OFF -DENABLE_JOYSTICK=NO" }
+          - { os: ubuntu-latest, cc: "gcc", cxx: "g++", opts: "-DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
+          - { os: ubuntu-latest, cc: "clang", cxx: "clang++", opts: "-DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
+          - { os: windows-latest, cc: "cl", cxx: "cl", opts: "-DENABLE_WIN=ON -DENABLE_X11=OFF -DENABLE_SDL=OFF -DENABLE_MONITOR=OFF -DENABLE_JOYSTICK=NO" }
     steps:
       - uses: actions/checkout@v1
       - name: Install dependencies (${{ matrix.config.os }})
