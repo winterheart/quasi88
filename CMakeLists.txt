@@ -10,6 +10,7 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 option(ENABLE_GTK2 "Enable building for GTK2" OFF)
 option(ENABLE_SDL "Enable building for libSDL" OFF)
 option(ENABLE_X11 "Enable building for X.org" ON)
+option(ENABLE_WIN "Enable building for Windows" OFF)
 option(ENABLE_SOUND "Enable sound support" ON)
 option(ENABLE_FMGEN "Enable FM Generator" ON)
 option(ENABLE_DOUBLE "Enable double screen" ON)
@@ -48,6 +49,8 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	add_definitions(-DINLINE=static\ __inline__)
 elseif(CMAKE_C_COMPILER_ID STREQUAL "Intel")
 	add_definitions(-DINLINE=static\ inline)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+	add_definitions(-DINLINE=__inline)
 else()
 	add_definitions(-DINLINE=static)
 endif()
@@ -372,3 +375,36 @@ if(ENABLE_GTK2)
 	target_link_libraries(${PROJECT_NAME}.gtk ${COMMON_LIBS} ${GTK_LIBS})
 
 endif(ENABLE_GTK2)
+
+if(ENABLE_WINDOWS)
+	add_definitions(-DQUASI88_WIN32)
+	add_definitions(-DWIN32 -D_WINDOWS -DLANG_EN -D_CRT_SECURE_NO_WARNINGS)
+
+	list(APPEND WIN32_INCLUDES
+		src/FWIN
+		src/WIN32
+	)
+
+	set(WIN32_SOURCES
+		src/FWIN/file-op.c
+		src/WIN32/audio.c
+		src/WIN32/event.c
+		src/WIN32/graph.cpp
+		src/WIN32/main.cpp
+		src/WIN32/menubar.cpp
+		src/WIN32/wait.c
+		src/WIN32/quasi88.rc
+	)
+
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GF")
+	add_executable(
+		${PROJECT_NAME}.win WIN32 ${COMMON_SOURCES} ${WIN32_SOURCES} ${SOUND_SOURCES}
+	)
+	add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+	add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+	set_target_properties(${PROJECT_NAME}.win PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+	target_include_directories(${PROJECT_NAME}.win PRIVATE ${WIN32_INCLUDES})
+	target_link_options(${PROJECT_NAME}.win PRIVATE /DYNAMICBASE:NO)
+	target_link_libraries(${PROJECT_NAME}.win imm32.lib winmm.lib)
+	# libraries for RA: odbc32.lib odbccp32.lib winhttp.lib
+endif(ENABLE_WINDOWS)

@@ -19,8 +19,9 @@
 
 /* エンディアンネス */
 
+#ifndef LSB_FIRST
 #define LSB_FIRST
-
+#endif
 
 
 /* メニューのタイトル／バージョン表示にて追加で表示する言葉 (任意の文字列) */
@@ -38,8 +39,10 @@
 
 #undef  SUPPORT_8BPP
 #undef  SUPPORT_16BPP
-#define SUPPORT_32BPP
 
+#ifndef SUPPORT_32BPP
+#define SUPPORT_32BPP
+#endif
 
 
 /* VC のインラインキーワード */
