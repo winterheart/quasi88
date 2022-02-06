@@ -39,7 +39,6 @@
 
 #undef  SUPPORT_8BPP
 #undef  SUPPORT_16BPP
-
 #ifndef SUPPORT_32BPP
 #define SUPPORT_32BPP
 #endif

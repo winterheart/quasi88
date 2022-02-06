@@ -39,11 +39,9 @@
 /* 画面の bpp の定義。SDL版は 16bpp/32bpp のみをサポートする */
 
 #undef  SUPPORT_8BPP
-
 #ifndef SUPPORT_16BPP
 #define SUPPORT_16BPP
 #endif
-
 #ifndef SUPPORT_32BPP
 #define SUPPORT_32BPP
 #endif

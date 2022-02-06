@@ -293,10 +293,10 @@ if(ENABLE_X11)
 		src/X11/wait.c
 	)
 	add_executable(
-		${PROJECT_NAME} ${COMMON_SOURCES} ${X11_SOURCES} ${SOUND_SOURCES} ${X11_SOUND_SOURCES}
+		${PROJECT_NAME}.x11 ${COMMON_SOURCES} ${X11_SOURCES} ${SOUND_SOURCES} ${X11_SOUND_SOURCES}
 	)
-	target_include_directories(${PROJECT_NAME} PRIVATE ${X11_INCLUDES})
-	target_link_libraries(${PROJECT_NAME} ${COMMON_LIBS} ${X11_LIBS})
+	target_include_directories(${PROJECT_NAME}.x11 PRIVATE ${X11_INCLUDES})
+	target_link_libraries(${PROJECT_NAME}.x11 ${COMMON_LIBS} ${X11_LIBS})
 endif(ENABLE_X11)
 
 #### SDL target
