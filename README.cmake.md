@@ -2,47 +2,42 @@
 
 ## Requirements
 
-Currently cmake build framework supports modern Linux distributions (such as recent Debian/Ubuntu or Fedora) and 
-(probably) *BSD and macOS. Minimal development requirements are:
+Currently, cmake build framework supports modern Linux distributions (such as recent Debian/Ubuntu or Fedora), Windows
+and (probably) *BSD and macOS. Minimal development requirements are:
 
-* recent compiler (GCC or llvm)
+* recent compiler (GCC, LLVM, MSVC)
 * cmake 3.10
+* ninja (optionally)
 * libSDL 1.2 (for SDL backend)
 * libX11 1.6.9 (for X.Org backend)
 * libxxf86dga (for X.Org backend)
+* libxxf86vm-dev (for X.Org backend)
 * GTK2+ 2.24 (for GTK backend)
 * ReadLine 7 (optional for Monitor)
 
 ## Quick start
 
 ```
-mkdir build
-cd build
-cmake -DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_JOYSTICK=SDL ..
-make -j2
+cmake -B build -G Ninja -DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_JOYSTICK=SDL
+cmake --build build -j2
 ```
 
 ## Configuration and compilation
 
-First, prepare build directory:
-
-```
-mkdir build
-cd build
-```
-
-Then call cmake with one of supported backend (X11, SDL, GTK2). By default enabled only X11, but you can enable all of
+Call cmake with one of supported backend (X11, SDL, GTK2, WIN). By default, enabled only X11, but you can enable all of
 them. Here is example:
 
 ```
-cmake -DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON ..
+cmake -B build -G Ninja -DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON
 ```
 
 After that you ready to compile quasi88kai:
 
 ```
-make
+cmake --build build -j2
 ```
+
+Compiled binaries can be found in `build` directory.
 
 ### All compilation options
 
@@ -53,6 +48,7 @@ Here list of all options that can be enabled/disabled via -DENABLE_FOO=ON/OFF di
 | ENABLE_GTK2                | Enable GTK2 backend               |     OFF |
 | ENABLE_SDL                 | Enable SDL backend                |     OFF |
 | ENABLE_X11                 | Enable X.Org backend              |      ON |
+| ENABLE_WIN                 | Enable Windows backend            |     OFF |
 | ENABLE_JOYSTICK            | Enable joystick support for X.Org (options: NO, SDL, LINUX_USB, BSD_USB) | NO |
 | ENABLE_SOUND               | Enable sound support              |      ON |
 | ENABLE_FMGEN               | Enable FM sound generator         |      ON |

@@ -5,23 +5,32 @@ on: [push, pull_request]
 jobs:
   build:
     name: Build all
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.config.os }}
     strategy:
+      fail-fast: false
       matrix:
         config:
-        - {cc: gcc, cxx: g++}
-        - {cc: clang, cxx: clang++}
+          - { os: ubuntu-latest, c: "gcc", cxx: "g++", opts: "-DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
+          - { os: ubuntu-latest, c: "clang", cxx: "clang++", opts: "-DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
+          - { os: windows-latest, c: "cl", cxx: "cl", opts: "-DENABLE_WIN=ON -DENABLE_X11=OFF -DENABLE_SDL=OFF -DENABLE_MONITOR=OFF -DENABLE_JOYSTICK=NO" }
     steps:
       - uses: actions/checkout@v1
-      - name: Install dependencies
+      - name: Install dependencies (${{ matrix.config.os }})
+        if: matrix.config.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install libgtk2.0-dev libsdl1.2-dev libx11-dev libxxf86dga-dev libxxf86vm-dev libreadline-dev
+          sudo apt-get install ninja-build libgtk2.0-dev libsdl1.2-dev libx11-dev libxxf86dga-dev libxxf86vm-dev libreadline-dev
+      - name: Install dependencies (${{ matrix.config.os }})
+        if: matrix.config.os == 'windows-latest'
+        run: |
+          choco install ninja
+      - name: Setup devcmd (Windows)
+        if: matrix.config.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1.10.0
       - name: Build with ${{ matrix.config.cc }}/${{ matrix.config.cxx }}
         env:
           CC: ${{ matrix.config.cc }}
           CXX: ${{ matrix.config.cxx }}
         run: |
-          cmake -B build -DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL
+          cmake -B build -G Ninja ${{ matrix.config.opts }}
           cmake --build build -j2
-

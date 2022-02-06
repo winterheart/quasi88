@@ -376,7 +376,7 @@ if(ENABLE_GTK2)
 
 endif(ENABLE_GTK2)
 
-if(ENABLE_WINDOWS)
+if(ENABLE_WIN)
 	add_definitions(-DQUASI88_WIN32)
 	add_definitions(-DWIN32 -D_WINDOWS -DLANG_EN -D_CRT_SECURE_NO_WARNINGS)
 
@@ -407,4 +407,4 @@ if(ENABLE_WINDOWS)
 	target_link_options(${PROJECT_NAME}.win PRIVATE /DYNAMICBASE:NO)
 	target_link_libraries(${PROJECT_NAME}.win imm32.lib winmm.lib)
 	# libraries for RA: odbc32.lib odbccp32.lib winhttp.lib
-endif(ENABLE_WINDOWS)
+endif(ENABLE_WIN)
