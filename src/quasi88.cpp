@@ -21,35 +21,36 @@
 
 extern "C"
 {
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
-    #include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
-    #include "quasi88.h"
-    #include "initval.h"
+#include "quasi88.h"
+#include "initval.h"
 
-    #include "pc88main.h"
-    #include "pc88sub.h"
-    #include "graph.h"
-    #include "memory.h"
-    #include "file-op.h"
+#include "pc88main.h"
+#include "pc88sub.h"
+#include "graph.h"
+#include "memory.h"
+#include "file-op.h"
+#include "fname.h"
 
-    #include "emu.h"
-    #include "drive.h"
-    #include "keyboard.h"
-    #include "monitor.h"
-    #include "snddrv.h"
-    #include "wait.h"
-    #include "status.h"
-    #include "suspend.h"
-    #include "snapshot.h"
-    #include "soundbd.h"
-    #include "screen.h"
-    #include "menu.h"
-    #include "pause.h"
-    #include "z80.h"
-    #include "intr.h"
+#include "emu.h"
+#include "drive.h"
+#include "keyboard.h"
+#include "monitor.h"
+#include "snddrv.h"
+#include "wait.h"
+#include "status.h"
+#include "suspend.h"
+#include "snapshot.h"
+#include "soundbd.h"
+#include "screen.h"
+#include "menu.h"
+#include "pause.h"
+#include "z80.h"
+#include "intr.h"
 }
 
 #if USE_RETROACHIEVEMENTS
@@ -67,8 +68,6 @@ int verbose_wait    = FALSE;        /* ウエイト時の異常を報告 */
 int verbose_suspend = FALSE;        /* サスペンド時の異常を報告 */
 int verbose_snd = FALSE;        /* サウンドのメッセージ   */
 
-static  void    imagefile_all_open(int stateload);
-static  void    imagefile_all_close(void);
 static  void    status_override(void);
 
 /***********************************************************************
@@ -618,14 +617,6 @@ static  void    status_override(void)
  *  雑多な関数
  ************************************************************************/
 #include "utility.c"
-
-
-
-/***********************************************************************
- *          ファイル名制御／管理
- ************************************************************************/
-#include "fname.c"
-
 
 
 

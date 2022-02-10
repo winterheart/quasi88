@@ -114,7 +114,6 @@ extern  T_CONFIG_IMAGE  config_image;   /* 引数で指定されたイメージ�
 
 /*------------------------------------------------------------------------*/
 
-extern  int file_coding;    /* ファイル名の漢字コード 0:EUC/1:SJIS/2:UTF8*/
 extern  int save_config;    /* 真で、終了時に設定保存する      */
 
 int config_init(int argc,

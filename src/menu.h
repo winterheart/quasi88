@@ -7,7 +7,6 @@ extern  int menu_readonly;          /* ディスク選択ダイアログは */
 extern  int menu_swapdrv;           /* ドライブの表示順序       */
 
 
-extern  int file_coding;            /* ファイル名の漢字コード   */
 extern  int filename_synchronize;       /* ファイル名を同調させる   */
 
 

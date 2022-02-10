@@ -27,6 +27,7 @@
 #include "monitor.h"
 #include "snddrv.h"
 #include "file-op.h"
+#include "fname.h"
 #include "suspend.h"
 #include "snapshot.h"
 #include "fdc.h"

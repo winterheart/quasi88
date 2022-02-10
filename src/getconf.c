@@ -11,11 +11,9 @@
 #include "quasi88.h"
 #include "initval.h"
 #include "getconf.h"
-#include "event.h"
 
 #include "pc88main.h"
 #include "pc88sub.h"
-#include "graph.h"
 #include "intr.h"
 #include "keyboard.h"
 #include "memory.h"
@@ -25,12 +23,10 @@
 
 #include "emu.h"
 #include "file-op.h"
-#include "drive.h"
+#include "fname.h"
 #include "menu.h"
 #include "status.h"
-#include "monitor.h"
 #include "snddrv.h"
-#include "wait.h"
 #include "snapshot.h"
 #include "suspend.h"
 

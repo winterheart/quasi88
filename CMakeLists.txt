@@ -100,6 +100,7 @@ set(COMMON_SOURCES
 	src/emu.c
 	src/fdc.c
 	src/file-op.cpp
+	src/fname.c
 	src/getconf.c
 	src/image.c
 	src/intr.c

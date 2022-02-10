@@ -1,7 +1,18 @@
 /***********************************************************************
  *          ファイル名制御／管理
  ************************************************************************/
+
+#include <string.h>
+#include <stdlib.h>
+
+#include "quasi88.h"
+
+#include "drive.h"
 #include "getconf.h"
+#include "file-op.h"
+#include "pc88main.h"
+#include "snapshot.h"
+#include "suspend.h"
 
 char    file_disk[2][QUASI88_MAX_FILENAME]; /*ディスクイメージファイル名*/
 int image_disk[2];              /*イメージ番号0〜31,-1は自動*/
@@ -15,6 +26,23 @@ char    file_sout[QUASI88_MAX_FILENAME];    /* シリアル入力のファイル
 int file_coding = 0;            /* ファイル名の漢字コード   */
 int filename_synchronize = TRUE;        /* ファイル名を同調させる   */
 
+/*
+ * FIXME: documentation is mess.
+ * According to function usage,
+ * 0 is Q8TK_KANJI_ANK, 1 is Q8TK_KANJI_EUC, 2 is Q8TK_KANJI_SJIS, 3 is Q8TK_KANJI_UTF8
+ */
+/**
+ * Get the Kanji code used in file name
+ * @return Kanji code:
+ */
+int osd_kanji_code() {
+  if (file_coding == 2)
+    return 3;
+  else if (file_coding == 1)
+    return 2;
+  else
+    return 1;
+}
 
 
 static char *assemble_filename(const char *imagename,
@@ -33,7 +61,7 @@ static char *assemble_filename(const char *imagename,
  *
  *  ステートロード時は、 stateload を真にして、呼び出す。
  *----------------------------------------------------------------------*/
-static  void    imagefile_all_open(int stateload)
+ void    imagefile_all_open(int stateload)
 {
     int err0 = TRUE;
     int err1 = TRUE;
@@ -183,7 +211,7 @@ static  void    imagefile_all_open(int stateload)
     }
 }
 
-static  void    imagefile_all_close(void)
+void    imagefile_all_close(void)
 {
     disk_eject(0);          memset(file_disk[0],     0, QUASI88_MAX_FILENAME);
     disk_eject(1);          memset(file_disk[1],     0, QUASI88_MAX_FILENAME);
@@ -431,19 +459,13 @@ void    filename_init_wav(int synchronize)
  *  成功時は、 char * (mallocされた領域)、失敗時は NULL
  ************************************************************************/
 
-/*
- * あるイメージのファイル名 imagename のディレクトリ部と拡張子部を
- * 取り除いたベース名を取り出し、
- * basedir と ベース名 と suffix を結合したファイル名を返す。
- *
- *  例)
- *  imagename … /my/disk/dir/GAMEDISK.d88
- *                                ^^^^^^^^  これ取り出して、
- *  basedir   …     /new/dir      これと
- *  suffix    …                      .dat これをくっつけて
- *  返り値    …     /new/dir/GAMEDISK.dat  これと返す
- *
- * この返ってくる領域は、静的な領域なので注意 !
+/**
+ * Take basename of imagename, and assembly path that constructs as basedir/basename(imagename).siffix
+ * i.e.: assemble_filename("/my/disk/dir/GAMEDISK.d88", "/new/dir", ".dat") will return "/new/dir/GAMEDISK.dat"
+ * @param imagename full path to file
+ * @param basedir base dir to new location
+ * @param suffix new suffix of filename
+ * @return assembled path
  */
 static char *assemble_filename(const char *imagename,
                    const char *basedir,

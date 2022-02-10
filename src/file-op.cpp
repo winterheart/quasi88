@@ -75,21 +75,6 @@ int osd_set_dir_state(const char *d) { return set_new_dir(d, dir_state); }
 int osd_set_dir_gcfg(const char *d) { return set_new_dir(d, dir_home); }
 int osd_set_dir_lcfg(const char *d) { return set_new_dir(d, dir_ini); }
 
-/****************************************************************************
- * ファイル名に使用されている漢字コードを取得
- *      0 … ASCII のみ
- *      1 … 日本語EUC
- *      2 … シフトJIS
- *      3 … UTF-8
- *****************************************************************************/
-int osd_kanji_code() {
-  if (file_coding == 2)
-    return 3;
-  else if (file_coding == 1)
-    return 2;
-  else
-    return 1;
-}
 
 /****************************************************************************
  * ファイル操作
