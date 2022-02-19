@@ -6,7 +6,7 @@
 #endif
 
 #ifndef BASE_VERSION
-#define BASE_VERSION    "0.6.8"
+#define BASE_VERSION    "0.6.10"
 #endif
 
 #ifndef BASE_COMMENT

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(quasi88 VERSION 0.6.8)
+project(quasi88 VERSION 0.6.10)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Reasonable default
