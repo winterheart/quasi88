@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file. An old version of
 this file can be found in `document/HISTORY.TXT` file.
 
+## 0.6.10 - Unreleased
+* Removed old Classic Mac OS support.
+
 ## 0.6.9 - 2022-02-06
 
 * RetroAchievements improvements: updated RAIntegration to 0.76.3, some fixes.

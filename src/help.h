@@ -243,17 +243,6 @@ static  void    help_msg_config( void )
    "TAPE",
    "SNAP",
    "STATE",
-#elif   defined( QUASI88_FMAC )
-   ":",
-   ":",
-   ":",
-   ":",
-   ":",
-   ":ROM:",
-   ":DISK:",
-   ":TAPE:",
-   ":SNAP:",
-   ":STATE:",
 #else
    "",
    "",

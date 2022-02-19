@@ -384,12 +384,6 @@ void stream_set_input(sound_stream *stream, int index, sound_stream *input_strea
     input->source_frac = 0;
 #if     defined(DENY_LONG_LONG)                 /* QUASI88 */
     input->step_frac = input_stream ? (UINT32)((double)input_stream->sample_rate * (double)(1 << FRAC_BITS) / stream->sample_rate) : 0;
-#elif   defined(macintosh) && defined(__MRC__)  /* QUASI88 (for MrC ...) */
-    if (input_stream) {
-        input->step_frac = ((UINT64)input_stream->sample_rate << FRAC_BITS) / stream->sample_rate;
-    } else {
-        input->step_frac = 0;
-    }
 #else                                           /* QUASI88 */
     input->step_frac = input_stream ? (((UINT64)input_stream->sample_rate << FRAC_BITS) / stream->sample_rate) : 0;
 #endif                                          /* QUASI88 */
@@ -592,12 +586,7 @@ static void stream_generate_samples(sound_stream *stream, int samples)
                 target_source_frac += FRAC_ONE;
 
             /* based on that, we know how many additional source samples we need to generate */
-#if     defined(macintosh) && defined(__SC__)       /* QUASI88 (for SC ...) */
-            source_samples_needed = ((target_source_frac + FRAC_ONE - 1) >> FRAC_BITS);
-            source_samples_needed -= input->source->cur_in_pos;
-#else                                               /* QUASI88 */
             source_samples_needed = ((target_source_frac + FRAC_ONE - 1) >> FRAC_BITS) - input->source->cur_in_pos;
-#endif                                              /* QUASI88 */
             VPRINTF(("    source_samples_needed = %d\n", source_samples_needed));
 
             /* if we need some samples, generate them recursively */

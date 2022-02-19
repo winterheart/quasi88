@@ -694,20 +694,6 @@ void    event_init(void)
         bin = binding_101;
     }
 
-#elif   defined(QUASI88_FMAC)
-
-    if (keyboard_type == 1) {
-        map = remapping_toolbox_106;
-        bin = binding_106;
-    } else {
-        map = remapping_toolbox_101;
-        bin = binding_101;
-    }
-
-    if (use_cmdkey == FALSE) {
-        map += 2;
-    }
-
 #else
     map = remapping_dummy;
     bin = binding_106;

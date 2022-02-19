@@ -858,12 +858,7 @@ uint OPNABase::ReadRAM()
 }
 
 
-#if defined(macintosh) && defined(__SC__)
-/* なんで inline にできないの……… */
-       int OPNABase::DecodeADPCMBSample(uint data)
-#else
 inline int OPNABase::DecodeADPCMBSample(uint data)
-#endif
 {
     static const int table1[16] =
     {

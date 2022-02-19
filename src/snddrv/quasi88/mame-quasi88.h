@@ -70,12 +70,6 @@ typedef signed   long long INT64;
 #endif
 
 
-#ifdef  macintosh   /* SC depend */
-#define CLIB_DECL
-#endif
-
-
-
 /* src/mamecore.h ========================================================== */
 
 /* Suppress warnings about redefining the macro 'PPC' on LinuxPPC. */
@@ -265,17 +259,7 @@ char *_auto_strdup(const char *str, const char *file, int line) ATTR_MALLOC;
 /* src/driver.h ============================================================ */
 
 #include "sndintrf.h"
-#ifdef  QUASI88_CLASSIC
-#include "sound-alias.h"
-/* Classic Mac OS では 「sound.h」 がシステムのヘッダファイル名と被ってしまう
-   ので、別名でしのぐことにしよう。
-   具体的には、ビルド前に予め、ファイル 「src/snddrv/src/sound.h」 を
-   リネームして、 「src/snddrv/src/sound-alias.h」 に変えておく。
-   なお、インクルードパス中に、 sound.h というファイル名が存在すると、
-   それだけでビルドに失敗するので注意 */
-#else
 #include "sound.h"
-#endif
 
 /* maxima */
 #define MAX_SOUND       32

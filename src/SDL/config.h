@@ -92,18 +92,4 @@
  *  SC depend
  */
 
-#ifdef  macintosh
-
-/* サウンドドライバ用に、PI(π)とM_PI(π)を定義 …  SCでも必要? */
-#ifndef PI
-#define PI 3.14159265358979323846
-#endif
-#ifndef M_PI
-#define M_PI    PI
-#endif
-
-#endif
-
-
-
 #endif  /* CONFIG_H_INCLUDED */
