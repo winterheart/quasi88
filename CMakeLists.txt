@@ -55,6 +55,14 @@ else()
 	add_definitions(-DINLINE=static)
 endif()
 
+if(UNIX)
+	add_definitions(-DQUASI88_FUNIX)
+elseif(WIN32)
+	add_definitions(-DQUASI88_FWIN)
+else()
+	message(FATAL_ERROR "Unknown architecture!")
+endif()
+
 # Check endianness
 include(TestBigEndian)
 TEST_BIG_ENDIAN(BIG_ENDIAN)

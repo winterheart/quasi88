@@ -1,12 +1,6 @@
 #ifndef FILENAME_H_INCLUDED
 #define FILENAME_H_INCLUDED
 
-
-#ifndef QUASI88_FWIN
-#define QUASI88_FWIN
-#endif
-
-
 /* 設定ファイル名 */
 
 #ifndef CONFIG_SUFFIX
