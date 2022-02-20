@@ -96,6 +96,7 @@ set(COMMON_SOURCES
 	src/crtcdmac.c
 	src/emu.c
 	src/fdc.c
+	src/file-op.cpp
 	src/getconf.c
 	src/image.c
 	src/intr.c
@@ -287,13 +288,11 @@ if(ENABLE_X11)
 		-DUSE_DGA
 	)
 	list(APPEND X11_INCLUDES
-		src/FUNIX
 		src/X11
 		${X11_Xext_INCLUDE_PATH}
 	)
 
 	set(X11_SOURCES
-		src/FUNIX/file-op.c
 		src/X11/event.c
 		src/X11/graph.c
 		src/X11/joystick.c
@@ -314,13 +313,11 @@ if(ENABLE_SDL)
 
 	list(APPEND SDL_LIBS ${SDL_LIBRARY})
 	list(APPEND SDL_INCLUDES
-		src/FUNIX
 		src/SDL
 		${SDL_INCLUDE_DIR}
 	)
 
 	set(SDL_SOURCES
-		src/FUNIX/file-op.c
 		src/SDL/event.c
 		src/SDL/graph.c
 		src/SDL/main.c
@@ -353,13 +350,11 @@ if(ENABLE_GTK2)
 	list(APPEND GTK_LIBS ${GTK2_LIBRARIES} ${CAIRO_LIBRARIES} ${SDL_LIBRARY})
 
 	list(APPEND GTK_INCLUDES
-		src/FUNIX
 		src/GTK
 		${SDL_INCLUDE_DIR}
 	)
 
 	set(GTK_SOURCES
-		src/FUNIX/file-op.c
 		src/GTK/event.c
 		src/GTK/graph.c
 		src/GTK/main.c
