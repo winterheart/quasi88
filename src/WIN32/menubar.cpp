@@ -2,27 +2,27 @@
  * メニューバー処理
  ************************************************************************/
 
-extern "C"
-{
-    #include "quasi88.h"
-    #include "device.h"
-    #include "event.h"
+extern "C" {
+#include "quasi88.h"
+#include "device.h"
+#include "event.h"
 
-    #include "initval.h"
-    #include "pc88main.h"   /* boot_basic, ...      */
-    #include "memory.h"     /* use_pcg          */
-    #include "soundbd.h"    /* sound_board          */
-    #include "intr.h"       /* cpu_clock_mhz        */
-    #include "keyboard.h"   /* mouse_mode           */
-    #include "fdc.h"        /* fdc_wait         */
-    #include "getconf.h"    /* config_save          */
-    #include "screen.h"     /* SCREEN_INTERLACE_NO ...  */
-    #include "emu.h"        /* cpu_timing, emu_reset()  */
-    #include "menu.h"       /* menu_sound_restart()     */
-    #include "drive.h"
-    #include "snddrv.h"
+#include "initval.h"
+#include "pc88main.h"   /* boot_basic, ...      */
+#include "memory.h"     /* use_pcg          */
+#include "soundbd.h"    /* sound_board          */
+#include "intr.h"       /* cpu_clock_mhz        */
+#include "keyboard.h"   /* mouse_mode           */
+#include "fdc.h"        /* fdc_wait         */
+#include "fname.h"
+#include "getconf.h"    /* config_save          */
+#include "screen.h"     /* SCREEN_INTERLACE_NO ...  */
+#include "emu.h"        /* cpu_timing, emu_reset()  */
+#include "menu.h"       /* menu_sound_restart()     */
+#include "drive.h"
+#include "snddrv.h"
 
-    #include "resource.h"
+#include "resource.h"
 }
 
 #if USE_RETROACHIEVEMENTS

@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "quasi88.h"
+#include "fname.h"
 #include "keyboard.h"
 #include "romaji.h"
 #include "event.h"

@@ -21,6 +21,7 @@
 #include "drive.h"
 #include "emu.h"     /* cpu_timing, emu_reset()  */
 #include "fdc.h"     /* fdc_wait         */
+#include "fname.h"
 #include "getconf.h" /* config_save          */
 #include "initval.h"
 #include "intr.h"     /* cpu_clock_mhz        */
