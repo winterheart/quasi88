@@ -353,15 +353,6 @@ T_DIR_INFO *osd_opendir(const char *filename) {
   /* ファイル名をソート */
   qsort(dir->entry, dir->nr_entry, sizeof(T_DIR_ENTRY), namecmp);
 
-#if 0 /* この処理は無し。表示名 abc/ でも ファイル名は abc のまま */
-    /* ディレクトリの場合、ファイル名に / を付加 (ソート後に行う) */
-    for (i=0; i<dir->nr_entry; i++) {
-    if (dir->entry[i].type == FILE_STAT_DIR) {
-        strcat(dir->entry[i].name, "/");
-    }
-    }
-#endif
-
   /* osd_readdir に備えて */
   dir->cur_entry = 0;
   return dir;
@@ -398,215 +389,76 @@ void osd_closedir(T_DIR_INFO *dirp) {
   free(dirp);
 }
 
-/****************************************************************************
- * パス名の操作
- *****************************************************************************/
+/* Manipulating path names */
 
-/*---------------------------------------------------------------------------
- * int  osd_path_normalize(const char *path, char resolved_path[], int size)
- *
- *  処理内容:
- *      ./ は削除、 ../ は親ディレクトリに置き換え、 /…/ は / に置換。
- *      面倒なので、リンクやカレントディレクトリは展開しない。
- *      末尾に / が残った場合、それは削除する。
- *  例:
- *      "../dir1/./dir2///dir3/../../file" → "../dir1/file"
- *---------------------------------------------------------------------------*/
+/**
+ * Normalize path, i.e. remove extra separators, resolve '..' and '.'. Path must be exists.
+ * @note resolved_path should be pre-allocated with size bytes
+ * @param path input path
+ * @param resolved_path result path
+ * @param size size of resolved_path
+ * @return false on failure, true on success
+ */
 int osd_path_normalize(const char *path, char resolved_path[], int size) {
-  char *buf, *s, *d, *p;
-  int is_abs, is_dir, success = FALSE;
-  size_t len = strlen(path);
+  std::filesystem::path input{canonical(std::filesystem::path(path))};
 
-  if (len == 0) {
-    if (size) {
-      resolved_path[0] = '\0';
-      success = TRUE;
-    }
-  } else {
-
-    is_abs = (path[0] == '/') ? TRUE : FALSE;
-    is_dir = (path[len - 1] == '/') ? TRUE : FALSE;
-
-    buf = (char *)malloc((len + 3) * 2); /* path と同サイズ位の   */
-    if (buf) {                           /* バッファを2個分 確保    */
-      strcpy(buf, path);
-      d = &buf[len + 3];
-      d[0] = '\0';
-
-      s = strtok(buf, "/"); /* / で 区切っていく */
-
-      if (s == nullptr) { /* 区切れないなら、 */
-                          /* それは / そのものだ  */
-        if (size > 1) {
-          strcpy(resolved_path, "/");
-          success = TRUE;
-        }
-
-      } else { /* 区切れたなら、分析  */
-
-        for (; s; s = strtok(nullptr, "/")) {
-
-          if (strcmp(s, ".") == 0) { /* . は無視  */
-            ;
-
-          } else if (strcmp(s, "..") == 0) { /* .. は直前を削除 */
-
-            p = strrchr(d, '/'); /* 直前の/を探す */
-
-            if (p && strcmp(p, "/..") != 0) { /* 見つかれば    */
-              *p = '\0';                      /*    そこで分断 */
-            } else {                          /* 見つからない  */
-              if (p == nullptr && is_abs) {   /*   絶対パスなら*/
-                ;                             /*     無視する  */
-              } else {                        /*   相対パスなら*/
-                strcat(d, "/..");             /*     .. にする */
-              }
-            }
-
-          } else {          /* 上記以外は連結 */
-            strcat(d, "/"); /* 常に / を前置 */
-            strcat(d, s);
-          }
-        }
-
-        if (d[0] == '\0') { /* 結果が空文字列になったら */
-          if (is_abs)
-            strcpy(d, "/"); /*   元が絶対パスなら /     */
-                            /* else         ;        *   元が相対パスから 空    */
-
-        } else {
-          if (is_abs == FALSE) { /* 元が相対パスなら */
-            d++;                 /* 先頭の / を削除  */
-          }
-#if 0 /* この処理は無し。元が a/b/c/ でも a/b/c とする */
-            if (is_dir) {       /* 元の末尾が / なら */
-            strcat(d, "/");     /* 末尾に / を付加   */
-            }
-#endif
-        }
-
-        if (strlen(d) < (size_t)size) {
-          strcpy(resolved_path, d);
-          success = TRUE;
-        }
-      }
-
-      free(buf);
-    }
+  if (strlen(input.string().c_str()) >= size) {
+    return false;
   }
+  strcpy(resolved_path, canonical(input).string().c_str());
 
-  /*printf("NORM:\"%s\" => \"%s\"\n",path,resolved_path);*/
-  return success;
+  // printf("NORM: \"%s\" => \"%s\"\n", path, resolved_path);
+  return true;
 }
 
-/*---------------------------------------------------------------------------
- * int  osd_path_split(const char *path, char dir[], char file[], int size)
- *
- *  処理内容:
- *      path の最後の / より前を dir、後ろを file にセットする
- *          dir の末尾に / はつかない。
- *      path の末尾が / なら、予め削除してから処理する
- *          よって、 file の末尾にも / はつかない。
- *      path は予め、正規化されているものとする。
- *---------------------------------------------------------------------------*/
+/**
+ * Split path into dirname dir and basename name, i.e. "/tmp/file.txt"
+ * produces "/tmp" and "file.txt".
+ * @note dir and file should be pre-allocated with size bytes
+ * @param path input path
+ * @param dir dirname of path
+ * @param file basename of path
+ * @param size size of dir and file entries
+ * @return false on failure, true on success
+ */
 int osd_path_split(const char *path, char dir[], char file[], int size) {
-  size_t pos = strlen(path);
+  std::filesystem::path fullpath{path};
+  std::filesystem::path dirname = fullpath.parent_path();
+  std::filesystem::path basename = fullpath.filename();
 
-  /* dir, file は十分なサイズを確保しているはずなので、軽くチェック */
-  if (pos == 0 || size <= pos) {
-    dir[0] = '\0';
-    file[0] = '\0';
-    strncat(file, path, size - 1);
-    if (pos)
-      fprintf(stderr, "internal overflow %d\n", __LINE__);
-    return FALSE;
+  if (strlen(dirname.string().c_str()) < size) {
+    strcpy(dir, dirname.string().c_str());
+  } else {
+    return false;
+  }
+  if (strlen(basename.string().c_str()) < size) {
+    strcpy(file, basename.string().c_str());
+  } else {
+    return false;
   }
 
-  if (strcmp(path, "/") == 0) { /* "/" の場合、別処理    */
-    strcpy(dir, "/");           /* ディレクトリは "/"    */
-    strcpy(file, "");           /* ファイルは ""   */
-    return TRUE;
-  }
-
-  if (path[pos - 1] == '/') { /* path 末尾の / は無視   */
-    pos--;
-  }
-
-  do { /* / を末尾から探す  */
-    if (path[pos - 1] == '/') {
-      break;
-    }
-    pos--;
-  } while (pos);
-
-  if (pos) {                 /* / が見つかったら  */
-    strncpy(dir, path, pos); /* 先頭〜 / までをコピー*/
-    if (pos > 1)
-      dir[pos - 1] = '\0'; /* 末尾の / は削除する  */
-    else                   /* ただし        */
-      dir[pos] = '\0';     /* "/"の場合は / は残す */
-
-    strcpy(file, &path[pos]);
-
-  } else {              /* / が見つからなかった    */
-    strcpy(dir, "");    /* ディレクトリは "" */
-    strcpy(file, path); /* ファイルは path全て   */
-  }
-
-  pos = strlen(file); /* ファイル末尾の / は削除 */
-  if (pos && file[pos - 1] == '/') {
-    file[pos - 1] = '\0';
-  }
-
-  /*printf("SPLT:\"%s\" = \"%s\" + \"%s\")\n",path,dir,file);*/
-  return TRUE;
+  // printf("SPLT: \"%s\" = \"%s\" + \"%s\")\n", path, dir, file);
+  return true;
 }
 
-/*---------------------------------------------------------------------------
- * int  osd_path_join(const char *dir, const char *file, char path[], int size)
- *
- *  処理内容:
- *      file が / で始まっていたら、そのまま path にセット
- *      そうでなければ、"dir" + "/" + "file" を path にセット
- *      出来上がった path は正規化しておく
- *---------------------------------------------------------------------------*/
+/**
+ * Joins dir and file paths into one, normalize it and returns result as path.
+ * @note path should be pre-allocated with size bytes.
+ * @param dir directory path
+ * @param file filename
+ * @param path result path
+ * @param size expected size of path
+ * @return false on failure, true on success
+ */
 int osd_path_join(const char *dir, const char *file, char path[], int size) {
-  size_t len;
-  char *p;
-
-  if (dir == nullptr || dir[0] == '\0' || /* ディレクトリ名なし or  */
-      file[0] == '/') {                   /* ファイル名が、絶対パス */
-
-    if ((size_t)size <= strlen(file)) {
-      return FALSE;
-    }
-    strcpy(path, file);
-
-  } else { /* ファイル名は、相対パス */
-
-    path[0] = '\0';
-    strncat(path, dir, size - 1);
-
-    len = strlen(path);                   /* ディレクトリ末尾  */
-    if (len && path[len - 1] != '/') {    /* が '/' でないなら */
-      strncat(path, "/", size - len - 1); /* 付加する          */
-    }
-
-    len = strlen(path);
-    strncat(path, file, size - len - 1);
+  std::filesystem::path result{weakly_canonical(std::filesystem::path(dir) / std::filesystem::path(file))};
+  if (result.string().size() > size) {
+    return false;
   }
+  strcpy(path, result.string().c_str());
 
-  p = (char *)malloc(size); /* 正規化しておこう */
-  if (p) {
-    strcpy(p, path);
-    if (osd_path_normalize(p, path, size) == FALSE) {
-      strcpy(path, p);
-    }
-    free(p);
-  }
-
-  /*printf("JOIN:\"%s\" + \"%s\" = \"%s\"\n",dir,file,path);*/
-  return TRUE;
+  // printf("JOIN: \"%s\" + \"%s\" = \"%s\"\n", dir, file, path);
+  return true;
 }
 
 /**
