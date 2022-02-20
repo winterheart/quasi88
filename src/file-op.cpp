@@ -12,8 +12,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include <unistd.h>
-#include <errno.h>
 
 #include "quasi88.h"
 #include "file-op.h"
@@ -21,23 +19,21 @@
 
 /*****************************************************************************/
 
-/* 以下のディレクトリ名は、予め OSD_MAX_FILENAME バイトの
-   固定長バッファを確保して、それにわりあてる。
-    (malloc/free で動的に管理する方がスマートかもしれないけど…) */
+/*
+ * Following dir names are pre-allocated char arrays with OSD_MAX_FILENAME
+ * length. Don't forget to malloc() and free() them.
+ */
+static char *dir_cwd;   // Current directory
+static char *dir_rom;   // Search directory for ROM files
+static char *dir_disk;  // Search directory for DISK image files
+static char *dir_tape;  // Search directory for TAPE image files
+static char *dir_snap;  // Where to save snapshots
+static char *dir_state; // Where to save states of machine
+static char *dir_save;  // Where to save saves
+static char *dir_home;  // Common directory of configuration
+static char *dir_ini;   // Directory for local configuration
 
-static char *dir_cwd;   /* デフォルトのディレクトリ (カレント)      */
-static char *dir_rom;   /* ROMイメージファイルの検索ディレクトリ   */
-static char *dir_disk;  /* DISKイメージファイルの検索ディレクトリ  */
-static char *dir_tape;  /* TAPEイメージファイルの基準ディレクトリ  */
-static char *dir_save;  /* 上書き用のイメージファイルの保存先        */
-static char *dir_snap;  /* 画面スナップショットファイルの保存先       */
-static char *dir_state; /* サスペンドファイルの保存先          */
-static char *dir_g_cfg; /* 共通設定ファイルのディレクトリ        */
-static char *dir_l_cfg; /* 個別設定ファイルのディレクトリ        */
-
-/****************************************************************************
- * 各種ディレクトリの取得    (osd_dir_cwd は NULLを返してはだめ !)
- *****************************************************************************/
+/* Gets directory pathnames (osd_dir_cwd should never returns NULL!) */
 const char *osd_dir_cwd() { return dir_cwd; }
 const char *osd_dir_rom() { return dir_rom; }
 const char *osd_dir_disk() { return dir_disk; }
@@ -45,8 +41,8 @@ const char *osd_dir_tape() { return dir_tape; }
 const char *osd_dir_save() { return dir_save; }
 const char *osd_dir_snap() { return dir_snap; }
 const char *osd_dir_state() { return dir_state; }
-const char *osd_dir_gcfg() { return dir_g_cfg[0] ? dir_g_cfg : nullptr; }
-const char *osd_dir_lcfg() { return dir_l_cfg[0] ? dir_l_cfg : NULL; }
+const char *osd_dir_gcfg() { return dir_home; }
+const char *osd_dir_lcfg() { return dir_ini; }
 
 static int set_new_dir(const char *newdir, char *dir) {
   if (strlen(newdir) < OSD_MAX_FILENAME) {
@@ -63,8 +59,8 @@ int osd_set_dir_tape(const char *d) { return set_new_dir(d, dir_tape); }
 int osd_set_dir_save(const char *d) { return set_new_dir(d, dir_save); }
 int osd_set_dir_snap(const char *d) { return set_new_dir(d, dir_snap); }
 int osd_set_dir_state(const char *d) { return set_new_dir(d, dir_state); }
-int osd_set_dir_gcfg(const char *d) { return set_new_dir(d, dir_g_cfg); }
-int osd_set_dir_lcfg(const char *d) { return set_new_dir(d, dir_l_cfg); }
+int osd_set_dir_gcfg(const char *d) { return set_new_dir(d, dir_home); }
+int osd_set_dir_lcfg(const char *d) { return set_new_dir(d, dir_ini); }
 
 /****************************************************************************
  * ファイル名に使用されている漢字コードを取得
@@ -127,8 +123,8 @@ OSD_FILE *osd_fopen(int type, const char *path, const char *mode) {
   int stat_ok;
 
   st = nullptr;
-  for (i = 0; i < MAX_STREAM; i++) { /* 空きバッファを探す */
-    if (osd_stream[i].fp == nullptr) {  /* fp が NULL なら空き */
+  for (i = 0; i < MAX_STREAM; i++) {   /* 空きバッファを探す */
+    if (osd_stream[i].fp == nullptr) { /* fp が NULL なら空き */
       st = &osd_stream[i];
       break;
     }
@@ -310,7 +306,7 @@ T_DIR_INFO *osd_opendir(const char *filename) {
 
     dp = readdir(dirp); /* ファイル名取得 */
 
-    if (dp == nullptr) {    /* 取得に失敗したら、中断  */
+    if (dp == nullptr) { /* 取得に失敗したら、中断  */
       dir->nr_entry = i; /* (これは正常扱いとする。 */
       break;             /*  おそらく途中でファイル */
     }                    /*  が削除されたのだろう)  */
@@ -454,7 +450,7 @@ int osd_path_normalize(const char *path, char resolved_path[], int size) {
       s = strtok(buf, "/"); /* / で 区切っていく */
 
       if (s == nullptr) { /* 区切れないなら、 */
-                       /* それは / そのものだ  */
+                          /* それは / そのものだ  */
         if (size > 1) {
           strcpy(resolved_path, "/");
           success = TRUE;
@@ -474,7 +470,7 @@ int osd_path_normalize(const char *path, char resolved_path[], int size) {
             if (p && strcmp(p, "/..") != 0) { /* 見つかれば    */
               *p = '\0';                      /*    そこで分断 */
             } else {                          /* 見つからない  */
-              if (p == nullptr && is_abs) {      /*   絶対パスなら*/
+              if (p == nullptr && is_abs) {   /*   絶対パスなら*/
                 ;                             /*     無視する  */
               } else {                        /*   相対パスなら*/
                 strcat(d, "/..");             /*     .. にする */
@@ -593,7 +589,7 @@ int osd_path_join(const char *dir, const char *file, char path[], int size) {
   char *p;
 
   if (dir == nullptr || dir[0] == '\0' || /* ディレクトリ名なし or  */
-      file[0] == '/') {                /* ファイル名が、絶対パス */
+      file[0] == '/') {                   /* ファイル名が、絶対パス */
 
     if ((size_t)size <= strlen(file)) {
       return FALSE;
@@ -654,22 +650,38 @@ int osd_file_stat(const char *pathname) {
   }
 }
 
-/****************************************************************************
- * int  osd_file_config_init(void)
- *
- *  この関数は、起動後に1度だけ呼び出される。
- *  正常終了時は真を、 malloc に失敗したなど異常終了時は偽を返す。
- *
- ****************************************************************************/
-static int parse_tilda(const char *home, const char *path, char *result_path, int result_size);
 static int make_dir(const char *dname);
 
+/**
+ * Sets pointer to *dir to directory defined by environment variable env_dir.
+ * If env_dir undefined, cwd_dir / alt_dir will be used instead as default value.
+ * @param dir directory that will be defined
+ * @param env_dir environment variable that holds requested path (if defined)
+ * @param alt_dir alternative path that will be used if environment var undefined or empty
+ */
+static void set_dir(char **dir, const char *env_dir, const char *alt_dir) {
+  std::filesystem::path path;
+  char *env_path = getenv(env_dir);
+  if (env_path) {
+    path = std::filesystem::path(env_path);
+  }
+
+  if (!path.empty()) {
+    strcpy(*dir, path.string().c_str());
+  } else {
+    if (alt_dir) {
+      path = std::filesystem::path(dir_home) / std::filesystem::path(alt_dir);
+      strcpy(*dir, path.string().c_str());
+    } else {
+      // Failsafe
+      path = std::filesystem::current_path();
+      strcpy(*dir, path.string().c_str());
+    }
+    make_dir((const char *)*dir);
+  }
+}
+
 int osd_file_config_init() {
-  char *s;
-  char *home = nullptr;
-  char *g_cfg = nullptr;
-  char *l_cfg = nullptr;
-  char *state = nullptr;
 
   /* ワークを確保 (固定長で処理する予定なので静的確保でもいいんだけど) */
 
@@ -679,213 +691,62 @@ int osd_file_config_init() {
   dir_tape = (char *)malloc(OSD_MAX_FILENAME);
   dir_snap = (char *)malloc(OSD_MAX_FILENAME);
   dir_state = (char *)malloc(OSD_MAX_FILENAME);
-  dir_g_cfg = (char *)malloc(OSD_MAX_FILENAME);
-  dir_l_cfg = (char *)malloc(OSD_MAX_FILENAME);
+  dir_save = (char *)malloc(OSD_MAX_FILENAME);
+  dir_home = (char *)malloc(OSD_MAX_FILENAME);
+  dir_ini = (char *)malloc(OSD_MAX_FILENAME);
 
-  if (!dir_cwd || !dir_rom || !dir_disk || !dir_tape || !dir_snap || !dir_state || !dir_g_cfg || !dir_l_cfg)
-    return FALSE;
+  if (!dir_cwd || !dir_rom || !dir_disk || !dir_tape || !dir_snap || !dir_state || !dir_home || !dir_ini)
+    return false;
 
   /* カレントワーキングディレクトリ名 (CWD) を取得する */
-
-  if (getcwd(dir_cwd, OSD_MAX_FILENAME - 1)) {
-    dir_cwd[OSD_MAX_FILENAME - 1] = '\0';
+  std::filesystem::path dir_path;
+  std::error_code ec;
+  dir_path = std::filesystem::current_path(ec);
+  if (ec) {
+    fprintf(stderr, "error: can't get CWD: %s\n", ec.message().c_str());
+    strcpy(dir_cwd, ""); // Dunno, is this safe?
   } else {
-    fprintf(stderr, "error: can't get CWD\n");
-    strcpy(dir_cwd, "");
+    strcpy(dir_cwd, dir_path.string().c_str());
   }
 
-  /* ホームディレクトリ $(HOME) を取得する */
-
-  home = getenv("HOME");
-
-  if (home == nullptr ||   /* 未定義とか絶対パスで   */
-      home[0] != '/') { /* ない場合は NG   */
-    fprintf(stderr, "error: can't get HOME\n");
-    home = nullptr;
-
+  // Now check if current directory contains quasi88.ini file. If it is, make it as home.
+  if (is_regular_file(dir_path / CONFIG_FILENAME CONFIG_SUFFIX)) {
+    strcpy(dir_home, dir_path.string().c_str());
   } else {
+    /* Retrieve home directory via getenv */
+#if defined(QUASI88_FUNIX)
+    char *env_home = getenv("HOME");
+#elif defined(QUASI88_FWIN)
+    char *env_home = getenv("USERPROFILE");
+#else
+    fprintf(stderr, "cannot detect homedir, trying getenv(\"HOME\") as default!\n");
+    char *env_home = getenv("HOME");
+#endif
 
-    /* $(HOME)/.quasi88/以下のディレクトリを作成 */
-
-#define HOME_QUASI88 "/.quasi88"
-#define HOME_QUASI88_RC "/.quasi88/rc"
-#define HOME_QUASI88_STATE "/.quasi88/state"
-
-    s = (char *)malloc(strlen(home) + sizeof(HOME_QUASI88) + 1);
-    if (s) {
-      sprintf(s, "%s%s", home, HOME_QUASI88);
-
-      if (make_dir(s)) {
-        g_cfg = s;
-      } else {
-        free(s);
-      }
-    }
-
-    s = (char *)malloc(strlen(home) + sizeof(HOME_QUASI88_RC) + 1);
-    if (s) {
-      sprintf(s, "%s%s", home, HOME_QUASI88_RC);
-
-      if (make_dir(s)) {
-        l_cfg = s;
-      } else {
-        free(s);
-      }
-    }
-
-    s = (char *)malloc(strlen(home) + sizeof(HOME_QUASI88_STATE) + 1);
-    if (s) {
-      sprintf(s, "%s%s", home, HOME_QUASI88_STATE);
-
-      if (make_dir(s)) {
-        state = s;
-      } else {
-        free(s);
-      }
-    }
-  }
-
-  /* ROMディレクトリを設定する */
-
-  s = getenv("QUASI88_ROM_DIR"); /* $(QUASI88_ROM_DIR)   */
-  if (s && strlen(s) < OSD_MAX_FILENAME) {
-    strcpy(dir_rom, s);
-  } else {
-    if (parse_tilda(home, ROM_DIR, dir_rom, OSD_MAX_FILENAME) == 0) {
-      strcpy(dir_rom, dir_cwd);
-    }
-  }
-
-  /* DISKディレクトリを設定する */
-
-  s = getenv("QUASI88_DISK_DIR"); /* $(QUASI88_DISK_DIR) */
-  if (s && strlen(s) < OSD_MAX_FILENAME) {
-    strcpy(dir_disk, s);
-  } else {
-    if (parse_tilda(home, DISK_DIR, dir_disk, OSD_MAX_FILENAME) == 0) {
-      strcpy(dir_disk, dir_cwd);
-    }
-  }
-
-  /* TAPEディレクトリを設定する */
-
-  s = getenv("QUASI88_TAPE_DIR"); /* $(QUASI88_TAPE_DIR) */
-  if (s && strlen(s) < OSD_MAX_FILENAME) {
-    strcpy(dir_tape, s);
-  } else {
-    if (parse_tilda(home, TAPE_DIR, dir_tape, OSD_MAX_FILENAME) == 0) {
-      strcpy(dir_tape, dir_cwd);
-    }
-  }
-
-  /* SNAPディレクトリを設定する */
-
-  s = getenv("QUASI88_SNAP_DIR"); /* $(QUASI88_SNAP_DIR) */
-  if (s && strlen(s) < OSD_MAX_FILENAME) {
-    strcpy(dir_snap, s);
-  } else {
-    strcpy(dir_snap, dir_cwd);
-  }
-
-  /* STATEディレクトリを設定する */
-
-  s = getenv("QUASI88_STATE_DIR"); /* $(QUASI88_STATE_DIR) */
-  if (s && strlen(s) < OSD_MAX_FILENAME) {
-    strcpy(dir_state, s);
-  } else {
-    if (state && strlen(state) < OSD_MAX_FILENAME) {
-      strcpy(dir_state, state);
+    if (env_home) {
+      dir_path = std::filesystem::path(env_home) / ".quasi88";
     } else {
-      strcpy(dir_state, dir_cwd);
+      // Cannot get HOME, setting current as home
+      fprintf(stderr, "error: can't get HOME\n");
+      dir_path = std::filesystem::current_path();
     }
+    strcpy(dir_home, dir_path.string().c_str());
   }
+  make_dir((const char *)dir_home);
 
-  /* 全体設定ディレクトリを設定する */
+  // All set, now populate dir variables
+  set_dir(&dir_ini, "QUASI88_INI_DIR", "ini");
+  set_dir(&dir_rom, "QUASI88_ROM_DIR", "rom");
+  set_dir(&dir_disk, "QUASI88_DISK_DIR", "disk");
+  set_dir(&dir_tape, "QUASI88_TAPE_DIR", "tape");
+  set_dir(&dir_snap, "QUASI88_SNAP_DIR", "snap");
+  set_dir(&dir_state, "QUASI88_STATE_DIR", "state");
+  set_dir(&dir_save, "QUASI88_SAVE_DIR", "save");
 
-  s = g_cfg;
-  if (s && strlen(s) < OSD_MAX_FILENAME) {
-    strcpy(dir_g_cfg, s);
-  } else {
-    strcpy(dir_g_cfg, "");
-  }
+  if (!dir_ini || !dir_rom || !dir_disk || !dir_tape || !dir_snap || !dir_state || !dir_save)
+    return false;
 
-  /* 個別設定ディレクトリを設定する */
-
-  s = l_cfg;
-  if (s && strlen(s) < OSD_MAX_FILENAME) {
-    strcpy(dir_l_cfg, s);
-  } else {
-    strcpy(dir_l_cfg, "");
-  }
-
-  if (g_cfg)
-    free(g_cfg);
-  if (l_cfg)
-    free(l_cfg);
-  if (state)
-    free(state);
-
-  return TRUE;
-}
-
-/*
- * path が ~ で始まっていたら、 home に置き換えて result_path に格納する。
- *  何らかの理由で格納できなかったら、偽を返す。
- */
-
-static int parse_tilda(const char *home, const char *path, char *result_path, int result_size) {
-  size_t i;
-  char *buf;
-
-  if (home && home[0] == '/' && /* home が / で始まっていて、   */
-      path[0] == '~') {         /* path が ~ で始まっている場合   */
-
-    buf = (char *)malloc(strlen(home) + strlen(path) + 2);
-    if (buf == nullptr)
-      return FALSE;
-
-    if (path[1] == '/' || /* path が ~/ や ~/xxx や ~ の場合 */
-        path[1] == '\0') {
-
-      sprintf(buf, "%s%s%s", home, "/", &path[1]);
-
-    } else { /* path が ~xxx や ~xxx/ の場合 */
-
-      strcpy(buf, home);   /* home から最後のディレク */
-      i = strlen(buf) - 1; /* トリ部を削り切り取ろう  */
-
-      while (0 <= i && buf[i] == '/') {
-        i--;
-      } /* 末尾の / を全てスキップ */
-      while (0 <= i && buf[i] != '/') {
-        i--;
-      } /* / 以外を全てスキップ    */
-      while (0 <= i && buf[i] == '/') {
-        i--;
-      }                  /* さらに / を全てスキップ */
-                         /*   (全部スキップして     */
-      buf[i + 1] = '\0'; /*    しまったら / になる) */
-
-      strcat(buf, "/");
-      strcat(buf, &path[1]);
-    }
-
-    osd_path_normalize(buf, result_path, result_size);
-
-    free(buf);
-    return TRUE;
-
-  } else { /* home が / で始まらない、 path が ~ で…… */
-
-    if (strlen(path) < (size_t)result_size) {
-
-      strcpy(result_path, path);
-      return TRUE;
-
-    } else {
-      return FALSE;
-    }
-  }
+  return true;
 }
 
 /*
@@ -927,8 +788,10 @@ void osd_file_config_exit() {
     free(dir_snap);
   if (dir_state)
     free(dir_state);
-  if (dir_g_cfg)
-    free(dir_g_cfg);
-  if (dir_l_cfg)
-    free(dir_l_cfg);
+  if (dir_save)
+    free(dir_save);
+  if (dir_home)
+    free(dir_home);
+  if (dir_ini)
+    free(dir_ini);
 }
