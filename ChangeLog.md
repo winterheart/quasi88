@@ -5,6 +5,7 @@ this file can be found in `document/HISTORY.TXT` file.
 
 ## 0.6.10 - Unreleased
 * Removed old Classic Mac OS support.
+* Unify file operations functions for all supported platforms. Now project requires C++17 capable compiler.
 
 ## 0.6.9 - 2022-02-06
 

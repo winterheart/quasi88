@@ -5,7 +5,7 @@
 Currently, cmake build framework supports modern Linux distributions (such as recent Debian/Ubuntu or Fedora), Windows
 and (probably) *BSD and macOS. Minimal development requirements are:
 
-* recent compiler (GCC, LLVM, MSVC)
+* a recent compiler with C99 and C++17 support (GCC, LLVM, MSVC)
 * cmake 3.10
 * ninja (optionally)
 * libSDL 1.2 (for SDL backend)

@@ -17,6 +17,7 @@
 #include "intr.h"
 #include "keyboard.h"
 #include "memory.h"
+#include "monitor.h"
 #include "screen.h"
 #include "soundbd.h"
 #include "fdc.h"

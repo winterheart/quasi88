@@ -31,6 +31,7 @@
 #include "drive.h"
 #include "image.h"
 #include "file-op.h"
+#include "fname.h"
 #include "status.h"
 #include "menu.h"
 #include "pause.h"
