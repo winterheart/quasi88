@@ -8,14 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <errno.h>
 
 #include "quasi88.h"
-#include "initval.h"
 #include "file-op.h"
 #include "menu.h"
 
@@ -38,15 +36,15 @@ static char *dir_l_cfg; /* 個別設定ファイルのディレクトリ        
 /****************************************************************************
  * 各種ディレクトリの取得    (osd_dir_cwd は NULLを返してはだめ !)
  *****************************************************************************/
-const char *osd_dir_cwd(void) { return dir_cwd; }
-const char *osd_dir_rom(void) { return dir_rom; }
-const char *osd_dir_disk(void) { return dir_disk; }
-const char *osd_dir_tape(void) { return dir_tape; }
-const char *osd_dir_save(void) { return dir_save; }
-const char *osd_dir_snap(void) { return dir_snap; }
-const char *osd_dir_state(void) { return dir_state; }
-const char *osd_dir_gcfg(void) { return dir_g_cfg[0] ? dir_g_cfg : NULL; }
-const char *osd_dir_lcfg(void) { return dir_l_cfg[0] ? dir_l_cfg : NULL; }
+const char *osd_dir_cwd() { return dir_cwd; }
+const char *osd_dir_rom() { return dir_rom; }
+const char *osd_dir_disk() { return dir_disk; }
+const char *osd_dir_tape() { return dir_tape; }
+const char *osd_dir_save() { return dir_save; }
+const char *osd_dir_snap() { return dir_snap; }
+const char *osd_dir_state() { return dir_state; }
+const char *osd_dir_gcfg() { return dir_g_cfg[0] ? dir_g_cfg : nullptr; }
+const char *osd_dir_lcfg() { return dir_l_cfg[0] ? dir_l_cfg : NULL; }
 
 static int set_new_dir(const char *newdir, char *dir) {
   if (strlen(newdir) < OSD_MAX_FILENAME) {
@@ -73,7 +71,7 @@ int osd_set_dir_lcfg(const char *d) { return set_new_dir(d, dir_l_cfg); }
  *      2 … シフトJIS
  *      3 … UTF-8
  *****************************************************************************/
-int osd_kanji_code(void) {
+int osd_kanji_code() {
   if (file_coding == 2)
     return 3;
   else if (file_coding == 1)
@@ -126,19 +124,19 @@ OSD_FILE *osd_fopen(int type, const char *path, const char *mode) {
   OSD_FILE *st;
   int stat_ok;
 
-  st = NULL;
+  st = nullptr;
   for (i = 0; i < MAX_STREAM; i++) { /* 空きバッファを探す */
-    if (osd_stream[i].fp == NULL) {  /* fp が NULL なら空き */
+    if (osd_stream[i].fp == nullptr) {  /* fp が NULL なら空き */
       st = &osd_stream[i];
       break;
     }
   }
-  if (st == NULL)
-    return NULL; /* 空きがなければ NG */
+  if (st == nullptr)
+    return nullptr; /* 空きがなければ NG */
 
   if (stat(path, &sb) != 0) { /* ファイルの状態を取得する */
     if (mode[0] == 'r')
-      return NULL;
+      return nullptr;
     stat_ok = FALSE;
   } else {
     stat_ok = TRUE;
@@ -166,7 +164,7 @@ OSD_FILE *osd_fopen(int type, const char *path, const char *mode) {
 
             } else {
               /* DISK以外、ないしモードが違うならばNG */
-              return NULL;
+              return nullptr;
             }
           }
         }
@@ -194,7 +192,7 @@ OSD_FILE *osd_fopen(int type, const char *path, const char *mode) {
 
     } else {
 
-      return NULL;
+      return nullptr;
     }
   }
 }
@@ -202,13 +200,13 @@ OSD_FILE *osd_fopen(int type, const char *path, const char *mode) {
 int osd_fclose(OSD_FILE *stream) {
   FILE *fp = stream->fp;
 
-  stream->fp = NULL;
+  stream->fp = nullptr;
   return fclose(fp);
 }
 
 int osd_fflush(OSD_FILE *stream) {
-  if (stream == NULL)
-    return fflush(NULL);
+  if (stream == nullptr)
+    return fflush(nullptr);
   else
     return fflush(stream->fp);
 }
@@ -273,18 +271,18 @@ T_DIR_INFO *osd_opendir(const char *filename) {
   struct dirent *dp;
 
   /* T_DIR_INFO ワークを 1個確保 */
-  if ((dir = (T_DIR_INFO *)malloc(sizeof(T_DIR_INFO))) == NULL) {
-    return NULL;
+  if ((dir = (T_DIR_INFO *)malloc(sizeof(T_DIR_INFO))) == nullptr) {
+    return nullptr;
   }
 
-  if (filename == NULL || filename[0] == '\0') {
+  if (filename == nullptr || filename[0] == '\0') {
     filename = ".";
   }
 
   dirp = opendir(filename); /* ディレクトリを開く */
-  if (dirp == NULL) {
+  if (dirp == nullptr) {
     free(dir);
-    return NULL;
+    return nullptr;
   }
 
   dir->nr_entry = 0; /* ファイル数を数える */
@@ -295,14 +293,14 @@ T_DIR_INFO *osd_opendir(const char *filename) {
 
   /* T_DIR_ENTRY ワークを ファイル数分 確保 */
   dir->entry = (T_DIR_ENTRY *)malloc(dir->nr_entry * sizeof(T_DIR_ENTRY));
-  if (dir->entry == NULL) {
+  if (dir->entry == nullptr) {
     closedir(dirp);
     free(dir);
-    return NULL;
+    return nullptr;
   }
   for (i = 0; i < dir->nr_entry; i++) {
-    dir->entry[i].name = NULL;
-    dir->entry[i].str = NULL;
+    dir->entry[i].name = nullptr;
+    dir->entry[i].str = nullptr;
   }
 
   /* ファイル数分、処理ループ (情報を格納) */
@@ -310,7 +308,7 @@ T_DIR_INFO *osd_opendir(const char *filename) {
 
     dp = readdir(dirp); /* ファイル名取得 */
 
-    if (dp == NULL) {    /* 取得に失敗したら、中断  */
+    if (dp == nullptr) {    /* 取得に失敗したら、中断  */
       dir->nr_entry = i; /* (これは正常扱いとする。 */
       break;             /*  おそらく途中でファイル */
     }                    /*  が削除されたのだろう)  */
@@ -349,7 +347,7 @@ T_DIR_INFO *osd_opendir(const char *filename) {
 
     len = strlen(dp->d_name) + 1;
     p = (char *)malloc((len + 1) + (len + 1));
-    if (p == NULL) { /* ↑ファイル名 と ↑表示名 のバッファを一気に確保 */
+    if (p == nullptr) { /* ↑ファイル名 と ↑表示名 のバッファを一気に確保 */
       dir->nr_entry = i;
       break; /* malloc に失敗したら中断 */
     }
@@ -391,7 +389,7 @@ T_DIR_INFO *osd_opendir(const char *filename) {
  *  順次、返していく。
  *---------------------------------------------------------------------------*/
 T_DIR_ENTRY *osd_readdir(T_DIR_INFO *dirp) {
-  T_DIR_ENTRY *ret_value = NULL;
+  T_DIR_ENTRY *ret_value = nullptr;
 
   if (dirp->cur_entry != dirp->nr_entry) {
     ret_value = &dirp->entry[dirp->cur_entry];
@@ -453,7 +451,7 @@ int osd_path_normalize(const char *path, char resolved_path[], int size) {
 
       s = strtok(buf, "/"); /* / で 区切っていく */
 
-      if (s == NULL) { /* 区切れないなら、 */
+      if (s == nullptr) { /* 区切れないなら、 */
                        /* それは / そのものだ  */
         if (size > 1) {
           strcpy(resolved_path, "/");
@@ -462,7 +460,7 @@ int osd_path_normalize(const char *path, char resolved_path[], int size) {
 
       } else { /* 区切れたなら、分析  */
 
-        for (; s; s = strtok(NULL, "/")) {
+        for (; s; s = strtok(nullptr, "/")) {
 
           if (strcmp(s, ".") == 0) { /* . は無視  */
             ;
@@ -474,7 +472,7 @@ int osd_path_normalize(const char *path, char resolved_path[], int size) {
             if (p && strcmp(p, "/..") != 0) { /* 見つかれば    */
               *p = '\0';                      /*    そこで分断 */
             } else {                          /* 見つからない  */
-              if (p == NULL && is_abs) {      /*   絶対パスなら*/
+              if (p == nullptr && is_abs) {      /*   絶対パスなら*/
                 ;                             /*     無視する  */
               } else {                        /*   相対パスなら*/
                 strcat(d, "/..");             /*     .. にする */
@@ -592,7 +590,7 @@ int osd_path_join(const char *dir, const char *file, char path[], int size) {
   size_t len;
   char *p;
 
-  if (dir == NULL || dir[0] == '\0' || /* ディレクトリ名なし or  */
+  if (dir == nullptr || dir[0] == '\0' || /* ディレクトリ名なし or  */
       file[0] == '/') {                /* ファイル名が、絶対パス */
 
     if ((size_t)size <= strlen(file)) {
@@ -675,12 +673,12 @@ int osd_file_stat(const char *pathname) {
 static int parse_tilda(const char *home, const char *path, char *result_path, int result_size);
 static int make_dir(const char *dname);
 
-int osd_file_config_init(void) {
+int osd_file_config_init() {
   char *s;
-  char *home = NULL;
-  char *g_cfg = NULL;
-  char *l_cfg = NULL;
-  char *state = NULL;
+  char *home = nullptr;
+  char *g_cfg = nullptr;
+  char *l_cfg = nullptr;
+  char *state = nullptr;
 
   /* ワークを確保 (固定長で処理する予定なので静的確保でもいいんだけど) */
 
@@ -709,10 +707,10 @@ int osd_file_config_init(void) {
 
   home = getenv("HOME");
 
-  if (home == NULL ||   /* 未定義とか絶対パスで   */
+  if (home == nullptr ||   /* 未定義とか絶対パスで   */
       home[0] != '/') { /* ない場合は NG   */
     fprintf(stderr, "error: can't get HOME\n");
-    home = NULL;
+    home = nullptr;
 
   } else {
 
@@ -722,7 +720,7 @@ int osd_file_config_init(void) {
 #define HOME_QUASI88_RC "/.quasi88/rc"
 #define HOME_QUASI88_STATE "/.quasi88/state"
 
-    s = malloc(strlen(home) + sizeof(HOME_QUASI88) + 1);
+    s = (char *)malloc(strlen(home) + sizeof(HOME_QUASI88) + 1);
     if (s) {
       sprintf(s, "%s%s", home, HOME_QUASI88);
 
@@ -733,7 +731,7 @@ int osd_file_config_init(void) {
       }
     }
 
-    s = malloc(strlen(home) + sizeof(HOME_QUASI88_RC) + 1);
+    s = (char *)malloc(strlen(home) + sizeof(HOME_QUASI88_RC) + 1);
     if (s) {
       sprintf(s, "%s%s", home, HOME_QUASI88_RC);
 
@@ -744,7 +742,7 @@ int osd_file_config_init(void) {
       }
     }
 
-    s = malloc(strlen(home) + sizeof(HOME_QUASI88_STATE) + 1);
+    s = (char *)malloc(strlen(home) + sizeof(HOME_QUASI88_STATE) + 1);
     if (s) {
       sprintf(s, "%s%s", home, HOME_QUASI88_STATE);
 
@@ -852,7 +850,7 @@ static int parse_tilda(const char *home, const char *path, char *result_path, in
       path[0] == '~') {         /* path が ~ で始まっている場合   */
 
     buf = (char *)malloc(strlen(home) + strlen(path) + 2);
-    if (buf == NULL)
+    if (buf == nullptr)
       return FALSE;
 
     if (path[1] == '/' || /* path が ~/ や ~/xxx や ~ の場合 */
@@ -938,7 +936,7 @@ static int make_dir(const char *dname) {
  *  この関数は、終了後に1度だけ呼び出される。
  *
  ****************************************************************************/
-void osd_file_config_exit(void) {
+void osd_file_config_exit() {
   if (dir_cwd)
     free(dir_cwd);
   if (dir_rom)
