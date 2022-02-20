@@ -387,12 +387,10 @@ if(ENABLE_WIN)
 	add_definitions(-DWIN32 -D_WINDOWS -DLANG_EN -D_CRT_SECURE_NO_WARNINGS)
 
 	list(APPEND WIN32_INCLUDES
-		src/FWIN
 		src/WIN32
 	)
 
 	set(WIN32_SOURCES
-		src/FWIN/file-op.c
 		src/WIN32/audio.c
 		src/WIN32/event.c
 		src/WIN32/graph.cpp
