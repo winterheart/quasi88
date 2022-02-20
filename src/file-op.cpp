@@ -5,19 +5,22 @@
 /*                                       */
 /*****************************************************************************/
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <filesystem>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <dirent.h>
 
 #include "quasi88.h"
 #include "file-op.h"
 #include "menu.h"
 
 /*****************************************************************************/
+
+struct T_DIR_INFO_STRUCT {
+  int cur_entry;      /* 上位が取得したエントリ数 */
+  int nr_entry;       /* エントリの全数        */
+  T_DIR_ENTRY *entry; /* エントリ情報 (entry[0]〜) */
+};
 
 struct OSD_FILE_STRUCT {
   FILE *fp;     /* In use if !=NULL */
@@ -222,12 +225,6 @@ int osd_fputs(const char *str, OSD_FILE *stream) { return fputs(str, stream->fp)
  * ディレクトリ閲覧
  *****************************************************************************/
 
-struct T_DIR_INFO_STRUCT {
-  int cur_entry;      /* 上位が取得したエントリ数 */
-  int nr_entry;       /* エントリの全数        */
-  T_DIR_ENTRY *entry; /* エントリ情報 (entry[0]〜) */
-};
-
 /*
  * ディレクトリ内のファイル名のソーティングに使う関数
  */
@@ -235,7 +232,11 @@ static int namecmp(const void *p1, const void *p2) {
   auto *s1 = (T_DIR_ENTRY *)p1;
   auto *s2 = (T_DIR_ENTRY *)p2;
 
-  return strcmp(s1->name, s2->name);
+  // Directories first
+  if (s1->type == s2->type) {
+    return strcmp(s1->name, s2->name);
+  }
+  return (s1->type > s2->type);
 }
 
 /*---------------------------------------------------------------------------
@@ -246,13 +247,7 @@ static int namecmp(const void *p1, const void *p2) {
  *  処理後は、このワークをファイル名でソートしておく。
  *---------------------------------------------------------------------------*/
 T_DIR_INFO *osd_opendir(const char *filename) {
-  size_t len;
-  char *p;
-  int i;
   T_DIR_INFO *dir;
-
-  DIR *dirp;
-  struct dirent *dp;
 
   /* T_DIR_INFO ワークを 1個確保 */
   if ((dir = (T_DIR_INFO *)malloc(sizeof(T_DIR_INFO))) == nullptr) {
@@ -263,97 +258,58 @@ T_DIR_INFO *osd_opendir(const char *filename) {
     filename = ".";
   }
 
-  dirp = opendir(filename); /* ディレクトリを開く */
-  if (dirp == nullptr) {
+  std::filesystem::path root{filename};
+  if (!exists(root) || !is_directory(root)) {
     free(dir);
     return nullptr;
   }
 
-  dir->nr_entry = 0; /* ファイル数を数える */
-  while (readdir(dirp)) {
-    dir->nr_entry++;
-  }
-  rewinddir(dirp);
+  dir->nr_entry = std::distance(std::filesystem::directory_iterator(root),
+                                std::filesystem::directory_iterator{}) + 1;
 
   /* T_DIR_ENTRY ワークを ファイル数分 確保 */
   dir->entry = (T_DIR_ENTRY *)malloc(dir->nr_entry * sizeof(T_DIR_ENTRY));
   if (dir->entry == nullptr) {
-    closedir(dirp);
     free(dir);
     return nullptr;
   }
-  for (i = 0; i < dir->nr_entry; i++) {
+
+  int i = 0;
+
+  for (const auto& it : std::filesystem::directory_iterator(root)) {
     dir->entry[i].name = nullptr;
     dir->entry[i].str = nullptr;
+    size_t size_name, size_str;
+    std::filesystem::path basename = it.path().filename();
+    size_name = strlen(basename.string().c_str()) + 1;
+    if (it.is_directory()) {
+      dir->entry[i].type = FILE_STAT_DIR;
+      size_str = size_name + 1;
+    } else {
+      dir->entry[i].type = FILE_STAT_FILE;
+      size_str = size_name;
+    }
+    dir->entry[i].name = (char *)malloc(size_name);
+    dir->entry[i].str = (char *)malloc(size_str);
+    strcpy(dir->entry[i].name, basename.string().c_str());
+    strcpy(dir->entry[i].str, basename.string().c_str());
+    if (it.is_directory()) {
+      // append "/" to directory
+      strcat(dir->entry[i].str, "/");
+    }
+    i++;
   }
+  // Add ".."
+  dir->entry[i].name = nullptr;
+  dir->entry[i].str = nullptr;
+  dir->entry[i].type = FILE_STAT_DIR;
+  dir->entry[i].name = (char *)malloc(3);
+  dir->entry[i].str = (char *)malloc(4);
+  strcpy(dir->entry[i].name, "..");
+  strcpy(dir->entry[i].str, "../");
 
-  /* ファイル数分、処理ループ (情報を格納) */
-  for (i = 0; i < dir->nr_entry; i++) {
-
-    dp = readdir(dirp); /* ファイル名取得 */
-
-    if (dp == nullptr) { /* 取得に失敗したら、中断  */
-      dir->nr_entry = i; /* (これは正常扱いとする。 */
-      break;             /*  おそらく途中でファイル */
-    }                    /*  が削除されたのだろう)  */
-
-    /* ファイルの種類をセット */
-    {
-      char *fullname; /* ディレクトリ名(filename) */
-      struct stat sb; /* とファイル名(dp->d_name) */
-                      /* からstat関数で属性取得。 */
-                      /* 失敗しても気にしない     */
-
-      dir->entry[i].type = FILE_STAT_FILE; /*  (失敗したら FILE 扱い) */
-
-      fullname = (char *)malloc(strlen(filename) + 1 + strlen(dp->d_name) + 1);
-
-      if (fullname) {
-        sprintf(fullname, "%s%s%s", filename, "/", dp->d_name);
-
-        if (stat(fullname, &sb) == 0) {
-#if 1
-          if (S_ISDIR(sb.st_mode))
-#else
-          if ((sb.st_mode & S_IFMT) == S_IFDIR)
-#endif
-          {
-            dir->entry[i].type = FILE_STAT_DIR;
-          } else {
-            dir->entry[i].type = FILE_STAT_FILE;
-          }
-        }
-        free(fullname);
-      }
-    }
-
-    /* ファイル名バッファ確保 */
-
-    len = strlen(dp->d_name) + 1;
-    p = (char *)malloc((len + 1) + (len + 1));
-    if (p == nullptr) { /* ↑ファイル名 と ↑表示名 のバッファを一気に確保 */
-      dir->nr_entry = i;
-      break; /* malloc に失敗したら中断 */
-    }
-
-    /* ファイル名・表示名セット */
-    dir->entry[i].name = &p[0];
-    dir->entry[i].str = &p[len + 1];
-
-    strcpy(dir->entry[i].name, dp->d_name);
-    strcpy(dir->entry[i].str, dp->d_name);
-
-    if (dir->entry[i].type == FILE_STAT_DIR) { /* ディレクトリの場合、 */
-      strcat(dir->entry[i].str, "/");          /* 表示名に / を付加    */
-    }
-  }
-
-  closedir(dirp); /* ディレクトリを閉じる */
-
-  /* ファイル名をソート */
   qsort(dir->entry, dir->nr_entry, sizeof(T_DIR_ENTRY), namecmp);
 
-  /* osd_readdir に備えて */
   dir->cur_entry = 0;
   return dir;
 }
@@ -383,6 +339,9 @@ void osd_closedir(T_DIR_INFO *dirp) {
   for (i = 0; i < dirp->nr_entry; i++) {
     if (dirp->entry[i].name) {
       free(dirp->entry[i].name);
+    }
+    if (dirp->entry[i].str) {
+      free(dirp->entry[i].str);
     }
   }
   free(dirp->entry);
