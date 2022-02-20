@@ -5,6 +5,8 @@
 /*                                       */
 /*****************************************************************************/
 
+#include <filesystem>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -248,8 +250,8 @@ struct T_DIR_INFO_STRUCT {
  * ディレクトリ内のファイル名のソーティングに使う関数
  */
 static int namecmp(const void *p1, const void *p2) {
-  T_DIR_ENTRY *s1 = (T_DIR_ENTRY *)p1;
-  T_DIR_ENTRY *s2 = (T_DIR_ENTRY *)p2;
+  auto *s1 = (T_DIR_ENTRY *)p1;
+  auto *s2 = (T_DIR_ENTRY *)p2;
 
   return strcmp(s1->name, s2->name);
 }
@@ -625,43 +627,32 @@ int osd_path_join(const char *dir, const char *file, char path[], int size) {
   return TRUE;
 }
 
-/****************************************************************************
- * ファイル属性の取得
- ****************************************************************************/
-#if 1
-
+/**
+ * Get attribute of file/directory
+ * @param pathname pathname of file/directory
+ * @return One of following values:
+ * FILE_STAT_NOEXIST: file or directory not exists;
+ * FILE_STAT_DIR: pathname is directory;
+ * FILE_STAT_FILE: pathname is regular file.
+ * @note FILE_STAT_FILE will return as default value, i.e. even if pathname is not a regular file.
+ */
 int osd_file_stat(const char *pathname) {
-  struct stat sb;
+  std::filesystem::path path{pathname};
 
-  if (stat(pathname, &sb)) {
+  if (!exists(path) || path.empty()) {
     return FILE_STAT_NOEXIST;
   }
 
-  if (S_ISDIR(sb.st_mode)) {
+  if (is_directory(path)) {
     return FILE_STAT_DIR;
+  } else if (is_regular_file(path)) {
+    return FILE_STAT_FILE;
   } else {
+    // What I gonna do??
+    fprintf(stderr, "Unknown type of pathname, returning FILE_STAT_FILE!\n");
     return FILE_STAT_FILE;
   }
 }
-
-#else
-int osd_file_stat(const char *pathname) {
-  DIR *dirp;
-  FILE *fp;
-
-  if ((dirp = opendir(pathname))) { /* ディレクトリとして開く */
-    closedir(dirp);                 /* 成功したらディレクトリ */
-    return FILE_STAT_DIR;
-  } else {
-    if ((fp = fopen(pathname, "r"))) { /* ファイルとして開く     */
-      fclose(fp);                      /* 成功したらファイル    */
-      return FILE_STAT_FILE;
-    } else {
-      return FILE_STAT_NOEXIST; /* どちらとも失敗      */
-    }
-  }
-}
-#endif
 
 /****************************************************************************
  * int  osd_file_config_init(void)
@@ -902,32 +893,19 @@ static int parse_tilda(const char *home, const char *path, char *result_path, in
  *      成功したら、真を返す
  */
 static int make_dir(const char *dname) {
-  struct stat sb;
-
-  if (stat(dname, &sb)) {
-
-    if (errno == ENOENT) { /* ディレクトリ存在しない */
-
-      if (mkdir(dname, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)) { /*mode==0775*/
-        fprintf(stderr, "error: can't make dir %s\n", dname);
-        return FALSE;
-      } else {
-        printf("make dir \"%s\"\n", dname);
-      }
-
-    } else { /* その他の異常 */
-      return FALSE;
-    }
-
-  } else { /* ディレクトリあった */
-
-    if (!S_ISDIR(sb.st_mode)) { /* と思ったらファイル*/
-      fprintf(stderr, "error: not exist dir %s\n", dname);
-      return FALSE;
-    }
+  std::filesystem::path path{dname};
+  if (exists(path) && is_directory(path)) {
+    // Already exists, nothing to do
+    return true;
   }
-
-  return TRUE;
+  std::error_code ec;
+  create_directories(path, ec);
+  if (ec) {
+    printf("error: can't make dir \"%s\": %s\n", dname, ec.message().c_str());
+    return false;
+  }
+  printf("make dir \"%s\"\n", dname);
+  return true;
 }
 
 /****************************************************************************

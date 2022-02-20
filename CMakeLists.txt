@@ -7,6 +7,9 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
 option(ENABLE_GTK2 "Enable building for GTK2" OFF)
 option(ENABLE_SDL "Enable building for libSDL" OFF)
 option(ENABLE_X11 "Enable building for X.org" ON)
