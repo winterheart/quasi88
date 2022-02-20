@@ -19,6 +19,16 @@
 
 /*****************************************************************************/
 
+struct OSD_FILE_STRUCT {
+  FILE *fp;     /* In use if !=NULL */
+  int type;     /* File type */
+  char *path;   /* File path */
+  char mode[4]; /* Mode on open */
+};
+
+#define MAX_STREAM 8
+static OSD_FILE osd_stream[MAX_STREAM];
+
 /*
  * Following dir names are pre-allocated char arrays with OSD_MAX_FILENAME
  * length. Don't forget to malloc() and free() them.
@@ -105,39 +115,23 @@ int osd_kanji_code() {
  * ファイルポインタを返し、他の場合はオープン失敗として NULL を返す。
  */
 
-struct OSD_FILE_STRUCT {
-
-  FILE *fp;       /* !=NULL なら使用中   */
-  struct stat sb; /* 開いたファイルの状態   */
-  int type;       /* ファイル種別       */
-  char mode[4];   /* 開いた際の、モード  */
-};
-
-#define MAX_STREAM 8
-static OSD_FILE osd_stream[MAX_STREAM];
-
 OSD_FILE *osd_fopen(int type, const char *path, const char *mode) {
-  int i;
-  struct stat sb;
-  OSD_FILE *st;
-  int stat_ok;
+  OSD_FILE *st = nullptr;
 
-  st = nullptr;
-  for (i = 0; i < MAX_STREAM; i++) {   /* 空きバッファを探す */
-    if (osd_stream[i].fp == nullptr) { /* fp が NULL なら空き */
-      st = &osd_stream[i];
+  /* Find a free buffer */
+  for (auto & i : osd_stream) {
+    if (i.fp == nullptr) { /* fp が NULL なら空き */
+      st = &i;
       break;
     }
   }
   if (st == nullptr)
     return nullptr; /* 空きがなければ NG */
+  st->path = nullptr;
 
-  if (stat(path, &sb) != 0) { /* ファイルの状態を取得する */
-    if (mode[0] == 'r')
-      return nullptr;
-    stat_ok = FALSE;
-  } else {
-    stat_ok = TRUE;
+  std::filesystem::path fullpath = std::filesystem::absolute(path);
+  if (!exists(fullpath)) {
+    return nullptr;
   }
 
   switch (type) {
@@ -149,47 +143,36 @@ OSD_FILE *osd_fopen(int type, const char *path, const char *mode) {
   case FTYPE_COM_LOAD:  /* "rb"     */
   case FTYPE_COM_SAVE:  /* "ab"     */
 
-    if (stat_ok) {
-      /* すでに開いているファイルかどうかをチェックする */
-      for (i = 0; i < MAX_STREAM; i++) {
-        if (osd_stream[i].fp) {
-          if (osd_stream[i].sb.st_dev == sb.st_dev && osd_stream[i].sb.st_ino == sb.st_ino) {
-
-            /* DISKの場合かつ同じモードならばそれを返す */
-            if (type == FTYPE_DISK && osd_stream[i].type == type && strcmp(osd_stream[i].mode, mode) == 0) {
-
-              return &osd_stream[i];
-
-            } else {
-              /* DISK以外、ないしモードが違うならばNG */
-              return nullptr;
-            }
+    /* すでに開いているファイルかどうかをチェックする */
+    for (auto & i : osd_stream) {
+      if (i.fp) {
+        if (fullpath == std::filesystem::path{i.path}) {
+          /* Check if the file is already open. NB: Is this code ever needed? */
+          if (type == FTYPE_DISK && i.type == type && strcmp(i.mode, mode) == 0) {
+            return &i;
+          } else {
+            /* DISK以外、ないしモードが違うならばNG */
+            return nullptr;
           }
         }
       }
     }
+
     /* FALLTHROUGH */
 
   default:
-    st->fp = fopen(path, mode); /* ファイルを開く */
+    st->path = (char *)malloc(strlen(fullpath.string().c_str()) + 1);
+    if (st->path != nullptr) {
+      strcpy(st->path, fullpath.string().c_str());
+    }
+    st->fp = fopen(st->path, mode); /* ファイルを開く */
 
     if (st->fp) {
-
-      if (stat_ok == FALSE) {       /* もう一度ファイル状態を */
-        fflush(st->fp);             /* 取得してみよう。       */
-        if (stat(path, &sb) != 0) { /* 必ず成功するはず……？ */
-          sb.st_dev = 0;
-          sb.st_ino = 0;
-        }
-      }
-
       st->type = type;
-      st->sb = sb;
       strncpy(st->mode, mode, sizeof(st->mode));
       return st;
-
     } else {
-
+      free(st->path);
       return nullptr;
     }
   }
@@ -197,8 +180,11 @@ OSD_FILE *osd_fopen(int type, const char *path, const char *mode) {
 
 int osd_fclose(OSD_FILE *stream) {
   FILE *fp = stream->fp;
-
   stream->fp = nullptr;
+  if (stream->path) {
+    free(stream->path);
+    stream->path = nullptr;
+  }
   return fclose(fp);
 }
 
