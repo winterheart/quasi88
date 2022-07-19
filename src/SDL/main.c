@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include "quasi88.h"
 #include "device.h"
@@ -20,24 +20,18 @@
  * オプション
  ************************************************************************/
 static int oo_env(const char *var, const char *str) {
-  char *buf = (char *)malloc(strlen(var) + strlen(str) + 1);
-  sprintf(buf, "%s%s", var, str);
-  SDL_putenv(buf);
-  free(buf);
+  // TODO: Check this out
+  SDL_setenv(var, str, TRUE);
   return 0;
 }
-static int o_videodrv(char *str) { return oo_env("SDL_VIDEODRIVER=", str); }
-static int o_audiodrv(char *str) { return oo_env("SDL_AUDIODRIVER=", str); }
+static int o_videodrv(char *str) { return oo_env("SDL_VIDEODRIVER", str); }
+static int o_audiodrv(char *str) { return oo_env("SDL_AUDIODRIVER", str); }
 
 static int invalid_arg;
 static const T_CONFIG_TABLE sdl_options[] = {
     /* 300〜349: システム依存オプション */
 
     /*  -- GRAPHIC -- */
-    {300, "hwsurface", X_FIX, &use_hwsurface, TRUE, 0, 0, 0},
-    {300, "swsurface", X_FIX, &use_hwsurface, FALSE, 0, 0, 0},
-    {301, "doublebuf", X_FIX, &use_doublebuf, TRUE, 0, 0, 0},
-    {301, "nodoublebuf", X_FIX, &use_doublebuf, FALSE, 0, 0, 0},
 
     /*  -- INPUT -- */
     {311, "use_joy", X_FIX, &use_joydevice, TRUE, 0, 0, 0},
@@ -62,10 +56,7 @@ static const T_CONFIG_TABLE sdl_options[] = {
 };
 
 static void help_msg_sdl(void) {
-  fprintf(stdout, "  ** GRAPHIC (SDL depend) **\n"
-                  "    -hwsurface/-swsurface   use Hardware/Software surface [-hwsurface]\n"
-                  "    -doublebuf/-nodoublebuf Use/Not use double buffer [-nodoublebuf]\n"
-                  "  ** INPUT (SDL depend) **\n"
+  fprintf(stdout, "  ** INPUT (SDL depend) **\n"
                   "    -use_joy/-nouse_joy     Enable/Disabel system joystick [-use_joy]\n"
                   "    -keyboard <0|1|2>       Set keyboard type (0:config/1:106key/2:101key) [1]\n"
                   "    -keyconf <filename>     Specify keyboard configuration file <filename>\n"

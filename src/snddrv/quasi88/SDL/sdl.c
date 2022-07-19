@@ -40,7 +40,7 @@ Version 0.1, January 2002
 #if 0       /* QUASI88 */
 #include <strings.h>
 #endif      /* QUASI88 */
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #if 0       /* QUASI88 */
 #include "sysdep/sysdep_dsp.h"
 #include "sysdep/sysdep_dsp_priv.h"
@@ -168,7 +168,7 @@ extern void *sdl_dsp_create(const void *flags)
       SDL_Init(SDL_INIT_AUDIO);         /* else we MUST use "SDL_Init" */
                                         /* (untested) */
 #else       /* QUASI88 */
-   if( ! SDL_WasInit( SDL_INIT_AUDIO ) ) SDL_InitSubSystem( SDL_INIT_AUDIO );
+   if( ! SDL_WasInit( SDL_INIT_AUDIO ) ) SDL_Init( SDL_INIT_AUDIO );
 #endif      /* QUASI88 */
 
    if (SDL_OpenAudio(audiospec, NULL) != 0) { 
@@ -262,6 +262,8 @@ static void sdl_fill_sound(void *unused, Uint8 *stream, int len)
 {
     int result;
     Uint8 *dst;
+    // Initialize stream before audio playback to prevent noise
+    memset(stream, 0, len);
     sample.amountRead = len;
     if(sample.sound_n_pos <= 0)
         return;

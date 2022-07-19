@@ -7,7 +7,7 @@
 #if defined(JOY_SDL)
 
 #include <stdio.h>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include "quasi88.h"
 #include "keyboard.h"
@@ -59,7 +59,7 @@ void    joystick_init(void)
     if (verbose_proc) printf("Initializing joystick ... ");
 
     if (! SDL_WasInit(SDL_INIT_JOYSTICK)) {
-    if (SDL_InitSubSystem(SDL_INIT_JOYSTICK)) {
+    if (SDL_Init(SDL_INIT_JOYSTICK)) {
         if (verbose_proc) printf("FAILED\n");
         return;
     }

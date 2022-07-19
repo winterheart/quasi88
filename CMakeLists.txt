@@ -228,10 +228,10 @@ endif(ENABLE_MONITOR)
 if(${ENABLE_JOYSTICK} STREQUAL "NO")
 	add_definitions(-DJOY_NOTHING)
 elseif(${ENABLE_JOYSTICK} STREQUAL "SDL")
-	find_package(SDL REQUIRED)
+	find_package(SDL2 REQUIRED)
 	add_definitions(-DJOY_SDL)
-	include_directories(${SDL_INCLUDE_DIR})
-	list(APPEND COMMON_LIBS ${SDL_LIBRARY})
+	include_directories(${SDL2_INCLUDE_DIR})
+	list(APPEND COMMON_LIBS ${SDL2_LIBRARIES})
 elseif(${ENABLE_JOYSTICK} STREQUAL "LINUX_USB")
 	add_definitions(-DJOY_LINUX_USB)
 	include(FindPkgConfig)
@@ -251,12 +251,12 @@ if(ENABLE_X11)
 
 	if(ENABLE_SOUND)
 		add_definitions(-DSYSDEP_DSP_SDL)
-		find_package(SDL REQUIRED)
+		find_package(SDL2 REQUIRED)
 		list(APPEND X11_INCLUDES
 			src/snddrv/quasi88/X11
-			${SDL_INCLUDE_DIR}
+			${SDL2_INCLUDE_DIR}
 		)
-		list(APPEND X11_LIBS ${SDL_LIBRARY})
+		list(APPEND X11_LIBS ${SDL2_LIBRARIES})
 
 		set(X11_SOUND_SOURCES
 			src/snddrv/quasi88/X11/audio.c
@@ -313,12 +313,12 @@ endif(ENABLE_X11)
 #### SDL target
 if(ENABLE_SDL)
 	add_definitions(-DQUASI88_SDL)
-	find_package(SDL REQUIRED)
+	find_package(SDL2 REQUIRED)
 
-	list(APPEND SDL_LIBS ${SDL_LIBRARY})
+	list(APPEND SDL_LIBS ${SDL2_LIBRARIES})
 	list(APPEND SDL_INCLUDES
 		src/SDL
-		${SDL_INCLUDE_DIR}
+		${SDL2_INCLUDE_DIR}
 	)
 
 	set(SDL_SOURCES
@@ -347,15 +347,15 @@ endif(ENABLE_SDL)
 if(ENABLE_GTK2)
 	add_definitions(-DQUASI88_GTK)
 	find_package(GTK2 REQUIRED)
-	find_package(SDL REQUIRED)
+	find_package(SDL2 REQUIRED)
 	include(FindPkgConfig)
 	pkg_check_modules(CAIRO REQUIRED cairo)
 
-	list(APPEND GTK_LIBS ${GTK2_LIBRARIES} ${CAIRO_LIBRARIES} ${SDL_LIBRARY})
+	list(APPEND GTK_LIBS ${GTK2_LIBRARIES} ${CAIRO_LIBRARIES} ${SDL2_LIBRARIES})
 
 	list(APPEND GTK_INCLUDES
 		src/GTK
-		${SDL_INCLUDE_DIR}
+		${SDL2_INCLUDE_DIR}
 	)
 
 	set(GTK_SOURCES

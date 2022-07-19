@@ -5,8 +5,7 @@
 /* SDL バージョン固有の定義                       */
 /*----------------------------------------------------------------------*/
 
-#include <SDL_main.h>
-#include <SDL_byteorder.h>
+#include <SDL2/SDL.h>
 
 /* SDL版 QUASI88 のための識別用 */
 
@@ -31,9 +30,7 @@
 /* 画面の bpp の定義。SDL版は 16bpp/32bpp のみをサポートする */
 
 #undef SUPPORT_8BPP
-#ifndef SUPPORT_16BPP
-#define SUPPORT_16BPP
-#endif
+#undef SUPPORT_16BPP
 #ifndef SUPPORT_32BPP
 #define SUPPORT_32BPP
 #endif
