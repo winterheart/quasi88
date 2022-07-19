@@ -34,7 +34,7 @@ Version 0.1, January 2002
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #include "sysdep/sysdep_dsp.h"
 #include "sysdep/sysdep_dsp_priv.h"
 #include "sysdep/plugin_manager.h"
@@ -257,6 +257,8 @@ static void sdl_fill_sound(void *unused, Uint8 *stream, int len)
 {
     int result;
     Uint8 *dst;
+    // Initialize stream before audio playback to prevent noise
+    memset(stream, 0, len);
     sample.amountRead = len;
     if(sample.sound_n_pos <= 0)
         return;

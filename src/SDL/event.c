@@ -4,25 +4,21 @@
  *  詳細は、 event.h 参照
  ************************************************************************/
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
-#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "quasi88.h"
-#include "getconf.h"
+#include "graph.h"
 #include "keyboard.h"
 
 #include "drive.h"
 
-#include "emu.h"
 #include "device.h"
 #include "screen.h"
 #include "event.h"
 
 #include "intr.h"   /* test */
-#include "screen.h" /* test */
 
 int show_fps;                      /* test */
 static int display_fps_init(void); /* test */
@@ -152,7 +148,7 @@ typedef struct {
  *  keysym2key88[] には、 KEY88_xxx をセットしておく。
  *  初期値は keysym2key88_default[] と同じ
  *----------------------------------------------------------------------*/
-static int keysym2key88[SDLK_LAST];
+static int keysym2key88[SDL_NUM_SCANCODES];
 
 /*----------------------------------------------------------------------
  * SDL の scancode を QUASI88 の キーコードに変換するテーブル
@@ -182,7 +178,242 @@ static T_BINDING binding[64];
  * SDLK_xxx → KEY88_xxx 変換テーブル (デフォルト)
  *----------------------------------------------------------------------*/
 
-static const int keysym2key88_default[SDLK_LAST] = {
+static const int keysym2key88_default2[SDL_NUM_SCANCODES] = {
+    0,  // SDL_SCANCODE_UNKNOWN = 0,
+    0,
+    0,
+    0,
+    0,  // SDL_SCANCODE_A = 4
+    0,  // SDL_SCANCODE_B = 5,
+    0,  // SDL_SCANCODE_C = 6,
+    0,  // SDL_SCANCODE_D = 7,
+    0,  // SDL_SCANCODE_E = 8,
+    0,  // SDL_SCANCODE_F = 9,
+    0,  // SDL_SCANCODE_G = 10,
+    0,  // SDL_SCANCODE_H = 11,
+    0,  // SDL_SCANCODE_I = 12,
+    0,  // SDL_SCANCODE_J = 13,
+    0,  // SDL_SCANCODE_K = 14,
+    0,  // SDL_SCANCODE_L = 15,
+    0,  // SDL_SCANCODE_M = 16,
+    0,  // SDL_SCANCODE_N = 17,
+    0,  // SDL_SCANCODE_O = 18,
+    0,  // SDL_SCANCODE_P = 19,
+    0,  // SDL_SCANCODE_Q = 20,
+    0,  // SDL_SCANCODE_R = 21,
+    0,  // SDL_SCANCODE_S = 22,
+    0,  // SDL_SCANCODE_T = 23,
+    0,  // SDL_SCANCODE_U = 24,
+    0,  // SDL_SCANCODE_V = 25,
+    0,  // SDL_SCANCODE_W = 26,
+    0,  // SDL_SCANCODE_X = 27,
+    0,  // SDL_SCANCODE_Y = 28,
+    0,  // SDL_SCANCODE_Z = 29,
+    KEY88_EXCLAM,  // SDL_SCANCODE_1 = 30,
+    0,  // SDL_SCANCODE_2 = 31,
+    0,  // SDL_SCANCODE_3 = 32,
+    0,  // SDL_SCANCODE_4 = 33,
+    0,  // SDL_SCANCODE_5 = 34,
+    0,  // SDL_SCANCODE_6 = 35,
+    0,  // SDL_SCANCODE_7 = 36,
+    0,  // SDL_SCANCODE_8 = 37,
+    0,  // SDL_SCANCODE_9 = 38,
+    0,  // SDL_SCANCODE_0 = 39,
+    KEY88_RETURNL,  // SDL_SCANCODE_RETURN = 40,
+    KEY88_ESC,  // SDL_SCANCODE_ESCAPE = 41,
+    KEY88_INS_DEL, //SDL_SCANCODE_BACKSPACE = 42,
+    KEY88_TAB, // SDL_SCANCODE_TAB = 43,
+    KEY88_SPACE,  // SDL_SCANCODE_SPACE = 44,
+    0,  // SDL_SCANCODE_MINUS = 45,
+    0,  // SDL_SCANCODE_EQUALS = 46,
+    0,  // SDL_SCANCODE_LEFTBRACKET = 47,
+    0,  // SDL_SCANCODE_RIGHTBRACKET = 48,
+    0,  // SDL_SCANCODE_BACKSLASH = 49,
+    0,  // SDL_SCANCODE_NONUSHASH = 50,
+    0,  // SDL_SCANCODE_SEMICOLON = 51,
+    0,  // SDL_SCANCODE_APOSTROPHE = 52,
+    0,  // SDL_SCANCODE_GRAVE = 53,
+    0,  // SDL_SCANCODE_COMMA = 54,
+    0,  // SDL_SCANCODE_PERIOD = 55,
+    0,  // SDL_SCANCODE_SLASH = 56,
+    0,  // SDL_SCANCODE_CAPSLOCK = 57,
+    0,  // SDL_SCANCODE_F1 = 58,
+    0,  // SDL_SCANCODE_F2 = 59,
+    0,  // SDL_SCANCODE_F3 = 60,
+    0,  // SDL_SCANCODE_F4 = 61,
+    0,  // SDL_SCANCODE_F5 = 62,
+    0,  // SDL_SCANCODE_F6 = 63,
+    0,  // SDL_SCANCODE_F7 = 64,
+    0,  // SDL_SCANCODE_F8 = 65,
+    0,  // SDL_SCANCODE_F9 = 66,
+    0,  // SDL_SCANCODE_F10 = 67,
+    0,  // SDL_SCANCODE_F11 = 68,
+    0,  // SDL_SCANCODE_F12 = 69,
+    0,  // SDL_SCANCODE_PRINTSCREEN = 70,
+    0,  // SDL_SCANCODE_SCROLLLOCK = 71,
+    KEY88_STOP,  // SDL_SCANCODE_PAUSE = 72,
+    0,  // SDL_SCANCODE_INSERT = 73,
+    KEY88_HOME,  // SDL_SCANCODE_HOME = 74,
+    0,  // SDL_SCANCODE_PAGEUP = 75,
+    0,  // SDL_SCANCODE_DELETE = 76,
+    0,  // SDL_SCANCODE_END = 77,
+    0,  // SDL_SCANCODE_PAGEDOWN = 78,
+    0,  // SDL_SCANCODE_RIGHT = 79,
+    0,  // SDL_SCANCODE_LEFT = 80,
+    0,  // SDL_SCANCODE_DOWN = 81,
+    0,  // SDL_SCANCODE_UP = 82,
+    0,  // SDL_SCANCODE_NUMLOCKCLEAR = 83,
+    0,  // SDL_SCANCODE_KP_DIVIDE = 84,
+    0,  // SDL_SCANCODE_KP_MULTIPLY = 85,
+    0,  // SDL_SCANCODE_KP_MINUS = 86,
+    0,  // SDL_SCANCODE_KP_PLUS = 87,
+    0,  // SDL_SCANCODE_KP_ENTER = 88,
+    0,  // SDL_SCANCODE_KP_1 = 89,
+    0,  // SDL_SCANCODE_KP_2 = 90,
+    0,  // SDL_SCANCODE_KP_3 = 91,
+    0,  // SDL_SCANCODE_KP_4 = 92,
+    0,  // SDL_SCANCODE_KP_5 = 93,
+    0,  // SDL_SCANCODE_KP_6 = 94,
+    0,  // SDL_SCANCODE_KP_7 = 95,
+    0,  // SDL_SCANCODE_KP_8 = 96,
+    0,  // SDL_SCANCODE_KP_9 = 97,
+    0,  // SDL_SCANCODE_KP_0 = 98,
+    0,  // SDL_SCANCODE_KP_PERIOD = 99,
+    0,  // SDL_SCANCODE_NONUSBACKSLASH = 100,
+    0,  // SDL_SCANCODE_APPLICATION = 101, /**< windows contextual menu, compose */
+    0,  // SDL_SCANCODE_POWER = 102,
+    0,  // SDL_SCANCODE_KP_EQUALS = 103,
+    0,  // SDL_SCANCODE_F13 = 104,
+    0,  // SDL_SCANCODE_F14 = 105,
+    0,  // SDL_SCANCODE_F15 = 106,
+    0,  // SDL_SCANCODE_F16 = 107,
+    0,  // SDL_SCANCODE_F17 = 108,
+    0,  // SDL_SCANCODE_F18 = 109,
+    0,  // SDL_SCANCODE_F19 = 110,
+    0,  // SDL_SCANCODE_F20 = 111,
+    0,  // SDL_SCANCODE_F21 = 112,
+    0,  // SDL_SCANCODE_F22 = 113,
+    0,  // SDL_SCANCODE_F23 = 114,
+    0,  // SDL_SCANCODE_F24 = 115,
+    0,  // SDL_SCANCODE_EXECUTE = 116,
+    0,  // SDL_SCANCODE_HELP = 117,
+    0,  // SDL_SCANCODE_MENU = 118,
+    0,  // SDL_SCANCODE_SELECT = 119,
+    0,  // SDL_SCANCODE_STOP = 120,
+    0,  // SDL_SCANCODE_AGAIN = 121,   /**< redo */
+    0,  // SDL_SCANCODE_UNDO = 122,
+    0,  // SDL_SCANCODE_CUT = 123,
+    0,  // SDL_SCANCODE_COPY = 124,
+    0,  // SDL_SCANCODE_PASTE = 125,
+    0,  // SDL_SCANCODE_FIND = 126,
+    0,  // SDL_SCANCODE_MUTE = 127,
+    0,  // SDL_SCANCODE_VOLUMEUP = 128,
+    0,  // SDL_SCANCODE_VOLUMEDOWN = 129,
+    0, // SDL_SCANCODE_LOCKINGCAPSLOCK = 130,
+    0, // SDL_SCANCODE_LOCKINGNUMLOCK = 131,
+    0, // SDL_SCANCODE_LOCKINGSCROLLLOCK = 132,
+    0,  // SDL_SCANCODE_KP_COMMA = 133,
+    0,  // SDL_SCANCODE_KP_EQUALSAS400 = 134,
+    0,  // SDL_SCANCODE_INTERNATIONAL1 = 135,
+    0,  // SDL_SCANCODE_INTERNATIONAL2 = 136,
+    0,  // SDL_SCANCODE_INTERNATIONAL3 = 137, /**< Yen */
+    0,  // SDL_SCANCODE_INTERNATIONAL4 = 138,
+    0,  // SDL_SCANCODE_INTERNATIONAL5 = 139,
+    0,  // SDL_SCANCODE_INTERNATIONAL6 = 140,
+    0,  // SDL_SCANCODE_INTERNATIONAL7 = 141,
+    0,  // SDL_SCANCODE_INTERNATIONAL8 = 142,
+    0,  // SDL_SCANCODE_INTERNATIONAL9 = 143,
+    0,  // SDL_SCANCODE_LANG1 = 144, /**< Hangul/English toggle */
+    0,  // SDL_SCANCODE_LANG2 = 145, /**< Hanja conversion */
+    0,  // SDL_SCANCODE_LANG3 = 146, /**< Katakana */
+    0,  // SDL_SCANCODE_LANG4 = 147, /**< Hiragana */
+    0,  // SDL_SCANCODE_LANG5 = 148, /**< Zenkaku/Hankaku */
+    0,  // SDL_SCANCODE_LANG6 = 149, /**< reserved */
+    0,  // SDL_SCANCODE_LANG7 = 150, /**< reserved */
+    0,  // SDL_SCANCODE_LANG8 = 151, /**< reserved */
+    0,  // SDL_SCANCODE_LANG9 = 152, /**< reserved */
+    0,  // SDL_SCANCODE_ALTERASE = 153, /**< Erase-Eaze */
+    0,  // SDL_SCANCODE_SYSREQ = 154,
+    0,  // SDL_SCANCODE_CANCEL = 155,
+    0,  // SDL_SCANCODE_CLEAR = 156,
+    0,  // SDL_SCANCODE_PRIOR = 157,
+    0,  // SDL_SCANCODE_RETURN2 = 158,
+    0,  // SDL_SCANCODE_SEPARATOR = 159,
+    0,  // SDL_SCANCODE_OUT = 160,
+    0,  // SDL_SCANCODE_OPER = 161,
+    0,  // SDL_SCANCODE_CLEARAGAIN = 162,
+    0,  // SDL_SCANCODE_CRSEL = 163,
+    0,  // SDL_SCANCODE_EXSEL = 164,
+    0,  // 165
+    0,  // 166
+    0,  // 167
+    0,  // 168
+    0,  // 169
+    0,  // 170
+    0,  // 171
+    0,  // 172
+    0,  // 173
+    0,  // 174
+    0,  // 175
+    0,  // SDL_SCANCODE_KP_00 = 176,
+    0,  // SDL_SCANCODE_KP_000 = 177,
+    0,  // SDL_SCANCODE_THOUSANDSSEPARATOR = 178,
+    0,  // SDL_SCANCODE_DECIMALSEPARATOR = 179,
+    0,  // SDL_SCANCODE_CURRENCYUNIT = 180,
+    0,  // SDL_SCANCODE_CURRENCYSUBUNIT = 181,
+    0,  // SDL_SCANCODE_KP_LEFTPAREN = 182,
+    0,  // SDL_SCANCODE_KP_RIGHTPAREN = 183,
+    0,  // SDL_SCANCODE_KP_LEFTBRACE = 184,
+    0,  // SDL_SCANCODE_KP_RIGHTBRACE = 185,
+    0,  // SDL_SCANCODE_KP_TAB = 186,
+    0,  // SDL_SCANCODE_KP_BACKSPACE = 187,
+    0,  // SDL_SCANCODE_KP_A = 188,
+    0,  // SDL_SCANCODE_KP_B = 189,
+    0,  // SDL_SCANCODE_KP_C = 190,
+    0,  // SDL_SCANCODE_KP_D = 191,
+    0,  // SDL_SCANCODE_KP_E = 192,
+    0,  // SDL_SCANCODE_KP_F = 193,
+    0,  // SDL_SCANCODE_KP_XOR = 194,
+    0,  // SDL_SCANCODE_KP_POWER = 195,
+    0,  // SDL_SCANCODE_KP_PERCENT = 196,
+    0,  // SDL_SCANCODE_KP_LESS = 197,
+    0,  // SDL_SCANCODE_KP_GREATER = 198,
+    0,  // SDL_SCANCODE_KP_AMPERSAND = 199,
+    0,  // SDL_SCANCODE_KP_DBLAMPERSAND = 200,
+    0,  // SDL_SCANCODE_KP_VERTICALBAR = 201,
+    0,  // SDL_SCANCODE_KP_DBLVERTICALBAR = 202,
+    0,  // SDL_SCANCODE_KP_COLON = 203,
+    0,  // SDL_SCANCODE_KP_HASH = 204,
+    0,  // SDL_SCANCODE_KP_SPACE = 205,
+    0,  // SDL_SCANCODE_KP_AT = 206,
+    0,  // SDL_SCANCODE_KP_EXCLAM = 207,
+    0,  // SDL_SCANCODE_KP_MEMSTORE = 208,
+    0,  // SDL_SCANCODE_KP_MEMRECALL = 209,
+    0,  // SDL_SCANCODE_KP_MEMCLEAR = 210,
+    0,  // SDL_SCANCODE_KP_MEMADD = 211,
+    0,  // SDL_SCANCODE_KP_MEMSUBTRACT = 212,
+    0,  // SDL_SCANCODE_KP_MEMMULTIPLY = 213,
+    0,  // SDL_SCANCODE_KP_MEMDIVIDE = 214,
+    0,  // SDL_SCANCODE_KP_PLUSMINUS = 215,
+    0,  // SDL_SCANCODE_KP_CLEAR = 216,
+    0,  // SDL_SCANCODE_KP_CLEARENTRY = 217,
+    0,  // SDL_SCANCODE_KP_BINARY = 218,
+    0,  // SDL_SCANCODE_KP_OCTAL = 219,
+    0,  // SDL_SCANCODE_KP_DECIMAL = 220,
+    0,  // SDL_SCANCODE_KP_HEXADECIMAL = 221,
+    0, // 222
+    0, // 223
+    0,  // SDL_SCANCODE_LCTRL = 224,
+    0,  // SDL_SCANCODE_LSHIFT = 225,
+    0,  // SDL_SCANCODE_LALT = 226,
+    0,  // SDL_SCANCODE_LGUI = 227,
+    0,  // SDL_SCANCODE_RCTRL = 228,
+    0,  // SDL_SCANCODE_RSHIFT = 229,
+    0,  // SDL_SCANCODE_RALT = 230,
+    0,  // SDL_SCANCODE_RGUI = 231,
+};
+
+static const int keysym2key88_default[SDL_NUM_SCANCODES] = {
     0,                                  /*  SDLK_UNKNOWN        = 0,    */
     0, 0, 0, 0, 0, 0, 0, KEY88_INS_DEL, /*  SDLK_BACKSPACE      = 8,    */
     KEY88_TAB,                          /*  SDLK_TAB        = 9,    */
@@ -381,7 +612,7 @@ static const int keysym2key88_default[SDLK_LAST] = {
 static const T_REMAPPING remapping_x11_106[] = {
     {
         KEYCODE_SYM,
-        SDLK_LSUPER,
+        SDLK_LGUI,
         KEY88_KANA,
     },
     {
@@ -455,7 +686,7 @@ static const T_REMAPPING remapping_x11_101[] = {
     },
     {
         KEYCODE_SYM,
-        SDLK_LSUPER,
+        SDLK_LGUI,
         KEY88_KANA,
     },
     {
@@ -508,7 +739,7 @@ static const T_REMAPPING remapping_windib_106[] = {
     }, /* :        */
     {
         KEYCODE_SYM,
-        SDLK_LSUPER,
+        SDLK_LGUI,
         KEY88_KANA,
     }, /* 左Window */
     {
@@ -578,7 +809,7 @@ static const T_REMAPPING remapping_windib_101[] = {
     }, /* '        */
     {
         KEYCODE_SYM,
-        SDLK_LSUPER,
+        SDLK_LGUI,
         KEY88_KANA,
     }, /* 左Window */
     {
@@ -611,7 +842,7 @@ static const T_REMAPPING remapping_directx_106[] = {
     }, /* \ _ ロ   */
     {
         KEYCODE_SYM,
-        SDLK_LMETA,
+        SDLK_LGUI,
         KEY88_KANA,
     }, /* 左Window */
     {
@@ -691,7 +922,7 @@ static const T_REMAPPING remapping_directx_101[] = {
     }, /* '        */
     {
         KEYCODE_SYM,
-        SDLK_LMETA,
+        SDLK_LGUI,
         KEY88_KANA,
     }, /* 左Window */
     {
@@ -744,12 +975,12 @@ static const T_REMAPPING remapping_directx_101[] = {
 static const T_REMAPPING remapping_toolbox_106[] = {
     {
         KEYCODE_SYM,
-        SDLK_LMETA,
+        SDLK_LGUI,
         KEY88_SYS_MENU,
     },
     {
         KEYCODE_SYM,
-        SDLK_RMETA,
+        SDLK_RGUI,
         KEY88_SYS_MENU,
     },
     {
@@ -769,12 +1000,12 @@ static const T_REMAPPING remapping_toolbox_106[] = {
 static const T_REMAPPING remapping_toolbox_101[] = {
     {
         KEYCODE_SYM,
-        SDLK_LMETA,
+        SDLK_LGUI,
         KEY88_SYS_MENU,
     },
     {
         KEYCODE_SYM,
-        SDLK_RMETA,
+        SDLK_RGUI,
         KEY88_SYS_MENU,
     },
     {
@@ -1244,9 +1475,9 @@ void event_init(void) {
 
   /* キーマッピング初期化 */
 
-  if (SDL_VideoDriverName(video_driver, sizeof(video_driver)) == NULL) {
+  //if (SDL_VideoDriverName(video_driver, sizeof(video_driver)) == NULL) {
     memset(video_driver, 0, sizeof(video_driver));
-  }
+  //}
 
   memset(keysym2key88, 0, sizeof(keysym2key88));
   for (i = 0; i < COUNTOF(scancode2key88); i++) {
@@ -1304,11 +1535,11 @@ void event_init(void) {
 
       if (map->type == KEYCODE_SYM) {
 
-        keysym2key88[map->code] = map->key88;
+        //keysym2key88[map->code] = map->key88;
 
       } else if (map->type == KEYCODE_SCAN) {
 
-        scancode2key88[map->code] = map->key88;
+        //scancode2key88[map->code] = map->key88;
       }
     }
 
@@ -1355,17 +1586,12 @@ void event_init(void) {
  */
 void event_update(void) {
   SDL_Event E;
-  SDLKey keysym;
+  SDL_Keycode keysym;
   int key88, x, y;
 
   SDL_PumpEvents(); /* イベントを汲み上げる */
 
-  while (SDL_PeepEvents(&E, 1, SDL_GETEVENT,
-                        SDL_EVENTMASK(SDL_KEYDOWN) | SDL_EVENTMASK(SDL_KEYUP) | SDL_EVENTMASK(SDL_MOUSEMOTION) |
-                            SDL_EVENTMASK(SDL_MOUSEBUTTONDOWN) | SDL_EVENTMASK(SDL_MOUSEBUTTONUP) |
-                            SDL_EVENTMASK(SDL_JOYAXISMOTION) | SDL_EVENTMASK(SDL_JOYBUTTONDOWN) |
-                            SDL_EVENTMASK(SDL_JOYBUTTONUP) | SDL_EVENTMASK(SDL_VIDEOEXPOSE) |
-                            SDL_EVENTMASK(SDL_ACTIVEEVENT) | SDL_EVENTMASK(SDL_USEREVENT) | SDL_EVENTMASK(SDL_QUIT))) {
+  while (SDL_PeepEvents(&E, 1, SDL_GETEVENT, SDL_QUIT, SDL_USEREVENT)) {
 
     switch (E.type) {
 
@@ -1387,9 +1613,11 @@ void event_update(void) {
 
       } else { /* キーUNICODE時 (メニューなど) */
 
+        /*
         if (E.key.keysym.unicode <= 0xff && isprint(E.key.keysym.unicode)) {
           keysym = E.key.keysym.unicode;
         }
+        */
         if (SDLK_SPACE <= keysym && keysym < SDLK_DELETE) {
           /* ASCIIコードの範囲内では、SDLK_xx と KEY88_xx は等価 */
           key88 = keysym;
@@ -1423,6 +1651,14 @@ void event_update(void) {
       }
       break;
 
+    case SDL_MOUSEWHEEL:
+      if (E.wheel.y >= 0)
+        key88 = KEY88_MOUSE_WUP;
+      else
+        key88 = KEY88_MOUSE_WDN;
+      quasi88_mouse(key88, (E.type == SDL_MOUSEWHEEL)); // TODO: check this
+      break;
+
     case SDL_MOUSEBUTTONDOWN: /*------------------------------------------*/
     case SDL_MOUSEBUTTONUP:
       /* マウス移動イベントも同時に処理する必要があるなら、
@@ -1437,12 +1673,6 @@ void event_update(void) {
         break;
       case SDL_BUTTON_RIGHT:
         key88 = KEY88_MOUSE_R;
-        break;
-      case SDL_BUTTON_WHEELUP:
-        key88 = KEY88_MOUSE_WUP;
-        break;
-      case SDL_BUTTON_WHEELDOWN:
-        key88 = KEY88_MOUSE_WDN;
         break;
       default:
         key88 = 0;
@@ -1522,20 +1752,23 @@ void event_update(void) {
       quasi88_quit();
       break;
 
-    case SDL_ACTIVEEVENT: /*------------------------------------------*/
+    case SDL_WINDOWEVENT: /*------------------------------------------*/
       /* -focus オプションを機能させたいなら、
          quasi88_focus_in / quasi88_focus_out を適宜呼び出す必要がある */
 
-      if (E.active.state & SDL_APPINPUTFOCUS) {
-        if (E.active.gain) {
-          quasi88_focus_in();
-        } else {
-          quasi88_focus_out();
-        }
+      switch (E.window.event) {
+      case SDL_WINDOWEVENT_FOCUS_GAINED:
+        quasi88_focus_in();
+        break;
+      case SDL_WINDOWEVENT_FOCUS_LOST:
+        quasi88_focus_out();
+        break;
+      default:
+        break ;
       }
-      break;
+      break ;
 
-    case SDL_VIDEOEXPOSE: /*------------------------------------------*/
+    case SDL_DISPLAYEVENT: /*------------------------------------------*/
       quasi88_expose();
       break;
 
@@ -1622,19 +1855,16 @@ void event_switch(void) {
 
       /* キー押下を UNICODE に変換可能とする
          (処理が重いらしいので指定時のみ) */
-      SDL_EnableUNICODE(1);
       now_unicode = TRUE;
 
     } else {
 
       /* キー押下を ASCII コードに変換可能とする */
-      SDL_EnableUNICODE(0);
       now_unicode = FALSE;
     }
 
   } else {
 
-    SDL_EnableUNICODE(1);
     now_unicode = TRUE;
   }
 }
@@ -1657,7 +1887,7 @@ static int joystick_init(void) {
 
   /* ジョイスティックサブシステム初期化 */
   if (!SDL_WasInit(SDL_INIT_JOYSTICK)) {
-    if (SDL_InitSubSystem(SDL_INIT_JOYSTICK)) {
+    if (SDL_Init(SDL_INIT_JOYSTICK)) {
       return 0;
     }
   }
@@ -1706,11 +1936,11 @@ static void joystick_exit(void) {
 int event_get_joystick_num(void) { return joystick_num; }
 
 /****************************************************************************
- * キー設定ファイルを読み込んで、設定する。
- *  設定ファイルが無ければ偽、あれば処理して真を返す
+ * Read the key setting file and set it.
+ * False if there is no configuration file, if there is, process and return true
  *****************************************************************************/
 
-/* SDL の keysym の文字列を int 値に変換するテーブル */
+/* A table that converts the SDL keysym string to an int value */
 
 static const T_SYMBOL_TABLE sdlkeysym_list[] = {
     {"SDLK_BACKSPACE", SDLK_BACKSPACE},       /*   = 8,    */
@@ -1784,112 +2014,112 @@ static const T_SYMBOL_TABLE sdlkeysym_list[] = {
     {"SDLK_y", SDLK_y},                       /*   = 121,  */
     {"SDLK_z", SDLK_z},                       /*   = 122,  */
     {"SDLK_DELETE", SDLK_DELETE},             /*   = 127,  */
-    {"SDLK_WORLD_0", SDLK_WORLD_0},           /*   = 160,  */
-    {"SDLK_WORLD_1", SDLK_WORLD_1},           /*   = 161,  */
-    {"SDLK_WORLD_2", SDLK_WORLD_2},           /*   = 162,  */
-    {"SDLK_WORLD_3", SDLK_WORLD_3},           /*   = 163,  */
-    {"SDLK_WORLD_4", SDLK_WORLD_4},           /*   = 164,  */
-    {"SDLK_WORLD_5", SDLK_WORLD_5},           /*   = 165,  */
-    {"SDLK_WORLD_6", SDLK_WORLD_6},           /*   = 166,  */
-    {"SDLK_WORLD_7", SDLK_WORLD_7},           /*   = 167,  */
-    {"SDLK_WORLD_8", SDLK_WORLD_8},           /*   = 168,  */
-    {"SDLK_WORLD_9", SDLK_WORLD_9},           /*   = 169,  */
-    {"SDLK_WORLD_10", SDLK_WORLD_10},         /*   = 170,  */
-    {"SDLK_WORLD_11", SDLK_WORLD_11},         /*   = 171,  */
-    {"SDLK_WORLD_12", SDLK_WORLD_12},         /*   = 172,  */
-    {"SDLK_WORLD_13", SDLK_WORLD_13},         /*   = 173,  */
-    {"SDLK_WORLD_14", SDLK_WORLD_14},         /*   = 174,  */
-    {"SDLK_WORLD_15", SDLK_WORLD_15},         /*   = 175,  */
-    {"SDLK_WORLD_16", SDLK_WORLD_16},         /*   = 176,  */
-    {"SDLK_WORLD_17", SDLK_WORLD_17},         /*   = 177,  */
-    {"SDLK_WORLD_18", SDLK_WORLD_18},         /*   = 178,  */
-    {"SDLK_WORLD_19", SDLK_WORLD_19},         /*   = 179,  */
-    {"SDLK_WORLD_20", SDLK_WORLD_20},         /*   = 180,  */
-    {"SDLK_WORLD_21", SDLK_WORLD_21},         /*   = 181,  */
-    {"SDLK_WORLD_22", SDLK_WORLD_22},         /*   = 182,  */
-    {"SDLK_WORLD_23", SDLK_WORLD_23},         /*   = 183,  */
-    {"SDLK_WORLD_24", SDLK_WORLD_24},         /*   = 184,  */
-    {"SDLK_WORLD_25", SDLK_WORLD_25},         /*   = 185,  */
-    {"SDLK_WORLD_26", SDLK_WORLD_26},         /*   = 186,  */
-    {"SDLK_WORLD_27", SDLK_WORLD_27},         /*   = 187,  */
-    {"SDLK_WORLD_28", SDLK_WORLD_28},         /*   = 188,  */
-    {"SDLK_WORLD_29", SDLK_WORLD_29},         /*   = 189,  */
-    {"SDLK_WORLD_30", SDLK_WORLD_30},         /*   = 190,  */
-    {"SDLK_WORLD_31", SDLK_WORLD_31},         /*   = 191,  */
-    {"SDLK_WORLD_32", SDLK_WORLD_32},         /*   = 192,  */
-    {"SDLK_WORLD_33", SDLK_WORLD_33},         /*   = 193,  */
-    {"SDLK_WORLD_34", SDLK_WORLD_34},         /*   = 194,  */
-    {"SDLK_WORLD_35", SDLK_WORLD_35},         /*   = 195,  */
-    {"SDLK_WORLD_36", SDLK_WORLD_36},         /*   = 196,  */
-    {"SDLK_WORLD_37", SDLK_WORLD_37},         /*   = 197,  */
-    {"SDLK_WORLD_38", SDLK_WORLD_38},         /*   = 198,  */
-    {"SDLK_WORLD_39", SDLK_WORLD_39},         /*   = 199,  */
-    {"SDLK_WORLD_40", SDLK_WORLD_40},         /*   = 200,  */
-    {"SDLK_WORLD_41", SDLK_WORLD_41},         /*   = 201,  */
-    {"SDLK_WORLD_42", SDLK_WORLD_42},         /*   = 202,  */
-    {"SDLK_WORLD_43", SDLK_WORLD_43},         /*   = 203,  */
-    {"SDLK_WORLD_44", SDLK_WORLD_44},         /*   = 204,  */
-    {"SDLK_WORLD_45", SDLK_WORLD_45},         /*   = 205,  */
-    {"SDLK_WORLD_46", SDLK_WORLD_46},         /*   = 206,  */
-    {"SDLK_WORLD_47", SDLK_WORLD_47},         /*   = 207,  */
-    {"SDLK_WORLD_48", SDLK_WORLD_48},         /*   = 208,  */
-    {"SDLK_WORLD_49", SDLK_WORLD_49},         /*   = 209,  */
-    {"SDLK_WORLD_50", SDLK_WORLD_50},         /*   = 210,  */
-    {"SDLK_WORLD_51", SDLK_WORLD_51},         /*   = 211,  */
-    {"SDLK_WORLD_52", SDLK_WORLD_52},         /*   = 212,  */
-    {"SDLK_WORLD_53", SDLK_WORLD_53},         /*   = 213,  */
-    {"SDLK_WORLD_54", SDLK_WORLD_54},         /*   = 214,  */
-    {"SDLK_WORLD_55", SDLK_WORLD_55},         /*   = 215,  */
-    {"SDLK_WORLD_56", SDLK_WORLD_56},         /*   = 216,  */
-    {"SDLK_WORLD_57", SDLK_WORLD_57},         /*   = 217,  */
-    {"SDLK_WORLD_58", SDLK_WORLD_58},         /*   = 218,  */
-    {"SDLK_WORLD_59", SDLK_WORLD_59},         /*   = 219,  */
-    {"SDLK_WORLD_60", SDLK_WORLD_60},         /*   = 220,  */
-    {"SDLK_WORLD_61", SDLK_WORLD_61},         /*   = 221,  */
-    {"SDLK_WORLD_62", SDLK_WORLD_62},         /*   = 222,  */
-    {"SDLK_WORLD_63", SDLK_WORLD_63},         /*   = 223,  */
-    {"SDLK_WORLD_64", SDLK_WORLD_64},         /*   = 224,  */
-    {"SDLK_WORLD_65", SDLK_WORLD_65},         /*   = 225,  */
-    {"SDLK_WORLD_66", SDLK_WORLD_66},         /*   = 226,  */
-    {"SDLK_WORLD_67", SDLK_WORLD_67},         /*   = 227,  */
-    {"SDLK_WORLD_68", SDLK_WORLD_68},         /*   = 228,  */
-    {"SDLK_WORLD_69", SDLK_WORLD_69},         /*   = 229,  */
-    {"SDLK_WORLD_70", SDLK_WORLD_70},         /*   = 230,  */
-    {"SDLK_WORLD_71", SDLK_WORLD_71},         /*   = 231,  */
-    {"SDLK_WORLD_72", SDLK_WORLD_72},         /*   = 232,  */
-    {"SDLK_WORLD_73", SDLK_WORLD_73},         /*   = 233,  */
-    {"SDLK_WORLD_74", SDLK_WORLD_74},         /*   = 234,  */
-    {"SDLK_WORLD_75", SDLK_WORLD_75},         /*   = 235,  */
-    {"SDLK_WORLD_76", SDLK_WORLD_76},         /*   = 236,  */
-    {"SDLK_WORLD_77", SDLK_WORLD_77},         /*   = 237,  */
-    {"SDLK_WORLD_78", SDLK_WORLD_78},         /*   = 238,  */
-    {"SDLK_WORLD_79", SDLK_WORLD_79},         /*   = 239,  */
-    {"SDLK_WORLD_80", SDLK_WORLD_80},         /*   = 240,  */
-    {"SDLK_WORLD_81", SDLK_WORLD_81},         /*   = 241,  */
-    {"SDLK_WORLD_82", SDLK_WORLD_82},         /*   = 242,  */
-    {"SDLK_WORLD_83", SDLK_WORLD_83},         /*   = 243,  */
-    {"SDLK_WORLD_84", SDLK_WORLD_84},         /*   = 244,  */
-    {"SDLK_WORLD_85", SDLK_WORLD_85},         /*   = 245,  */
-    {"SDLK_WORLD_86", SDLK_WORLD_86},         /*   = 246,  */
-    {"SDLK_WORLD_87", SDLK_WORLD_87},         /*   = 247,  */
-    {"SDLK_WORLD_88", SDLK_WORLD_88},         /*   = 248,  */
-    {"SDLK_WORLD_89", SDLK_WORLD_89},         /*   = 249,  */
-    {"SDLK_WORLD_90", SDLK_WORLD_90},         /*   = 250,  */
-    {"SDLK_WORLD_91", SDLK_WORLD_91},         /*   = 251,  */
-    {"SDLK_WORLD_92", SDLK_WORLD_92},         /*   = 252,  */
-    {"SDLK_WORLD_93", SDLK_WORLD_93},         /*   = 253,  */
-    {"SDLK_WORLD_94", SDLK_WORLD_94},         /*   = 254,  */
-    {"SDLK_WORLD_95", SDLK_WORLD_95},         /*   = 255,  */
-    {"SDLK_KP0", SDLK_KP0},                   /*   = 256,  */
-    {"SDLK_KP1", SDLK_KP1},                   /*   = 257,  */
-    {"SDLK_KP2", SDLK_KP2},                   /*   = 258,  */
-    {"SDLK_KP3", SDLK_KP3},                   /*   = 259,  */
-    {"SDLK_KP4", SDLK_KP4},                   /*   = 260,  */
-    {"SDLK_KP5", SDLK_KP5},                   /*   = 261,  */
-    {"SDLK_KP6", SDLK_KP6},                   /*   = 262,  */
-    {"SDLK_KP7", SDLK_KP7},                   /*   = 263,  */
-    {"SDLK_KP8", SDLK_KP8},                   /*   = 264,  */
-    {"SDLK_KP9", SDLK_KP9},                   /*   = 265,  */
+    {"SDLK_WORLD_0", 0xA0},           /*   = 160,  */
+    {"SDLK_WORLD_1", 0xA0},           /*   = 161,  */
+    {"SDLK_WORLD_2", 0xA0},           /*   = 162,  */
+    {"SDLK_WORLD_3", 0xA0},           /*   = 163,  */
+    {"SDLK_WORLD_4", 0xA0},           /*   = 164,  */
+    {"SDLK_WORLD_5", 0xA0},           /*   = 165,  */
+    {"SDLK_WORLD_6", 0xA0},           /*   = 166,  */
+    {"SDLK_WORLD_7", 0xA0},           /*   = 167,  */
+    {"SDLK_WORLD_8", 0xA0},           /*   = 168,  */
+    {"SDLK_WORLD_9", 0xA0},           /*   = 169,  */
+    {"SDLK_WORLD_10", 0xA0},         /*   = 170,  */
+    {"SDLK_WORLD_11", 0xA0},         /*   = 171,  */
+    {"SDLK_WORLD_12", 0xA0},         /*   = 172,  */
+    {"SDLK_WORLD_13", 0xA0},         /*   = 173,  */
+    {"SDLK_WORLD_14", 0xA0},         /*   = 174,  */
+    {"SDLK_WORLD_15", 0xA0},         /*   = 175,  */
+    {"SDLK_WORLD_16", 0xA0},         /*   = 176,  */
+    {"SDLK_WORLD_17", 0xA0},         /*   = 177,  */
+    {"SDLK_WORLD_18", 0xA0},         /*   = 178,  */
+    {"SDLK_WORLD_19", 0xA0},         /*   = 179,  */
+    {"SDLK_WORLD_20", 0xA0},         /*   = 180,  */
+    {"SDLK_WORLD_21", 0xA0},         /*   = 181,  */
+    {"SDLK_WORLD_22", 0xA0},         /*   = 182,  */
+    {"SDLK_WORLD_23", 0xA0},         /*   = 183,  */
+    {"SDLK_WORLD_24", 0xA0},         /*   = 184,  */
+    {"SDLK_WORLD_25", 0xA0},         /*   = 185,  */
+    {"SDLK_WORLD_26", 0xA0},         /*   = 186,  */
+    {"SDLK_WORLD_27", 0xA0},         /*   = 187,  */
+    {"SDLK_WORLD_28", 0xA0},         /*   = 188,  */
+    {"SDLK_WORLD_29", 0xA0},         /*   = 189,  */
+    {"SDLK_WORLD_30", 0xA0},         /*   = 190,  */
+    {"SDLK_WORLD_31", 0xA0},         /*   = 191,  */
+    {"SDLK_WORLD_32", 0xA0},         /*   = 192,  */
+    {"SDLK_WORLD_33", 0xA0},         /*   = 193,  */
+    {"SDLK_WORLD_34", 0xA0},         /*   = 194,  */
+    {"SDLK_WORLD_35", 0xA0},         /*   = 195,  */
+    {"SDLK_WORLD_36", 0xA0},         /*   = 196,  */
+    {"SDLK_WORLD_37", 0xA0},         /*   = 197,  */
+    {"SDLK_WORLD_38", 0xA0},         /*   = 198,  */
+    {"SDLK_WORLD_39", 0xA0},         /*   = 199,  */
+    {"SDLK_WORLD_40", 0xA0},         /*   = 200,  */
+    {"SDLK_WORLD_41", 0xA0},         /*   = 201,  */
+    {"SDLK_WORLD_42", 0xA0},         /*   = 202,  */
+    {"SDLK_WORLD_43", 0xA0},         /*   = 203,  */
+    {"SDLK_WORLD_44", 0xA0},         /*   = 204,  */
+    {"SDLK_WORLD_45", 0xA0},         /*   = 205,  */
+    {"SDLK_WORLD_46", 0xA0},         /*   = 206,  */
+    {"SDLK_WORLD_47", 0xA0},         /*   = 207,  */
+    {"SDLK_WORLD_48", 0xA0},         /*   = 208,  */
+    {"SDLK_WORLD_49", 0xA0},         /*   = 209,  */
+    {"SDLK_WORLD_50", 0xA0},         /*   = 210,  */
+    {"SDLK_WORLD_51", 0xA0},         /*   = 211,  */
+    {"SDLK_WORLD_52", 0xA0},         /*   = 212,  */
+    {"SDLK_WORLD_53", 0xA0},         /*   = 213,  */
+    {"SDLK_WORLD_54", 0xA0},         /*   = 214,  */
+    {"SDLK_WORLD_55", 0xA0},         /*   = 215,  */
+    {"SDLK_WORLD_56", 0xA0},         /*   = 216,  */
+    {"SDLK_WORLD_57", 0xA0},         /*   = 217,  */
+    {"SDLK_WORLD_58", 0xA0},         /*   = 218,  */
+    {"SDLK_WORLD_59", 0xA0},         /*   = 219,  */
+    {"SDLK_WORLD_60", 0xA0},         /*   = 220,  */
+    {"SDLK_WORLD_61", 0xA0},         /*   = 221,  */
+    {"SDLK_WORLD_62", 0xA0},         /*   = 222,  */
+    {"SDLK_WORLD_63", 0xA0},         /*   = 223,  */
+    {"SDLK_WORLD_64", 0xA0},         /*   = 224,  */
+    {"SDLK_WORLD_65", 0xA0},         /*   = 225,  */
+    {"SDLK_WORLD_66", 0xA0},         /*   = 226,  */
+    {"SDLK_WORLD_67", 0xA0},         /*   = 227,  */
+    {"SDLK_WORLD_68", 0xA0},         /*   = 228,  */
+    {"SDLK_WORLD_69", 0xA0},         /*   = 229,  */
+    {"SDLK_WORLD_70", 0xA0},         /*   = 230,  */
+    {"SDLK_WORLD_71", 0xA0},         /*   = 231,  */
+    {"SDLK_WORLD_72", 0xA0},         /*   = 232,  */
+    {"SDLK_WORLD_73", 0xA0},         /*   = 233,  */
+    {"SDLK_WORLD_74", 0xA0},         /*   = 234,  */
+    {"SDLK_WORLD_75", 0xA0},         /*   = 235,  */
+    {"SDLK_WORLD_76", 0xA0},         /*   = 236,  */
+    {"SDLK_WORLD_77", 0xA0},         /*   = 237,  */
+    {"SDLK_WORLD_78", 0xA0},         /*   = 238,  */
+    {"SDLK_WORLD_79", 0xA0},         /*   = 239,  */
+    {"SDLK_WORLD_80", 0xA0},         /*   = 240,  */
+    {"SDLK_WORLD_81", 0xA0},         /*   = 241,  */
+    {"SDLK_WORLD_82", 0xA0},         /*   = 242,  */
+    {"SDLK_WORLD_83", 0xA0},         /*   = 243,  */
+    {"SDLK_WORLD_84", 0xA0},         /*   = 244,  */
+    {"SDLK_WORLD_85", 0xA0},         /*   = 245,  */
+    {"SDLK_WORLD_86", 0xA0},         /*   = 246,  */
+    {"SDLK_WORLD_87", 0xA0},         /*   = 247,  */
+    {"SDLK_WORLD_88", 0xA0},         /*   = 248,  */
+    {"SDLK_WORLD_89", 0xA0},         /*   = 249,  */
+    {"SDLK_WORLD_90", 0xA0},         /*   = 250,  */
+    {"SDLK_WORLD_91", 0xA0},         /*   = 251,  */
+    {"SDLK_WORLD_92", 0xA0},         /*   = 252,  */
+    {"SDLK_WORLD_93", 0xA0},         /*   = 253,  */
+    {"SDLK_WORLD_94", 0xA0},         /*   = 254,  */
+    {"SDLK_WORLD_95", 0xA0},         /*   = 255,  */
+    {"SDLK_KP0", SDLK_KP_0},                   /*   = 256,  */
+    {"SDLK_KP1", SDLK_KP_1},                   /*   = 257,  */
+    {"SDLK_KP2", SDLK_KP_2},                   /*   = 258,  */
+    {"SDLK_KP3", SDLK_KP_3},                   /*   = 259,  */
+    {"SDLK_KP4", SDLK_KP_4},                   /*   = 260,  */
+    {"SDLK_KP5", SDLK_KP_5},                   /*   = 261,  */
+    {"SDLK_KP6", SDLK_KP_6},                   /*   = 262,  */
+    {"SDLK_KP7", SDLK_KP_7},                   /*   = 263,  */
+    {"SDLK_KP8", SDLK_KP_8},                   /*   = 264,  */
+    {"SDLK_KP9", SDLK_KP_9},                   /*   = 265,  */
     {"SDLK_KP_PERIOD", SDLK_KP_PERIOD},       /*   = 266,  */
     {"SDLK_KP_DIVIDE", SDLK_KP_DIVIDE},       /*   = 267,  */
     {"SDLK_KP_MULTIPLY", SDLK_KP_MULTIPLY},   /*   = 268,  */
@@ -1921,28 +2151,28 @@ static const T_SYMBOL_TABLE sdlkeysym_list[] = {
     {"SDLK_F13", SDLK_F13},                   /*   = 294,  */
     {"SDLK_F14", SDLK_F14},                   /*   = 295,  */
     {"SDLK_F15", SDLK_F15},                   /*   = 296,  */
-    {"SDLK_NUMLOCK", SDLK_NUMLOCK},           /*   = 300,  */
+    {"SDLK_NUMLOCK", SDLK_NUMLOCKCLEAR},           /*   = 300,  */
     {"SDLK_CAPSLOCK", SDLK_CAPSLOCK},         /*   = 301,  */
-    {"SDLK_SCROLLOCK", SDLK_SCROLLOCK},       /*   = 302,  */
+    {"SDLK_SCROLLOCK", SDLK_SCROLLLOCK},      /*   = 302,  */
     {"SDLK_RSHIFT", SDLK_RSHIFT},             /*   = 303,  */
     {"SDLK_LSHIFT", SDLK_LSHIFT},             /*   = 304,  */
     {"SDLK_RCTRL", SDLK_RCTRL},               /*   = 305,  */
     {"SDLK_LCTRL", SDLK_LCTRL},               /*   = 306,  */
     {"SDLK_RALT", SDLK_RALT},                 /*   = 307,  */
     {"SDLK_LALT", SDLK_LALT},                 /*   = 308,  */
-    {"SDLK_RMETA", SDLK_RMETA},               /*   = 309,  */
-    {"SDLK_LMETA", SDLK_LMETA},               /*   = 310,  */
-    {"SDLK_LSUPER", SDLK_LSUPER},             /*   = 311,  */
-    {"SDLK_RSUPER", SDLK_RSUPER},             /*   = 312,  */
+    {"SDLK_RMETA", SDLK_RGUI},                /*   = 309,  */
+    {"SDLK_LMETA", SDLK_LGUI},               /*   = 310,  */
+    {"SDLK_LSUPER", SDLK_LGUI},             /*   = 311,  */
+    {"SDLK_RSUPER", SDLK_RGUI},             /*   = 312,  */
     {"SDLK_MODE", SDLK_MODE},                 /*   = 313,  */
-    {"SDLK_COMPOSE", SDLK_COMPOSE},           /*   = 314,  */
+    {"SDLK_COMPOSE", SDLK_LGUI},           /*   = 314,  */  // FIXME
     {"SDLK_HELP", SDLK_HELP},                 /*   = 315,  */
-    {"SDLK_PRINT", SDLK_PRINT},               /*   = 316,  */
+    {"SDLK_PRINT", SDLK_PRINTSCREEN},         /*   = 316,  */
     {"SDLK_SYSREQ", SDLK_SYSREQ},             /*   = 317,  */
-    {"SDLK_BREAK", SDLK_BREAK},               /*   = 318,  */
+    {"SDLK_BREAK", SDLK_PAUSE},               /*   = 318,  */
     {"SDLK_MENU", SDLK_MENU},                 /*   = 319,  */
     {"SDLK_POWER", SDLK_POWER},               /*   = 320,  */
-    {"SDLK_EURO", SDLK_EURO},                 /*   = 321,  */
+    {"SDLK_EURO", SDLK_LGUI},                 /*   = 321,  */ // FIXME
     {"SDLK_UNDO", SDLK_UNDO},                 /*   = 322,  */
 };
 /* デバッグ用 */
@@ -2070,7 +2300,7 @@ static void display_fps(void) {
 
     sprintf(buf, "FPS: %3d (VSYNC %3d)", now_drawn_count - prev_drawn_count, now_vsync_count - prev_vsync_count);
 
-    SDL_WM_SetCaption(buf, buf);
+    graph_set_window_title(buf);
   }
 
   prev_drawn_count = now_drawn_count;
