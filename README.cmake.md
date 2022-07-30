@@ -8,7 +8,7 @@ and (probably) *BSD and macOS. Minimal development requirements are:
 * a recent compiler with C99 and C++17 support (GCC, LLVM, MSVC)
 * cmake 3.10
 * ninja (optionally)
-* libSDL 1.2 (for SDL backend)
+* libSDL 2.0.12 (for SDL backend)
 * libX11 1.6.9 (for X.Org backend)
 * libxxf86dga (for X.Org backend)
 * libxxf86vm-dev (for X.Org backend)
