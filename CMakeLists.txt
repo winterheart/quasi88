@@ -324,6 +324,7 @@ if(ENABLE_SDL)
 	set(SDL_SOURCES
 		src/SDL/event.c
 		src/SDL/graph.c
+		src/SDL/keymap.cpp
 		src/SDL/main.c
 		src/SDL/wait.c
 	)
