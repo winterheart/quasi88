@@ -6,7 +6,7 @@
 #endif
 
 #ifndef BASE_VERSION
-#define BASE_VERSION    "0.6.10"
+#define BASE_VERSION    "0.7.0"
 #endif
 
 #ifndef BASE_COMMENT
@@ -55,7 +55,7 @@
 
 
 #ifndef Q_COPYRIGHT
-#define Q_COPYRIGHT     "(c) 1998-2019 S.Fukunaga, R.Zumer"
+#define Q_COPYRIGHT     "(c) 1998-2022 S.Fukunaga, R.Zumer, A.Hackimov"
 #endif
 
 #ifdef  USE_SOUND
