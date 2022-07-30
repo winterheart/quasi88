@@ -3,9 +3,10 @@
 All notable changes to this project will be documented in this file. An old version of
 this file can be found in `document/HISTORY.TXT` file.
 
-## 0.6.10 - Unreleased
+## 0.7.0 - Unreleased
 * Removed old Classic Mac OS support.
 * Unify file operations functions for all supported platforms. Now project requires C++17 capable compiler.
+* Updated SDL backend to use of SDL2 library.
 
 ## 0.6.9 - 2022-02-06
 
