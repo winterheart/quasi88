@@ -24,6 +24,8 @@ static SDL_Surface *sdl_offscreen;
 
 static SDL_DisplayMode sdl_display_mode = {SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0};
 
+static int x_pos = SDL_WINDOWPOS_UNDEFINED, y_pos = SDL_WINDOWPOS_UNDEFINED;
+
 int sdl_init(void) {
   if (verbose_proc) {
     SDL_version libver;
@@ -116,7 +118,14 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double as
   SDL_RenderSetLogicalSize(sdl_renderer, width, height);
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
   SDL_SetWindowFullscreen(sdl_window, flags);
-  SDL_SetWindowPosition(sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
+  if (x_pos == SDL_WINDOWPOS_UNDEFINED || y_pos == SDL_WINDOWPOS_UNDEFINED) {
+    x_pos = y_pos = SDL_WINDOWPOS_CENTERED;
+  } else {
+    SDL_GetWindowPosition(sdl_window, &x_pos, &y_pos);
+  }
+  SDL_SetWindowPosition(sdl_window, x_pos, y_pos);
+
   if (verbose_proc)
     printf("OK (%dx%d -> %dx%d)\n", width, height, real_w, real_h);
 
