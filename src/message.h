@@ -1290,7 +1290,7 @@ enum {
 static const t_menulabel data_key[] =
 {
   { { " Function key Config ",             " ファンクションキー設定 ",         } },
-  { { " Curosr Key Config ",               " カーソルキー設定 ",               } }, 
+  { { " Cursor Key Config ",               " カーソルキー設定 ",               } },
   { { "                                 ", "                                ", } },
   { { " Software ",                        " ソフトウェア ",                   } },
   { { "   Keyboard  ",                     "  キーボード  ",                   } },
