@@ -15,6 +15,24 @@ and (probably) *BSD and macOS. Minimal development requirements are:
 * GTK2+ 2.24 (for GTK backend)
 * ReadLine 7 (optional for Monitor)
 
+On Windows dependencies are controlled via [vcpkg package manager](https://vcpkg.io/). Here quick commands how to get
+it:
+
+```
+# Assuming that vcpkg will placed at C:\users\user
+cd C:\users\user
+git clone https://github.com/microsoft/vcpkg
+```
+
+After that just add `-DCMAKE_TOOLCHAIN_FILE=C:/users/user/scripts/buildsystems/vcpkg.cmake` to cmake input during
+configuration: 
+
+```
+cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=C:/users/user/scripts/buildsystems/vcpkg.cmake <build options>
+# Now build quasi88
+cmake --build build -j2
+```
+
 ## Quick start
 
 ```
