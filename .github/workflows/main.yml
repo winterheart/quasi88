@@ -18,27 +18,34 @@ jobs:
         config:
           - { os: ubuntu-latest, cc: "gcc", cxx: "g++", opts: "-DENABLE_GTK2=OFF -DENABLE_X11=OFF -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
           - { os: ubuntu-latest, cc: "clang", cxx: "clang++", opts: "-DENABLE_GTK2=OFF -DENABLE_X11=OFF -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
-          - { os: windows-latest, cc: "cl", cxx: "cl", opts: "-DENABLE_WIN=ON -DENABLE_GTK2=OFF -DENABLE_X11=OFF -DENABLE_SDL=OFF -DENABLE_MONITOR=OFF -DENABLE_JOYSTICK=NO" }
+          - { os: windows-latest, cc: "cl", cxx: "cl", opts: "-DCMAKE_TOOLCHAIN_FILE='vcpkg/scripts/buildsystems/vcpkg.cmake' -DENABLE_WIN=ON -DENABLE_GTK2=OFF -DENABLE_X11=OFF -DENABLE_SDL=ON -DENABLE_MONITOR=OFF -DENABLE_JOYSTICK=SDL" }
     steps:
       - uses: actions/checkout@v1
-      - name: Install dependencies (${{ matrix.config.os }})
+      - name: Install dependencies (ubuntu)
         if: matrix.config.os == 'ubuntu-latest'
         # Need to backport >=libsdl2-dev-2.0.12
         run: |
           sudo add-apt-repository -y ppa:savoury1/multimedia
           sudo apt-get update
           sudo apt-get install ninja-build libsdl2-dev libreadline-dev
-      - name: Install dependencies (${{ matrix.config.os }})
+      - name: Install dependencies (windows)
         if: matrix.config.os == 'windows-latest'
         run: |
           choco install ninja
-      - name: Setup devcmd (Windows)
+      - name: Install dependencies via vcpkg (windows)
+        if: matrix.config.os == 'windows-latest'
+        uses: lukka/run-vcpkg@v10.4
+        with:
+          vcpkgGitCommitId: 'acc3bcf76b84ae5041c86ab55fe138ae7b8255c7' # tag 2022.08.15
+          vcpkgDirectory: 'vcpkg'
+      - name: Setup devcmd (windows)
         if: matrix.config.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1.10.0
       - name: Build with ${{ matrix.config.cc }}/${{ matrix.config.cxx }}
         env:
           CC: ${{ matrix.config.cc }}
           CXX: ${{ matrix.config.cxx }}
+          VCPKG_DEFAULT_TRIPLET: x64-windows
         run: |
           cmake -B build -G Ninja ${{ matrix.config.opts }}
           cmake --build build -j2
