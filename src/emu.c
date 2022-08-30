@@ -101,7 +101,7 @@ void    emu_breakpoint_init( void )
  *
  ************************************************************************/
 
-#define INFINITY    (0)
+#define Q_INFINITY  (0)
 #define ONLY_1STEP  (1)
 
 /*------------------------------------------------------------------------*/
@@ -196,7 +196,7 @@ void    emu_init(void)
   default:
   case GO:
     target_step = 0;            /* 無限に実行 */
-    infinity    = INFINITY;
+    infinity    = Q_INFINITY;
     only_1step  = ONLY_1STEP;
     break;
 
@@ -267,11 +267,11 @@ void    emu_main(void)
       sub_state  += (int) ((3.9936        * cpu_slice_us) * JACKUP);
     }
     if( main_state >= 1*JACKUP ){
-      wk = (infinity==INFINITY) ? main_state/JACKUP : ONLY_1STEP;
+      wk = (infinity== Q_INFINITY) ? main_state/JACKUP : ONLY_1STEP;
       main_state -= (z80_exec( &z80main_cpu, wk ) ) * JACKUP;
     }
     if( sub_state >= 1*JACKUP ){
-      wk = (infinity==INFINITY) ? sub_state/JACKUP : ONLY_1STEP;
+      wk = (infinity== Q_INFINITY) ? sub_state/JACKUP : ONLY_1STEP;
       sub_state  -= (z80_exec( &z80sub_cpu, wk ) ) * JACKUP;
     }
     break;

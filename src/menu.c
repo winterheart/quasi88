@@ -137,7 +137,7 @@ static  void    start_file_error_dialog(int drv, int result)
     const t_menulabel *l = (drv<0) ? data_err_file : data_err_drive;
 
     if (result == ERR_NO) return;
-    if (drv < 0) sprintf(wk, GET_LABEL(l, result));
+    if (drv < 0) sprintf(wk, "%s", GET_LABEL(l, result));
     else         sprintf(wk, GET_LABEL(l, result), drv+1);
 
     dialog_create();

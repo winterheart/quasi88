@@ -1374,7 +1374,7 @@ int z80_line_disasm( z80arch *z80, word pc )
   switch( Inst->type ){
   case OP_NOTHING:
     printf_head( z80, pc, 1 );
-    printf( Inst->str );
+    printf( "%s", Inst->str );
     return 1;
 
   case OP_NUM_8:
@@ -1407,7 +1407,7 @@ int z80_line_disasm( z80arch *z80, word pc )
     switch( Inst->type ){
     case OP_NOTHING:
       printf_head( z80, pc, 2 );
-      printf( Inst->str );
+      printf( "%s", Inst->str );
       return 2;
 
     case OP_UNEXIST:

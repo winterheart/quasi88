@@ -2121,7 +2121,7 @@ static const t_keymap keymap_assign[] =
 
 /* t_menulabel の index 番目の文字列を取得するマクロ -------------------*/
 
-#define     GET_LABEL(l, index) (l[index].str[menu_lang])
+#define     GET_LABEL(l, index) ((l)[index].str[menu_lang])
 
 
 /* フレームを生成する --------------------------------------------------
