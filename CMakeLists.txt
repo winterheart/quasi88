@@ -228,10 +228,10 @@ endif(ENABLE_MONITOR)
 if(${ENABLE_JOYSTICK} STREQUAL "NO")
 	add_definitions(-DJOY_NOTHING)
 elseif(${ENABLE_JOYSTICK} STREQUAL "SDL")
-	find_package(SDL2 REQUIRED)
+	find_package(SDL2 CONFIG REQUIRED)
 	add_definitions(-DJOY_SDL)
 	include_directories(${SDL2_INCLUDE_DIR})
-	list(APPEND COMMON_LIBS ${SDL2_LIBRARIES})
+	list(APPEND COMMON_LIBS SDL2::SDL2)
 elseif(${ENABLE_JOYSTICK} STREQUAL "LINUX_USB")
 	add_definitions(-DJOY_LINUX_USB)
 	include(FindPkgConfig)
@@ -313,12 +313,11 @@ endif(ENABLE_X11)
 #### SDL target
 if(ENABLE_SDL)
 	add_definitions(-DQUASI88_SDL)
-	find_package(SDL2 REQUIRED)
+	find_package(SDL2 CONFIG REQUIRED)
 
-	list(APPEND SDL_LIBS ${SDL2_LIBRARIES})
+	list(APPEND SDL_LIBS SDL2::SDL2 SDL2::SDL2main)
 	list(APPEND SDL_INCLUDES
 		src/SDL
-		${SDL2_INCLUDE_DIR}
 	)
 
 	set(SDL_SOURCES
