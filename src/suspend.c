@@ -15,6 +15,7 @@
 #include "suspend.h"
 #include "initval.h"
 #include "file-op.h"
+#include "utility.h"
 
 int resume_flag  = FALSE;           /* 起動時のレジューム  */
 int resume_force = FALSE;           /* 強制レジューム    */

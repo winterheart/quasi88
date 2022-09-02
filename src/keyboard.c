@@ -26,6 +26,7 @@
 #include "snapshot.h"
 
 #include "suspend.h"
+#include "utility.h"
 
 /******************************************************************************
  *
@@ -812,7 +813,7 @@ void    keyboard_jop1_strobe(void)
           if( dx < -127 || 127 < dx ) f |= 0x01;
           if( dy < -127 || 127 < dy ) f |= 0x02;
           if( f==0x03 ){
-            if( ABS(dx) > ABS(dy) ) f = 0x01;
+            if( abs(dx) > abs(dy) ) f = 0x01;
             else                    f = 0x02;
           }
           if( f==0x01 ){        /* x変位が ±127を超えた場合 */

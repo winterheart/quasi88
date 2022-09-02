@@ -29,6 +29,7 @@
 #include "screen.h"
 #include "event.h"
 #include "file-op.h"
+#include "utility.h"
 
 
 

@@ -32,6 +32,7 @@
 #include "screen.h"   /* SCREEN_INTERLACE_NO ...  */
 #include "snddrv.h"
 #include "soundbd.h" /* sound_board          */
+#include "utility.h"
 
 extern int sdl_buffersize;
 

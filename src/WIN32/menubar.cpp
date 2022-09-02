@@ -23,6 +23,7 @@ extern "C" {
 #include "snddrv.h"
 
 #include "resource.h"
+#include "utility.h"
 }
 
 #if USE_RETROACHIEVEMENTS

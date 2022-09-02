@@ -126,6 +126,7 @@ set(COMMON_SOURCES
 	src/q8tk.c
 	src/q8tk-glib.c
 	src/quasi88.cpp
+	src/utility.c
 	src/z80.c
 	src/z80-debug.c
 )

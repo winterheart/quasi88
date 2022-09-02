@@ -30,6 +30,7 @@
 #include "snddrv.h"
 #include "snapshot.h"
 #include "suspend.h"
+#include "utility.h"
 
 
 /*----------------------------------------------------------------------*/

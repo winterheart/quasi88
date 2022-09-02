@@ -20,6 +20,7 @@
 
 #include "intr.h" /* test */
 #include "keymap.h"
+#include "utility.h"
 
 int show_fps;                      /* test */
 static int display_fps_init(void); /* test */

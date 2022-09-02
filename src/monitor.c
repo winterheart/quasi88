@@ -42,7 +42,7 @@
 #include "event.h"
 
 #include "basic.h"
-
+#include "utility.h"
 
 #ifdef USE_GNU_READLINE
 #include <readline/readline.h>
