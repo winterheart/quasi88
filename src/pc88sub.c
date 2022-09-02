@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "quasi88.h"
+#include "debug.h"
 #include "pc88sub.h"
 
 #include "pc88cpu.h"

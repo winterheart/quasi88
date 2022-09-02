@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "quasi88.h"
+#include "debug.h"
 #include "initval.h"
 #include "screen.h"
 #include "screen-func.h"

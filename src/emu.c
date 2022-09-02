@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "quasi88.h"
+#include "debug.h"
 #include "initval.h"
 #include "emu.h"
 

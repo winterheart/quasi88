@@ -11,6 +11,9 @@
 #include <signal.h>
 
 #include "quasi88.h"
+#ifdef  DEBUGLOG
+#include "debug.h"
+#endif
 #include "initval.h"
 #include "monitor.h"
 

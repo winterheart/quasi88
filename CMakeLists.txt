@@ -97,6 +97,7 @@ include_directories(
 set(COMMON_SOURCES
 	src/basic.c
 	src/crtcdmac.c
+	src/debug.c
 	src/emu.c
 	src/fdc.c
 	src/file-op.cpp

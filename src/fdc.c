@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "quasi88.h"
+#include "debug.h"
 #include "initval.h"
 #include "drive.h"
 #include "image.h"
