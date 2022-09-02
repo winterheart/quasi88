@@ -99,6 +99,7 @@ set(COMMON_SOURCES
 	src/crtcdmac.c
 	src/debug.c
 	src/emu.c
+	src/event.c
 	src/fdc.c
 	src/file-op.cpp
 	src/fname.c

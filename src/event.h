@@ -1,7 +1,6 @@
 #ifndef EVENT_H_INCLUDED
 #define EVENT_H_INCLUDED
 
-
 /***********************************************************************
  * イベント処理 (システム依存)
  ************************************************************************/
@@ -19,9 +18,8 @@
  *  この関数は、終了時に 1回だけ呼び出される。
  *
  *****************************************************************************/
-void    event_init(void);
-void    event_exit(void);
-
+void event_init(void);
+void event_exit(void);
 
 /******************************************************************************
  * イベント処理の再初期化
@@ -32,8 +30,7 @@ void    event_exit(void);
  *  (キー入力イベント処理や、メニューバーの設定を変える場合など)
  *
  *****************************************************************************/
-void    event_switch(void);
-
+void event_switch(void);
 
 /******************************************************************************
  * イベント処理の実行
@@ -84,8 +81,7 @@ void    event_switch(void);
  *          quasi88_quit()
  *
  *****************************************************************************/
-void    event_update(void);
-
+void event_update(void);
 
 /******************************************************************************
  * その他の雑多な関数
@@ -109,14 +105,11 @@ void    event_update(void);
  *
  *****************************************************************************/
 int event_numlock_on(void);
-void    event_numlock_off(void);
+void event_numlock_off(void);
 
-void    event_get_mouse_pos(int *x, int *y);
+void event_get_mouse_pos(int *x, int *y);
 
 int event_get_joystick_num(void);
-
-
-
 
 /******************************************************************************
  * 以下は、上記のシステム依存な関数より、呼び出される関数
@@ -126,39 +119,36 @@ int event_get_joystick_num(void);
 /*----------------------------------------------------------------------
  * イベント処理の対処
  *----------------------------------------------------------------------*/
-void    quasi88_key  (int code, int on_flag);
-void    quasi88_mouse(int code, int on_flag);
-void    quasi88_pad  (int code, int on_flag);
-void    quasi88_mouse_move(int x, int y, int abs_flag);
+void quasi88_key(int code, int on_flag);
+void quasi88_mouse(int code, int on_flag);
+void quasi88_pad(int code, int on_flag);
+void quasi88_mouse_move(int x, int y, int abs_flag);
 
-#define quasi88_key_pressed(code)   quasi88_key  (code, TRUE )
-#define quasi88_key_released(code)  quasi88_key  (code, FALSE)
-#define quasi88_mouse_pressed(code) quasi88_mouse(code, TRUE )
-#define quasi88_mouse_released(code)    quasi88_mouse(code, FALSE)
-#define quasi88_pad_pressed(code)   quasi88_pad  (code, TRUE )
-#define quasi88_pad_released(code)  quasi88_pad  (code, FALSE)
-#define quasi88_mouse_moved_abs(x, y)   quasi88_mouse_move(x, y, TRUE)
-#define quasi88_mouse_moved_rel(x, y)   quasi88_mouse_move(x, y, FALSE)
+#define quasi88_key_pressed(code) quasi88_key(code, TRUE)
+#define quasi88_key_released(code) quasi88_key(code, FALSE)
+#define quasi88_mouse_pressed(code) quasi88_mouse(code, TRUE)
+#define quasi88_mouse_released(code) quasi88_mouse(code, FALSE)
+#define quasi88_pad_pressed(code) quasi88_pad(code, TRUE)
+#define quasi88_pad_released(code) quasi88_pad(code, FALSE)
+#define quasi88_mouse_moved_abs(x, y) quasi88_mouse_move(x, y, TRUE)
+#define quasi88_mouse_moved_rel(x, y) quasi88_mouse_move(x, y, FALSE)
 
-
-
-void    quasi88_expose(void);
-void    quasi88_focus_in(void);
-void    quasi88_focus_out(void);
-
+void quasi88_expose(void);
+void quasi88_focus_in(void);
+void quasi88_focus_out(void);
 
 /* 以下は、実装実験中。呼び出しに条件があるでの注意 */
 
 typedef struct {
-    int     boot_basic;
-    int     boot_dipsw;
-    int     boot_from_rom;
-    int     boot_clock_4mhz;
-    int     set_version;
-    byte    baudrate_sw;
-    int     use_extram;
-    int     use_jisho_rom;
-    int     sound_board;
+  int boot_basic;
+  int boot_dipsw;
+  int boot_from_rom;
+  int boot_clock_4mhz;
+  int set_version;
+  byte baudrate_sw;
+  int use_extram;
+  int use_jisho_rom;
+  int sound_board;
 } T_RESET_CFG;
 
 int quasi88_stateload(int serial);
@@ -167,12 +157,10 @@ int quasi88_screen_snapshot(void);
 int quasi88_waveout(int start);
 int quasi88_drag_and_drop(const char *filename);
 
-
 int quasi88_cfg_now_wait_rate(void);
-void    quasi88_cfg_set_wait_rate(int rate);
+void quasi88_cfg_set_wait_rate(int rate);
 int quasi88_cfg_now_no_wait(void);
-void    quasi88_cfg_set_no_wait(int enable);
-
+void quasi88_cfg_set_no_wait(int enable);
 
 int quasi88_disk_insert_all(const char *filename, int ro);
 int quasi88_disk_insert(int drv, const char *filename, int image, int ro);
@@ -180,24 +168,22 @@ int quasi88_disk_insert_A_to_B(int src_drv, int dst_drv, int dst_img);
 int quasi88_disk_eject_all(void);
 int quasi88_disk_eject(int drv);
 
-void    quasi88_disk_image_select(int drv, int img);
-void    quasi88_disk_image_empty(int drv);
-void    quasi88_disk_image_next(int drv);
-void    quasi88_disk_image_prev(int drv);
+void quasi88_disk_image_select(int drv, int img);
+void quasi88_disk_image_empty(int drv);
+void quasi88_disk_image_next(int drv);
+void quasi88_disk_image_prev(int drv);
 
-int quasi88_load_tape_insert( const char *filename );
-int quasi88_load_tape_rewind( void );
-int quasi88_load_tape_eject( void );
-int quasi88_save_tape_insert( const char *filename );
-int quasi88_save_tape_eject( void );
+int quasi88_load_tape_insert(const char *filename);
+int quasi88_load_tape_rewind(void);
+int quasi88_load_tape_eject(void);
+int quasi88_save_tape_insert(const char *filename);
+int quasi88_save_tape_eject(void);
 
-int quasi88_serial_in_connect( const char *filename );
-void    quasi88_serial_in_remove( void );
-int quasi88_serial_out_connect( const char *filename );
-void    quasi88_serial_out_remove( void );
-int quasi88_printer_connect( const char *filename );
-void    quasi88_printer_remove( void );
+int quasi88_serial_in_connect(const char *filename);
+void quasi88_serial_in_remove(void);
+int quasi88_serial_out_connect(const char *filename);
+void quasi88_serial_out_remove(void);
+int quasi88_printer_connect(const char *filename);
+void quasi88_printer_remove(void);
 
-
-
-#endif  /* EVENT_H_INCLUDED */
+#endif /* EVENT_H_INCLUDED */
