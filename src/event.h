@@ -160,8 +160,7 @@ typedef struct {
     int     use_jisho_rom;
     int     sound_board;
 } T_RESET_CFG;
-void    quasi88_get_reset_cfg(T_RESET_CFG *cfg);
-void    quasi88_reset(const T_RESET_CFG *cfg);
+
 int quasi88_stateload(int serial);
 int quasi88_statesave(int serial);
 int quasi88_screen_snapshot(void);
