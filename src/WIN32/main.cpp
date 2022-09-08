@@ -19,10 +19,11 @@
 #endif
 #endif
 
+#include <cstdio>
+#include <cstdlib>
+
 extern "C"
 {
-    #include <stdio.h>
-    #include <stdlib.h>
 
     #include "device.h"
     #include "quasi88.h"
