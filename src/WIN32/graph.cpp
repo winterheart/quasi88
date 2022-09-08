@@ -4,11 +4,11 @@
  *  詳細は、 graph.h 参照
  ************************************************************************/
 
+#include <cstdio>
+#include <cstdlib>
+
 extern "C"
 {
-    #include <stdio.h>
-    #include <stdlib.h>
-
     #include "quasi88.h"
     #include "graph.h"
     #include "device.h"

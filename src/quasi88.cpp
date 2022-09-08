@@ -18,13 +18,11 @@
 /*  この部分のソースの著作権は、 cisc氏 にあります。       */
 /*                                  */
 /************************************************************************/
-
-extern "C" {
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
 
+extern "C" {
 #include "quasi88.h"
 #include "debug.h"
 #include "initval.h"
