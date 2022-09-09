@@ -74,19 +74,10 @@ typedef struct { /* 画面サイズのリスト      */
 
 static const SCREEN_SIZE_TABLE screen_size_tbl[SCREEN_SIZE_END] = {
     /*  w     h   */
-    {
-        320,
-        200,
-    }, /* SCREEN_SIZE_HALF 320x200 */
-    {
-        640,
-        400,
-    }, /* SCREEN_SIZE_FULL 640x400 */
+    {320, 200}, /* SCREEN_SIZE_HALF 320x200 */
+    {640, 400}, /* SCREEN_SIZE_FULL 640x400 */
 #ifdef SUPPORT_DOUBLE
-    {
-        1280,
-        800,
-    }, /* SCREEN_SIZE_DOUBLE   1280x800*/
+    {1280, 800}, /* SCREEN_SIZE_DOUBLE   1280x800*/
 #endif
 };
 
@@ -151,7 +142,12 @@ static int auto_mouse;       /* 真で、マウスを自動で隠すモード   
 static int auto_mouse_timer; /* 自動で隠すまでの残り時間タイマー */
 static int auto_grab;        /* 真で、マウス自動グラブモード     */
 
-enum { SETUP_START, SETUP_MOVE, SETUP_TIMEUP, SETUP_CLICK };
+enum {
+  SETUP_START,
+  SETUP_MOVE,
+  SETUP_TIMEUP,
+  SETUP_CLICK,
+};
 static void screen_attr_setup(int stat);
 
 static void check_half_interp(void);
