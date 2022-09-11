@@ -62,7 +62,7 @@ static int blink_ctrl_counter = 0; /*              〃     */
 /*CFG*/ int use_swcursor = FALSE; /* メニュー専用カーソル表示有無   */
 int now_swcursor;                 /* 現在専用カーソル表示中?   */
 
-/*CFG*/ int use_interlace = 0; /* インターレース表示  */
+/*CFG*/ int use_interlace = SCREEN_INTERLACE_NO; /* インターレース表示  */
 
 static int enable_half_interp = FALSE; /* HALF時、色補間可能か否か */
 /*CFG*/ int use_half_interp = TRUE;    /* HALF時、色補間する        */
@@ -259,7 +259,7 @@ static int open_window(void) {
 
   added_color = 0;
 
-  if (enable_fullscreen == FALSE) { /* 全画面不可なら、全画面指示は却下 */
+  if (!enable_fullscreen) { /* 全画面不可なら、全画面指示は却下 */
     use_fullscreen = FALSE;
   }
 
@@ -306,14 +306,14 @@ static int open_window(void) {
         break;
     }
 
-    if (found == FALSE) { /* 表示可能サイズ無しなら全画面不可 */
+    if (!found) { /* 表示可能サイズ無しなら全画面不可 */
       use_fullscreen = FALSE;
     }
   }
 
   /* ウインドウ表示が表示な可能サイズを、大きいほうから探し出す */
 
-  if (use_fullscreen == FALSE) {
+  if (!use_fullscreen) {
     for (size = screen_size; size >= screen_size_min; size--) {
 
       for (i = 0; i < 4; i++) { /* 4パターンのサイズにて確認 */
@@ -371,7 +371,7 @@ static int open_window(void) {
 
   /* サイズが決まったので、いよいよ画面を生成する */
 
-  if (found == FALSE) { /* これはありえないハズだが、念のため… */
+  if (!found) { /* これはありえないハズだが、念のため… */
     size = screen_size_min;
     w = screen_size_tbl[size].w;
     h = screen_size_tbl[size].h;
@@ -538,7 +538,7 @@ static int open_window(void) {
  * ウインドウの再生成。失敗したら exit
  */
 static void open_window_or_exit(void) {
-  if (open_window() == FALSE) {
+  if (!open_window()) {
     fprintf(stderr, "Sorry : Graphic System Fatal Error !!!\n");
 
     quasi88_exit(1);
@@ -1019,16 +1019,19 @@ static void set_vram2screen_list(void) {
 #ifdef SUPPORT_8BPP
     switch (now_screen_size) {
     case SCREEN_SIZE_FULL:
-      if (use_interlace == 0) {
-        if (screen_write_only) {
-          list = &vram2screen_list_F_N__8_d;
-        } else {
-          list = &vram2screen_list_F_N__8;
-        }
-      } else if (use_interlace > 0) {
+      switch (use_interlace) {
+      case SCREEN_INTERLACE_NO:
+        list = screen_write_only ? &vram2screen_list_F_N__8_d : &vram2screen_list_F_N__8;
+        break;
+      case SCREEN_INTERLACE_YES:
         list = &vram2screen_list_F_I__8;
-      } else {
+        break;
+      case SCREEN_INTERLACE_SKIP:
         list = &vram2screen_list_F_S__8;
+        break;
+      default:
+        fprintf(stderr, "Unknown interlace option %d. What I gonna do?!\n", use_interlace);
+        exit(1);
       }
       menu2screen_p = menu2screen_F_N__8;
       break;
@@ -1043,22 +1046,19 @@ static void set_vram2screen_list(void) {
       break;
 #ifdef SUPPORT_DOUBLE
     case SCREEN_SIZE_DOUBLE:
-      if (screen_write_only) {
-        if (use_interlace == 0) {
-          list = &vram2screen_list_D_N__8_d;
-        } else if (use_interlace > 0) {
-          list = &vram2screen_list_D_I__8_d;
-        } else {
-          list = &vram2screen_list_D_S__8_d;
-        }
-      } else {
-        if (use_interlace == 0) {
-          list = &vram2screen_list_D_N__8;
-        } else if (use_interlace > 0) {
-          list = &vram2screen_list_D_I__8;
-        } else {
-          list = &vram2screen_list_D_S__8;
-        }
+      switch (use_interlace) {
+      case SCREEN_INTERLACE_NO:
+        list = screen_write_only ? &vram2screen_list_D_N__8_d : &vram2screen_list_D_N__8;
+        break;
+      case SCREEN_INTERLACE_YES:
+        list = screen_write_only ? &vram2screen_list_D_I__8_d : &vram2screen_list_D_I__8;
+        break;
+      case SCREEN_INTERLACE_SKIP:
+        list = screen_write_only ? &vram2screen_list_D_S__8_d : &vram2screen_list_D_S__8;
+        break;
+      default:
+        fprintf(stderr, "Unknown interlace option %d. What I gonna do?!\n", use_interlace);
+        exit(1);
       }
       menu2screen_p = menu2screen_D_N__8;
       break;
@@ -1078,16 +1078,19 @@ static void set_vram2screen_list(void) {
 #ifdef SUPPORT_16BPP
     switch (now_screen_size) {
     case SCREEN_SIZE_FULL:
-      if (use_interlace == 0) {
-        if (screen_write_only) {
-          list = &vram2screen_list_F_N_16_d;
-        } else {
-          list = &vram2screen_list_F_N_16;
-        }
-      } else if (use_interlace > 0) {
+      switch (use_interlace) {
+      case SCREEN_INTERLACE_NO:
+        list = screen_write_only ? &vram2screen_list_F_N_16_d : &vram2screen_list_F_N_16;
+        break;
+      case SCREEN_INTERLACE_YES:
         list = &vram2screen_list_F_I_16;
-      } else {
+        break;
+      case SCREEN_INTERLACE_SKIP:
         list = &vram2screen_list_F_S_16;
+        break;
+      default:
+        fprintf(stderr, "Unknown interlace option %d. What I gonna do?!\n", use_interlace);
+        exit(1);
       }
       menu2screen_p = menu2screen_F_N_16;
       break;
@@ -1102,22 +1105,19 @@ static void set_vram2screen_list(void) {
       break;
 #ifdef SUPPORT_DOUBLE
     case SCREEN_SIZE_DOUBLE:
-      if (screen_write_only) {
-        if (use_interlace == 0) {
-          list = &vram2screen_list_D_N_16_d;
-        } else if (use_interlace > 0) {
-          list = &vram2screen_list_D_I_16_d;
-        } else {
-          list = &vram2screen_list_D_S_16_d;
-        }
-      } else {
-        if (use_interlace == 0) {
-          list = &vram2screen_list_D_N_16;
-        } else if (use_interlace > 0) {
-          list = &vram2screen_list_D_I_16;
-        } else {
-          list = &vram2screen_list_D_S_16;
-        }
+      switch (use_interlace) {
+      case SCREEN_INTERLACE_NO:
+        list = screen_write_only ? &vram2screen_list_D_N_16_d : &vram2screen_list_D_N_16;
+        break;
+      case SCREEN_INTERLACE_YES:
+        list = screen_write_only ? &vram2screen_list_D_I_16_d : &vram2screen_list_D_I_16;
+        break;
+      case SCREEN_INTERLACE_SKIP:
+        list = screen_write_only ? &vram2screen_list_D_S_16_d : &vram2screen_list_D_S_16;
+        break;
+      default:
+        fprintf(stderr, "Unknown interlace option %d. What I gonna do?!\n", use_interlace);
+        exit(1);
       }
       menu2screen_p = menu2screen_D_N_16;
       break;
@@ -1137,16 +1137,19 @@ static void set_vram2screen_list(void) {
 #ifdef SUPPORT_32BPP
     switch (now_screen_size) {
     case SCREEN_SIZE_FULL:
-      if (use_interlace == 0) {
-        if (screen_write_only) {
-          list = &vram2screen_list_F_N_32_d;
-        } else {
-          list = &vram2screen_list_F_N_32;
-        }
-      } else if (use_interlace > 0) {
+      switch (use_interlace) {
+      case SCREEN_INTERLACE_NO:
+        list = screen_write_only ? &vram2screen_list_F_N_32_d : &vram2screen_list_F_N_32;
+        break;
+      case SCREEN_INTERLACE_YES:
         list = &vram2screen_list_F_I_32;
-      } else {
+        break;
+      case SCREEN_INTERLACE_SKIP:
         list = &vram2screen_list_F_S_32;
+        break;
+      default:
+        fprintf(stderr, "Unknown interlace option %d. What I gonna do?!\n", use_interlace);
+        exit(1);
       }
       menu2screen_p = menu2screen_F_N_32;
       break;
@@ -1161,22 +1164,19 @@ static void set_vram2screen_list(void) {
       break;
 #ifdef SUPPORT_DOUBLE
     case SCREEN_SIZE_DOUBLE:
-      if (screen_write_only) {
-        if (use_interlace == 0) {
-          list = &vram2screen_list_D_N_32_d;
-        } else if (use_interlace > 0) {
-          list = &vram2screen_list_D_I_32_d;
-        } else {
-          list = &vram2screen_list_D_S_32_d;
-        }
-      } else {
-        if (use_interlace == 0) {
-          list = &vram2screen_list_D_N_32;
-        } else if (use_interlace > 0) {
-          list = &vram2screen_list_D_I_32;
-        } else {
-          list = &vram2screen_list_D_S_32;
-        }
+      switch (use_interlace) {
+      case SCREEN_INTERLACE_NO:
+        list = screen_write_only ? &vram2screen_list_D_N_32 : &vram2screen_list_D_N_32;
+        break;
+      case SCREEN_INTERLACE_YES:
+        list = screen_write_only ? &vram2screen_list_D_I_32_d : &vram2screen_list_D_I_32;
+        break;
+      case SCREEN_INTERLACE_SKIP:
+        list = screen_write_only ? &vram2screen_list_D_S_32_d : &vram2screen_list_D_S_32;
+        break;
+      default:
+        fprintf(stderr, "Unknown interlace option %d. What I gonna do?!\n", use_interlace);
+        exit(1);
       }
       menu2screen_p = menu2screen_D_N_32;
       break;
@@ -1456,18 +1456,12 @@ void screen_update(void) {
   /* メイン領域は、描画をスキップする場合があるので、以下で判定 */
   /* (メニューなどは、常時 frame_counter==0 なので、毎回描画)   */
 
-  if ((frame_counter % frameskip_rate) == 0) { /* 描画の時が来た。       */
-                                               /* 以下のいずれかなら描画 */
-    if (no_wait ||                             /* ウェイトなし設定時     */
-        use_auto_skip == FALSE ||              /* 自動スキップなし設定時 */
-        do_skip_draw == FALSE) {               /* 今回スキップ対象でない */
-
+  // Time to draw
+  if ((frame_counter % frameskip_rate) == 0) {
+    if (no_wait || !use_auto_skip || !do_skip_draw) {
       skip = FALSE;
-
-    } else { /* 以外はスキップ */
-
+    } else {
       skip = TRUE;
-
       /* 描画タイミングなのにスキップした場合は、そのことを覚えておく */
       already_skip_draw = TRUE;
     }
@@ -1485,7 +1479,7 @@ void screen_update(void) {
 
   /* メイン領域を描画する (スキップしない) 場合の処理 */
 
-  if (skip == FALSE) {
+  if (!skip) {
 
     /* 色転送 */
 
@@ -1550,7 +1544,7 @@ void screen_update(void) {
       /*      VRAM非表示の場合、更新フラグは意味無いのでクリアする */
       /*      400ラインの場合、更新フラグを画面下半分にも拡張する  */
 
-      if (screen_dirty_all == FALSE) {
+      if (!screen_dirty_all) {
         if (!(grph_ctrl & GRPH_CTRL_VDISP)) {
           /* 非表示 */
           memset(screen_dirty_flag, 0, sizeof(screen_dirty_flag) / 2);
@@ -1613,7 +1607,7 @@ void screen_update(void) {
     profiler_video_output(((frame_counter % frameskip_rate) == 0), skip, (all_area || rect != -1));
   }
 
-  if ((is_exec) && (dont_frameskip == FALSE)) {
+  if (is_exec && !dont_frameskip) {
     ++frame_counter;
   } else { /* menu,pause,monitor */
     frame_counter = 0;

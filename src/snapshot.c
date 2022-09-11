@@ -12,13 +12,10 @@
 #include "quasi88.h"
 #include "screen.h"
 #include "screen-func.h"
-#include "graph.h"
 
 #include "crtcdmac.h"
-#include "memory.h"
 #include "file-op.h"
 #include "snapshot.h"
-#include "initval.h"
 
 char file_snap[QUASI88_MAX_FILENAME]; /* スナップショットベース部 */
 int snapshot_format = 0;              /* スナップショットフォーマット   */
@@ -73,13 +70,20 @@ static void make_snapshot(void) {
 
   /* skipline の場合は、予め snapshot_clear() を呼び出しておく */
 
-  if (use_interlace == 0) {
+  switch (use_interlace) {
+  case SCREEN_INTERLACE_NO:
     list = snapshot_list_normal;
-  } else if (use_interlace > 0) {
+    break;
+  case SCREEN_INTERLACE_YES:
     list = snapshot_list_itlace;
-  } else {
+    break;
+  case SCREEN_INTERLACE_SKIP:
     snapshot_clear();
     list = snapshot_list_skipln;
+    break;
+  default:
+    fprintf(stderr, "Unknown interlace option %d. What I gonna do?!\n", use_interlace);
+    exit(1);
   }
 
   /* VRAM/TEXT の内容を screen_snapshot[] に転送 */
