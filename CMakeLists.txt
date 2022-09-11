@@ -416,3 +416,14 @@ if(ENABLE_WIN)
 	target_link_libraries(${PROJECT_NAME}.win imm32.lib winmm.lib)
 	# libraries for RA: odbc32.lib odbccp32.lib winhttp.lib
 endif(ENABLE_WIN)
+
+# Packaging stuff
+set(CPACK_SOURCE_GENERATOR "TXZ")
+set(CPACK_SOURCE_IGNORE_FILES
+	\\.git/
+	build/
+	cmake-build-*
+	".*~$"
+	)
+set(CPACK_VERBATIM_VARIABLES YES)
+include(CPack)
