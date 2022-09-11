@@ -22,78 +22,56 @@
 #include "wait.h"
 #include "event.h"
 
+int need_focus = FALSE; /* フォーカスアウト停止あり */
 
-int need_focus = FALSE;         /* フォーカスアウト停止あり */
-
-
-static  int pause_by_focus_out = FALSE;
+static int pause_by_focus_out = FALSE;
 
 /*
  * エミュ処理中に、フォーカスが無くなった (-focus指定時は、ポーズ開始)
  */
-void    pause_event_focus_out_when_exec(void)
-{
-    if (need_focus) {               /* -focus 指定時は */
+void pause_event_focus_out_when_exec(void) {
+  if (need_focus) { /* -focus 指定時は */
     pause_by_focus_out = TRUE;
-    quasi88_pause();            /* ここで PAUSE する */
-    }
+    quasi88_pause(); /* ここで PAUSE する */
+  }
 }
 
 /*
  * ポーズ中に、フォーカスを得た
  */
-void    pause_event_focus_in_when_pause(void)
-{
-    if (pause_by_focus_out) {
+void pause_event_focus_in_when_pause(void) {
+  if (pause_by_focus_out) {
     quasi88_exec();
-    }
+  }
 }
 
 /*
  * ポーズ中に、ポーズ終了のキー(ESCキー)押下検知した
  */
-void    pause_event_key_on_esc(void)
-{
-    quasi88_exec();
-}
+void pause_event_key_on_esc(void) { quasi88_exec(); }
 
 /*
  * ポーズ中に、メニュー開始のキー押下検知した
  */
-void    pause_event_key_on_menu(void)
-{
-    quasi88_menu();
+void pause_event_key_on_menu(void) { quasi88_menu(); }
+
+void pause_init(void) {
+  status_message_default(0, " PAUSE ");
+  status_message_default(1, "<ESC> key to return");
+  status_message_default(2, NULL);
 }
 
+void pause_main(void) {
+  /* 終了などを検知するために、イベント処理だけ実施 */
+  event_update();
 
-
-
-
-
-
-
-
-void    pause_init(void)
-{
-    status_message_default(0, " PAUSE ");
-    status_message_default(1, "<ESC> key to return");
-    status_message_default(2, NULL);
-}
-
-
-void    pause_main(void)
-{
-    /* 終了などを検知するために、イベント処理だけ実施 */
-    event_update();
-
-
-    /* 一時停止を抜けたら、ワーク再初期化 */
-    if (quasi88_event_flags & EVENT_MODE_CHANGED) {
+  /* 一時停止を抜けたら、ワーク再初期化 */
+  if (quasi88_event_flags & EVENT_MODE_CHANGED) {
 
     pause_by_focus_out = FALSE;
 
-    } else {
+  } else {
 
     quasi88_event_flags |= EVENT_FRAME_UPDATE;
-    }
+  }
 }

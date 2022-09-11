@@ -2,25 +2,25 @@
 #define VERSION_H
 
 #ifndef BASE_TITLE
-#define BASE_TITLE  "QUASI88"
+#define BASE_TITLE "QUASI88"
 #endif
 
 #ifndef BASE_VERSION
-#define BASE_VERSION    "0.7.0"
+#define BASE_VERSION "0.7.0"
 #endif
 
 #ifndef BASE_COMMENT
-#define BASE_COMMENT    ""
+#define BASE_COMMENT ""
 #endif
 
 #if USE_RETROACHIEVEMENTS
 
 #ifndef RAQ_TITLE
-#define RAQ_TITLE   "RAQUASI88"
+#define RAQ_TITLE "RAQUASI88"
 #endif
 
 #ifndef RAQ_VERSION
-#define RAQ_VERSION     "1.1.3"
+#define RAQ_VERSION "1.1.3"
 #endif
 
 #ifndef Q_TITLE
@@ -51,23 +51,20 @@
 
 #endif
 
-
-
-
 #ifndef Q_COPYRIGHT
-#define Q_COPYRIGHT     "(c) 1998-2022 S.Fukunaga, R.Zumer, A.Hackimov"
+#define Q_COPYRIGHT "(c) 1998-2022 S.Fukunaga, R.Zumer, A.Hackimov"
 #endif
 
-#ifdef  USE_SOUND
+#ifdef USE_SOUND
 #ifndef Q_MAME_COPYRIGHT
-#define Q_MAME_COPYRIGHT    "(c) 1997-2007 Nicola Salmoria and the MAME team"
+#define Q_MAME_COPYRIGHT "(c) 1997-2007 Nicola Salmoria and the MAME team"
 #endif
 
-#ifdef  USE_FMGEN
+#ifdef USE_FMGEN
 #ifndef Q_FMGEN_COPYRIGHT
-#define Q_FMGEN_COPYRIGHT   "(c) 1998, 2003 cisc"
+#define Q_FMGEN_COPYRIGHT "(c) 1998, 2003 cisc"
 #endif
 #endif
 #endif
 
-#endif  /* VERSION_H */
+#endif /* VERSION_H */

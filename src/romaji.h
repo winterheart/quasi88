@@ -3,11 +3,9 @@
 
 /* ローマ字入力処理 */
 
-void    romaji_init( void );
-void    romaji_clear( void );
-int romaji_input( int key );
-void    romaji_output( void );
+void romaji_init(void);
+void romaji_clear(void);
+int romaji_input(int key);
+void romaji_output(void);
 
-
-#endif  /* ROMAJI_H_INCLUDED */
-
+#endif /* ROMAJI_H_INCLUDED */

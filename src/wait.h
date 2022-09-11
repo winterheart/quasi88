@@ -1,7 +1,6 @@
 #ifndef WAIT_H_INCLUDED
 #define WAIT_H_INCLUDED
 
-
 /***********************************************************************
  * ウェイト調整処理 (システム依存)
  ************************************************************************/
@@ -20,8 +19,7 @@
  *
  *****************************************************************************/
 int wait_vsync_init(void);
-void    wait_vsync_exit(void);
-
+void wait_vsync_exit(void);
 
 /****************************************************************************
  * ウェイト調整処理の設定
@@ -39,8 +37,7 @@ void    wait_vsync_exit(void);
  *  行い、ウェイトのタイミング合わせを開始する。
  *
  *****************************************************************************/
-void    wait_vsync_setup(long vsync_cycle_us, int do_sleep);
-
+void wait_vsync_setup(long vsync_cycle_us, int do_sleep);
 
 /****************************************************************************
  * ウェイト調整処理の実行
@@ -51,7 +48,7 @@ void    wait_vsync_setup(long vsync_cycle_us, int do_sleep);
  *  wait_vsync_setup() で設定した時間 vsync_cycle_us [μsec] が経過したかを
  *  チェックする。
  *
- *  まだ経過していない場合は、時間が経過するまで待つ。(wait_vsync_setup() 
+ *  まだ経過していない場合は、時間が経過するまで待つ。(wait_vsync_setup()
  *  で設定した do_sleep に応じて、可能なら CPU を Sleep させて待つ)
  *  時間が経過したら、直ちに WAIT_JUST を返す。
  *
@@ -62,10 +59,10 @@ void    wait_vsync_setup(long vsync_cycle_us, int do_sleep);
  *
  *****************************************************************************/
 enum {
-    WAIT_YET,       /* ウェイト まだ時間経過してない */
-    WAIT_JUST,      /*          ちょうど時間になった */
-    WAIT_OVER       /*          時間超過してる！     */
+  WAIT_YET,  /* ウェイト まだ時間経過してない */
+  WAIT_JUST, /*          ちょうど時間になった */
+  WAIT_OVER  /*          時間超過してる！     */
 };
 int wait_vsync_update(void);
 
-#endif  /* WAIT_H_INCLUDED */
+#endif /* WAIT_H_INCLUDED */

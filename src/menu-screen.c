@@ -55,57 +55,54 @@
 #include "q8tk.h"
 #include "graph.h"
 
-
 /*----------------------------------------------------------------------*/
 /* メニュー画面のソフトウェアカーソルの字形             */
 /*----------------------------------------------------------------------*/
-#if 0       /* 矢印カーソル */
+#if 0 /* 矢印カーソル */
 byte menu_cursor_on[]  = { 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff,
                0xd8, 0xa8, 0x0c, 0x0c, 0x06, 0x06, 0x03, 0x03 };
-#else       /* ブロックカーソル */
-byte menu_cursor_on[]  = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-               0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+#else /* ブロックカーソル */
+byte menu_cursor_on[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 #endif
 
-byte menu_cursor_off[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+byte menu_cursor_off[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 int menu_cursor_x;
 int menu_cursor_y;
 
-
 /*----------------------------------------------------------------------*/
 /* メニュー表示用パレットを設定し、システムに転送            */
 /*----------------------------------------------------------------------*/
-void    screen_get_menu_palette(PC88_PALETTE_T pal[16])
-{
-    int i;
+void screen_get_menu_palette(PC88_PALETTE_T pal[16]) {
+  int i;
 
-    static const struct {
+  static const struct {
     int index;
     int col;
-    } menupal[ 16 ] = {
-    { Q8GR_PALETTE_FOREGROUND, MENU_COLOR_FOREGROUND,   },
-    { Q8GR_PALETTE_BACKGROUND, MENU_COLOR_BACKGROUND,   },
-    { Q8GR_PALETTE_LIGHT,      MENU_COLOR_LIGHT,        },
-    { Q8GR_PALETTE_SHADOW,     MENU_COLOR_SHADOW,       },
-    { Q8GR_PALETTE_FONT_FG,    MENU_COLOR_FONT_FG,      },
-    { Q8GR_PALETTE_FONT_BG,    MENU_COLOR_FONT_BG,      },
-    { Q8GR_PALETTE_LOGO_FG,    MENU_COLOR_LOGO_FG,      },
-    { Q8GR_PALETTE_LOGO_BG,    MENU_COLOR_LOGO_BG,      },
-    { Q8GR_PALETTE_BLACK,      0x000000,            },
-    { Q8GR_PALETTE_SCALE_SLD,  MENU_COLOR_SCALE_SLD,    },
-    { Q8GR_PALETTE_SCALE_BAR,  MENU_COLOR_SCALE_BAR,    },
-    { Q8GR_PALETTE_SCALE_ACT,  MENU_COLOR_SCALE_ACT,    },
-    { Q8GR_PALETTE_RED,        0xff0000,            },
-    { Q8GR_PALETTE_GREEN,      0x00ff00,            },
-    { Q8GR_PALETTE_BLUE,       0x0000ff,            },
-    { Q8GR_PALETTE_WHITE,      0xffffff,            },
-    };
+  } menupal[16] = {
+      {Q8GR_PALETTE_FOREGROUND, MENU_COLOR_FOREGROUND},
+      {Q8GR_PALETTE_BACKGROUND, MENU_COLOR_BACKGROUND},
+      {Q8GR_PALETTE_LIGHT, MENU_COLOR_LIGHT},
+      {Q8GR_PALETTE_SHADOW, MENU_COLOR_SHADOW},
+      {Q8GR_PALETTE_FONT_FG, MENU_COLOR_FONT_FG},
+      {Q8GR_PALETTE_FONT_BG, MENU_COLOR_FONT_BG},
+      {Q8GR_PALETTE_LOGO_FG, MENU_COLOR_LOGO_FG},
+      {Q8GR_PALETTE_LOGO_BG, MENU_COLOR_LOGO_BG},
+      {Q8GR_PALETTE_BLACK, 0x000000},
+      {Q8GR_PALETTE_SCALE_SLD, MENU_COLOR_SCALE_SLD},
+      {Q8GR_PALETTE_SCALE_BAR, MENU_COLOR_SCALE_BAR},
+      {Q8GR_PALETTE_SCALE_ACT, MENU_COLOR_SCALE_ACT},
+      {Q8GR_PALETTE_RED, 0xff0000},
+      {Q8GR_PALETTE_GREEN, 0x00ff00},
+      {Q8GR_PALETTE_BLUE, 0x0000ff},
+      {Q8GR_PALETTE_WHITE, 0xffffff},
+  };
 
-    for (i=0; i<COUNTOF(menupal); i++) {
-    pal[ menupal[i].index ].red   = (menupal[i].col >> 16) & 0xff;
-    pal[ menupal[i].index ].green = (menupal[i].col >>  8) & 0xff;
-    pal[ menupal[i].index ].blue  = (menupal[i].col >>  0) & 0xff;
-    }
+  for (i = 0; i < COUNTOF(menupal); i++) {
+    pal[menupal[i].index].red = (menupal[i].col >> 16) & 0xff;
+    pal[menupal[i].index].green = (menupal[i].col >> 8) & 0xff;
+    pal[menupal[i].index].blue = (menupal[i].col >> 0) & 0xff;
+  }
 }
