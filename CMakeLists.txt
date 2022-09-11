@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(quasi88 VERSION 0.7.0)
+project(quasi88 VERSION 0.7.1)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Reasonable default
@@ -92,6 +92,7 @@ endif()
 
 include_directories(
 	src
+	${CMAKE_CURRENT_BINARY_DIR}
 )
 
 set(COMMON_SOURCES
@@ -416,6 +417,8 @@ if(ENABLE_WIN)
 	target_link_libraries(${PROJECT_NAME}.win imm32.lib winmm.lib)
 	# libraries for RA: odbc32.lib odbccp32.lib winhttp.lib
 endif(ENABLE_WIN)
+
+configure_file(src/num_ver.h.cmake.in num_ver.h @ONLY)
 
 # Packaging stuff
 set(CPACK_SOURCE_GENERATOR "TXZ")

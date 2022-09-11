@@ -1,0 +1,8 @@
+#ifndef NUM_VER_H
+#define NUM_VER_H
+
+#ifndef BASE_VERSION
+#define BASE_VERSION "@PROJECT_VERSION@"
+#endif
+
+#endif

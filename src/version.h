@@ -1,12 +1,10 @@
 #ifndef VERSION_H
 #define VERSION_H
 
+#include "num_ver.h"
+
 #ifndef BASE_TITLE
 #define BASE_TITLE "QUASI88"
-#endif
-
-#ifndef BASE_VERSION
-#define BASE_VERSION "0.7.0"
 #endif
 
 #ifndef BASE_COMMENT
