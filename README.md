@@ -14,7 +14,7 @@ Main changes:
 
 Please refer to issues with the "enhancement" tag for future plans.
 
-The latest version is 0.6.9 (released 2022-02-06).
+The latest version is 0.7.0 (released 2022-09-11).
 
 ### Compilation
 
