@@ -7,26 +7,14 @@
 
 #include "screen.h" /* PC88_PALETTE_T */
 
-/***********************************************************************
- * 画面に関する、基本情報をまとめた構造体
- ************************************************************************/
+/* A structure that summarizes basic information about the screen */
 typedef struct {
-
-  int window_max_width;  /* ウインドウ表示可能な、最大の        */
-  int window_max_height; /* 横サイズと縦サイズ (ピクセル数)   */
-                         /*  ウインドウ表示サイズに制約の */
-                         /*  無い場合は、適当に大きな値を */
-                         /*  セットしておく。(640以上)    */
-
-  int fullscreen_max_width;  /* フルスクリーン表示可能な、最大の  */
-  int fullscreen_max_height; /* 横サイズと縦サイズ (ピクセル数)   */
-                             /*  フルスクリーン表示できない場 */
-                             /*  合は 0 をセットしておく      */
-
-  int forbid_status; /* ステータス表示を禁止するなら、真  */
-
-  int forbid_half; /* 半分サイズ表示を禁止するなら、真  */
-
+  int window_max_width;      /* max window width */
+  int window_max_height;     /* max windows height */
+  int fullscreen_max_width;  /* max fullscreen width, set it 0 if fullscreen is not supported */
+  int fullscreen_max_height; /* max fullscreen height, set it 0 if fullscreen is not supported   */
+  bool forbid_status;        /* true if forbid status display */
+  bool forbid_half;          /* true if forbid half-size display */
 } T_GRAPH_SPEC;
 
 /***********************************************************************

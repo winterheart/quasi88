@@ -205,11 +205,7 @@ int screen_init(void) {
 
   /* spec によって、全画面可能かどうかを決定 */
 
-  if (spec->forbid_half) {
-    i = SCREEN_SIZE_FULL;
-  } else {
-    i = SCREEN_SIZE_HALF;
-  }
+  i = spec->forbid_half ? SCREEN_SIZE_FULL : SCREEN_SIZE_HALF;
 
   if (spec->fullscreen_max_width >= screen_size_tbl[i].w && spec->fullscreen_max_height >= screen_size_tbl[i].h) {
     enable_fullscreen = TRUE;
@@ -367,7 +363,7 @@ static int open_window(void) {
     /* ステータス表示が可能なサイズが見つかった場合でも、
        ステータス表示しないならば、その分のサイズを減らしておく */
     if (status_displayable) {
-      if (spec->forbid_status || show_status == FALSE) {
+      if (spec->forbid_status || !show_status) {
         h -= STATUS_HEIGHT;
       }
     }
@@ -397,7 +393,7 @@ static int open_window(void) {
     }
 
     /* 本当にステータス表示が可能かどうかを、最終判断 */
-    if (status_displayable && (spec->forbid_status == FALSE)) {
+    if (status_displayable && !spec->forbid_status) {
       enable_status = TRUE;
       /* show_status は現在値のまま */
     } else {

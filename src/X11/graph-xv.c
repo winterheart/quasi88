@@ -128,8 +128,8 @@ static  const T_GRAPH_SPEC  *xv_graph_init(void)
     graph_spec.window_max_height     = win_h;
     graph_spec.fullscreen_max_width  = ful_w;
     graph_spec.fullscreen_max_height = ful_h;
-    graph_spec.forbid_status         = FALSE;
-    graph_spec.forbid_half           = FALSE;
+    graph_spec.forbid_status         = false;
+    graph_spec.forbid_half           = false;
 
     if (verbose_proc)
     printf("  INFO: %dbpp(%dbyte), Maxsize=win(%d,%d),full(%d,%d)\n",

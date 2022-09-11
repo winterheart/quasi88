@@ -82,8 +82,8 @@ const T_GRAPH_SPEC *graph_init(void) {
   graph_spec.window_max_height = sdl_display_mode.h;
   graph_spec.fullscreen_max_width = sdl_display_mode.w;
   graph_spec.fullscreen_max_height = sdl_display_mode.h;
-  graph_spec.forbid_status = FALSE;
-  graph_spec.forbid_half = FALSE;
+  graph_spec.forbid_status = false;
+  graph_spec.forbid_half = false;
 
   if (verbose_proc)
     printf("  INFO: Maxsize=win(%d,%d),full(%d,%d)\n", sdl_display_mode.w, sdl_display_mode.h, sdl_display_mode.w,

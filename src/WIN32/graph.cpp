@@ -53,8 +53,8 @@ const T_GRAPH_SPEC  *graph_init(void)
 #endif
     graph_spec.fullscreen_max_width  = GetSystemMetrics(SM_CXSCREEN);
     graph_spec.fullscreen_max_height = GetSystemMetrics(SM_CYSCREEN);
-    graph_spec.forbid_status         = FALSE;
-    graph_spec.forbid_half           = FALSE;
+    graph_spec.forbid_status         = false;
+    graph_spec.forbid_half           = false;
 
     if (verbose_proc)
     printf("OK\n");
