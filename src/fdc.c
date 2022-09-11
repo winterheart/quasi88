@@ -436,7 +436,7 @@ int drive_check_empty(int drv) { return drive[drv].empty; }
 
 #define DISK_ERROR(s, drv)                                                                                             \
   do {                                                                                                                 \
-    if (quasi88_is_menu() == FALSE) {                                                                                  \
+    if (!quasi88_is_menu()) {                                                                                          \
       printf("\n");                                                                                                    \
       printf("[[[ %-26s ]]]\n", s);                                                                                    \
       printf("[[[   Eject Disk from drive %d: ]]]\n"                                                                   \

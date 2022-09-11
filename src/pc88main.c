@@ -1657,7 +1657,7 @@ int sio_open_tapeload(const char *filename) {
     return sio_tape_rewind();
 
   } else {
-    if (quasi88_is_menu() == FALSE)
+    if (!quasi88_is_menu())
       printf("\n[[[ %s : Tape load image can't open ]]]\n\n", filename);
   }
   cmt_stateload_chars = 0;
@@ -1683,7 +1683,7 @@ int sio_open_tapesave(const char *filename) {
     return TRUE;
 
   } else {
-    if (quasi88_is_menu() == FALSE)
+    if (!quasi88_is_menu())
       printf("\n[[[ %s : Tape save image can't open ]]]\n\n", filename);
   }
   return FALSE;
@@ -1718,7 +1718,7 @@ ERR:
   if (fp_si) {
     printf("\n[[[ Serial input image access error ]]]\n\n");
   } else {
-    if (quasi88_is_menu() == FALSE)
+    if (!quasi88_is_menu())
       printf("\n[[[ %s : Serial input file can't open ]]]\n\n", filename);
   }
   sio_close_serialin();
@@ -1744,7 +1744,7 @@ int sio_open_serialout(const char *filename) {
     return TRUE;
 
   } else {
-    if (quasi88_is_menu() == FALSE)
+    if (!quasi88_is_menu())
       printf("\n[[[ %s : Serial output file can't open ]]]\n\n", filename);
   }
   return FALSE;
@@ -1901,7 +1901,7 @@ static int sio_getc(int is_cmt, int *tick) {
     if (cmt_EOF)
       return EOF;
 
-    if (cmt_is_t88 == FALSE) { /* CMT形式の場合 */
+    if (!cmt_is_t88) { /* CMT形式の場合 */
 
       c = osd_fgetc(fp_ti);
 
@@ -2394,7 +2394,7 @@ int printer_open(const char *filename) {
     return TRUE;
 
   } else {
-    if (quasi88_is_menu() == FALSE)
+    if (!quasi88_is_menu())
       printf("\n[[[ %s : Printer output file can't open ]]]\n\n", filename);
   }
   return FALSE;

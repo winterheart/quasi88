@@ -680,7 +680,7 @@ void key_record_playback_exit(void) {
 static void record_playback(void) {
   int i, img;
 
-  if (quasi88_is_exec() == FALSE)
+  if (!quasi88_is_exec())
     return;
 
   if (fp_rec) {

@@ -1443,7 +1443,7 @@ void screen_update(void) {
   int rect = -1;        /* 画面転送フラグ    */
   int flag = 0;         /* ステータス転送フラグ   */
   PC88_PALETTE_T syspal[16];
-  int is_exec = (quasi88_is_exec()) ? TRUE : FALSE;
+  bool is_exec = quasi88_is_exec();
 
   screen_attr_update(); /* マウス自動で隠す…呼び出し場所がいまいち */
 
