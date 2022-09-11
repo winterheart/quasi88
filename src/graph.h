@@ -1,36 +1,33 @@
 #ifndef GRAPH_H_INCLUDED
 #define GRAPH_H_INCLUDED
 
-
 /***********************************************************************
  * グラフィック処理 (システム依存)
  ************************************************************************/
 
 #include "screen.h" /* PC88_PALETTE_T */
 
-
 /***********************************************************************
  * 画面に関する、基本情報をまとめた構造体
  ************************************************************************/
 typedef struct {
 
-    int     window_max_width;   /* ウインドウ表示可能な、最大の        */
-    int     window_max_height;  /* 横サイズと縦サイズ (ピクセル数)   */
-                    /*  ウインドウ表示サイズに制約の */
-                    /*  無い場合は、適当に大きな値を */
-                    /*  セットしておく。(640以上)    */
+  int window_max_width;  /* ウインドウ表示可能な、最大の        */
+  int window_max_height; /* 横サイズと縦サイズ (ピクセル数)   */
+                         /*  ウインドウ表示サイズに制約の */
+                         /*  無い場合は、適当に大きな値を */
+                         /*  セットしておく。(640以上)    */
 
-    int     fullscreen_max_width;   /* フルスクリーン表示可能な、最大の  */
-    int     fullscreen_max_height;  /* 横サイズと縦サイズ (ピクセル数)   */
-                    /*  フルスクリーン表示できない場 */
-                    /*  合は 0 をセットしておく      */
+  int fullscreen_max_width;  /* フルスクリーン表示可能な、最大の  */
+  int fullscreen_max_height; /* 横サイズと縦サイズ (ピクセル数)   */
+                             /*  フルスクリーン表示できない場 */
+                             /*  合は 0 をセットしておく      */
 
-    int     forbid_status;      /* ステータス表示を禁止するなら、真  */
+  int forbid_status; /* ステータス表示を禁止するなら、真  */
 
-    int     forbid_half;        /* 半分サイズ表示を禁止するなら、真  */
+  int forbid_half; /* 半分サイズ表示を禁止するなら、真  */
 
 } T_GRAPH_SPEC;
-
 
 /***********************************************************************
  * 現在 QUASI88 が処理する対象となる画面の、情報をまとめた構造体
@@ -58,32 +55,32 @@ typedef struct {
  ************************************************************************/
 typedef struct {
 
-    int     fullscreen; /* 全画面モードなら真、ウインドウなら偽 */
+  int fullscreen; /* 全画面モードなら真、ウインドウなら偽 */
 
-    int     width;      /* 確保した画面の、描画可能エリア幅 */
-    int     height;     /* 確保した画面の、描画可能エリア高さ  */
+  int width;  /* 確保した画面の、描画可能エリア幅 */
+  int height; /* 確保した画面の、描画可能エリア高さ  */
 
-    int     scaled_width; /* Win32用 スケール後の幅 */
-    int     scaled_height; /* Win32用 スケール後の高さ */
-    int     scaled_offx; /* Win32用 スケール後のオフセット */
-    int     scaled_offy;
-    int     window_offx; /* ウィンドウモード時のフレームのオフセット */
-    int     window_offy;
+  int scaled_width;  /* Win32用 スケール後の幅 */
+  int scaled_height; /* Win32用 スケール後の高さ */
+  int scaled_offx;   /* Win32用 スケール後のオフセット */
+  int scaled_offy;
+  int window_offx; /* ウィンドウモード時のフレームのオフセット */
+  int window_offy;
 
-    int     byte_per_pixel; /* 確保した画面のピクセルあたりバイト数   */
-                /*  1, 2, 4 のいずれか     */
+  int byte_per_pixel; /* 確保した画面のピクセルあたりバイト数   */
+                      /*  1, 2, 4 のいずれか     */
 
-    int     byte_per_line;  /* 確保した画面の1ラインあたりバイト数 */
-                /*  (width * byte_per_line) 以上  */
+  int byte_per_line; /* 確保した画面の1ラインあたりバイト数 */
+                     /*  (width * byte_per_line) 以上  */
 
-    void    *buffer;    /* 確保した画面のバッファ        */
+  void *buffer; /* 確保した画面のバッファ        */
                 /*  byte_per_pixel が、       */
                 /*      1 なら、 unsigned char   */
                 /*      2 なら、 unsigned short  */
                 /*      4 なら、 unsigned int    */
                 /*  で、アクセスできるポインタ */
 
-    int     nr_color;   /* 確保した画面にて、利用可能な色の数  */
+  int nr_color; /* 確保した画面にて、利用可能な色の数  */
                 /*  同時に利用できる色の数に制約が   */
                 /*  ある場合、その色の数を返す。  */
                 /*  ただし、以下のいずれかとする。   */
@@ -91,45 +88,43 @@ typedef struct {
                 /*  色の数に制約がない場合は、 */
                 /*      255 以上      */
 
-    int     write_only; /* 画面のバッファが読出不可の場合、真  */
-                /*  直接フレームバッファを確保した   */
-                /*  場合などは、真にしておく。 */
+  int write_only; /* 画面のバッファが読出不可の場合、真  */
+                  /*  直接フレームバッファを確保した   */
+                  /*  場合などは、真にしておく。 */
 
-    int     broken_mouse;   /* マウスカーソル表示問題ありなら、真  */
-                /*  マウスカーソル表示に問題がある   */
-                /*  システムがあるようだ。       */
-                /*     X11-DGA:マウスカーソルは基本   */
-                /*             的に、表示されない。   */
-                /*     SDL-DGA:マウスカーソルを表示   */
-                /*             させると、画面にゴミ   */
-                /*             が残る場合がある。  */
-                /*  これらのシステムでは、メニュー   */
-                /*  画面で独自のカーソル制御を行う   */
-                /*  ので、 TRUE をセットしておく。  */
-                /*  普通のシステムでは、問題はない   */
-                /*  と思うので、 FALSE をセットして */
-                /*  おくこと。         */
+  int broken_mouse; /* マウスカーソル表示問題ありなら、真  */
+                    /*  マウスカーソル表示に問題がある   */
+                    /*  システムがあるようだ。       */
+                    /*     X11-DGA:マウスカーソルは基本   */
+                    /*             的に、表示されない。   */
+                    /*     SDL-DGA:マウスカーソルを表示   */
+                    /*             させると、画面にゴミ   */
+                    /*             が残る場合がある。  */
+                    /*  これらのシステムでは、メニュー   */
+                    /*  画面で独自のカーソル制御を行う   */
+                    /*  ので、 TRUE をセットしておく。  */
+                    /*  普通のシステムでは、問題はない   */
+                    /*  と思うので、 FALSE をセットして */
+                    /*  おくこと。         */
 
-    void    (*draw_start)(void);
-    void    (*draw_finish)(void);
-                /* 画面のバッファにアクセスする際に、  */
-                /* その前後に呼び出される関数      */
-                /*  buffer のライトに際して、必要な */
-                /*  内部処理がある場合、それを記述   */
-                /*  した関数をここで設定しておく。   */
-                /*  特に必要がなければ、 NULL を */
-                /*  設定しておく。           */
+  void (*draw_start)(void);
+  void (*draw_finish)(void);
+  /* 画面のバッファにアクセスする際に、  */
+  /* その前後に呼び出される関数      */
+  /*  buffer のライトに際して、必要な */
+  /*  内部処理がある場合、それを記述   */
+  /*  した関数をここで設定しておく。   */
+  /*  特に必要がなければ、 NULL を */
+  /*  設定しておく。           */
 
-    int     dont_frameskip; /* フレームスキップを禁止するなら、真  */
-                /*  真ならば、フレーム毎に必ず     */
-                /*  graph_update が呼び出される。   */
-                /*  描画をスキップさせたい場合は、   */
-                /*  graph_update 内部にて独自に  */
-                /*  スキップ処理を組み込むこと。  */
+  int dont_frameskip; /* フレームスキップを禁止するなら、真  */
+                      /*  真ならば、フレーム毎に必ず     */
+                      /*  graph_update が呼び出される。   */
+                      /*  描画をスキップさせたい場合は、   */
+                      /*  graph_update 内部にて独自に  */
+                      /*  スキップ処理を組み込むこと。  */
 
 } T_GRAPH_INFO;
-
-
 
 /****************************************************************************
  * グラフィック処理の初期化／終了
@@ -149,10 +144,8 @@ typedef struct {
  *  この関数は、終了時に 1回だけ呼び出される。
  *
  *****************************************************************************/
-const T_GRAPH_SPEC  *graph_init(void);
-void            graph_exit(void);
-
-
+const T_GRAPH_SPEC *graph_init(void);
+void graph_exit(void);
 
 /****************************************************************************
  * グラフィック処理の設定
@@ -191,9 +184,7 @@ void            graph_exit(void);
  *        ：
  *
  ****************************************************************************/
-const T_GRAPH_INFO  *graph_setup(int width, int height,
-                     int fullscreen, double aspect);
-
+const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double aspect);
 
 /****************************************************************************
  * 色の確保と破棄
@@ -221,7 +212,7 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
  *
  *  o 使用できる色数が、システムによって制限されている場合、色の管理が必要
  *    になることがある。 (X11 の PseudoColor で共有カラーを使う場合など)
- * 
+ *
  *    QUASI88 が graph_remove_color を呼び出す場合、その引数の pixel は、
  *    直前の graph_add_color() にて確保した nr_color 個の pixel と
  *    同じとなるようにしてある。 (つまり、LIFO方式)
@@ -240,11 +231,8 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
  *    実装する必要がある。
  *
  *****************************************************************************/
-void    graph_add_color(const PC88_PALETTE_T color[],
-            int nr_color, unsigned long pixel[]);
-void    graph_remove_color(int nr_pixel, unsigned long pixel[]);
-
-
+void graph_add_color(const PC88_PALETTE_T color[], int nr_color, unsigned long pixel[]);
+void graph_remove_color(int nr_pixel, unsigned long pixel[]);
 
 /***********************************************************************
  * 画面の更新
@@ -280,13 +268,11 @@ void    graph_remove_color(int nr_pixel, unsigned long pixel[]);
  *
  ************************************************************************/
 typedef struct {
-    int x, y;
-    int width, height;
+  int x, y;
+  int width, height;
 } T_GRAPH_RECT;
 
-void    graph_update(int nr_rect, T_GRAPH_RECT rect[]);
-
-
+void graph_update(int nr_rect, T_GRAPH_RECT rect[]);
 
 /***********************************************************************
  * 属性の設定
@@ -304,9 +290,7 @@ void    graph_update(int nr_rect, T_GRAPH_RECT rect[]);
  *  keyrepeat_on が真なら、キーリピートをオンにする。偽ならオフにする。
  *
  ************************************************************************/
-void    graph_set_window_title(const char *title);
-void    graph_set_attribute(int mouse_show, int grab, int keyrepeat_on);
+void graph_set_window_title(const char *title);
+void graph_set_attribute(int mouse_show, int grab, int keyrepeat_on);
 
-
-
-#endif  /* GRAPH_H_INCLUDED */
+#endif /* GRAPH_H_INCLUDED */
