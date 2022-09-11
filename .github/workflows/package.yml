@@ -12,6 +12,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: generate tarball
         run: |
           cmake -B build -DENABLE_SDL=OFF -DENABLE_JOYSTICK=OFF
