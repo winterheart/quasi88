@@ -148,23 +148,7 @@ static  void    help_msg_common(void)
    (DEFAULT_CLOCK==CLOCK_8MHZ) ? "-8mhz" : "-4mhz",
    (DEFAULT_SOUND==SOUND_I) ? "-sd" : "-sd2",
    DEFAULT_DIPSW,
-   (DEFAULT_BAUDRATE==BAUDRATE_75 )
-     ? 75
-     : (DEFAULT_BAUDRATE==BAUDRATE_150 )
-       ? 150
-       : (DEFAULT_BAUDRATE==BAUDRATE_300 )
-         ? 300
-         : (DEFAULT_BAUDRATE==BAUDRATE_600 )
-           ? 600
-           : (DEFAULT_BAUDRATE==BAUDRATE_1200 )
-             ? 1200
-             : (DEFAULT_BAUDRATE==BAUDRATE_2400 )
-               ? 2400
-               : (DEFAULT_BAUDRATE==BAUDRATE_4800 )
-                 ? 4800
-                 : (DEFAULT_BAUDRATE==BAUDRATE_9600 )
-                   ? 9600
-                   : 19200,
+   baudrate_table[DEFAULT_BAUDRATE],
    (DEFAULT_BOOT==BOOT_AUTO)
      ? "AUTO"
      : (DEFAULT_BOOT==BOOT_DISK)

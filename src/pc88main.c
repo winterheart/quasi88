@@ -2146,9 +2146,6 @@ static int sio_bps;       /* BPS */
 static int sio_framesize; /* StartBit + Bit長 + StopBit を適当に計算 */
 
 static void sio_set_intr_base(void) {
-  static const int table[] = {
-      75, 150, 300, 600, 1200, 2400, 4800, 9600, 19200,
-  };
 
   /* イメージファイルセット済み かつ、
      受信 Enable かつ、
@@ -2159,7 +2156,7 @@ static void sio_set_intr_base(void) {
 
     if (sys_ctrl & 0x20) { /* RS232C 指定時  */
 
-      sio_bps = table[baudrate_sw]; /* BPS は ボーレート設定 */
+      sio_bps = baudrate_table[baudrate_sw]; /* BPS は ボーレート設定 */
       sio_framesize = 10;           /* フレーム長は10bit固定 */
 
     } else { /* CMT 指定時 */

@@ -112,6 +112,8 @@ extern T_CONFIG_IMAGE config_image; /* 引数で指定されたイメージフ�
 
 /*------------------------------------------------------------------------*/
 
+extern const int baudrate_table[];
+
 extern int save_config; /* 真で、終了時に設定保存する      */
 
 int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void (*osd_help)(void));

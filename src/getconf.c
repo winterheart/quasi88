@@ -118,9 +118,10 @@ static int o_help(UNUSED_ARG) {
 }
 
 static int arg_baudrate;
-static const int baudrate_table[] = {
+const int baudrate_table[] = {
     75, 150, 300, 600, 1200, 2400, 4800, 9600, 19200,
 };
+
 static int o_baudrate(UNUSED_ARG) {
   int i;
   for (i = 0; i < COUNTOF(baudrate_table); i++) {
