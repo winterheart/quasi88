@@ -86,24 +86,24 @@ extern int need_focus; /* フォーカスアウト停止あり */
 extern char *file_rec; /* キー入力記録のファイル名 */
 extern char *file_pb;  /* キー入力再生のファイル名 */
 
-void keyboard_reset(void);
-void keyboard_update(void);
-void keyboard_switch(void);
+void keyboard_reset();
+void keyboard_update();
+void keyboard_switch();
 
-void init_serial_mouse_data(void);
-int get_serial_mouse_data(void);
+void init_serial_mouse_data();
+int get_serial_mouse_data();
 
-void key_record_playback_init(void);
-void key_record_playback_exit(void);
+void key_record_playback_init();
+void key_record_playback_exit();
 
-void keyboard_jop1_reset(void);
-void keyboard_jop1_strobe(void);
+void keyboard_jop1_reset();
+void keyboard_jop1_strobe();
 
 int softkey_is_pressed(int code); /* メニューのソフトキー用 */
 void softkey_press(int code);
 void softkey_release(int code);
-void softkey_release_all(void);
-void softkey_bug(void);
+void softkey_release_all();
+void softkey_bug();
 
 void quasi88_cfg_key_numlock(int on);
 void quasi88_cfg_key_kana(int on);
@@ -118,7 +118,7 @@ void quasi88_cfg_key_romaji(int on);
 /* キーシンボルの文字列 (XK_xxx や SDLK_xxx) を int値に変換するテーブル */
 
 typedef struct {
-  char *name; /* keysym (キーシンボル) 文字列 */
+  const char *name; /* keysym (キーシンボル) 文字列 */
   int val;    /* 対応する、 int値       */
 } T_SYMBOL_TABLE;
 

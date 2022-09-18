@@ -4,8 +4,9 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
+#include <cstdio>
 
+extern "C" {
 #include "quasi88.h"
 #include "debug.h"
 #include "initval.h"
@@ -19,6 +20,7 @@
 #include "suspend.h"
 #include "status.h"
 #include "snddrv.h"
+}
 
 break_t break_point[2][NR_BP];        /* ブレークポイント     */
 break_drive_t break_point_fdc[NR_BP]; /* FDC ブレークポイント     */
@@ -49,7 +51,7 @@ void set_emu_exec_mode(int mode) { emu_mode_execute = mode; }
  * エミュレート処理の初期化関連
  ************************************************************************/
 
-void emu_reset(void) {
+void emu_reset() {
   select_main_cpu = TRUE;
   dual_cpu_count = 0;
 
@@ -57,7 +59,7 @@ void emu_reset(void) {
   sub_state = 0;
 }
 
-void emu_breakpoint_init(void) {
+void emu_breakpoint_init() {
   int i, j;
   /* ブレークポイントのワーク初期化 (モニターモード用) */
   for (j = 0; j < 2; j++)
@@ -89,7 +91,7 @@ void emu_breakpoint_init(void) {
  * ブレークポイント (タイプ PC) の有無をチェックする
  */
 
-static int check_break_point_PC(void) {
+static int check_break_point_PC() {
   int i, j;
 
   for (i = 0; i < NR_BP; i++)
@@ -146,7 +148,7 @@ static int target_step; /* この step数に達するまで実行する */
 static int infinity, only_1step;
 static int (*z80_exec)(z80arch *, int);
 
-void emu_init(void) {
+void emu_init() {
   /*xmame_sound_update();*/
   xmame_update_video_and_audio();
   event_update();
@@ -156,9 +158,9 @@ void emu_init(void) {
   /*screen_set_dirty_palette();*/
 
   /* ステータス部クリア */
-  status_message_default(0, NULL);
-  status_message_default(1, NULL);
-  status_message_default(2, NULL);
+  status_message_default(0, nullptr);
+  status_message_default(1, nullptr);
+  status_message_default(2, nullptr);
 
   /* ブレークポイント設定の有無で、呼び出す関数を変える */
   if (check_break_point_PC())
@@ -205,7 +207,7 @@ void emu_init(void) {
   emu_rest_step = target_step;
 }
 
-void emu_main(void) {
+void emu_main() {
   int wk;
 
   profiler_lapse(PROF_LAPSE_CPU);
@@ -343,7 +345,6 @@ void emu_main(void) {
     quasi88_debug();
     break;
   }
-  return;
 }
 
 /***********************************************************************
@@ -361,7 +362,7 @@ static T_SUSPEND_W suspend_emu_work[] = {
     {TYPE_INT, &main_state},
     {TYPE_INT, &sub_state},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 int statesave_emu(void) {

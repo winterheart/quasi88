@@ -12,7 +12,7 @@ enum {
   D88_ERR         /*                  */
 };
 
-int d88_read_header(OSD_FILE *fp, long offset, unsigned char header[32]);
+int d88_read_header(OSD_FILE *fp, long offset, char header[32]);
 int d88_append_blank(OSD_FILE *fp, int drv);
 int d88_write_protect(OSD_FILE *fp, int drv, int img, const char *protect);
 int d88_write_name(OSD_FILE *fp, int drv, int img, const char *name);

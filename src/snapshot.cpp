@@ -4,11 +4,12 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
 
+extern "C" {
 #include "quasi88.h"
 #include "screen.h"
 #include "screen-func.h"
@@ -16,6 +17,8 @@
 #include "crtcdmac.h"
 #include "file-op.h"
 #include "snapshot.h"
+#include "snddrv.h"
+}
 
 char file_snap[QUASI88_MAX_FILENAME]; /* スナップショットベース部 */
 int snapshot_format = 0;              /* スナップショットフォーマット   */
@@ -62,9 +65,9 @@ void screen_snapshot_exit(void) { waveout_save_stop(); }
 /* 画面イメージを生成する                        */
 /*----------------------------------------------------------------------*/
 
-typedef int (*SNAPSHOT_FUNC)(void);
+typedef int (*SNAPSHOT_FUNC)();
 
-static void make_snapshot(void) {
+static void make_snapshot() {
   int vram_mode, text_mode;
   SNAPSHOT_FUNC(*list)[4][2];
 
@@ -186,7 +189,7 @@ static int save_snapshot_ppm(OSD_FILE *fp) {
   int i, j;
   char *p = screen_snapshot;
 
-  if (fp == NULL)
+  if (fp == nullptr)
     return 0;
 
   strcpy((char *)buf, "P6\n"
@@ -271,7 +274,7 @@ static int save_snapshot_bmp(OSD_FILE *fp) {
   int i, j;
   char *p;
 
-  if (fp == NULL)
+  if (fp == nullptr)
     return 0;
 
   osd_fwrite(header, sizeof(char), sizeof(header), fp);
@@ -298,7 +301,7 @@ static int save_snapshot_raw(OSD_FILE *fp) {
   int i, j;
   char *p = screen_snapshot;
 
-  if (fp == NULL)
+  if (fp == nullptr)
     return 0;
 
   for (i = 0; i < 400; i++) {
@@ -430,7 +433,7 @@ int screen_snapshot_save(void) {
       if (osd_file_stat(filename) != FILE_STAT_NOEXIST)
         break;
     }
-    if (snap_suffix[i] == NULL) { /* 見つかった */
+    if (snap_suffix[i] == nullptr) { /* 見つかった */
       filename[len] = '\0';
       strcat(filename, suffix[snapshot_format]);
       success = TRUE;
@@ -560,7 +563,7 @@ int screen_snapshot_save(void) {
 
 char file_wav[QUASI88_MAX_FILENAME]; /* サウンド出力ベース部   */
 
-static const char *wav_suffix[] = {".wav", ".WAV", NULL};
+static const char *wav_suffix[] = {".wav", ".WAV", nullptr};
 
 void filename_set_wav_base(const char *filename) {
   if (filename) {
@@ -607,7 +610,7 @@ int waveout_save_start(void) {
       if (osd_file_stat(filename) != FILE_STAT_NOEXIST)
         break;
     }
-    if (wav_suffix[i] == NULL) { /* 見つかった */
+    if (wav_suffix[i] == nullptr) { /* 見つかった */
       filename[len] = '\0';
       strcat(filename, suffix);
       success = TRUE;

@@ -4,9 +4,9 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
+#include <cstring>
 
+extern "C" {
 #include "quasi88.h"
 #include "debug.h"
 #include "initval.h"
@@ -20,6 +20,7 @@
 #include "suspend.h"
 #include "status.h"
 #include "snddrv.h"
+}
 
 static int fdc_break_flag = FALSE;
 
@@ -78,6 +79,13 @@ static struct {
 
 static Uchar data_buf[DATA_BUF_SIZE];
 
+enum seek_stat {                     /* シーク状態              */
+                 SEEK_STAT_STOP = 0, /*      シークなし         */
+                 SEEK_STAT_MOVE,     /*      シーク中        */
+                 SEEK_STAT_END,      /*      シーク完了         */
+                 SEEK_STAT_INTR,     /*      シーク完了割込       */
+};
+
 /*
  * FDC の各種情報ワーク
  *  ホストから受け取ったコマンド、処理後のステータスは、ここに。
@@ -95,12 +103,7 @@ static struct {
   int carry; /* 次処理までのウェイト繰り越し分    */
   int gap3;  /* 次処理までのGAP3のウェイト分     */
 
-  enum {                     /* シーク状態              */
-         SEEK_STAT_STOP = 0, /*      シークなし         */
-         SEEK_STAT_MOVE,     /*      シーク中        */
-         SEEK_STAT_END,      /*      シーク完了         */
-         SEEK_STAT_INTR      /*      シーク完了割込       */
-  } seek_stat[MAX_DRIVE];
+  enum seek_stat seek_stat[MAX_DRIVE];
   int seek_wait[MAX_DRIVE]; /* シーク用ウェイト         */
 
   int srt_clk;            /* SRT (ウェイト換算)         */
@@ -378,14 +381,14 @@ static int fill_sector_gap(int ptr, int drv, Uchar fdc_mf);
 /************************************************************************/
 /* ドライブの初期化                         */
 /************************************************************************/
-static void fdc_init(void);
+static void fdc_init();
 void drive_init(void) {
   int i;
 
   fdc_init();
 
   for (i = 0; i < NR_DRIVE; i++) {
-    drive[i].fp = NULL;
+    drive[i].fp = nullptr;
     drive[i].sec_nr = -1;
     drive[i].empty = TRUE;
     /* memset( drive[ i ].filename, 0, QUASI88_MAX_FILENAME ); */
@@ -457,7 +460,7 @@ int drive_check_empty(int drv) { return drive[drv].empty; }
 
 int disk_insert(int drv, const char *filename, int img, int readonly) {
   int exit_flag;
-  Uchar c[32];
+  char c[32];
   long offset;
   int num;
 
@@ -481,12 +484,12 @@ int disk_insert(int drv, const char *filename, int img, int readonly) {
   if (open_as_readonly == FALSE) {
     drive[drv].fp = osd_fopen(FTYPE_DISK, filename, "r+b");
   }
-  if (drive[drv].fp == NULL) {
+  if (drive[drv].fp == nullptr) {
     drive[drv].fp = osd_fopen(FTYPE_DISK, filename, "rb");
     open_as_readonly = TRUE;
   }
 
-  if (drive[drv].fp == NULL) {
+  if (drive[drv].fp == nullptr) {
     DISK_ERROR("Open failed", drv);
     return 1;
   }
@@ -616,7 +619,7 @@ int disk_insert_A_to_B(int src, int dst, int img) {
 
   disk_eject(dst);
 
-  if (drive[src].fp == NULL) {
+  if (drive[src].fp == nullptr) {
     return 0;
   }
 
@@ -652,7 +655,7 @@ static void disk_now_track(int drv, int trk);
 int disk_change_image(int drv, int img) {
   int i;
 
-  if (drive[drv].fp == NULL) { /* ドライブ未セット */
+  if (drive[drv].fp == nullptr) { /* ドライブ未セット */
     return 1;
   }
   if (img < 0 || img >= drive[drv].image_nr) { /* 指定イメージ無し */
@@ -711,7 +714,7 @@ void disk_eject(int drv) {
       osd_fclose(drive[drv].fp);
     }
   }
-  drive[drv].fp = NULL;
+  drive[drv].fp = nullptr;
   drive[drv].sec_nr = -1;
   drive[drv].empty = TRUE;
   /* memset( drive[ drv ].filename, 0, QUASI88_MAX_FILENAME ); */
@@ -782,7 +785,6 @@ static void disk_now_track(int drv, int trk) {
   }
 
   sec_buf.drv = drv; /* 処理対象のドライブを覚えておく */
-  return;
 }
 
 /*======================================================================*/
@@ -878,7 +880,7 @@ static void disk_next_sec(int drv) {
 /************************************************************************/
 /* FDC の初期化                             */
 /************************************************************************/
-static void fdc_init(void) {
+static void fdc_init() {
   int i;
 
   fdc.status = 0 | REQ_MASTER;
@@ -1001,7 +1003,7 @@ static const int gap4_tbl[] = { 488, 152, 182, 94, 1584, 1760, 2242, 4144 };
  *  戻り値が 1 の場合、結果が ST0〜ST2 にセットされる
  *             (一部のエラーはここではセットしない)
  *===========================================================================*/
-static int fdc_check_unit(void) {
+static int fdc_check_unit() {
   int drv = (fdc.us);
 
   /* 未接続ドライブや、シーク中ドライブありなら、異常終了 */
@@ -1134,7 +1136,7 @@ static int fdc_check_unit(void) {
  *  戻り値が 1 の場合、結果が ST0〜ST2 にセットされる
  *             (一部のエラーはここではセットしない)
  *===========================================================================*/
-static int fdc_search_id(void) {
+static int fdc_search_id() {
   int drv = (fdc.us);
   int index_cnt = 0;     /* インデックスホール検出回数 */
   int exist_iam = FALSE; /* IAMが1度でも見つかったら真 */
@@ -1165,7 +1167,7 @@ static int fdc_search_id(void) {
   else
     n = 5;
 
-  while (1) {
+  while (true) {
 
     if (sector_density_mismatch() || /* このセクタには IAM がない         */
         sec_buf.status == STATUS_MA) {
@@ -1293,7 +1295,7 @@ static int fdc_search_id(void) {
  *  結果は ST0〜ST2 とバッファセットされる
  *  (READ ID の場合、この関数は呼ばないこと)
  *===========================================================================*/
-static int fdc_read_data(void) {
+static int fdc_read_data() {
   int drv = (fdc.us);
   int read_size, size, ptr, error;
 
@@ -1424,7 +1426,7 @@ FDC_READ_DATA_RETURN:
  *          +----------+---------------------------------+----------+
  *  サイズは「後のセクタのサイズ+16バイト」増やす (セクタ数は変えない)。
  *===========================================================================*/
-static int fdc_write_data(void) {
+static int fdc_write_data() {
   long id_pos, write_pos;
   int write_size, total_size, size, ptr, error = 0, sys_err = 0;
   int drv = fdc.us;
@@ -1845,26 +1847,26 @@ static int fdc_next_chrn(int with_TC) {
  *  ホスト(サブCPU)とのデータのやり取りは 4clock 以内に終わると
  *  勝手に想定 (つまり、データのやり取りにウェイトは無し)
  *===========================================================================*/
-static void c_phase(void) {
+static void c_phase() {
   int cmd, nd, i;
   unsigned char *const table[][10] = {
-      /*WAIT */ {0},
-      /*R_DAT*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.dtl, 0},
-      /*R_DEL*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.dtl, 0},
-      /*R_DIA*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.dtl, 0},
-      /*R_ID */ {&fdc.c0, &fdc.c1, 0},
-      /*W_DAT*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.dtl, 0},
-      /*W_DEL*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.dtl, 0},
-      /*W_ID */ {&fdc.c0, &fdc.c1, &fdc.n, &fdc.sc, &fdc.gpl, &fdc.d, 0},
-      /*S_EQU*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.stp, 0},
-      /*S_LOW*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.stp, 0},
-      /*S_HIG*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.stp, 0},
-      /*SEEK */ {&fdc.c0, &fdc.c1, &fdc.cn, 0},
-      /*RECAL*/ {&fdc.c0, &fdc.c1, 0},
-      /*SNS_I*/ {&fdc.c0, 0},
-      /*SNS_D*/ {&fdc.c0, &fdc.c1, 0},
-      /*SPECI*/ {&fdc.c0, &fdc.s0, &fdc.s1, 0},
-      /*INVAL*/ {&fdc.c0, 0},
+      /*WAIT */ {nullptr},
+      /*R_DAT*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.dtl, nullptr},
+      /*R_DEL*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.dtl, nullptr},
+      /*R_DIA*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.dtl, nullptr},
+      /*R_ID */ {&fdc.c0, &fdc.c1, nullptr},
+      /*W_DAT*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.dtl, nullptr},
+      /*W_DEL*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.dtl, nullptr},
+      /*W_ID */ {&fdc.c0, &fdc.c1, &fdc.n, &fdc.sc, &fdc.gpl, &fdc.d, nullptr},
+      /*S_EQU*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.stp, nullptr},
+      /*S_LOW*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.stp, nullptr},
+      /*S_HIG*/ {&fdc.c0, &fdc.c1, &fdc.c, &fdc.h, &fdc.r, &fdc.n, &fdc.eot, &fdc.gpl, &fdc.stp, nullptr},
+      /*SEEK */ {&fdc.c0, &fdc.c1, &fdc.cn, nullptr},
+      /*RECAL*/ {&fdc.c0, &fdc.c1, nullptr},
+      /*SNS_I*/ {&fdc.c0, nullptr},
+      /*SNS_D*/ {&fdc.c0, &fdc.c1, nullptr},
+      /*SPECI*/ {&fdc.c0, &fdc.s0, &fdc.s1, nullptr},
+      /*INVAL*/ {&fdc.c0, nullptr},
   };
 
   /* 「ホストがデータ書込→FDCがそれを検知」のウェイトが必要なら、 */
@@ -2008,26 +2010,26 @@ static void c_phase(void) {
  *  ホスト(サブCPU)とのデータのやり取りは 4clock 以内に終わると
  *  勝手に想定 (つまり、データのやり取りにウェイトは無し)
  *===========================================================================*/
-static void r_phase(void) {
+static void r_phase() {
   int i;
   unsigned char *const table[][8] = {
-      /*WAIT */ {0},
-      /*R_DAT*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, 0},
-      /*R_DEL*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, 0},
-      /*R_DIA*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, 0},
-      /*R_ID */ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, 0},
-      /*W_DAT*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, 0},
-      /*W_DEL*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, 0},
-      /*W_ID */ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, 0},
-      /*S_EQU*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, 0},
-      /*S_LOW*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, 0},
-      /*S_HIG*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, 0},
-      /*SEEK */ {0},
-      /*RECAL*/ {0},
-      /*SNS_I*/ {&fdc.r0, &fdc.r1, 0},
-      /*SNS_D*/ {&fdc.st3, 0},
-      /*SPECI*/ {0},
-      /*INVAL*/ {&fdc.r0, 0},
+      /*WAIT */ {nullptr},
+      /*R_DAT*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, nullptr},
+      /*R_DEL*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, nullptr},
+      /*R_DIA*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, nullptr},
+      /*R_ID */ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, nullptr},
+      /*W_DAT*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, nullptr},
+      /*W_DEL*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, nullptr},
+      /*W_ID */ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, nullptr},
+      /*S_EQU*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, nullptr},
+      /*S_LOW*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, nullptr},
+      /*S_HIG*/ {&fdc.st0, &fdc.st1, &fdc.st2, &fdc.c, &fdc.h, &fdc.r, &fdc.n, nullptr},
+      /*SEEK */ {nullptr},
+      /*RECAL*/ {nullptr},
+      /*SNS_I*/ {&fdc.r0, &fdc.r1, nullptr},
+      /*SNS_D*/ {&fdc.st3, nullptr},
+      /*SPECI*/ {nullptr},
+      /*INVAL*/ {&fdc.r0, nullptr},
   };
 
   /* R-PHASE の一番最初に、通知するデータの一覧を生成する */
@@ -2126,7 +2128,7 @@ static void r_phase(void) {
 /*---------------------------------------------------------------------------
  *  SEEK系
  *---------------------------------------------------------------------------*/
-static void e_phase_seek(void) {
+static void e_phase_seek() {
 
   fdc.status = (fdc.status & 0x0f) | REQ_MASTER | (1 << fdc.us);
 
@@ -2186,7 +2188,7 @@ static void e_phase_seek(void) {
  * 指定IDを検索し、みつかったらバッファに読み込む
  * 戻り値 -1:終了(E-PHASE完)  0:今のまま  1:次へ
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-static int e_phase_read_search(void) {
+static int e_phase_read_search() {
   int search, ret, skip_this;
 
   if (fdc.command != READ_ID) {
@@ -2259,7 +2261,7 @@ static int e_phase_read_search(void) {
  * バッファから1バイトとりだし、ホストへ転送 (割り込み発生)
  * 戻り値 -1:終了(セクタ終了処理へ)  1:次へ
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-static int e_phase_read_send(void) {
+static int e_phase_read_send() {
   int ret;
 
   if (fdc.TC && fdc.data_ptr) { /* TC信号あり (1回以上、割込発生済) */
@@ -2406,7 +2408,7 @@ static int e_phase_read_end(int interval) {
  *  READ/WRITE共通
  *---------------------------------------------------------------------------*/
 
-static void e_phase_finish(void) {
+static void e_phase_finish() {
   fdc.TC = FALSE;
   fdc.status = (fdc.status & 0x0f) | FDC_BUSY | DATA_IO;
   fdc.phase = R_PHASE;
@@ -2423,7 +2425,7 @@ static void e_phase_finish(void) {
  * 書き込み可能かチェック
  * 戻り値 -1:終了(E-PHASE完)  0:今のまま  1:次へ
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-static int e_phase_writeid_search(void) {
+static int e_phase_writeid_search() {
   int search, ret;
 
   search = fdc_check_unit(); /* 書込判定する           */
@@ -2459,7 +2461,7 @@ static int e_phase_writeid_search(void) {
  * 書き込みIDを検索する
  * 戻り値 -1:終了(E-PHASE完)  0:今のまま  1:次へ
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-static int e_phase_write_search(void) {
+static int e_phase_write_search() {
   int search, ret;
 
   logfdc("\t\t\tC:%02X H:%02X R:%02X N:%02X  ", fdc.c, fdc.h, fdc.r, fdc.n);
@@ -2498,7 +2500,7 @@ static int e_phase_write_search(void) {
  * ホストへ転送を要求 (割り込み発生)
  * 戻り値 -1:終了(セクタ終了処理へ)  1:次へ
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-static int e_phase_write_request(void) {
+static int e_phase_write_request() {
   int ret;
 
   if (fdc.TC && fdc.data_ptr) { /* TC信号あり (1回以上、割込発生済) */
@@ -2589,7 +2591,7 @@ static int e_phase_write_respond(int interval) {
  * 1トラック分、イメージファイルに書き出す
  * 戻り値 1:終了(セクタ終了処理へ)
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-static int e_phase_writeid_track(void) {
+static int e_phase_writeid_track() {
   int ret;
 
   fdc.TC = FALSE; /* TC信号があれば消す */
@@ -2619,7 +2621,7 @@ static int e_phase_writeid_track(void) {
  * 1セクタ分、イメージファイルに書き出す
  * 戻り値 1:終了(セクタ終了処理へ)
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-static int e_phase_write_sector(void) {
+static int e_phase_write_sector() {
   int i, ret;
 
   while (fdc.counter) {              /* セクタサイズに満たなければ  */
@@ -3292,304 +3294,94 @@ static int fill_sector_gap(int ptr, int drv, Uchar fdc_mf) {
 #define SID2 "FDC2"
 
 static T_SUSPEND_W suspend_fdc_work[] = {
-    {
-        TYPE_STR,
-        &file_disk[0][0],
-    },
-    {
-        TYPE_STR,
-        &file_disk[1][0],
-    },
-    {
-        TYPE_INT,
-        &image_disk[0],
-    },
-    {
-        TYPE_INT,
-        &image_disk[1],
-    },
-    {
-        TYPE_INT,
-        &readonly_disk[0],
-    },
-    {
-        TYPE_INT,
-        &readonly_disk[1],
-    },
+    {TYPE_STR, &file_disk[0][0]},
+    {TYPE_STR, &file_disk[1][0]},
+    {TYPE_INT, &image_disk[0]},
+    {TYPE_INT, &image_disk[1]},
+    {TYPE_INT, &readonly_disk[0]},
+    {TYPE_INT, &readonly_disk[1]},
 
-    {
-        TYPE_INT,
-        &disk_exchange,
-    },
-    {
-        TYPE_INT,
-        &disk_ex_drv,
-    },
+    {TYPE_INT, &disk_exchange},
+    {TYPE_INT, &disk_ex_drv},
 
-    {
-        TYPE_INT,
-        &FDC_flag,
-    },
-    {
-        TYPE_INT,
-        &fdc_wait,
-    },
+    {TYPE_INT, &FDC_flag},
+    {TYPE_INT, &fdc_wait},
 
-    {
-        TYPE_INT,
-        &fdc.command,
-    },
-    {
-        TYPE_INT,
-        &fdc.phase,
-    },
-    {
-        TYPE_INT,
-        &fdc.step,
-    },
-    {
-        TYPE_INT,
-        &fdc.counter,
-    },
-    {
-        TYPE_INT,
-        &fdc.data_ptr,
-    },
+    {TYPE_INT, &fdc.command},
+    {TYPE_INT, &fdc.phase},
+    {TYPE_INT, &fdc.step},
+    {TYPE_INT, &fdc.counter},
+    {TYPE_INT, &fdc.data_ptr},
 
-    {
-        TYPE_INT,
-        &fdc.limit,
-    },
-    {
-        TYPE_INT,
-        &fdc.wait,
-    },
-    {
-        TYPE_INT,
-        &fdc.carry,
-    },
-    {
-        TYPE_INT,
-        &fdc.gap3,
-    },
+    {TYPE_INT, &fdc.limit},
+    {TYPE_INT, &fdc.wait},
+    {TYPE_INT, &fdc.carry},
+    {TYPE_INT, &fdc.gap3},
 
-    {
-        TYPE_INT,
-        &fdc.seek_stat[0],
-    },
-    {
-        TYPE_INT,
-        &fdc.seek_stat[1],
-    },
-    {
-        TYPE_INT,
-        &fdc.seek_stat[2],
-    },
-    {
-        TYPE_INT,
-        &fdc.seek_stat[3],
-    },
-    {
-        TYPE_INT,
-        &fdc.seek_wait[0],
-    },
-    {
-        TYPE_INT,
-        &fdc.seek_wait[1],
-    },
-    {
-        TYPE_INT,
-        &fdc.seek_wait[2],
-    },
-    {
-        TYPE_INT,
-        &fdc.seek_wait[3],
-    },
+    {TYPE_INT, &fdc.seek_stat[0]},
+    {TYPE_INT, &fdc.seek_stat[1]},
+    {TYPE_INT, &fdc.seek_stat[2]},
+    {TYPE_INT, &fdc.seek_stat[3]},
+    {TYPE_INT, &fdc.seek_wait[0]},
+    {TYPE_INT, &fdc.seek_wait[1]},
+    {TYPE_INT, &fdc.seek_wait[2]},
+    {TYPE_INT, &fdc.seek_wait[3]},
 
-    {
-        TYPE_INT,
-        &fdc.srt_clk,
-    },
-    {
-        TYPE_INT,
-        &fdc.hut_clk,
-    },
-    {
-        TYPE_INT,
-        &fdc.hlt_clk,
-    },
-    {
-        TYPE_INT,
-        &fdc.hl_stat[0],
-    },
-    {
-        TYPE_INT,
-        &fdc.hl_stat[1],
-    },
-    {
-        TYPE_INT,
-        &fdc.hl_stat[2],
-    },
-    {
-        TYPE_INT,
-        &fdc.hl_stat[3],
-    },
-    {
-        TYPE_INT,
-        &fdc.hl_wait[0],
-    },
-    {
-        TYPE_INT,
-        &fdc.hl_wait[1],
-    },
-    {
-        TYPE_INT,
-        &fdc.hl_wait[2],
-    },
-    {
-        TYPE_INT,
-        &fdc.hl_wait[3],
-    },
+    {TYPE_INT, &fdc.srt_clk},
+    {TYPE_INT, &fdc.hut_clk},
+    {TYPE_INT, &fdc.hlt_clk},
+    {TYPE_INT, &fdc.hl_stat[0]},
+    {TYPE_INT, &fdc.hl_stat[1]},
+    {TYPE_INT, &fdc.hl_stat[2]},
+    {TYPE_INT, &fdc.hl_stat[3]},
+    {TYPE_INT, &fdc.hl_wait[0]},
+    {TYPE_INT, &fdc.hl_wait[1]},
+    {TYPE_INT, &fdc.hl_wait[2]},
+    {TYPE_INT, &fdc.hl_wait[3]},
 
-    {
-        TYPE_INT,
-        &fdc.ddam_not_skipped,
-    },
+    {TYPE_INT, &fdc.ddam_not_skipped},
 
-    {
-        TYPE_BYTE,
-        &fdc.status,
-    },
-    {
-        TYPE_BYTE,
-        &fdc.read,
-    },
-    {
-        TYPE_BYTE,
-        &fdc.write,
-    },
-    {
-        TYPE_BYTE,
-        &fdc.TC,
-    },
+    {TYPE_BYTE, &fdc.status},
+    {TYPE_BYTE, &fdc.read},
+    {TYPE_BYTE, &fdc.write},
+    {TYPE_BYTE, &fdc.TC},
 
-    {
-        TYPE_CHAR,
-        &fdc.sk,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.mf,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.mt,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.us,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.hd,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.c,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.h,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.r,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.n,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.eot,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.gpl,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.dtl,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.d,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.sc,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.stp,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.ncn[0],
-    },
-    {
-        TYPE_CHAR,
-        &fdc.ncn[1],
-    },
-    {
-        TYPE_CHAR,
-        &fdc.ncn[2],
-    },
-    {
-        TYPE_CHAR,
-        &fdc.ncn[3],
-    },
-    {
-        TYPE_CHAR,
-        &fdc.pcn[0],
-    },
-    {
-        TYPE_CHAR,
-        &fdc.pcn[1],
-    },
-    {
-        TYPE_CHAR,
-        &fdc.pcn[2],
-    },
-    {
-        TYPE_CHAR,
-        &fdc.pcn[3],
-    },
-    {
-        TYPE_CHAR,
-        &fdc.st0,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.st1,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.st2,
-    },
-    {
-        TYPE_CHAR,
-        &fdc.st3,
-    },
+    {TYPE_CHAR, &fdc.sk},
+    {TYPE_CHAR, &fdc.mf},
+    {TYPE_CHAR, &fdc.mt},
+    {TYPE_CHAR, &fdc.us},
+    {TYPE_CHAR, &fdc.hd},
+    {TYPE_CHAR, &fdc.c},
+    {TYPE_CHAR, &fdc.h},
+    {TYPE_CHAR, &fdc.r},
+    {TYPE_CHAR, &fdc.n},
+    {TYPE_CHAR, &fdc.eot},
+    {TYPE_CHAR, &fdc.gpl},
+    {TYPE_CHAR, &fdc.dtl},
+    {TYPE_CHAR, &fdc.d},
+    {TYPE_CHAR, &fdc.sc},
+    {TYPE_CHAR, &fdc.stp},
+    {TYPE_CHAR, &fdc.ncn[0]},
+    {TYPE_CHAR, &fdc.ncn[1]},
+    {TYPE_CHAR, &fdc.ncn[2]},
+    {TYPE_CHAR, &fdc.ncn[3]},
+    {TYPE_CHAR, &fdc.pcn[0]},
+    {TYPE_CHAR, &fdc.pcn[1]},
+    {TYPE_CHAR, &fdc.pcn[2]},
+    {TYPE_CHAR, &fdc.pcn[3]},
+    {TYPE_CHAR, &fdc.st0},
+    {TYPE_CHAR, &fdc.st1},
+    {TYPE_CHAR, &fdc.st2},
+    {TYPE_CHAR, &fdc.st3},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 static T_SUSPEND_W suspend_fdc_work2[] = {
     {TYPE_CHAR, &fdc.c0}, {TYPE_CHAR, &fdc.c1}, {TYPE_CHAR, &fdc.cn}, {TYPE_CHAR, &fdc.s0},
     {TYPE_CHAR, &fdc.s1}, {TYPE_CHAR, &fdc.r0}, {TYPE_CHAR, &fdc.r1}, {TYPE_CHAR, &fdc.intr_unit},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 int statesave_fdc(void) {
@@ -3642,7 +3434,7 @@ int stateload_fdc(void) {
 }
 
 /* デバッグ用の関数 */
-void monitor_fdc(void) {
+void monitor_fdc() {
   printf("com = %d phs = %d  step = %d\n", fdc.command, fdc.phase, fdc.step);
   printf("FDC flag = %d\n", FDC_flag);
 #if 0

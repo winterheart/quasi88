@@ -41,7 +41,7 @@ extern int text_display;  /* テキスト表示状態フラグ    */
 extern int blink_cycle;   /* 点滅の周期  8/16/24/32  */
 extern int blink_counter; /* 点滅制御カウンタ     */
 
-void set_text_display(void);
+void set_text_display();
 
 extern int dma_wait_count; /* DMAウェイトの余った数    */
 extern int dma_next_vline; /* DMAウェイトを再計算する次のステート数（vsync で初期化） */
@@ -63,19 +63,19 @@ typedef union {
 } T_GRYPH;
 
 void get_font_gryph(int attr, T_GRYPH *gryph, int *color);
-void crtc_make_text_attr(void);
+void crtc_make_text_attr();
 
-void crtc_init(void);
+void crtc_init();
 
 void crtc_out_command(byte data);
 void crtc_out_parameter(byte data);
-byte crtc_in_status(void);
-byte crtc_in_parameter(void);
+byte crtc_in_status();
+byte crtc_in_parameter();
 
-void dmac_init(void);
+void dmac_init();
 
 void dmac_out_mode(byte data);
-byte dmac_in_status(void);
+byte dmac_in_status();
 void dmac_out_address(byte addr, byte data);
 void dmac_out_counter(byte addr, byte data);
 byte dmac_in_address(byte addr);

@@ -1,7 +1,6 @@
 #ifndef QUASI88_H_INCLUDED
 #define QUASI88_H_INCLUDED
 
-#include <stdbool.h>
 
 /*----------------------------------------------------------------------*/
 /* システム・環境依存の定義                     */

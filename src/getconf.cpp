@@ -4,10 +4,10 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
+extern "C" {
 #include "quasi88.h"
 #include "debug.h"
 #include "initval.h"
@@ -32,15 +32,16 @@
 #include "snapshot.h"
 #include "suspend.h"
 #include "utility.h"
+}
 
 /*----------------------------------------------------------------------*/
 
 /* -f6 .. -f10 オプションの引数と、機能の対応一覧 */
 static const struct {
   int num;
-  char *str;
+  const char *str;
 } fn_index[] = {
-    {FN_FUNC, NULL},
+    {FN_FUNC, nullptr},
     {FN_FRATE_UP, "FRATE-UP"},
     {FN_FRATE_DOWN, "FRATE-DOWN"},
     {FN_VOLUME_UP, "VOLUME-UP"},
@@ -83,10 +84,10 @@ static int load_config = TRUE; /* 真で、起動時に設定読み込む */
 int save_config = FALSE;       /* 真で、終了時に設定保存する */
 
 /* ヘルプ表示用の、コマンド (argv[0]) */
-static char *command = "QUASI88";
+static const char *command = "QUASI88";
 
 /* システム依存のヘルプ表示関数 */
-static void (*help_msg_osd)(void) = NULL;
+static void (*help_msg_osd)() = nullptr;
 
 /* システム依存のオプションテーブル */
 static const T_CONFIG_TABLE *option_table_osd;
@@ -256,7 +257,7 @@ static int oo_resumefilename(char *filename, int force) {
     resume_flag = FALSE;
     resume_force = FALSE;
     resume_file = FALSE;
-    filename_set_state(NULL);
+    filename_set_state(nullptr);
   } else {
     resume_flag = TRUE;
     resume_force = force;
@@ -265,7 +266,7 @@ static int oo_resumefilename(char *filename, int force) {
   }
   return 0;
 }
-static int o_resume(UNUSED_ARG) { return oo_resumefilename(NULL, FALSE); }
+static int o_resume(UNUSED_ARG) { return oo_resumefilename(nullptr, FALSE); }
 static int o_resumefile(char *fname) { return oo_resumefilename(fname, FALSE); }
 static int o_resumeforce(char *fname) { return oo_resumefilename(fname, TRUE); }
 
@@ -300,7 +301,7 @@ static int oo_setdir(int type, char *dir) {
     break;
   }
 
-  if (result == FALSE) {
+  if (!result) {
     fprintf(stderr, "-%s %s failed, ignored\n", opt, dir);
   }
   return 0;
@@ -315,7 +316,7 @@ static int oo_image(char **filename) {
   if (strlen(*filename) >= QUASI88_MAX_FILENAME) {
     fprintf(stderr, "filename %s too long, ignored\n", *filename);
     free(*filename);
-    *filename = NULL;
+    *filename = nullptr;
   }
   return 0;
 }
@@ -327,7 +328,7 @@ static int o_serialout(UNUSED_ARG) { return oo_image(&config_image.sout); }
 
 static int o_diskimage(UNUSED_ARG) {
   /*  config_image.d[DRIVE_1] = 設定済み */
-  config_image.d[DRIVE_2] = NULL;
+  config_image.d[DRIVE_2] = nullptr;
   config_image.n[DRIVE_1] = 0;
   config_image.n[DRIVE_2] = 0;
 
@@ -350,245 +351,232 @@ static int save_joy(const struct T_CONFIG_TABLE *op, char opt_arg[255]);
 static const T_CONFIG_TABLE option_table[] = {
     /*  1〜30 : PC-8801設定オプション */
 
-    {1, "n", X_FIX, &boot_basic, BASIC_N, 0, 0, OPT_SAVE},
-    {1, "v1s", X_FIX, &boot_basic, BASIC_V1S, 0, 0, OPT_SAVE},
-    {1, "v1h", X_FIX, &boot_basic, BASIC_V1H, 0, 0, OPT_SAVE},
-    {1, "v2", X_FIX, &boot_basic, BASIC_V2, 0, 0, OPT_SAVE},
+    {1, "n", X_FIX, &boot_basic, BASIC_N, 0, nullptr, OPT_SAVE},
+    {1, "v1s", X_FIX, &boot_basic, BASIC_V1S, 0, nullptr, OPT_SAVE},
+    {1, "v1h", X_FIX, &boot_basic, BASIC_V1H, 0, nullptr, OPT_SAVE},
+    {1, "v2", X_FIX, &boot_basic, BASIC_V2, 0, nullptr, OPT_SAVE},
     {2, "4mhz", X_FIX, &boot_clock_4mhz, TRUE, 0, o_4mhz, OPT_SAVE},
     {2, "8mhz", X_FIX, &boot_clock_4mhz, FALSE, 0, o_8mhz, OPT_SAVE},
-    {3, "sd", X_FIX, &sound_board, SOUND_I, 0, 0, OPT_SAVE},
-    {3, "sd2", X_FIX, &sound_board, SOUND_II, 0, 0, OPT_SAVE},
-    {4, "dipsw", X_INT, &boot_dipsw, 0x0000, 0xffff, 0, OPT_SAVE},
+    {3, "sd", X_FIX, &sound_board, SOUND_I, 0, nullptr, OPT_SAVE},
+    {3, "sd2", X_FIX, &sound_board, SOUND_II, 0, nullptr, OPT_SAVE},
+    {4, "dipsw", X_INT, &boot_dipsw, 0x0000, 0xffff, nullptr, OPT_SAVE},
     {5, "baudrate", X_INT, &arg_baudrate, 75, 19200, o_baudrate, save_bau},
-    {6, "romboot", X_FIX, &boot_from_rom, TRUE, 0, 0, 0},
-    {6, "diskboot", X_FIX, &boot_from_rom, FALSE, 0, 0, 0},
-    {7, "extram", X_INT, &use_extram, 0, 64, 0, OPT_SAVE},
-    {7, "noextram", X_FIX, &use_extram, 0, 0, 0, OPT_SAVE},
-    {8, "jisho", X_FIX, &use_jisho_rom, TRUE, 0, 0, OPT_SAVE},
-    {8, "nojisho", X_FIX, &use_jisho_rom, FALSE, 0, 0, OPT_SAVE},
-    {9, "mouse", X_FIX, &mouse_mode, 1, 0, 0, OPT_SAVE},
-    {9, "nomouse", X_FIX, &mouse_mode, 0, 0, 0, OPT_SAVE},
-    {9, "joymouse", X_FIX, &mouse_mode, 2, 0, 0, OPT_SAVE},
-    {9, "joystick", X_FIX, &mouse_mode, 3, 0, 0, OPT_SAVE},
-    {10, "analog", X_FIX, &monitor_analog, TRUE, 0, 0, OPT_SAVE},
-    {10, "digital", X_FIX, &monitor_analog, FALSE, 0, 0, OPT_SAVE},
-    {11, "24k", X_FIX, &monitor_15k, 0x00, 0, 0, OPT_SAVE},
-    {11, "15k", X_FIX, &monitor_15k, 0x02, 0, 0, OPT_SAVE},
-    {12, "pcg", X_FIX, &use_pcg, TRUE, 0, 0, OPT_SAVE},
-    {12, "nopcg", X_FIX, &use_pcg, FALSE, 0, 0, OPT_SAVE},
-    {13, "tapeload", X_STR, &config_image.t[CLOAD], 0, 0, o_tapeload, 0},
-    {14, "tapesave", X_STR, &config_image.t[CSAVE], 0, 0, o_tapesave, 0},
-    {15, "serialmouse", X_FIX, &use_siomouse, TRUE, 0, 0, OPT_SAVE},
-    {15, "noserialmouse", X_FIX, &use_siomouse, FALSE, 0, 0, OPT_SAVE},
+    {6, "romboot", X_FIX, &boot_from_rom, TRUE, 0, nullptr, nullptr},
+    {6, "diskboot", X_FIX, &boot_from_rom, FALSE, 0, nullptr, nullptr},
+    {7, "extram", X_INT, &use_extram, 0, 64, nullptr, OPT_SAVE},
+    {7, "noextram", X_FIX, &use_extram, 0, 0, nullptr, OPT_SAVE},
+    {8, "jisho", X_FIX, &use_jisho_rom, TRUE, 0, nullptr, OPT_SAVE},
+    {8, "nojisho", X_FIX, &use_jisho_rom, FALSE, 0, nullptr, OPT_SAVE},
+    {9, "mouse", X_FIX, &mouse_mode, 1, 0, nullptr, OPT_SAVE},
+    {9, "nomouse", X_FIX, &mouse_mode, 0, 0, nullptr, OPT_SAVE},
+    {9, "joymouse", X_FIX, &mouse_mode, 2, 0, nullptr, OPT_SAVE},
+    {9, "joystick", X_FIX, &mouse_mode, 3, 0, nullptr, OPT_SAVE},
+    {10, "analog", X_FIX, &monitor_analog, TRUE, 0, nullptr, OPT_SAVE},
+    {10, "digital", X_FIX, &monitor_analog, FALSE, 0, nullptr, OPT_SAVE},
+    {11, "24k", X_FIX, &monitor_15k, 0x00, 0, nullptr, OPT_SAVE},
+    {11, "15k", X_FIX, &monitor_15k, 0x02, 0, nullptr, OPT_SAVE},
+    {12, "pcg", X_FIX, &use_pcg, TRUE, 0, nullptr, OPT_SAVE},
+    {12, "nopcg", X_FIX, &use_pcg, FALSE, 0, nullptr, OPT_SAVE},
+    {13, "tapeload", X_STR, &config_image.t[CLOAD], 0, 0, o_tapeload, nullptr},
+    {14, "tapesave", X_STR, &config_image.t[CSAVE], 0, 0, o_tapesave, nullptr},
+    {15, "serialmouse", X_FIX, &use_siomouse, TRUE, 0, nullptr, OPT_SAVE},
+    {15, "noserialmouse", X_FIX, &use_siomouse, FALSE, 0, nullptr, OPT_SAVE},
 
     /*  31〜60 : エミュレーション設定オプション */
 
-    {31, "cpu", X_INT, &cpu_timing, 0, 2, 0, OPT_SAVE},
-    {32, "cpu1count", X_INT, &CPU_1_COUNT, 1, 65536, 0, 0},
-    {33, "cpu2us", X_INT, &cpu_slice_us, 1, 1000, 0, 0},
-    {34, "fdc_wait", X_FIX, &fdc_wait, 1, 0, 0, OPT_SAVE},
-    {34, "fdc_nowait", X_FIX, &fdc_wait, 0, 0, 0, OPT_SAVE},
-    {35, "clock", X_DBL, &cpu_clock_mhz, 0.001, 65536.0, 0, OPT_SAVE},
-    {36, "speed", X_INT, &wait_rate, 5, 5000, 0, OPT_SAVE},
-    {37, "nowait", X_FIX, &no_wait, TRUE, 0, 0, OPT_SAVE},
-    {37, "wait", X_FIX, &no_wait, FALSE, 0, 0, OPT_SAVE},
-    {38, "boost", X_INT, &boost, 1, 100, 0, OPT_SAVE},
-    {39, "cmt_intr", X_FIX, &cmt_intr, TRUE, 0, 0, OPT_SAVE},
-    {39, "cmt_poll", X_FIX, &cmt_intr, FALSE, 0, 0, OPT_SAVE},
-    {40, "cmt_speed", X_INT, &cmt_speed, 0, 0xffff, 0, OPT_SAVE},
-    {41, "hsbasic", X_FIX, &highspeed_mode, TRUE, 0, 0, OPT_SAVE},
-    {41, "nohsbasic", X_FIX, &highspeed_mode, FALSE, 0, 0, OPT_SAVE},
-    {42, "mem_wait", X_FIX, &memory_wait, TRUE, 0, 0, OPT_SAVE},
-    {42, "mem_nowait", X_FIX, &memory_wait, FALSE, 0, 0, OPT_SAVE},
+    {31, "cpu", X_INT, &cpu_timing, 0, 2, nullptr, OPT_SAVE},
+    {32, "cpu1count", X_INT, &CPU_1_COUNT, 1, 65536, nullptr, nullptr},
+    {33, "cpu2us", X_INT, &cpu_slice_us, 1, 1000, nullptr, nullptr},
+    {34, "fdc_wait", X_FIX, &fdc_wait, 1, 0, nullptr, OPT_SAVE},
+    {34, "fdc_nowait", X_FIX, &fdc_wait, 0, 0, nullptr, OPT_SAVE},
+    {35, "clock", X_DBL, &cpu_clock_mhz, 0.001, 65536.0, nullptr, OPT_SAVE},
+    {36, "speed", X_INT, &wait_rate, 5, 5000, nullptr, OPT_SAVE},
+    {37, "nowait", X_FIX, &no_wait, TRUE, 0, nullptr, OPT_SAVE},
+    {37, "wait", X_FIX, &no_wait, FALSE, 0, nullptr, OPT_SAVE},
+    {38, "boost", X_INT, &boost, 1, 100, nullptr, OPT_SAVE},
+    {39, "cmt_intr", X_FIX, &cmt_intr, TRUE, 0, nullptr, OPT_SAVE},
+    {39, "cmt_poll", X_FIX, &cmt_intr, FALSE, 0, nullptr, OPT_SAVE},
+    {40, "cmt_speed", X_INT, &cmt_speed, 0, 0xffff, nullptr, OPT_SAVE},
+    {41, "hsbasic", X_FIX, &highspeed_mode, TRUE, 0, nullptr, OPT_SAVE},
+    {41, "nohsbasic", X_FIX, &highspeed_mode, FALSE, 0, nullptr, OPT_SAVE},
+    {42, "mem_wait", X_FIX, &memory_wait, TRUE, 0, nullptr, OPT_SAVE},
+    {42, "mem_nowait", X_FIX, &memory_wait, FALSE, 0, nullptr, OPT_SAVE},
     {43, "setver", X_INT, &set_version, 0, 9, o_set_version, save_ver},
-    {44, "exchange", X_FIX, &disk_exchange, TRUE, 0, 0, OPT_SAVE},
-    {44, "noexchange", X_FIX, &disk_exchange, FALSE, 0, 0, OPT_SAVE},
+    {44, "exchange", X_FIX, &disk_exchange, TRUE, 0, nullptr, OPT_SAVE},
+    {44, "noexchange", X_FIX, &disk_exchange, FALSE, 0, nullptr, OPT_SAVE},
 
     /*  61〜90 : 画面表示設定オプション */
 
-    {61, "frameskip", X_INT, &frameskip_rate, 1, 65536, 0, OPT_SAVE},
-    {62, "autoskip", X_FIX, &use_auto_skip, TRUE, 0, 0, OPT_SAVE},
-    {62, "noautoskip", X_FIX, &use_auto_skip, FALSE, 0, 0, OPT_SAVE},
-    {63, "half", X_FIX, &screen_size, SCREEN_SIZE_HALF, 0, 0, OPT_SAVE},
-    {63, "full", X_FIX, &screen_size, SCREEN_SIZE_FULL, 0, 0, OPT_SAVE},
+    {61, "frameskip", X_INT, &frameskip_rate, 1, 65536, nullptr, OPT_SAVE},
+    {62, "autoskip", X_FIX, &use_auto_skip, TRUE, 0, nullptr, OPT_SAVE},
+    {62, "noautoskip", X_FIX, &use_auto_skip, FALSE, 0, nullptr, OPT_SAVE},
+    {63, "half", X_FIX, &screen_size, SCREEN_SIZE_HALF, 0, nullptr, OPT_SAVE},
+    {63, "full", X_FIX, &screen_size, SCREEN_SIZE_FULL, 0, nullptr, OPT_SAVE},
 #ifdef SUPPORT_DOUBLE
-    {63, "double", X_FIX, &screen_size, SCREEN_SIZE_DOUBLE, 0, 0, OPT_SAVE},
+    {63, "double", X_FIX, &screen_size, SCREEN_SIZE_DOUBLE, 0, nullptr, OPT_SAVE},
 #else
     {63, "double", X_INV, 0, 0, 0, 0, 0},
 #endif
-    {64, "fullscreen", X_FIX, &use_fullscreen, TRUE, 0, 0, OPT_SAVE},
-    {64, "dga", X_FIX, &use_fullscreen, TRUE, 0, 0, 0},
-    {64, "window", X_FIX, &use_fullscreen, FALSE, 0, 0, OPT_SAVE},
-    {64, "nodga", X_FIX, &use_fullscreen, FALSE, 0, 0, 0},
-    {65, "aspect", X_DBL, &mon_aspect, 0.0, 10.0, 0, OPT_SAVE},
-    {66, "width", X_INT, &WIDTH, 1, 65536, o_width, 0},
-    {67, "height", X_INT, &HEIGHT, 1, 65536, o_height, 0},
-    {68, "interp", X_FIX, &use_half_interp, TRUE, 0, 0, OPT_SAVE},
-    {68, "nointerp", X_FIX, &use_half_interp, FALSE, 0, 0, OPT_SAVE},
-    {69, "skipline", X_FIX, &use_interlace, SCREEN_INTERLACE_SKIP, 0, 0, OPT_SAVE},
-    {69, "noskipline", X_FIX, &use_interlace, SCREEN_INTERLACE_NO, 0, 0, OPT_SAVE},
-    {69, "interlace", X_FIX, &use_interlace, SCREEN_INTERLACE_YES, 0, 0, OPT_SAVE},
-    {69, "nointerlace", X_FIX, &use_interlace, SCREEN_INTERLACE_NO, 0, 0, OPT_SAVE},
-    {70, "hide_mouse", X_FIX, &hide_mouse, HIDE_MOUSE, 0, 0, OPT_SAVE},
-    {70, "show_mouse", X_FIX, &hide_mouse, SHOW_MOUSE, 0, 0, OPT_SAVE},
-    {70, "auto_mouse", X_FIX, &hide_mouse, AUTO_MOUSE, 0, 0, OPT_SAVE},
-    {71, "grab_mouse", X_FIX, &grab_mouse, GRAB_MOUSE, 0, 0, OPT_SAVE},
-    {71, "ungrab_mouse", X_FIX, &grab_mouse, UNGRAB_MOUSE, 0, 0, OPT_SAVE},
-    {71, "auto_grab", X_FIX, &grab_mouse, AUTO_MOUSE, 0, 0, OPT_SAVE},
-    {72, "status", X_FIX, &show_status, TRUE, 0, 0, OPT_SAVE},
-    {72, "nostatus", X_FIX, &show_status, FALSE, 0, 0, OPT_SAVE},
-    {73, "status_fg", X_INT, &status_fg, 0, 0xffffff, 0, OPT_SAVE},
-    {74, "status_bg", X_INT, &status_bg, 0, 0xffffff, 0, OPT_SAVE},
-    {75, "statusimage", X_FIX, &status_imagename, TRUE, 0, 0, OPT_SAVE},
-    {75, "nostatusimage", X_FIX, &status_imagename, FALSE, 0, 0, OPT_SAVE},
+    {64, "fullscreen", X_FIX, &use_fullscreen, TRUE, 0, nullptr, OPT_SAVE},
+    {64, "dga", X_FIX, &use_fullscreen, TRUE, 0, nullptr, nullptr},
+    {64, "window", X_FIX, &use_fullscreen, FALSE, 0, nullptr, OPT_SAVE},
+    {64, "nodga", X_FIX, &use_fullscreen, FALSE, 0, nullptr, nullptr},
+    {65, "aspect", X_DBL, &mon_aspect, 0.0, 10.0, nullptr, OPT_SAVE},
+    {66, "width", X_INT, &WIDTH, 1, 65536, o_width, nullptr},
+    {67, "height", X_INT, &HEIGHT, 1, 65536, o_height, nullptr},
+    {68, "interp", X_FIX, &use_half_interp, TRUE, 0, nullptr, OPT_SAVE},
+    {68, "nointerp", X_FIX, &use_half_interp, FALSE, 0, nullptr, OPT_SAVE},
+    {69, "skipline", X_FIX, &use_interlace, SCREEN_INTERLACE_SKIP, 0, nullptr, OPT_SAVE},
+    {69, "noskipline", X_FIX, &use_interlace, SCREEN_INTERLACE_NO, 0, nullptr, OPT_SAVE},
+    {69, "interlace", X_FIX, &use_interlace, SCREEN_INTERLACE_YES, 0, nullptr, OPT_SAVE},
+    {69, "nointerlace", X_FIX, &use_interlace, SCREEN_INTERLACE_NO, 0, nullptr, OPT_SAVE},
+    {70, "hide_mouse", X_FIX, &hide_mouse, HIDE_MOUSE, 0, nullptr, OPT_SAVE},
+    {70, "show_mouse", X_FIX, &hide_mouse, SHOW_MOUSE, 0, nullptr, OPT_SAVE},
+    {70, "auto_mouse", X_FIX, &hide_mouse, AUTO_MOUSE, 0, nullptr, OPT_SAVE},
+    {71, "grab_mouse", X_FIX, &grab_mouse, GRAB_MOUSE, 0, nullptr, OPT_SAVE},
+    {71, "ungrab_mouse", X_FIX, &grab_mouse, UNGRAB_MOUSE, 0, nullptr, OPT_SAVE},
+    {71, "auto_grab", X_FIX, &grab_mouse, AUTO_MOUSE, 0, nullptr, OPT_SAVE},
+    {72, "status", X_FIX, &show_status, TRUE, 0, nullptr, OPT_SAVE},
+    {72, "nostatus", X_FIX, &show_status, FALSE, 0, nullptr, OPT_SAVE},
+    {73, "status_fg", X_INT, &status_fg, 0, 0xffffff, nullptr, OPT_SAVE},
+    {74, "status_bg", X_INT, &status_bg, 0, 0xffffff, nullptr, OPT_SAVE},
+    {75, "statusimage", X_FIX, &status_imagename, TRUE, 0, nullptr, OPT_SAVE},
+    {75, "nostatusimage", X_FIX, &status_imagename, FALSE, 0, nullptr, OPT_SAVE},
 
     /*  91〜160: キー設定オプション */
 
-    {91, "tenkey", X_FIX, &tenkey_emu, TRUE, 0, 0, OPT_SAVE},
-    {91, "notenkey", X_FIX, &tenkey_emu, FALSE, 0, 0, OPT_SAVE},
-    {92, "numlock", X_FIX, &numlock_emu, TRUE, 0, 0, OPT_SAVE},
-    {92, "nonumlock", X_FIX, &numlock_emu, FALSE, 0, 0, OPT_SAVE},
-    {93, "cursor_up", X_STR, NULL, 0, 0, o_setkey_up, save_cur},
-    {94, "cursor_down", X_STR, NULL, 0, 0, o_setkey_down, save_cur},
-    {95, "cursor_left", X_STR, NULL, 0, 0, o_setkey_left, save_cur},
-    {96, "cursor_right", X_STR, NULL, 0, 0, o_setkey_right, save_cur},
-    {97, "cursor", X_FIX, &cursor_key_mode, 1, 0, 0, OPT_SAVE},
-    {97, "nocursor", X_FIX, &cursor_key_mode, 0, 0, 0, OPT_SAVE},
-    {98, "mouse_up", X_STR, NULL, 0, 0, o_setmouse_up, save_mou},
-    {99, "mouse_down", X_STR, NULL, 0, 0, o_setmouse_down, save_mou},
-    {100, "mouse_left", X_STR, NULL, 0, 0, o_setmouse_left, save_mou},
-    {101, "mouse_right", X_STR, NULL, 0, 0, o_setmouse_right, save_mou},
-    {102, "mouse_l", X_STR, NULL, 0, 0, o_setmouse_l, save_mou},
-    {103, "mouse_r", X_STR, NULL, 0, 0, o_setmouse_r, save_mou},
-    {104, "mousekey", X_FIX, &mouse_key_mode, 1, 0, 0, OPT_SAVE},
-    {104, "nomousekey", X_FIX, &mouse_key_mode, 0, 0, 0, OPT_SAVE},
-    {105, "joy_up", X_STR, NULL, 0, 0, o_setjoy_up, save_joy},
-    {106, "joy_down", X_STR, NULL, 0, 0, o_setjoy_down, save_joy},
-    {107, "joy_left", X_STR, NULL, 0, 0, o_setjoy_left, save_joy},
-    {108, "joy_right", X_STR, NULL, 0, 0, o_setjoy_right, save_joy},
-    {109, "joy_a", X_STR, NULL, 0, 0, o_setjoy_a, save_joy},
-    {110, "joy_b", X_STR, NULL, 0, 0, o_setjoy_b, save_joy},
-    {111, "joy_c", X_STR, NULL, 0, 0, o_setjoy_c, save_joy},
-    {112, "joy_d", X_STR, NULL, 0, 0, o_setjoy_d, save_joy},
-    {113, "joy_e", X_STR, NULL, 0, 0, o_setjoy_e, save_joy},
-    {114, "joy_f", X_STR, NULL, 0, 0, o_setjoy_f, save_joy},
-    {115, "joy_g", X_STR, NULL, 0, 0, o_setjoy_g, save_joy},
-    {116, "joy_h", X_STR, NULL, 0, 0, o_setjoy_h, save_joy},
-    {117, "joykey", X_FIX, &joy_key_mode, 1, 0, 0, OPT_SAVE},
-    {117, "nojoykey", X_FIX, &joy_key_mode, 0, 0, 0, OPT_SAVE},
-    {118, "f1", X_STR, NULL, 0, 0, o_setfn_1, 0},
-    {119, "f2", X_STR, NULL, 0, 0, o_setfn_2, 0},
-    {120, "f3", X_STR, NULL, 0, 0, o_setfn_3, 0},
-    {121, "f4", X_STR, NULL, 0, 0, o_setfn_4, 0},
-    {122, "f5", X_STR, NULL, 0, 0, o_setfn_5, 0},
-    {123, "f6", X_STR, NULL, 0, 0, o_setfn_6, save_fn},
-    {124, "f7", X_STR, NULL, 0, 0, o_setfn_7, save_fn},
-    {125, "f8", X_STR, NULL, 0, 0, o_setfn_8, save_fn},
-    {126, "f9", X_STR, NULL, 0, 0, o_setfn_9, save_fn},
-    {127, "f10", X_STR, NULL, 0, 0, o_setfn_10, save_fn},
-    {128, "f11", X_STR, NULL, 0, 0, o_setfn_11, 0},
-    {129, "f12", X_STR, NULL, 0, 0, o_setfn_12, 0},
-    {130, "fn_max_speed", X_INT, &fn_max_speed, 5, 5000, 0, 0},
-    {131, "fn_max_clock", X_DBL, &fn_max_clock, 0.001, 65536.0, 0, 0},
-    {132, "fn_max_boost", X_INT, &fn_max_boost, 1, 100, 0, 0},
-    {133, "romaji", X_INT, &romaji_type, 0, 2, 0, OPT_SAVE},
-    {134, "kanjikey", X_NOP, 0, 0, 0, o_kanjikey, 0},
-    {135, "joyswap", X_FIX, &joy_swap_button, TRUE, 0, 0, OPT_SAVE},
-    {136, "mouseswap", X_FIX, &mouse_swap_button, TRUE, 0, 0, OPT_SAVE},
-    {137, "mousespeed", X_INT, &mouse_sensitivity, 5, 400, 0, OPT_SAVE},
+    {91, "tenkey", X_FIX, &tenkey_emu, TRUE, 0, nullptr, OPT_SAVE},
+    {91, "notenkey", X_FIX, &tenkey_emu, FALSE, 0, nullptr, OPT_SAVE},
+    {92, "numlock", X_FIX, &numlock_emu, TRUE, 0, nullptr, OPT_SAVE},
+    {92, "nonumlock", X_FIX, &numlock_emu, FALSE, 0, nullptr, OPT_SAVE},
+    {93, "cursor_up", X_STR, nullptr, 0, 0, o_setkey_up, save_cur},
+    {94, "cursor_down", X_STR, nullptr, 0, 0, o_setkey_down, save_cur},
+    {95, "cursor_left", X_STR, nullptr, 0, 0, o_setkey_left, save_cur},
+    {96, "cursor_right", X_STR, nullptr, 0, 0, o_setkey_right, save_cur},
+    {97, "cursor", X_FIX, &cursor_key_mode, 1, 0, nullptr, OPT_SAVE},
+    {97, "nocursor", X_FIX, &cursor_key_mode, 0, 0, nullptr, OPT_SAVE},
+    {98, "mouse_up", X_STR, nullptr, 0, 0, o_setmouse_up, save_mou},
+    {99, "mouse_down", X_STR, nullptr, 0, 0, o_setmouse_down, save_mou},
+    {100, "mouse_left", X_STR, nullptr, 0, 0, o_setmouse_left, save_mou},
+    {101, "mouse_right", X_STR, nullptr, 0, 0, o_setmouse_right, save_mou},
+    {102, "mouse_l", X_STR, nullptr, 0, 0, o_setmouse_l, save_mou},
+    {103, "mouse_r", X_STR, nullptr, 0, 0, o_setmouse_r, save_mou},
+    {104, "mousekey", X_FIX, &mouse_key_mode, 1, 0, nullptr, OPT_SAVE},
+    {104, "nomousekey", X_FIX, &mouse_key_mode, 0, 0, nullptr, OPT_SAVE},
+    {105, "joy_up", X_STR, nullptr, 0, 0, o_setjoy_up, save_joy},
+    {106, "joy_down", X_STR, nullptr, 0, 0, o_setjoy_down, save_joy},
+    {107, "joy_left", X_STR, nullptr, 0, 0, o_setjoy_left, save_joy},
+    {108, "joy_right", X_STR, nullptr, 0, 0, o_setjoy_right, save_joy},
+    {109, "joy_a", X_STR, nullptr, 0, 0, o_setjoy_a, save_joy},
+    {110, "joy_b", X_STR, nullptr, 0, 0, o_setjoy_b, save_joy},
+    {111, "joy_c", X_STR, nullptr, 0, 0, o_setjoy_c, save_joy},
+    {112, "joy_d", X_STR, nullptr, 0, 0, o_setjoy_d, save_joy},
+    {113, "joy_e", X_STR, nullptr, 0, 0, o_setjoy_e, save_joy},
+    {114, "joy_f", X_STR, nullptr, 0, 0, o_setjoy_f, save_joy},
+    {115, "joy_g", X_STR, nullptr, 0, 0, o_setjoy_g, save_joy},
+    {116, "joy_h", X_STR, nullptr, 0, 0, o_setjoy_h, save_joy},
+    {117, "joykey", X_FIX, &joy_key_mode, 1, 0, nullptr, OPT_SAVE},
+    {117, "nojoykey", X_FIX, &joy_key_mode, 0, 0, nullptr, OPT_SAVE},
+    {118, "f1", X_STR, nullptr, 0, 0, o_setfn_1, nullptr},
+    {119, "f2", X_STR, nullptr, 0, 0, o_setfn_2, nullptr},
+    {120, "f3", X_STR, nullptr, 0, 0, o_setfn_3, nullptr},
+    {121, "f4", X_STR, nullptr, 0, 0, o_setfn_4, nullptr},
+    {122, "f5", X_STR, nullptr, 0, 0, o_setfn_5, nullptr},
+    {123, "f6", X_STR, nullptr, 0, 0, o_setfn_6, save_fn},
+    {124, "f7", X_STR, nullptr, 0, 0, o_setfn_7, save_fn},
+    {125, "f8", X_STR, nullptr, 0, 0, o_setfn_8, save_fn},
+    {126, "f9", X_STR, nullptr, 0, 0, o_setfn_9, save_fn},
+    {127, "f10", X_STR, nullptr, 0, 0, o_setfn_10, save_fn},
+    {128, "f11", X_STR, nullptr, 0, 0, o_setfn_11, nullptr},
+    {129, "f12", X_STR, nullptr, 0, 0, o_setfn_12, nullptr},
+    {130, "fn_max_speed", X_INT, &fn_max_speed, 5, 5000, nullptr, nullptr},
+    {131, "fn_max_clock", X_DBL, &fn_max_clock, 0.001, 65536.0, nullptr, nullptr},
+    {132, "fn_max_boost", X_INT, &fn_max_boost, 1, 100, nullptr, nullptr},
+    {133, "romaji", X_INT, &romaji_type, 0, 2, nullptr, OPT_SAVE},
+    {134, "kanjikey", X_NOP, nullptr, 0, 0, o_kanjikey, nullptr},
+    {135, "joyswap", X_FIX, &joy_swap_button, TRUE, 0, nullptr, OPT_SAVE},
+    {136, "mouseswap", X_FIX, &mouse_swap_button, TRUE, 0, nullptr, OPT_SAVE},
+    {137, "mousespeed", X_INT, &mouse_sensitivity, 5, 400, nullptr, OPT_SAVE},
 
     /* 161〜180: メニュー設定オプション */
 
-    {161, "menu", X_NOP, 0, 0, 0, o_menu, 0},
-    {162, "english", X_FIX, &menu_lang, MENU_ENGLISH, 0, 0, 0},
-    {162, "japanese", X_FIX, &menu_lang, MENU_JAPAN, 0, 0, 0},
-    {163, "utf8", X_FIX, &file_coding, 2, 0, 0, 0},
-    {163, "sjis", X_FIX, &file_coding, 1, 0, 0, 0},
-    {163, "euc", X_FIX, &file_coding, 0, 0, 0, 0},
-    {164, "bmp", X_FIX, &snapshot_format, SNAPSHOT_FMT_BMP, 0, 0, OPT_SAVE},
-    {164, "ppm", X_FIX, &snapshot_format, SNAPSHOT_FMT_PPM, 0, 0, OPT_SAVE},
-    {164, "raw", X_FIX, &snapshot_format, SNAPSHOT_FMT_RAW, 0, 0, OPT_SAVE},
-    {165, "swapdrv", X_FIX, &menu_swapdrv, TRUE, 0, 0, OPT_SAVE},
-    {165, "noswapdrv", X_FIX, &menu_swapdrv, FALSE, 0, 0, OPT_SAVE},
-    {166, "menucursor", X_FIX, &use_swcursor, TRUE, 0, 0, 0},
-    {166, "nomenucursor", X_FIX, &use_swcursor, FALSE, 0, 0, 0},
+    {161, "menu", X_NOP, nullptr, 0, 0, o_menu, nullptr},
+    {162, "english", X_FIX, &menu_lang, MENU_ENGLISH, 0, nullptr, nullptr},
+    {162, "japanese", X_FIX, &menu_lang, MENU_JAPAN, 0, nullptr, nullptr},
+    {163, "utf8", X_FIX, &file_coding, 2, 0, nullptr, nullptr},
+    {163, "sjis", X_FIX, &file_coding, 1, 0, nullptr, nullptr},
+    {163, "euc", X_FIX, &file_coding, 0, 0, nullptr, nullptr},
+    {164, "bmp", X_FIX, &snapshot_format, SNAPSHOT_FMT_BMP, 0, nullptr, OPT_SAVE},
+    {164, "ppm", X_FIX, &snapshot_format, SNAPSHOT_FMT_PPM, 0, nullptr, OPT_SAVE},
+    {164, "raw", X_FIX, &snapshot_format, SNAPSHOT_FMT_RAW, 0, nullptr, OPT_SAVE},
+    {165, "swapdrv", X_FIX, &menu_swapdrv, TRUE, 0, nullptr, OPT_SAVE},
+    {165, "noswapdrv", X_FIX, &menu_swapdrv, FALSE, 0, nullptr, OPT_SAVE},
+    {166, "menucursor", X_FIX, &use_swcursor, TRUE, 0, nullptr, nullptr},
+    {166, "nomenucursor", X_FIX, &use_swcursor, FALSE, 0, nullptr, nullptr},
 
     /* 181〜250: システム設定オプション */
 
-    {181, "romdir", X_STR, NULL, 0, 0, o_romdir, 0},
-    {182, "diskdir", X_STR, NULL, 0, 0, o_diskdir, 0},
-    {183, "tapedir", X_STR, NULL, 0, 0, o_tapedir, 0},
-    {184, "snapdir", X_STR, NULL, 0, 0, o_snapdir, 0},
-    {185, "statedir", X_STR, NULL, 0, 0, o_statedir, 0},
-    {186, "noconfig", X_FIX, &load_config, FALSE, 0, 0, 0},
-    {187, "compatrom", X_STR, &file_compatrom, 0, 0, 0, 0},
-    {188, "resume", X_NOP, 0, 0, 0, o_resume, 0},
-    {189, "resumefile", X_STR, NULL, 0, 0, o_resumefile, 0},
-    {190, "resumeforce", X_STR, NULL, 0, 0, o_resumeforce, 0},
-    {191, "focus", X_FIX, &need_focus, TRUE, 0, 0, 0},
-    {191, "nofocus", X_FIX, &need_focus, FALSE, 0, 0, 0},
-    {192, "sleep", X_FIX, &wait_by_sleep, TRUE, 0, 0, OPT_SAVE},
-    {192, "nosleep", X_FIX, &wait_by_sleep, FALSE, 0, 0, OPT_SAVE},
+    {181, "romdir", X_STR, nullptr, 0, 0, o_romdir, nullptr},
+    {182, "diskdir", X_STR, nullptr, 0, 0, o_diskdir, nullptr},
+    {183, "tapedir", X_STR, nullptr, 0, 0, o_tapedir, nullptr},
+    {184, "snapdir", X_STR, nullptr, 0, 0, o_snapdir, nullptr},
+    {185, "statedir", X_STR, nullptr, 0, 0, o_statedir, nullptr},
+    {186, "noconfig", X_FIX, &load_config, FALSE, 0, nullptr, nullptr},
+    {187, "compatrom", X_STR, &file_compatrom, 0, 0, nullptr, nullptr},
+    {188, "resume", X_NOP, nullptr, 0, 0, o_resume, nullptr},
+    {189, "resumefile", X_STR, nullptr, 0, 0, o_resumefile, nullptr},
+    {190, "resumeforce", X_STR, nullptr, 0, 0, o_resumeforce, nullptr},
+    {191, "focus", X_FIX, &need_focus, TRUE, 0, nullptr, nullptr},
+    {191, "nofocus", X_FIX, &need_focus, FALSE, 0, nullptr, nullptr},
+    {192, "sleep", X_FIX, &wait_by_sleep, TRUE, 0, nullptr, OPT_SAVE},
+    {192, "nosleep", X_FIX, &wait_by_sleep, FALSE, 0, nullptr, OPT_SAVE},
     /*193  削除 */
-    {194, "ro", X_FIX, &menu_readonly, TRUE, 0, 0, 0},
-    {194, "rw", X_FIX, &menu_readonly, FALSE, 0, 0, 0},
-    {195, "ignore_ro", X_FIX, &fdc_ignore_readonly, TRUE, 0, 0, 0},
-    {195, "noignore_ro", X_FIX, &fdc_ignore_readonly, FALSE, 0, 0, 0},
-    {196, "diskimage", X_STR, &config_image.d[DRIVE_1], 0, 0, o_diskimage, 0},
-    {197, "saveconfig", X_FIX, &save_config, TRUE, 0, 0, OPT_SAVE},
-    {197, "nosaveconfig", X_FIX, &save_config, FALSE, 0, 0, OPT_SAVE},
+    {194, "ro", X_FIX, &menu_readonly, TRUE, 0, nullptr, nullptr},
+    {194, "rw", X_FIX, &menu_readonly, FALSE, 0, nullptr, nullptr},
+    {195, "ignore_ro", X_FIX, &fdc_ignore_readonly, TRUE, 0, nullptr, nullptr},
+    {195, "noignore_ro", X_FIX, &fdc_ignore_readonly, FALSE, 0, nullptr, nullptr},
+    {196, "diskimage", X_STR, &config_image.d[DRIVE_1], 0, 0, o_diskimage, nullptr},
+    {197, "saveconfig", X_FIX, &save_config, TRUE, 0, nullptr, OPT_SAVE},
+    {197, "nosaveconfig", X_FIX, &save_config, FALSE, 0, nullptr, OPT_SAVE},
 
     /* 251〜299: デバッグ用オプション */
 
-    {251, "help", X_NOP, 0, 0, 0, o_help, 0},
-    {252, "verbose", X_INT, &verbose_level, 0x00, 0xff, 0, 0},
-    {253, "printer", X_STR, &config_image.prn, 0, 0, o_printer, 0},
-    {254, "serialin", X_STR, &config_image.sin, 0, 0, o_serialin, 0},
-    {255, "serialout", X_STR, &config_image.sout, 0, 0, o_serialout, 0},
-    {256, "record", X_STR, &file_rec, 0, 0, 0, 0},
-    {257, "playback", X_STR, &file_pb, 0, 0, 0, 0},
-    {258, "timestop", X_FIX, &calendar_stop, TRUE, 0, 0, 0},
-    {259, "vsync", X_DBL, &vsync_freq_hz, 10.0, 240.0, 0, 0},
-    {260, "soundclock", X_DBL, &sound_clock_mhz, 0.001, 65536.0, 0, 0},
-    {261, "subload", X_INT, &sub_load_rate, 0, 65536, 0, 0},
-    {262, "cmt_wait", X_FIX, &cmt_wait, TRUE, 0, 0, 0},
-    {262, "cmt_nowait", X_FIX, &cmt_wait, FALSE, 0, 0, 0},
-    {263, "linear_ram", X_FIX, &linear_ext_ram, TRUE, 0, 0, 0},
-    {263, "nolinear_ram", X_FIX, &linear_ext_ram, FALSE, 0, 0, 0},
-    {264, "cmd_sing", X_FIX, &use_cmdsing, TRUE, 0, 0, 0},
-    {264, "no_cmd_sing", X_FIX, &use_cmdsing, FALSE, 0, 0, 0},
+    {251, "help", X_NOP, nullptr, 0, 0, o_help, nullptr},
+    {252, "verbose", X_INT, &verbose_level, 0x00, 0xff, nullptr, nullptr},
+    {253, "printer", X_STR, &config_image.prn, 0, 0, o_printer, nullptr},
+    {254, "serialin", X_STR, &config_image.sin, 0, 0, o_serialin, nullptr},
+    {255, "serialout", X_STR, &config_image.sout, 0, 0, o_serialout, nullptr},
+    {256, "record", X_STR, &file_rec, 0, 0, nullptr, nullptr},
+    {257, "playback", X_STR, &file_pb, 0, 0, nullptr, nullptr},
+    {258, "timestop", X_FIX, &calendar_stop, TRUE, 0, nullptr, nullptr},
+    {259, "vsync", X_DBL, &vsync_freq_hz, 10.0, 240.0, nullptr, nullptr},
+    {260, "soundclock", X_DBL, &sound_clock_mhz, 0.001, 65536.0, nullptr, nullptr},
+    {261, "subload", X_INT, &sub_load_rate, 0, 65536, nullptr, nullptr},
+    {262, "cmt_wait", X_FIX, &cmt_wait, TRUE, 0, nullptr, nullptr},
+    {262, "cmt_nowait", X_FIX, &cmt_wait, FALSE, 0, nullptr, nullptr},
+    {263, "linear_ram", X_FIX, &linear_ext_ram, TRUE, 0, nullptr, nullptr},
+    {263, "nolinear_ram", X_FIX, &linear_ext_ram, FALSE, 0, nullptr, nullptr},
+    {264, "cmd_sing", X_FIX, &use_cmdsing, TRUE, 0, nullptr, nullptr},
+    {264, "no_cmd_sing", X_FIX, &use_cmdsing, FALSE, 0, nullptr, nullptr},
 
 #ifdef USE_MONITOR
-    {271, "debug", X_FIX, &debug_mode, TRUE, 0, 0, 0},
-    {271, "nodebug", X_FIX, &debug_mode, FALSE, 0, 0, 0},
-    {272, "monitor", X_FIX, &debug_mode, TRUE, 0, o_monitor, 0},
-    {273, "fdcdebug", X_FIX, &fdc_debug_mode, TRUE, 0, 0, 0},
+    {271, "debug", X_FIX, &debug_mode, TRUE, 0, nullptr, nullptr},
+    {271, "nodebug", X_FIX, &debug_mode, FALSE, 0, nullptr, nullptr},
+    {272, "monitor", X_FIX, &debug_mode, TRUE, 0, o_monitor, nullptr},
+    {273, "fdcdebug", X_FIX, &fdc_debug_mode, TRUE, 0, nullptr, nullptr},
 #else
     {0, "debug", X_INV, 0, 0, 0, 0, 0},
     {0, "monitor", X_INV, 0, 0, 0, 0, 0},
     {0, "fdcdebug", X_INV, 0, 0, 0, 0, 0},
 #endif
 
-    {281, "nofont", X_FIX, &use_built_in_font, TRUE, 0, 0, 0},
-    {281, "font", X_FIX, &use_built_in_font, FALSE, 0, 0, 0},
-    {282, "profiler", X_INT, &debug_profiler, 0x00, 0xff, 0, 0},
-    {283, "pio_debug", X_INT, &pio_debug, 0, 3, 0, 0},
-    {284, "fdc_debug", X_INT, &fdc_debug, 0, 3, 0, 0},
-    {285, "main_debug", X_INT, &main_debug, 0, 3, 0, 0},
-    {286, "sub_debug", X_INT, &sub_debug, 0, 3, 0, 0},
-
-#if 0
-  /* 以下のオプションは、すべて廃止 */
-  {   0, "menukey",      X_INV,                                       0,0,0,0, 0        },
-  {   0, "joyassign",    X_INT,  &invalid_arg,                          0,0,0, 0        },
-  {   0, "joykey",       X_INV,                                       0,0,0,0, 0        },
-  {   0, "waitfreq",     X_INV,  &invalid_arg,                          0,0,0, 0        },
-  {   0, "button2menu",  X_INV,                                       0,0,0,0, 0        },
-  {   0, "nobutton2menu",X_INV,                                       0,0,0,0, 0        },
-  {   0, "logo",         X_INV,                                       0,0,0,0, 0        },
-  {   0, "nologo",       X_INV,                                       0,0,0,0, 0        },
-  {   0, "load",         X_INV,  &invalid_arg,                          0,0,0, 0        },
-#endif
+    {281, "nofont", X_FIX, &use_built_in_font, TRUE, 0, nullptr, nullptr},
+    {281, "font", X_FIX, &use_built_in_font, FALSE, 0, nullptr, nullptr},
+    {282, "profiler", X_INT, &debug_profiler, 0x00, 0xff, nullptr, nullptr},
+    {283, "pio_debug", X_INT, &pio_debug, 0, 3, nullptr, nullptr},
+    {284, "fdc_debug", X_INT, &fdc_debug, 0, 3, nullptr, nullptr},
+    {285, "main_debug", X_INT, &main_debug, 0, 3, nullptr, nullptr},
+    {286, "sub_debug", X_INT, &sub_debug, 0, 3, nullptr, nullptr},
 
 /* 300〜349: システム依存オプション */
 /* この範囲のグループは、システム依存オプションのテーブル用に予約 */
@@ -690,7 +678,7 @@ static const T_CONFIG_TABLE option_table[] = {
 #endif
 
     /* 終端 */
-    {0, NULL, X_INV, 0, 0, 0, 0, 0},
+    {0, nullptr, X_INV, 0, 0, 0, 0, 0},
 };
 
 /*--------------------------------------------------------------------------
@@ -717,7 +705,7 @@ static int check_option(char *opt1, char *opt2, int priority, const T_CONFIG_TAB
   int ignore, applied;
   char *end;
 
-  if (opt1 == NULL)
+  if (opt1 == nullptr)
     return 0;
   if (opt1[0] != '-')
     return -1;
@@ -729,7 +717,7 @@ static int check_option(char *opt1, char *opt2, int priority, const T_CONFIG_TAB
       break;
   }
 
-  if (op->name == NULL) {
+  if (op->name == nullptr) {
 
     /* 見つからなければ、 osd_options のオプションから探します */
 
@@ -740,7 +728,7 @@ static int check_option(char *opt1, char *opt2, int priority, const T_CONFIG_TAB
       }
     }
 
-    if (op->name == NULL) {
+    if (op->name == nullptr) {
 
       /* 見つからなければ、 sound_options のオプションから探します */
 
@@ -751,7 +739,7 @@ static int check_option(char *opt1, char *opt2, int priority, const T_CONFIG_TAB
         }
       }
 
-      if (op->name == NULL) {
+      if (op->name == nullptr) {
 
         /* それでも見つからなければ、MAME のオプションから探します */
 
@@ -776,7 +764,7 @@ static int check_option(char *opt1, char *opt2, int priority, const T_CONFIG_TAB
 
   case X_FIX: /* なし:   *var = (int)val1 [定数]           */
   {
-    if (ignore == FALSE) {
+    if (!ignore) {
       *((int *)op->var) = (int)op->val1;
       applied = TRUE;
     }
@@ -788,7 +776,7 @@ static int check_option(char *opt1, char *opt2, int priority, const T_CONFIG_TAB
 
     if (opt2) {
       ret_val++;
-      if (ignore == FALSE) {
+      if (!ignore) {
         low = (int)op->val1;
         high = (int)op->val2;
         work = strtol(opt2, &end, 0);
@@ -811,7 +799,7 @@ static int check_option(char *opt1, char *opt2, int priority, const T_CONFIG_TAB
 
     if (opt2) {
       ret_val++;
-      if (ignore == FALSE) {
+      if (!ignore) {
         low = (double)op->val1;
         high = (double)op->val2;
         work = strtod(opt2, &end);
@@ -834,10 +822,10 @@ static int check_option(char *opt1, char *opt2, int priority, const T_CONFIG_TAB
 
     if (opt2) {
       ret_val++;
-      if (ignore == FALSE) {
+      if (!ignore) {
         if (op->var) {
           work = (char *)malloc(strlen(opt2) + 1);
-          if (work == NULL) {
+          if (work == nullptr) {
             fprintf(stderr, "error: malloc failed for %s\n", opt1);
             return -1;
           } else {
@@ -861,14 +849,14 @@ static int check_option(char *opt1, char *opt2, int priority, const T_CONFIG_TAB
     if (op->var) {
       if (opt2) {
         ret_val++;
-        if (ignore == FALSE) {
+        if (!ignore) {
           applied = TRUE;
         }
       } else {
         fprintf(stderr, "error: %s requires an argument\n", opt1);
       }
     } else {
-      if (ignore == FALSE) {
+      if (!ignore) {
         applied = TRUE;
       }
     }
@@ -919,14 +907,14 @@ static int get_option(int argc, char *argv[], int priority, const T_CONFIG_TABLE
   int drive = DRIVE_1;
   char *p;
 
-  if ((argc == 0) || (argv == NULL))
+  if ((argc == 0) || (argv == nullptr))
     return TRUE;
 
   for (i = 1; i < argc;) {
 
     /* '-' 以外で始まるオプションは、ディスクイメージのファイル名 */
     if (*argv[i] != '-') {
-      char *fname = NULL;
+      char *fname = nullptr;
 
       /* イメージファイルが指定可能かどうかをチェック (不可でも継続) */
       if (strlen(argv[i]) >= QUASI88_MAX_FILENAME) {
@@ -938,7 +926,7 @@ static int get_option(int argc, char *argv[], int priority, const T_CONFIG_TABLE
           fname = argv[i];
 
           p = (char *)malloc(strlen(fname) + 1);
-          if (p == NULL) {
+          if (p == nullptr) {
             fprintf(stderr, "error: malloc failed for arg\n");
             return FALSE;
           }
@@ -968,7 +956,7 @@ static int get_option(int argc, char *argv[], int priority, const T_CONFIG_TABLE
             fprintf(stderr, "error: too many image-number\n");
           } else {
             p = (char *)malloc(strlen(fname) + 1);
-            if (p == NULL) {
+            if (p == nullptr) {
               fprintf(stderr, "error: malloc failed for arg\n");
               return FALSE;
             }
@@ -996,7 +984,7 @@ static int get_option(int argc, char *argv[], int priority, const T_CONFIG_TABLE
 
     } else { /* '-' で始まる引数は、オプション */
 
-      j = check_option(argv[i], (i + 1 < argc) ? argv[i + 1] : NULL, priority, osd_options, sound_options);
+      j = check_option(argv[i], (i + 1 < argc) ? argv[i + 1] : nullptr, priority, osd_options, sound_options);
       if (j < 0) { /* 致命的エラーなら、解析失敗 */
         return FALSE;
       }
@@ -1036,7 +1024,7 @@ static int get_config_file(OSD_FILE *fp, int priority, const T_CONFIG_TABLE *osd
   while (osd_fgets(line, MAX_RCFILE_LINE, fp)) {
 
     line_cnt++;
-    parm1 = parm2 = parm3 = NULL;
+    parm1 = parm2 = parm3 = nullptr;
     str = line;
 
     /* パラメータを parm1〜parm3 にセット */
@@ -1061,7 +1049,7 @@ static int get_config_file(OSD_FILE *fp, int priority, const T_CONFIG_TABLE *osd
 
     /* パラメータがなければ次の行へ、あれば解析処理 */
 
-    if (parm1 == NULL) { /* パラメータなし    */
+    if (parm1 == nullptr) { /* パラメータなし    */
       ;
 
     } else if (parm3) { /* パラメータ3個以上 */
@@ -1070,7 +1058,7 @@ static int get_config_file(OSD_FILE *fp, int priority, const T_CONFIG_TABLE *osd
     } else { /* パラメータ1〜2個  */
       result = check_option(parm1, parm2, priority, osd_options, sound_options);
 
-      if ((result == 1 && parm2 == NULL) || (result == 2 && parm2)) {
+      if ((result == 1 && parm2 == nullptr) || (result == 2 && parm2)) {
         ;
       } else if (result < 0) { /* 致命的エラーなら、解析失敗 */
         return FALSE;
@@ -1088,7 +1076,7 @@ static int get_config_file(OSD_FILE *fp, int priority, const T_CONFIG_TABLE *osd
  *  エラー発生などで処理を続行できない場合、偽を返す。
  ************************************************************************/
 
-static void set_verbose(void) {
+static void set_verbose() {
   verbose_proc = verbose_level & 0x01;
   verbose_z80 = verbose_level & 0x02;
   verbose_io = verbose_level & 0x04;
@@ -1099,7 +1087,7 @@ static void set_verbose(void) {
   verbose_snd = verbose_level & 0x80;
 }
 
-int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void (*osd_help)(void)) {
+int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void (*osd_help)()) {
   int i, step;
   char *fname;
 
@@ -1110,15 +1098,15 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
   option_table_osd = osd_options;
 
   for (i = 0; i < NR_DRIVE; i++) {
-    config_image.d[i] = NULL;
+    config_image.d[i] = nullptr;
     config_image.n[i] = 0;
     config_image.ro[i] = FALSE;
   }
-  config_image.t[CLOAD] = NULL;
-  config_image.t[CSAVE] = NULL;
-  config_image.prn = NULL;
-  config_image.sin = NULL;
-  config_image.sout = NULL;
+  config_image.t[CLOAD] = nullptr;
+  config_image.t[CSAVE] = nullptr;
+  config_image.prn = nullptr;
+  config_image.sin = nullptr;
+  config_image.sout = nullptr;
 
   /* XMAMEサウンド関連の設定を初期化 */
 
@@ -1128,19 +1116,19 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
 
   /* 設定ファイルのディレクトリ名などを初期化 */
 
-  if (osd_file_config_init() == FALSE) {
+  if (!osd_file_config_init()) {
     return FALSE;
   }
 
   /* 起動時のオプションを解析 */
 
-  if (get_option(argc, argv, 2, option_table_osd, option_table_sound) == FALSE) {
+  if (!get_option(argc, argv, 2, option_table_osd, option_table_sound)) {
     return FALSE;
   }
 
   /* ディスクイメージ指定ありなら、そのファイル名(パス名)を補完する */
 
-  if (resume_flag == FALSE) {
+  if (!resume_flag) {
     int same = FALSE;
 
     /* 同じファイル(名)を指定しているかを、チェック */
@@ -1153,7 +1141,7 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
 
       if (config_image.d[i]) {
         fname = filename_alloc_diskname(config_image.d[i]);
-        if (fname == NULL) {
+        if (fname == nullptr) {
           printf("\n");
           printf("[[[ %-26s ]]]\n", "Open failed");
           printf("[[[   drive %d: %-15s ]]]\n"
@@ -1180,13 +1168,13 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
   for (step = 0; step < 2; step++) {
 
     OSD_FILE *fp;
-    char *alias;
+    const char *alias;
 
     set_verbose();
 
     if (step == 0) {
 
-      if (load_config == FALSE)
+      if (!load_config)
         continue;
 
       /* 共通設定ファイルのファイル名 */
@@ -1198,7 +1186,7 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
       if (resume_flag)
         continue;
 
-      if (load_config == FALSE)
+      if (!load_config)
         continue;
 
       /* 個別設定ファイルのファイル名 (ディスク or テープ名) */
@@ -1218,7 +1206,7 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
     if (fname)
       fp = osd_fopen(FTYPE_CFG, fname, "r");
     else
-      fp = NULL;
+      fp = nullptr;
 
     if (verbose_proc) {
       if (fp) {
@@ -1233,7 +1221,7 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
     if (fp) {
       int result = get_config_file(fp, 1, option_table_osd, option_table_sound);
       osd_fclose(fp);
-      if (result == FALSE)
+      if (!result)
         return FALSE;
     }
   }
@@ -1285,7 +1273,7 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
 
 void config_exit(void) {
   if (save_config) {
-    config_save(NULL);
+    config_save(nullptr);
   }
 
   /* 設定ファイルのディレクトリ名などを後片づけ */
@@ -1318,7 +1306,7 @@ static int save_normal(const struct T_CONFIG_TABLE *op, char opt_arg[255]) {
 
   case X_STR:
     if (op->var) {
-      strcat(opt_arg, op->var);
+      strcat(opt_arg, (char *)op->var);
       return TRUE;
     }
     break;
@@ -1472,7 +1460,7 @@ static void config_write(const char *opt_name, const char *opt_arg) {
   if (opt_name) {
     sprintf(buf, "-%s %s", opt_name, (opt_arg ? opt_arg : ""));
   } else {
-    if (opt_arg == NULL)
+    if (opt_arg == nullptr)
       return;
     sprintf(buf, "# -%s", opt_arg);
   }
@@ -1491,18 +1479,18 @@ int config_save(const char *fname) {
   char line[MAX_RCFILE_LINE];
   char buf[MAX_RCFILE_LINE];
 
-  OSD_FILE *fp = NULL;
-  OSD_FILE *fp_bak = NULL;
-  char *fname_bak = NULL;
+  OSD_FILE *fp = nullptr;
+  OSD_FILE *fp_bak = nullptr;
+  char *fname_bak = nullptr;
   int backup_ok;
   int need_lf = FALSE;
   int malloc_fname = FALSE;
 
   /*** 引数 fname が NULL なら、共通設定ファイルのファイル名を使用 ***/
 
-  if (fname == NULL) {
+  if (fname == nullptr) {
     fname = filename_alloc_global_cfgname();
-    if (fname == NULL) {
+    if (fname == nullptr) {
       return FALSE;
     }
     malloc_fname = TRUE;
@@ -1518,7 +1506,7 @@ int config_save(const char *fname) {
     int flen = strlen(fname);
     int slen = strlen(CONFIG_SUFFIX);
 
-    fname_bak = malloc(flen + 10); /* +10 は余分に */
+    fname_bak = (char *)malloc(flen + 10); /* +10 は余分に */
     if (fname_bak) {
 
       strcpy(fname_bak, fname);
@@ -1545,10 +1533,10 @@ int config_save(const char *fname) {
         }
 
         osd_fclose(fp_bak);
-        fp_bak = NULL;
+        fp_bak = nullptr;
       }
 
-      if (backup_ok == FALSE) {
+      if (!backup_ok) {
         free(fname_bak);
       }
 
@@ -1557,7 +1545,7 @@ int config_save(const char *fname) {
          処理系依存らしいので、やめといたほうがいいか・・・ */
     }
     osd_fclose(fp);
-    fp = NULL;
+    fp = nullptr;
   }
 
   /*** バックアップ成功時は、設定ファイルを新規作成し、設定を一部コピー ***/
@@ -1565,7 +1553,7 @@ int config_save(const char *fname) {
 
   if (backup_ok) { /* バックアップファイル開く */
     fp_bak = osd_fopen(FTYPE_CFG, fname_bak, "r");
-    if (fp_bak == NULL) {
+    if (fp_bak == nullptr) {
       backup_ok = FALSE;
     }
     free(fname_bak);
@@ -1573,7 +1561,7 @@ int config_save(const char *fname) {
 
   if (backup_ok) { /* OKなら設定ファイル新規作成*/
     fp = osd_fopen(FTYPE_CFG, fname, "w");
-    if (fp == NULL) {
+    if (fp == nullptr) {
       osd_fclose(fp_bak);
       if (malloc_fname) {
         free((void *)fname);
@@ -1606,7 +1594,7 @@ int config_save(const char *fname) {
 
   } else { /* NGなら設定ファイルは既存で*/
     fp = osd_fopen(FTYPE_CFG, fname, "a");
-    if (fp == NULL) {
+    if (fp == nullptr) {
       if (malloc_fname) {
         free((void *)fname);
       }
@@ -1637,14 +1625,14 @@ int config_save(const char *fname) {
     else
       op = option_table_sound;
 
-    if (op == NULL)
+    if (op == nullptr)
       continue;
 
     for (; op->name; op++) {
 
-      if (saved_option[op->group] == FALSE) {
+      if (!saved_option[op->group]) {
 
-        if (op->save_func != NULL) {
+        if (op->save_func != nullptr) {
 
           memset(opt_arg, 0, sizeof(opt_arg));
 

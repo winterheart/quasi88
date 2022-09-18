@@ -15,17 +15,19 @@
  *  などで高速化しています。
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
 
+extern "C" {
 #include "quasi88.h"
 #include "z80.h"
 #include "memory.h"
 #include "screen.h"
 #include "monitor.h"
 #include "basic.h"
+}
 
 #define BASIC_MAX_ERR_NUM 4  /* エラー登録可能数     */
 #define BASIC_MAX_ERR_STR 20 /* エラー表示文字数     */
@@ -99,7 +101,7 @@ static int decode_err_num;                      /* デコードエラー登録�
 /*------------------------------------------------------*/
 /* 仮想メモリ割り当て                  */
 /*------------------------------------------------------*/
-static void pseudo_memory_mapping(void) {
+static void pseudo_memory_mapping() {
   if (grph_ctrl & GRPH_CTRL_N) {
     read_pseudo_mem_0000_7fff = &main_rom_n[0x0000];
     read_pseudo_mem_8000_83ff = &pseudo_ram[0x8000];
@@ -170,13 +172,13 @@ static byte pseudo_io_in(byte port) {
 /*------------------------------------------------------*/
 /*                          */
 /*------------------------------------------------------*/
-void pseudo_intr_update(void) { pseudo_z80_cpu.skip_intr_chk = TRUE; }
-int pseudo_intr_ack(void) { return -1; }
+void pseudo_intr_update() { pseudo_z80_cpu.skip_intr_chk = TRUE; }
+int pseudo_intr_ack() { return -1; }
 
 /*------------------------------------------------------*/
 /* 仮想 CPU 初期化                 */
 /*------------------------------------------------------*/
-static void pseudo_z80_init(void) {
+static void pseudo_z80_init() {
   z80_reset(&pseudo_z80_cpu);
 
   pseudo_z80_cpu.fetch = pseudo_mem_read;
@@ -192,11 +194,11 @@ static void pseudo_z80_init(void) {
 /*------------------------------------------------------*/
 /* 仮想メモリ初期化                 */
 /*------------------------------------------------------*/
-static int pseudo_mem_init(void) {
+static int pseudo_mem_init() {
   if (verbose_proc)
     printf("Allocating 64kB for pseudo ram...");
   pseudo_ram = (byte *)malloc(sizeof(byte) * 0x10000);
-  if (pseudo_ram == NULL) {
+  if (pseudo_ram == nullptr) {
     if (verbose_proc) {
       printf("FAILED\n");
     }
@@ -222,7 +224,7 @@ static int pseudo_mem_init(void) {
 /*------------------------------------------------------*/
 /* 中間コードの始点・終点アドレスの書き込み     */
 /*------------------------------------------------------*/
-static void write_basic_addr(void) {
+static void write_basic_addr() {
   WRITE_WORD(main_ram, basic_top_addr_addr, basic_top_addr);
   WRITE_WORD(main_ram, basic_end_addr_addr, basic_end_addr);
   if (grph_ctrl & GRPH_CTRL_N) {
@@ -234,7 +236,7 @@ static void write_basic_addr(void) {
 /*------------------------------------------------------*/
 /* エンコード・デコード用アドレス設定          */
 /*------------------------------------------------------*/
-static void pseudo_set_addr(void) {
+static void pseudo_set_addr() {
   if (grph_ctrl & GRPH_CTRL_N) {
     /* N-mode */
 
@@ -301,7 +303,7 @@ static void pseudo_set_addr(void) {
 /*------------------------------------------------------*/
 /* エンコード用仮想 CPU レジスタ設定          */
 /*------------------------------------------------------*/
-static void encode_z80_set_register(void) {
+static void encode_z80_set_register() {
   SET_REG(pseudo_z80_cpu.PC, encode_start_pc); /* start addr */
   SET_REG(pseudo_z80_cpu.HL, basic_conv_buffer_addr - 1);
   SET_REG(pseudo_z80_cpu.SP, basic_sp);
@@ -310,7 +312,7 @@ static void encode_z80_set_register(void) {
 /*------------------------------------------------------*/
 /* エンコード用仮想メモリ設定              */
 /*------------------------------------------------------*/
-static void encode_set_mem(void) {
+static void encode_set_mem() {
   /* 開始アドレス格納 */
   WRITE_WORD(pseudo_ram, basic_top_addr_addr, basic_buffer_addr);
   /* 終了アドレス格納 */
@@ -339,12 +341,12 @@ int basic_encode_list(FILE *fp) {
 
   encode_set_mem();
   text_line_num = 0;
-  while (fgets(buf, BASIC_MAX_LINE, fp) != NULL) {
+  while (fgets(buf, BASIC_MAX_LINE, fp) != nullptr) {
     text_line_num++;
     /* 改行コード削除 */
-    if ((ptr = strchr(buf, '\r')) != NULL)
+    if ((ptr = strchr(buf, '\r')) != nullptr)
       *ptr = '\0';
-    if ((ptr = strchr(buf, '\n')) != NULL)
+    if ((ptr = strchr(buf, '\n')) != nullptr)
       *ptr = '\0';
 
     /* 先頭が数字でないならとばす */
@@ -356,7 +358,7 @@ int basic_encode_list(FILE *fp) {
     encode_z80_set_register();
 
     /* 変換用バッファにリストをコピー */
-    strncpy(&pseudo_ram[basic_conv_buffer_addr], ptr, strlen(ptr));
+    strncpy((char *)&pseudo_ram[basic_conv_buffer_addr], ptr, strlen(ptr));
     pseudo_ram[basic_conv_buffer_addr + strlen(ptr)] = 0x00; /* 終端 */
 
     /* 仮想プロセス開始 */
@@ -399,7 +401,7 @@ end_basic_encode_list:
 /*------------------------------------------------------*/
 /* デコード用仮想メモリ設定 1               */
 /*------------------------------------------------------*/
-static int decode_mem_set1(void) {
+static int decode_mem_set1() {
   /* 中間コードをコピー */
   basic_top_addr = READ_WORD(main_ram, basic_top_addr_addr);
   basic_end_addr = READ_WORD(main_ram, basic_end_addr_addr);
@@ -431,7 +433,7 @@ static int decode_mem_set1(void) {
 /*------------------------------------------------------*/
 /* デコード用仮想メモリ設定 2               */
 /*------------------------------------------------------*/
-static void decode_mem_set2(void) {
+static void decode_mem_set2() {
   /*    pseudo_window_offset = 0;*/
   /*    pseudo_memory_mapping();*/
 

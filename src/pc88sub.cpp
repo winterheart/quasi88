@@ -4,20 +4,22 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
+#include <cstdio>
 
+extern "C" {
 #include "quasi88.h"
 #include "debug.h"
 #include "pc88sub.h"
 
 #include "pc88cpu.h"
 #include "fdc.h"
-#include "intr.h"   /* state_of_vsync */
+#include "intr.h" /* state_of_vsync */
 #include "memory.h"
 #include "pio.h"
 
 #include "emu.h"
 #include "suspend.h"
+}
 
 z80arch z80sub_cpu; /* Z80 CPU ( sub system )   */
 
@@ -180,13 +182,13 @@ byte sub_io_in(byte port) {
 /*------------------------------*/
 /* 初期化(Z80リセット時に呼ぶ)   */
 /*------------------------------*/
-void sub_INT_init(void) { FDC_flag = FALSE; }
+void sub_INT_init() { FDC_flag = FALSE; }
 
 /*----------------------------------------------------------------------*/
 /* 割り込みを生成する。と同時に、次の割り込みまでの、最小 state も計算    */
 /*  帰り値は、Z80処理強制終了のフラグ(TRUE/FALSE)            */
 /*----------------------------------------------------------------------*/
-void sub_INT_update(void) {
+void sub_INT_update() {
   static int sub_total_state = 0; /* サブCPUが処理した命令数      */
   int icount;
 
@@ -233,7 +235,7 @@ void sub_INT_update(void) {
 /*----------------------------------------------*/
 /* チェック (割込許可時 1ステップ毎に呼ばれる)   */
 /*----------------------------------------------*/
-int sub_INT_chk(void) {
+int sub_INT_chk() {
   z80sub_cpu.INT_active = FALSE;
 
   if (FDC_flag)
@@ -285,7 +287,7 @@ void pc88sub_term(void) {}
 /************************************************************************/
 /* ブレークポイント関連                           */
 /************************************************************************/
-INLINE void check_break_point(int type, word addr, char *str) {
+INLINE void check_break_point(int type, word addr, const char *str) {
   int i;
 
   if (quasi88_is_monitor())
@@ -432,7 +434,7 @@ static T_SUSPEND_W suspend_pc88sub_work[] = {
 
     {TYPE_INT, &sub_load_rate},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 int statesave_pc88sub(void) {

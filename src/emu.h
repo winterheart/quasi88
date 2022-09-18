@@ -45,11 +45,11 @@ extern break_drive_t break_point_fdc[NR_BP];
 
 /**** 関数 ****/
 
-void emu_breakpoint_init(void);
-void emu_reset(void);
+void emu_breakpoint_init();
+void emu_reset();
 void set_emu_exec_mode(int mode);
 
-void emu_init(void);
-void emu_main(void);
+void emu_init();
+void emu_main();
 
 #endif /* EMU_H_INCLUDED */

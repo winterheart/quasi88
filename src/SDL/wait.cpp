@@ -4,11 +4,13 @@
  *  詳細は、 wait.h 参照
  ************************************************************************/
 
-#include <stdio.h>
+#include <cstdio>
 #include <SDL2/SDL.h>
 
+extern "C" {
 #include "quasi88.h"
 #include "wait.h"
+}
 
 /*---------------------------------------------------------------------------*/
 static int wait_do_sleep; /* idle時間 sleep する       */

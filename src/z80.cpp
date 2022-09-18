@@ -80,8 +80,10 @@
 
 #include <stdio.h>
 
+extern "C" {
 #include "quasi88.h"
 #include "z80.h"
+}
 
 #define S_FLAG (0x80)
 #define Z_FLAG (0x40)

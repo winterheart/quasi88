@@ -4,6 +4,7 @@
 /*                                  */
 /************************************************************************/
 
+extern "C" {
 #include "quasi88.h"
 #include "initval.h"
 #include "intr.h"
@@ -15,6 +16,7 @@
 
 #include "snddrv.h"
 #include "suspend.h"
+}
 
 int intr_level;        /* OUT[E4] 割り込みレベル    */
 int intr_priority;     /* OUT[E4] 割り込み優先度    */
@@ -120,7 +122,7 @@ static int vsync_count; /* test (計測用) */
 /*
  * 割り込みミュレート初期化 … Z80 の起動時に呼ぶ
  */
-static void interval_work_init_generic(void) {
+static void interval_work_init_generic() {
   vsync_intr_timer = vsync_intr_base = (int)(CPU_CLOCK / VSYNC_FREQ_HZ);
   vrtc_timer = vrtc_base = (int)(vsync_intr_base * VRTC_TOP);
   vrtc_base2 = (int)(vsync_intr_base * VRTC_DISP);
@@ -138,16 +140,16 @@ static void interval_work_init_generic(void) {
 /*
  * RS232C割り込みエミュレート初期化 … Z80起動時に呼ぶ
  */
-static void interval_work_init_RS232C(void) { interval_work_set_RS232C(0, 0); }
+static void interval_work_init_RS232C() { interval_work_set_RS232C(0, 0); }
 
 /*
  * サウンド割り込みエミュレート初期化 … Z80起動時に呼ぶ
  */
-static void interval_work_init_TIMER_A(void) {
+static void interval_work_init_TIMER_A() {
   interval_work_set_TIMER_A();
   sd_A_intr_timer = sd_A_intr_base;
 }
-static void interval_work_init_TIMER_B(void) {
+static void interval_work_init_TIMER_B() {
   interval_work_set_TIMER_B();
   sd_B_intr_timer = sd_B_intr_base;
 }
@@ -228,7 +230,7 @@ void change_sound_prescaler(int new_prescaler) {
  * サウンドのプリスケーラー値・各種フラグ変更時の際に、フラグを初期化する。
  *  割り込み更新後に呼ばれる。
  */
-static void check_sound_parm_update(void) {
+static void check_sound_parm_update() {
   byte data;
 
   if (sound_prescaler_update) { /* 分周 変更があったら         */
@@ -321,7 +323,7 @@ void interval_work_set_EOS(int length) {
 /* #define だと、VSYNC開始時に表示、#undef だとVBLANK 終了時に表示 */
 #undef DRAW_SCREEN_AT_VSYNC_START
 
-static void vsync(void) {
+static void vsync() {
   vsync_count++; /* test (計測用) */
 
   if (++boost_cnt >= boost) {
@@ -342,7 +344,7 @@ static void vsync(void) {
 
 int quasi88_info_vsync_count(void) { return vsync_count; }
 
-static void set_INT_active(void) {
+static void set_INT_active() {
   if (intr_level == 0) {                           /* レベル設定 0 */
     z80main_cpu.INT_active = FALSE;                /*    割り込みは受け付けない */
   } else if (intr_level >= 1 &&                    /* レベル設定 1 */
@@ -699,23 +701,23 @@ static T_SUSPEND_W suspend_intr_work[] = {
     {TYPE_INT, &sd2_EOS_intr_base},
     {TYPE_INT, &sd2_EOS_intr_timer},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 static T_SUSPEND_W suspend_intr_work2[] = {
     {TYPE_INT, &vrtc_base2},
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 static T_SUSPEND_W suspend_intr_work3[] = {
     {TYPE_INT, &SOUND_level},
     {TYPE_INT, &SOUND_edge},
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 static T_SUSPEND_W suspend_intr_work4[] = {
     {TYPE_INT, &boost},
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 int statesave_intr(void) {

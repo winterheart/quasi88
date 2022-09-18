@@ -4,10 +4,12 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
+#include <cstdio>
 
+extern "C" {
 #include "quasi88.h"
 #include "z80.h"
+}
 
 /*
   オペランドの型
@@ -42,7 +44,7 @@ enum {
 
 typedef struct {
   int type;
-  char *str;
+  const char *str;
 } Mnemonics;
 
 static Mnemonics Instruction[256] = {
@@ -261,7 +263,7 @@ static Mnemonics Instruction[256] = {
     {OP_NOTHING, " RET   Z"},
     {OP_NOTHING, " RET"},
     {OP_NUM_16, " JP    Z,%04XH"},
-    {OP_PREFIX, NULL},
+    {OP_PREFIX, nullptr},
     {OP_NUM_16, " CALL  Z,%04XH"},
     {OP_NUM_16, " CALL  %04XH"},
     {OP_NUM_8, " ADC   A,%02XH"},
@@ -280,7 +282,7 @@ static Mnemonics Instruction[256] = {
     {OP_NUM_16, " JP    C,%04XH"},
     {OP_NUM_8, " IN    A,(%02XH)"},
     {OP_NUM_16, " CALL  C,%04XH"},
-    {OP_PREFIX, NULL},
+    {OP_PREFIX, nullptr},
     {OP_NUM_8, " SBC   A,%02XH"},
     {OP_NOTHING, " RST   18H"},
 
@@ -297,7 +299,7 @@ static Mnemonics Instruction[256] = {
     {OP_NUM_16, " JP    PE,%04XH"},
     {OP_NOTHING, " EX    DE,HL"},
     {OP_NUM_16, " CALL  PE,%04XH"},
-    {OP_PREFIX, NULL},
+    {OP_PREFIX, nullptr},
     {OP_NUM_8, " XOR   %02XH"},
     {OP_NOTHING, " RST   28H"},
 
@@ -314,7 +316,7 @@ static Mnemonics Instruction[256] = {
     {OP_NUM_16, " JP    M,%04XH"},
     {OP_NOTHING, " EI"},
     {OP_NUM_16, " CALL  M,%04XH"},
-    {OP_PREFIX, NULL},
+    {OP_PREFIX, nullptr},
     {OP_NUM_8, " CP    %02XH"},
     {OP_NOTHING, " RST   38H"},
 };
@@ -891,10 +893,7 @@ static Mnemonics Instruction_DD[256] = {
     {OP_SKIP, "+DB    %02XH"},
     {OP_SKIP, "+DB    %02XH"},
     {OP_SKIP, "+DB    %02XH"},
-    {
-        OP_PREFIX,
-        NULL,
-    },
+    {OP_PREFIX, nullptr},
     {OP_SKIP, "+DB    %02XH"},
     {OP_SKIP, "+DB    %02XH"},
     {OP_SKIP, "+DB    %02XH"},
@@ -1282,7 +1281,7 @@ static Mnemonics Instruction_FD[256] = {
     {OP_SKIP, "+DB    %02XH"},
     {OP_SKIP, "+DB    %02XH"},
     {OP_SKIP, "+DB    %02XH"},
-    {OP_PREFIX, NULL},
+    {OP_PREFIX, nullptr},
     {OP_SKIP, "+DB    %02XH"},
     {OP_SKIP, "+DB    %02XH"},
     {OP_SKIP, "+DB    %02XH"},
@@ -1626,8 +1625,8 @@ void    z80_debug( z80arch *z80, char *mes )
   fflush(stdout);
 }
 #else /* ver 0.6.0 以降の表示形式 */
-void z80_debug(z80arch *z80, char *mes) {
-  static const char flags[8] = "SZ.H.PNC";
+void z80_debug(z80arch *z80, const char *mes) {
+  static const char flags[9] = "SZ.H.PNC";
   char fbuf[10];
   char fbuf1[10];
   int i, j;

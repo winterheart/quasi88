@@ -4,10 +4,10 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include <cstring>
+#include <ctime>
 
+extern "C" {
 #include "quasi88.h"
 #include "debug.h"
 #include "initval.h"
@@ -28,12 +28,13 @@
 #include "snddrv.h"
 #include "suspend.h"
 #include "status.h"
+}
 
-static OSD_FILE *fp_so = NULL;  /* シリアル出力用fp      */
-static OSD_FILE *fp_si = NULL;  /*     入力用fp      */
-static OSD_FILE *fp_to = NULL;  /* テープ出力用  fp       */
-static OSD_FILE *fp_ti = NULL;  /*       入力用  fp      */
-static OSD_FILE *fp_prn = NULL; /* プリンタ出力用fp      */
+static OSD_FILE *fp_so = nullptr;  /* シリアル出力用fp      */
+static OSD_FILE *fp_si = nullptr;  /*     入力用fp      */
+static OSD_FILE *fp_to = nullptr;  /* テープ出力用  fp       */
+static OSD_FILE *fp_ti = nullptr;  /*       入力用  fp      */
+static OSD_FILE *fp_prn = nullptr; /* プリンタ出力用fp      */
 
 int boot_basic = DEFAULT_BASIC;      /* 起動時の BASICモード      */
 int boot_dipsw = DEFAULT_DIPSW;      /* 起動時のディップ設定       */
@@ -93,17 +94,17 @@ static int cmt_EOF = FALSE; /* 真で、テープ入力 EOF     */
 static int com_EOF = FALSE; /* 真で、シリアル入力 EOF  */
 static long com_size;       /* イメージのサイズ     */
 
-static byte sio_in_data(void);    /* IN[20] RS232C入力 (データ)  */
-static byte sio_in_status(void);  /* IN[21] RS232C入力 (制御) */
-static byte in_ctrl_signal(void); /* IN[40] コントロール信号入力    */
+static byte sio_in_data();    /* IN[20] RS232C入力 (データ)  */
+static byte sio_in_status();  /* IN[21] RS232C入力 (制御) */
+static byte in_ctrl_signal(); /* IN[40] コントロール信号入力    */
 
 static void sio_out_data(byte);    /* OUT[20] RS232C出力 (データ) */
 static void sio_out_command(byte); /* OUT[21] RS232C出力 (コマンド)*/
 static void out_ctrl_signal(byte); /* OUT[40] コントロール信号出力   */
 
-static void sio_tape_highspeed_load(void);
-static void sio_set_intr_base(void);
-static void sio_check_cmt_error(void);
+static void sio_tape_highspeed_load();
+static void sio_set_intr_base();
+static void sio_check_cmt_error();
 
 #define sio_tape_readable() (fp_ti && !cmt_EOF)   /* テープ読込可？   */
 #define sio_tape_writable() (fp_to)               /* テープ書込可？   */
@@ -249,7 +250,7 @@ static byte *write_mem_f000_ffff;
 /*      ext_rom_bank, misc_ctrl により変化 */
 /*------------------------------------------------------*/
 #if 1
-INLINE void main_memory_mapping_0000_7fff(void) {
+INLINE void main_memory_mapping_0000_7fff() {
   highspeed_n88rom = FALSE; /* デフォルト */
 
   switch (ext_ram_ctrl) {
@@ -378,7 +379,7 @@ INLINE void main_memory_mapping_0000_7fff(void) {
 /* address : 0x8000 〜 0x83ff の メモリ割り当て        */
 /*      grph_ctrl, window_offset により変化    */
 /*------------------------------------------------------*/
-INLINE void main_memory_mapping_8000_83ff(void) {
+INLINE void main_memory_mapping_8000_83ff() {
   if (grph_ctrl & (GRPH_CTRL_64RAM | GRPH_CTRL_N)) {
     read_mem_8000_83ff = &main_ram[0x8000];
     write_mem_8000_83ff = &main_ram[0x8000];
@@ -391,8 +392,8 @@ INLINE void main_memory_mapping_8000_83ff(void) {
         read_mem_8000_83ff = &main_high_ram[window_offset - 0xf000];
         write_mem_8000_83ff = &main_high_ram[window_offset - 0xf000];
       } else {
-        read_mem_8000_83ff = NULL;
-        write_mem_8000_83ff = NULL;
+        read_mem_8000_83ff = nullptr;
+        write_mem_8000_83ff = nullptr;
       }
     } else {
       read_mem_8000_83ff = &main_ram[window_offset];
@@ -406,7 +407,7 @@ INLINE void main_memory_mapping_8000_83ff(void) {
 /*      jisho_rom_ctrl, jisho_rom_bank,     */
 /*      misc_ctrl により変化           */
 /*------------------------------------------------------*/
-INLINE void main_memory_mapping_c000_ffff(void) {
+INLINE void main_memory_mapping_c000_ffff() {
   mem_wait_highram = FALSE;
 
   if (jisho_rom_ctrl) {
@@ -439,7 +440,7 @@ INLINE void main_memory_mapping_c000_ffff(void) {
 static int vram_access_way; /* vram アクセスの方法   */
 enum VramAccessWay { VRAM_ACCESS_BANK, VRAM_ACCESS_ALU, VRAM_NOT_ACCESS, EndofVramAcc };
 
-INLINE void main_memory_vram_mapping(void) {
+INLINE void main_memory_vram_mapping() {
   if (misc_ctrl & MISC_CTRL_EVRAM) { /* 拡張アクセスモード */
 
     /* ワードラゴンで使用 (port 35H の方はいらないかも…) by peach */
@@ -1664,7 +1665,7 @@ int sio_open_tapeload(const char *filename) {
 void sio_close_tapeload(void) {
   if (fp_ti) {
     osd_fclose(fp_ti);
-    fp_ti = NULL;
+    fp_ti = nullptr;
   }
   sio_set_intr_base();
 
@@ -1689,7 +1690,7 @@ int sio_open_tapesave(const char *filename) {
 void sio_close_tapesave(void) {
   if (fp_to) {
     osd_fclose(fp_to);
-    fp_to = NULL;
+    fp_to = nullptr;
   }
 }
 
@@ -1750,7 +1751,7 @@ int sio_open_serialout(const char *filename) {
 void sio_close_serialout(void) {
   if (fp_so) {
     osd_fclose(fp_so);
-    fp_so = NULL;
+    fp_so = nullptr;
   }
 }
 
@@ -1796,7 +1797,7 @@ int sio_tape_rewind(void) {
     }
 
     while (cmt_stateload_chars--) { /* ステートロード時は、テープ早送り */
-      if (sio_getc(TRUE, NULL) == EOF) {
+      if (sio_getc(TRUE, nullptr) == EOF) {
         break;
       }
     }
@@ -1879,7 +1880,7 @@ static int sio_getc(int is_cmt, int *tick) {
       return c;
     }
 
-    if (fp_si == NULL)
+    if (fp_si == nullptr)
       return EOF;
     if (com_EOF)
       return EOF;
@@ -1894,7 +1895,7 @@ static int sio_getc(int is_cmt, int *tick) {
 
   } else { /* テープ入力 */
 
-    if (fp_ti == NULL)
+    if (fp_ti == nullptr)
       return EOF;
     if (cmt_EOF)
       return EOF;
@@ -2018,7 +2019,7 @@ static int sio_getc(int is_cmt, int *tick) {
  * 1バイト読み飛ばす。データの途中かどうかは T88 でないとチェックできない。
  * こんなチェック、必要なのか？？
  */
-static void sio_check_cmt_error(void) {
+static void sio_check_cmt_error() {
   int c;
   if (sio_tape_readable()) {
     if (cmt_is_t88 && /* T88 かつ、データタグの途中の時のみ */
@@ -2062,7 +2063,7 @@ static int sio_putc(int is_cmt, int c) {
 /*
  * 高速テープロード …… 詳細不明。こんな機能あったのか…
  */
-static void sio_tape_highspeed_load(void) {
+static void sio_tape_highspeed_load() {
   int c, sum, addr, size;
 
   if (sio_tape_readable() == FALSE)
@@ -2071,24 +2072,24 @@ static void sio_tape_highspeed_load(void) {
   /* マシン語ヘッダを探す */
 
   do { /* 0x3a が出てくるまでリード */
-    if ((c = sio_getc(TRUE, 0)) == EOF) {
+    if ((c = sio_getc(TRUE, nullptr)) == EOF) {
       return;
     }
   } while (c != 0x3a);
   /* 転送先アドレス H */
-  if ((c = sio_getc(TRUE, 0)) == EOF) {
+  if ((c = sio_getc(TRUE, nullptr)) == EOF) {
     return;
   }
   sum = c;
   addr = c * 256;
   /* 転送先アドレス L */
-  if ((c = sio_getc(TRUE, 0)) == EOF) {
+  if ((c = sio_getc(TRUE, nullptr)) == EOF) {
     return;
   }
   sum += c;
   addr += c;
   /* ヘッダ部サム */
-  if ((c = sio_getc(TRUE, 0)) == EOF) {
+  if ((c = sio_getc(TRUE, nullptr)) == EOF) {
     return;
   }
   sum += c;
@@ -2101,13 +2102,13 @@ static void sio_tape_highspeed_load(void) {
   while (TRUE) {
 
     do { /* 0x3a が出てくるまでリード */
-      if ((c = sio_getc(TRUE, 0)) == EOF) {
+      if ((c = sio_getc(TRUE, nullptr)) == EOF) {
         return;
       }
     } while (c != 0x3a);
 
     /* データ数 */
-    if ((c = sio_getc(TRUE, 0)) == EOF) {
+    if ((c = sio_getc(TRUE, nullptr)) == EOF) {
       return;
     }
     sum = c;
@@ -2118,7 +2119,7 @@ static void sio_tape_highspeed_load(void) {
 
     for (; size; size--) { /* データ数分、転送 */
 
-      if ((c = sio_getc(TRUE, 0)) == EOF) {
+      if ((c = sio_getc(TRUE, nullptr)) == EOF) {
         return;
       }
       sum += c;
@@ -2126,7 +2127,7 @@ static void sio_tape_highspeed_load(void) {
       addr++;
     }
     /* データ部サム */
-    if ((c = sio_getc(TRUE, 0)) == EOF) {
+    if ((c = sio_getc(TRUE, nullptr)) == EOF) {
       return;
     }
     sum += c;
@@ -2143,7 +2144,7 @@ static void sio_tape_highspeed_load(void) {
 static int sio_bps;       /* BPS */
 static int sio_framesize; /* StartBit + Bit長 + StopBit を適当に計算 */
 
-static void sio_set_intr_base(void) {
+static void sio_set_intr_base() {
 
   /* イメージファイルセット済み かつ、
      受信 Enable かつ、
@@ -2198,7 +2199,7 @@ static int tick_2_intr_skip(int tick) {
 /*
  *
  */
-static void sio_init(void) {
+static void sio_init() {
   sio_instruction = 0;
   sio_command = 0;
   sio_mode = 0;
@@ -2260,7 +2261,7 @@ static void sio_out_data(byte data) {
 /*
  *
  */
-static byte sio_in_data(void) {
+static byte sio_in_data() {
   /*printf("->%02x ",sio_data);fflush(stdout);*/
   sio_data_exist = FALSE;
   RS232C_flag = FALSE;
@@ -2269,7 +2270,7 @@ static byte sio_in_data(void) {
 /*
  *
  */
-static byte sio_in_status(void) {
+static byte sio_in_status() {
   int c;
   byte status = 0x80 | 0x04; /* 送信バッファエンプティ */
                              /* DSR| TxE */
@@ -2311,7 +2312,7 @@ static byte sio_in_status(void) {
 /*
  *
  */
-static void sio_term(void) {}
+static void sio_term() {}
 
 /*
  * RS-232C 受信割り込み処理
@@ -2327,7 +2328,7 @@ int sio_intr(void) {
 
       if (com_X_flow)
         return FALSE;
-      c = sio_getc(FALSE, 0);
+      c = sio_getc(FALSE, nullptr);
 
     } else { /* テープ入力(割込使用時のみ)*/
       if (cmt_intr) {
@@ -2343,7 +2344,7 @@ int sio_intr(void) {
               }
             }
           } else {
-            c = sio_getc(TRUE, 0);
+            c = sio_getc(TRUE, nullptr);
           }
         } else {               /* T88の場合は、    */
           cmt_skip--;          /* 無効データ部分の */
@@ -2397,18 +2398,18 @@ int printer_open(const char *filename) {
 void printer_close(void) {
   if (fp_prn) {
     osd_fclose(fp_prn);
-    fp_prn = NULL;
+    fp_prn = nullptr;
   }
 }
 
-void printer_init(void) {}
-void printer_stlobe(void) {
+void printer_init() {}
+void printer_stlobe() {
   if (fp_prn) {
     osd_fputc(common_out_data, fp_prn);
     osd_fflush(fp_prn);
   }
 }
-void printer_term(void) {}
+void printer_term() {}
 
 /*===========================================================================*/
 /* カレンダクロック                              */
@@ -2418,14 +2419,14 @@ static Uchar shift_reg[7];
 static Uchar calendar_cdo;
 static int calendar_diff;
 
-static void get_calendar_work(void) {
+static void get_calendar_work() {
   struct tm t;
 
   if (calendar_stop == FALSE) {
     time_t now_time;
     struct tm *tp;
 
-    now_time = time(NULL);
+    now_time = time(nullptr);
     now_time += (time_t)calendar_diff;
     tp = localtime(&now_time);
     t = *tp;
@@ -2462,7 +2463,7 @@ static void set_calendar_work(int x) {
       printf("Set Clock %02d/%02x(%s) %02x:%02x:%02x\n", (shift_reg[4] >> 4) & 0x0f, shift_reg[3],
              week[shift_reg[4] & 0x07], shift_reg[2], shift_reg[1], shift_reg[0]);
 
-    now_time = time(NULL);
+    now_time = time(nullptr);
     now_time += (time_t)calendar_diff;
     tp = localtime(&now_time);
     t.tm_year = tp->tm_year;
@@ -2488,7 +2489,7 @@ static void set_calendar_work(int x) {
   t.tm_yday = 0;
   t.tm_isdst = 0;
 
-  now_time = time(NULL);
+  now_time = time(nullptr);
   chg_time = mktime(&t);
 
   if (now_time != -1 && chg_time != -1)
@@ -2497,7 +2498,7 @@ static void set_calendar_work(int x) {
 #undef BCD2INT
 }
 
-void calendar_init(void) {
+void calendar_init() {
   int i;
   for (i = 0; i < 7; i++)
     shift_reg[i] = 0;
@@ -2506,7 +2507,7 @@ void calendar_init(void) {
   calendar_diff = 0;
 }
 
-void calendar_shift_clock(void) {
+void calendar_shift_clock() {
   byte x = (common_out_data >> 3) & 0x01;
 
   calendar_cdo = shift_reg[0] & 0x01;
@@ -2519,7 +2520,7 @@ void calendar_shift_clock(void) {
   shift_reg[6] = (shift_reg[6] >> 1) | (x << 3);
 }
 
-void calendar_stlobe(void) {
+void calendar_stlobe() {
   switch (common_out_data & 0x7) {
   case 0:  /*calendar_init();*/
     break; /* 初期化 */
@@ -2629,7 +2630,7 @@ void out_ctrl_signal(byte data) {
   ctrl_signal = data;
 }
 
-byte in_ctrl_signal(void) { return ((ctrl_vrtc << 5) | (calendar_cdo << 4) | ctrl_boot | monitor_15k); }
+byte in_ctrl_signal() { return ((ctrl_vrtc << 5) | (calendar_cdo << 4) | ctrl_boot | monitor_15k); }
 
 /************************************************************************/
 /* メモリの初期化 (電源投入時のみ)                    */
@@ -2738,7 +2739,7 @@ void power_on_ram_init(void) {
 /* PC88 メインシステム 初期化                     */
 /************************************************************************/
 
-static void bootup_work_init(void) {
+static void bootup_work_init() {
   /* V1モードのバージョンの小数点以下を強制変更する */
 
   if (set_version)
@@ -2945,7 +2946,7 @@ void pc88main_term(void) {
 /************************************************************************/
 /* ブレークポイント関連                           */
 /************************************************************************/
-INLINE void check_break_point(int type, word addr, byte data, char *str) {
+INLINE void check_break_point(int type, word addr, byte data, const char *str) {
   int i;
 
   if (quasi88_is_monitor())
@@ -3176,12 +3177,12 @@ static T_SUSPEND_W suspend_pc88main_work[] = {
     {TYPE_CHAR, &calendar_cdo},
     {TYPE_INT, &calendar_diff},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 static T_SUSPEND_W suspend_pc88main_work2[] = {
     {TYPE_INT, &use_siomouse},
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 int statesave_pc88main(void) {

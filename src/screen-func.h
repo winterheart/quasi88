@@ -79,16 +79,16 @@ extern int (*vram2screen_list_D_N_32_d[4][4][2])(void);
 extern int (*vram2screen_list_D_S_32_d[4][4][2])(void);
 extern int (*vram2screen_list_D_I_32_d[4][4][2])(void);
 
-extern void screen_buf_init_32(void);
+extern void screen_buf_init_32();
 
-extern int menu2screen_F_N_32(void);
-extern int menu2screen_H_N_32(void);
-extern int menu2screen_H_P_32(void);
-extern int menu2screen_D_N_32(void);
+extern int menu2screen_F_N_32();
+extern int menu2screen_H_N_32();
+extern int menu2screen_H_P_32();
+extern int menu2screen_D_N_32();
 
 extern void status2screen_32(int kind, byte pixmap[], int w, int h);
-extern void status_buf_init_32(void);
-extern void status_buf_clear_32(void);
+extern void status_buf_init_32();
+extern void status_buf_clear_32();
 #endif
 
 /* ------------------------------------------------------------------------- */
@@ -96,6 +96,6 @@ extern int (*snapshot_list_normal[4][4][2])(void);
 extern int (*snapshot_list_skipln[4][4][2])(void);
 extern int (*snapshot_list_itlace[4][4][2])(void);
 
-extern void snapshot_clear(void);
+extern void snapshot_clear();
 
 #endif /* SCREEN_FUNC_H_INCLUDED */

@@ -14,62 +14,64 @@ extern int resume_file;  /* ファイル名指定あり  */
 #define STATE_VER "0.6.0"  /* ファイルバージョン */
 #define STATE_REV "1"      /* 変更バージョン */
 
+enum suspend_type {
+  TYPE_INT,
+  TYPE_LONG,
+  TYPE_SHORT,
+  TYPE_CHAR,
+  TYPE_BYTE,
+  TYPE_WORD,
+  TYPE_PAIR,
+  TYPE_DOUBLE,
+  TYPE_256,
+  TYPE_STR,
+  TYPE_END
+};
+
 typedef struct {
-  enum {
-    TYPE_INT,
-    TYPE_LONG,
-    TYPE_SHORT,
-    TYPE_CHAR,
-    TYPE_BYTE,
-    TYPE_WORD,
-    TYPE_PAIR,
-    TYPE_DOUBLE,
-    TYPE_256,
-    TYPE_STR,
-    TYPE_END
-  } type;
+  enum suspend_type type;
   void *work;
 } T_SUSPEND_W;
 
-int stateload_emu(void);
-int stateload_memory(void);
-int stateload_pc88main(void);
-int stateload_crtcdmac(void);
-int stateload_sound(void);
-int stateload_pio(void);
-int stateload_screen(void);
-int stateload_intr(void);
-int stateload_keyboard(void);
-int stateload_pc88sub(void);
-int stateload_fdc(void);
-int stateload_system(void);
+int stateload_emu();
+int stateload_memory();
+int stateload_pc88main();
+int stateload_crtcdmac();
+int stateload_sound();
+int stateload_pio();
+int stateload_screen();
+int stateload_intr();
+int stateload_keyboard();
+int stateload_pc88sub();
+int stateload_fdc();
+int stateload_system();
 
-int statesave_emu(void);
-int statesave_memory(void);
-int statesave_pc88main(void);
-int statesave_crtcdmac(void);
-int statesave_sound(void);
-int statesave_pio(void);
-int statesave_screen(void);
-int statesave_intr(void);
-int statesave_keyboard(void);
-int statesave_pc88sub(void);
-int statesave_fdc(void);
-int statesave_system(void);
+int statesave_emu();
+int statesave_memory();
+int statesave_pc88main();
+int statesave_crtcdmac();
+int statesave_sound();
+int statesave_pio();
+int statesave_screen();
+int statesave_intr();
+int statesave_keyboard();
+int statesave_pc88sub();
+int statesave_fdc();
+int statesave_system();
 
 void filename_init_state(int synchronize);
-const char *filename_get_state(void);
-int filename_get_state_serial(void);
+const char *filename_get_state();
+int filename_get_state_serial();
 void filename_set_state(const char *filename);
 void filename_set_state_serial(int serial);
 
-void stateload_init(void);
-int statesave(void);
-int stateload(void);
-int statesave_check_file_exist(void);
-int stateload_check_file_exist(void);
+void stateload_init();
+int statesave();
+int stateload();
+int statesave_check_file_exist();
+int stateload_check_file_exist();
 
-int statefile_revision(void);
+int statefile_revision();
 
 #define STATE_OK (0)        /* ロード/セーブ正常終了 */
 #define STATE_ERR (-1)      /* ロード/セーブ異常終了 */

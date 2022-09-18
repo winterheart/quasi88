@@ -52,17 +52,17 @@ extern int sound2_notice_EOS; /* EOSチェックの要不要  */
 
 extern int use_cmdsing; /* 真で、CMD SING有効  */
 
-void sound_board_init(void);
+void sound_board_init();
 
 void sound_out_reg(byte data);
 void sound_out_data(byte data);
-byte sound_in_status(void);
+byte sound_in_status();
 byte sound_in_data(int always_sound_II);
 void sound2_out_reg(byte data);
 void sound2_out_data(byte data);
-byte sound2_in_status(void);
-byte sound2_in_data(void);
+byte sound2_in_status();
+byte sound2_in_data();
 
-void sound_output_after_stateload(void);
+void sound_output_after_stateload();
 
 #endif /* SOUND_H_INCLUDED */

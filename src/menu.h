@@ -10,8 +10,8 @@ extern int filename_synchronize; /* ファイル名を同調させる   */
 
 /* メニューモード */
 
-void menu_init(void);
-void menu_main(void);
+void menu_init();
+void menu_main();
 
 /***********************************************************************
  * メニュー画面で表示する、システム固有のメッセージを取得する関数
@@ -45,6 +45,6 @@ void q8tk_event_key_off(int code);
 void q8tk_event_mouse_on(int code);
 void q8tk_event_mouse_off(int code);
 void q8tk_event_mouse_moved(int x, int y);
-void q8tk_event_quit(void);
+void q8tk_event_quit();
 
 #endif /* MENU_H_INCLUDED */

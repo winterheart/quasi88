@@ -4,12 +4,23 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
 #include <signal.h>
 
+#ifdef USE_GNU_READLINE
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
+
+#ifdef USE_LOCALE
+#include <clocale>
+#include <langinfo.h>
+#endif /* USE_LOCALE */
+
+extern "C" {
 #include "quasi88.h"
 #ifdef DEBUGLOG
 #include "debug.h"
@@ -45,16 +56,7 @@
 
 #include "basic.h"
 #include "utility.h"
-
-#ifdef USE_GNU_READLINE
-#include <readline/readline.h>
-#include <readline/history.h>
-#endif
-
-#ifdef USE_LOCALE
-#include <locale.h>
-#include <langinfo.h>
-#endif /* USE_LOCALE */
+}
 
 /************************************************************************/
 /* SIGINT発生時 (Ctrl-C) 、モニターモードへ遷移するように設定      */
@@ -82,7 +84,7 @@ static void sigterm_handler(int dummy) {
 
 /*-------- 割り込み設定 -------- */
 
-void set_signal(void) {
+void set_signal() {
   if (debug_mode) {
     signal(SIGINT, sigint_handler);
     signal(SIGTERM, sigterm_handler);
@@ -159,25 +161,25 @@ enum MonitorJob {
 /****************************************************************/
 /* ヘルプメッセージ表示関数                 */
 /****************************************************************/
-static void help_help(void) {
+static void help_help() {
   printf("  help [<cmd>]\n"
          "    print help\n"
          "    <cmd> ... command for help\n"
          "              [omit]... print short help for all commands.\n");
 }
-static void help_menu(void) {
+static void help_menu() {
   printf("  menu\n"
          "    enter menu-mode.\n");
 }
-static void help_quit(void) {
+static void help_quit() {
   printf("  quit\n"
          "    quit QUASI88kai.\n");
 }
-static void help_go(void) {
+static void help_go() {
   printf("  go\n"
          "    execute MAIN and|or SUB program\n");
 }
-static void help_trace(void) {
+static void help_trace() {
   printf("  trace [#<steps>|<steps>|change]\n"
          "    execute MAIN ane|or SUB program specityes times\n"
          "    [all omit]        ... trace some steps (previous steps)\n"
@@ -185,7 +187,7 @@ static void help_trace(void) {
          "    change            ... trace while change CPU job. ( main<->sub )\n"
          "                          this is work under condition -cpu 0 or -cpu 1\n");
 }
-static void help_step(void) {
+static void help_step() {
   printf("  step [call][jp][rep]\n"
          "    execute MAIN and|or SUB program 1 time\n"
          "    [all omit] ... execute 1 step\n"
@@ -196,11 +198,11 @@ static void help_step(void) {
          "         call/jp/rep are work under condition -cpu 0 or -cpu 1\n"
          "         call/jp/rep are use break-point #10.\n");
 }
-static void help_stepall(void) {
+static void help_stepall() {
   printf("  S\n"
          "    mean 'step all'   (see. step)\n");
 }
-static void help_break(void) {
+static void help_break() {
   printf("  break [<cpu>] [<action>] <addr|port> [#<No>]\n"
          "  break [<cpu>] CLEAR [#<No>]\n"
          "  break\n"
@@ -224,14 +226,14 @@ static void help_break(void) {
          "                    CAUTION).. #10 is used by system\n");
 }
 
-static void help_read(void) {
+static void help_read() {
   printf("  read [<bank>] <addr>\n"
          "    read memory.\n"
          "    <bank> ... memory bank ROM|RAM|N|EXT0|EXT1|EXT2|EXT3|B|R|G|HIGH|SUB\n"
          "               [omit]... current memory bank of MAIN.\n"
          "    <addr> ... specify address\n");
 }
-static void help_write(void) {
+static void help_write() {
   printf("  write [<bank>] <addr> <data>\n"
          "    write memory.\n"
          "    <bank> ... memory bank ROM|RAM|N|EXT0|EXT1|EXT2|EXT3|B|R|G|HIGH|SUB\n"
@@ -239,7 +241,7 @@ static void help_write(void) {
          "    <addr> ... specify address\n"
          "    <data> ... write data\n");
 }
-static void help_dump(void) {
+static void help_dump() {
   printf("  dump [<bank>] <start-addr> [<end-addr>]\n"
          "  dump [<bank>] <start-addr> [#<size>]\n"
          "    dump memory.\n"
@@ -251,7 +253,7 @@ static void help_dump(void) {
          "    #<size>      ... dump size\n"
          "                     [omit]... 256 byte\n");
 }
-static void help_dumpext(void) {
+static void help_dumpext() {
   printf("  dumpext [<bank>] [#<board>] <start-addr> [<end-addr>]\n"
          "  dumpext [<bank>] [#<board>] <start-addr> [#<size>]\n"
          "    dump external ram memory.\n"
@@ -265,7 +267,7 @@ static void help_dumpext(void) {
          "    #<size>      ... dump size\n"
          "                     [omit]... 256 byte\n");
 }
-static void help_fill(void) {
+static void help_fill() {
   printf("  fill [<bank>] <start-addr> <end-addr> <value>\n"
          "  fill [<bank>] <start-addr> #<size>    <value>\n"
          "    fill memory by specify value. \n"
@@ -276,7 +278,7 @@ static void help_fill(void) {
          "    #<size>      ... fill size\n"
          "    <value>      ... fill value\n");
 }
-static void help_move(void) {
+static void help_move() {
   printf("  move [<src-bank>] <src-addr> <end-addr> [<dist-bank>] <dist-addr>\n"
          "  move [<src-bank>] <src-addr> #<size>    [<dist-bank>] <dist-addr>\n"
          "    move memory. \n"
@@ -289,7 +291,7 @@ static void help_move(void) {
          "                    [omit]... same as <src-bank>\n"
          "    <dist-addr> ... move distination address\n");
 }
-static void help_search(void) {
+static void help_search() {
   printf("  search [<value> [[<bank>] <start-addr> <end-addr>]]\n"
          "    search memory. \n"
          "    <value>      ... search value\n"
@@ -299,14 +301,14 @@ static void help_search(void) {
          "    <end-addr>   ... search end address\n"
          "    [omit-all]   ... search previous value\n");
 }
-static void help_in(void) {
+static void help_in() {
   printf("  in [<cpu>] <port>\n"
          "    input I/O port.\n"
          "    <cpu>  ... CPU select MAIN|SUB\n"
          "               [omit]... select MAIN\n"
          "    <port> ... in port address\n");
 }
-static void help_out(void) {
+static void help_out() {
   printf("  out [<cpu>] <port> <data>\n"
          "    output I/O port.\n"
          "    <cpu>  ... CPU select MAIN|SUB\n"
@@ -314,7 +316,7 @@ static void help_out(void) {
          "    <port> ... out port address\n"
          "    <data> ... output data\n");
 }
-static void help_loadmem(void) {
+static void help_loadmem() {
   printf("  loadmem <filename> <bank> <start-addr> [<end-addr>]\n"
          "  loadmem <filename> <bank> <start-addr> [#<size>]\n"
          "    load memory from binary file.\n"
@@ -325,7 +327,7 @@ static void help_loadmem(void) {
          "    #<size>      ... load size\n"
          "                     [omit] set filesize as binary size\n");
 }
-static void help_savemem(void) {
+static void help_savemem() {
   printf("  savemem <filename> <bank> <start-addr> <end-addr>\n"
          "  savemem <filename> <bank> <start-addr> #<size>\n"
          "    save memory image to file.\n"
@@ -335,7 +337,7 @@ static void help_savemem(void) {
          "    <end-addr>   ... save end addr\n"
          "    #<size>      ... save size\n");
 }
-static void help_reset(void) {
+static void help_reset() {
   printf("  reset [<basic-mode>] [<clock-mode>] [<sound-board>] [<dipsw>]\n"
          "    reset PC8800 (not execute)\n"
          "    <basic-mode>  ... BASIC mode N|V1S|V1H|V2\n"
@@ -347,7 +349,7 @@ static void help_reset(void) {
          "    <dipsw>       ... dip-switch setting \n"
          "                      [omit] select current dip-switch setting\n");
 }
-static void help_reg(void) {
+static void help_reg() {
   printf("  reg [[<cpu>] [<name> <value>]]\n"
          "    show & set register.\n"
          "    [all omit] ... show all register (MAIN and|or SUB).\n"
@@ -358,7 +360,7 @@ static void help_reg(void) {
          "    <value>    ... set value\n"
          "                   [omit]... show value of register\n");
 }
-static void help_disasm(void) {
+static void help_disasm() {
   printf("  disasm [[<cpu>] [<start-addr>][#<steps>]]\n"
          "    disassemble.\n"
          "    [all omit]   ... disasmble 16 steps from MAIN CPU PC address.\n"
@@ -369,7 +371,7 @@ static void help_disasm(void) {
          "    #<steps>     ... disassemble steps\n"
          "                     [omit]... 16 steps\n");
 }
-static void help_set(void) {
+static void help_set() {
   printf("  set [[<variabe-name> [<value>]]]\n"
          "    show & set variables.\n"
          "    [all omit]     ... show all variable.\n"
@@ -377,29 +379,29 @@ static void help_set(void) {
          "    <value>        ... set value\n"
          "                       [omit]... show value of variable\n");
 }
-static void help_show(void) {
+static void help_show() {
   printf("  show [<variabe-name>]\n"
          "    show variables.\n"
          "    [all omit]     ... show all variable.\n"
          "    <variabe-name> ... specify variable name.\n");
 }
-static void help_redraw(void) {
+static void help_redraw() {
   printf("  redraw\n"
          "    redraw QUASI88kai screen.\n");
 }
-static void help_resize(void) {
+static void help_resize() {
   printf("  resize [<screen-size>]\n"
          "    resize screen.\n"
 #ifdef SUPPORT_DOUBLE
          "    <screen_size> ... screen size FULL|HALF|DOUBLE|FULLSCREEN|WINDOW\n"
          "                      [omit]... change screen size HALF,FULL,DOUBLE...\n"
 #else
-           "    <screen_size> ... screen size FULL|HALF|FULLSCREEN|WINDOW\n"
-           "                      [omit]... change screen size HALF<->FULL\n"
+         "    <screen_size> ... screen size FULL|HALF|FULLSCREEN|WINDOW\n"
+         "                      [omit]... change screen size HALF<->FULL\n"
 #endif
   );
 }
-static void help_drive(void) {
+static void help_drive() {
   printf("  drive\n"
          "  drive show\n"
          "  drive empty [<drive_no>]\n"
@@ -417,7 +419,7 @@ static void help_drive(void) {
          "                       <image_no> omit, set image number 1.\n",
          MAX_NR_IMAGE);
 }
-static void help_file(void) {
+static void help_file() {
   printf("  file show <filename>\n"
          "  file create <filename>\n"
          "  file protect <filename> <image_no>\n"
@@ -439,28 +441,28 @@ static void help_file(void) {
          MAX_NR_IMAGE);
 }
 
-static void help_statesave(void) {
+static void help_statesave() {
   printf("  statesave [<filename>]\n"
          "    statesave QUASI88kai\n"
          "    <filename> ... specify state-file filename.\n"
          "                   omit, default filename\n");
 }
 
-static void help_stateload(void) {
+static void help_stateload() {
   printf("  stateload [<filename>]\n"
          "    stateload QUASI88kai\n"
          "    <filename> ... specify state-file filename.\n"
          "                   omit, default filename\n");
 }
 
-static void help_snapshot(void) {
+static void help_snapshot() {
   printf("  snapshot [<format>]\n"
          "    save screen snapshot\n"
          "    <format> ... select format \"BMP\", \"PPM\", \"RAW\".\n"
          "                 omit, current format\n");
 }
 
-static void help_loadfont(void) {
+static void help_loadfont() {
   printf("  loadfont <filename> <format> <type>\n"
          "    load text-font file\n"
          "    <filename> ... specify text-font-file filename.\n"
@@ -475,7 +477,7 @@ static void help_loadfont(void) {
          "                   3 ... 3rd font (usually transparent-font)\n");
 }
 
-static void help_savefont(void) {
+static void help_savefont() {
   printf("  savefont <filename> <format> <type>\n"
          "    save text-font file\n"
          "    <filename> ... specify text-font-file filename.\n"
@@ -490,7 +492,7 @@ static void help_savefont(void) {
          "                   3 ... 3rd font (usually transparent-font)\n");
 }
 
-static void help_fbreak(void) {
+static void help_fbreak() {
   printf("  fbreak [<action>] <drive> <track> [<sector>] [#<No>]\n"
          "  fbreak CLEAR [#<No>]\n"
          "  fbreak\n"
@@ -512,14 +514,14 @@ static void help_fbreak(void) {
          "                   [omit]... select #1\n");
 }
 
-static void help_textscr(void) {
+static void help_textscr() {
   printf("  textscr [<char>]\n"
          "    print text screen in the console screen\n"
          "    <char> ... alternative character to unprintable one.\n"
          "               [omit] ... use 'X'\n");
 }
 
-static void help_loadbas(void) {
+static void help_loadbas() {
   printf("  loadbas <filename> [<type>]\n"
          "    load basic list\n"
          "    <filename> ... filename of basic list.\n"
@@ -529,7 +531,7 @@ static void help_loadbas(void) {
          "                   [omit] ... select ASCII\n");
 }
 
-static void help_savebas(void) {
+static void help_savebas() {
   printf("  savebas [<filename> [<type>]]\n"
          "    print or save basic list\n"
          "    <filename> ... filename of basic list.\n"
@@ -539,51 +541,51 @@ static void help_savebas(void) {
          "                   [omit] ... select ASCII\n");
 }
 
-static void help_tapeload(void) {
+static void help_tapeload() {
   printf("  tapeload <filename>\n"
          "    set tape-image-file as load\n"
          "    <filename> ... specify tape-image-file filename.\n"
          "                   filename \"-\" mean \'unset image\'\n");
 }
 
-static void help_tapesave(void) {
+static void help_tapesave() {
   printf("  tapesave <filename>\n"
          "    set tape-image-file as save\n"
          "    <filename> ... specify tape-image-file filename.\n"
          "                   filename \"-\" mean \'unset image\'\n");
 }
 
-static void help_printer(void) {
+static void help_printer() {
   printf("  printer <filename>\n"
          "    set printout-image-file\n"
          "    <filename> ... specify printout-image-file filename.\n"
          "                   filename \"-\" mean \'unset image\'\n");
 }
 
-static void help_serialin(void) {
+static void help_serialin() {
   printf("  serialin <filename>\n"
          "    set serial-in-image-file\n"
          "    <filename> ... specify serial-in-image-file filename.\n"
          "                   filename \"-\" mean \'unset image\'\n");
 }
 
-static void help_serialout(void) {
+static void help_serialout() {
   printf("  serialout <filename>\n"
          "    set serial-out-image-file\n"
          "    <filename> ... specify serial-out-image-file filename.\n"
          "                   filename \"-\" mean \'unset image\'\n");
 }
 
-static void help_misc(void) { printf("  misc ... this is for debug. don't mind!\n"); }
+static void help_misc() { printf("  misc ... this is for debug. don't mind!\n"); }
 
 /****************************************************************/
 /* 命令の種類判定テーブル                    */
 /****************************************************************/
 static struct {
   int job;
-  char *cmd;
-  void (*help)(void);
-  char *help_mes;
+  const char *cmd;
+  void (*help)();
+  const char *help_mes;
 } monitor_cmd[] = {
     {
         MONITOR_HELP,
@@ -1007,415 +1009,103 @@ enum ArgvName {
 };
 
 static struct {
-  char *str;
+  const char *str;
   int type;
   int val;
 } monitor_argv[] = {
-    {
-        "MAIN",
-        ARGV_CPU,
-        ARG_MAIN,
-    }, /* <cpu> */
-    {
-        "SUB",
-        ARGV_CPU,
-        ARG_SUB,
-    },
+    {"MAIN", ARGV_CPU, ARG_MAIN}, /* <cpu> */
+    {"SUB", ARGV_CPU, ARG_SUB},
 
-    {
-        "MAIN",
-        ARGV_BANK,
-        ARG_MAIN,
-    }, /* <bank> */
-    {
-        "ROM",
-        ARGV_BANK,
-        ARG_ROM,
-    },
-    {
-        "RAM",
-        ARGV_BANK,
-        ARG_RAM,
-    },
-    {
-        "N",
-        ARGV_BANK,
-        ARG_N,
-    },
-    {
-        "HIGH",
-        ARGV_BANK,
-        ARG_HIGH,
-    },
-    {
-        "EXT0",
-        ARGV_BANK,
-        ARG_EXT0,
-    },
-    {
-        "EXT1",
-        ARGV_BANK,
-        ARG_EXT1,
-    },
-    {
-        "EXT2",
-        ARGV_BANK,
-        ARG_EXT2,
-    },
-    {
-        "EXT3",
-        ARGV_BANK,
-        ARG_EXT3,
-    },
-    {
-        "B",
-        ARGV_BANK,
-        ARG_B,
-    },
-    {
-        "R",
-        ARGV_BANK,
-        ARG_R,
-    },
-    {
-        "G",
-        ARGV_BANK,
-        ARG_G,
-    },
-    {
-        "SUB",
-        ARGV_BANK,
-        ARG_SUB,
-    },
-    {
-        "PCG",
-        ARGV_BANK,
-        ARG_PCG,
-    },
+    {"MAIN", ARGV_BANK, ARG_MAIN}, /* <bank> */
+    {"ROM", ARGV_BANK, ARG_ROM},
+    {"RAM", ARGV_BANK, ARG_RAM},
+    {"N", ARGV_BANK, ARG_N},
+    {"HIGH", ARGV_BANK, ARG_HIGH},
+    {"EXT0", ARGV_BANK, ARG_EXT0},
+    {"EXT1", ARGV_BANK, ARG_EXT1},
+    {"EXT2", ARGV_BANK, ARG_EXT2},
+    {"EXT3", ARGV_BANK, ARG_EXT3},
+    {"B", ARGV_BANK, ARG_B},
+    {"R", ARGV_BANK, ARG_R},
+    {"G", ARGV_BANK, ARG_G},
+    {"SUB", ARGV_BANK, ARG_SUB},
+    {"PCG", ARGV_BANK, ARG_PCG},
 
-    {
-        "AF",
-        ARGV_REG,
-        ARG_AF,
-    }, /* <reg> */
-    {
-        "BC",
-        ARGV_REG,
-        ARG_BC,
-    },
-    {
-        "DE",
-        ARGV_REG,
-        ARG_DE,
-    },
-    {
-        "HL",
-        ARGV_REG,
-        ARG_HL,
-    },
-    {
-        "IX",
-        ARGV_REG,
-        ARG_IX,
-    },
-    {
-        "IY",
-        ARGV_REG,
-        ARG_IY,
-    },
-    {
-        "SP",
-        ARGV_REG,
-        ARG_SP,
-    },
-    {
-        "PC",
-        ARGV_REG,
-        ARG_PC,
-    },
-    {
-        "AF'",
-        ARGV_REG,
-        ARG_AF1,
-    },
-    {
-        "BC'",
-        ARGV_REG,
-        ARG_BC1,
-    },
-    {
-        "DE'",
-        ARGV_REG,
-        ARG_DE1,
-    },
-    {
-        "HL'",
-        ARGV_REG,
-        ARG_HL1,
-    },
-    {
-        "I",
-        ARGV_REG,
-        ARG_I,
-    },
-    {
-        "R",
-        ARGV_REG,
-        ARG_R,
-    },
-    {
-        "IFF",
-        ARGV_REG,
-        ARG_IFF,
-    },
-    {
-        "IM",
-        ARGV_REG,
-        ARG_IM,
-    },
-    {
-        "HALT",
-        ARGV_REG,
-        ARG_HALT,
-    },
+    {"AF", ARGV_REG, ARG_AF}, /* <reg> */
+    {"BC", ARGV_REG, ARG_BC},
+    {"DE", ARGV_REG, ARG_DE},
+    {"HL", ARGV_REG, ARG_HL},
+    {"IX", ARGV_REG, ARG_IX},
+    {"IY", ARGV_REG, ARG_IY},
+    {"SP", ARGV_REG, ARG_SP},
+    {"PC", ARGV_REG, ARG_PC},
+    {"AF'", ARGV_REG, ARG_AF1},
+    {"BC'", ARGV_REG, ARG_BC1},
+    {"DE'", ARGV_REG, ARG_DE1},
+    {"HL'", ARGV_REG, ARG_HL1},
+    {"I", ARGV_REG, ARG_I},
+    {"R", ARGV_REG, ARG_R},
+    {"IFF", ARGV_REG, ARG_IFF},
+    {"IM", ARGV_REG, ARG_IM},
+    {"HALT", ARGV_REG, ARG_HALT},
 
-    {
-        "PC",
-        ARGV_BREAK,
-        ARG_PC,
-    }, /*<action>*/
-    {
-        "READ",
-        ARGV_BREAK,
-        ARG_READ,
-    },
-    {
-        "WRITE",
-        ARGV_BREAK,
-        ARG_WRITE,
-    },
-    {
-        "IN",
-        ARGV_BREAK,
-        ARG_IN,
-    },
-    {
-        "OUT",
-        ARGV_BREAK,
-        ARG_OUT,
-    },
-    {
-        "CLEAR",
-        ARGV_BREAK,
-        ARG_CLEAR,
-    },
+    {"PC", ARGV_BREAK, ARG_PC}, /*<action>*/
+    {"READ", ARGV_BREAK, ARG_READ},
+    {"WRITE", ARGV_BREAK, ARG_WRITE},
+    {"IN", ARGV_BREAK, ARG_IN},
+    {"OUT", ARGV_BREAK, ARG_OUT},
+    {"CLEAR", ARGV_BREAK, ARG_CLEAR},
 
-    {
-        "READ",
-        ARGV_FBREAK,
-        ARG_READ,
-    }, /*<action>*/
-    {
-        "WRITE",
-        ARGV_FBREAK,
-        ARG_WRITE,
-    },
-    {
-        "DIAG",
-        ARGV_FBREAK,
-        ARG_DIAG,
-    },
-    {
-        "CLEAR",
-        ARGV_FBREAK,
-        ARG_CLEAR,
-    },
+    {"READ", ARGV_FBREAK, ARG_READ}, /*<action>*/
+    {"WRITE", ARGV_FBREAK, ARG_WRITE},
+    {"DIAG", ARGV_FBREAK, ARG_DIAG},
+    {"CLEAR", ARGV_FBREAK, ARG_CLEAR},
 
-    {
-        "V2",
-        ARGV_BASMODE,
-        ARG_V2,
-    }, /* <basic-mode> */
-    {
-        "V1H",
-        ARGV_BASMODE,
-        ARG_V1H,
-    },
-    {
-        "V1S",
-        ARGV_BASMODE,
-        ARG_V1S,
-    },
-    {
-        "N",
-        ARGV_BASMODE,
-        ARG_N,
-    },
-    {
-        "8MHZ",
-        ARGV_CKMODE,
-        ARG_8MHZ,
-    }, /* <clock-mode> */
-    {
-        "4MHZ",
-        ARGV_CKMODE,
-        ARG_4MHZ,
-    },
-    {
-        "SD",
-        ARGV_SDMODE,
-        ARG_SD,
-    }, /* <sound-board> */
-    {
-        "SD2",
-        ARGV_SDMODE,
-        ARG_SD2,
-    },
+    {"V2", ARGV_BASMODE, ARG_V2}, /* <basic-mode> */
+    {"V1H", ARGV_BASMODE, ARG_V1H},
+    {"V1S", ARGV_BASMODE, ARG_V1S},
+    {"N", ARGV_BASMODE, ARG_N},
+    {"8MHZ", ARGV_CKMODE, ARG_8MHZ}, /* <clock-mode> */
+    {"4MHZ", ARGV_CKMODE, ARG_4MHZ},
+    {"SD", ARGV_SDMODE, ARG_SD}, /* <sound-board> */
+    {"SD2", ARGV_SDMODE, ARG_SD2},
 
-    {
-        "CHANGE",
-        ARGV_CHANGE,
-        ARG_CHANGE,
-    }, /* trace */
+    {"CHANGE", ARGV_CHANGE, ARG_CHANGE}, /* trace */
 
-    {
-        "CALL",
-        ARGV_STEP,
-        ARG_CALL,
-    }, /* step  */
-    {
-        "JP",
-        ARGV_STEP,
-        ARG_JP,
-    },
-    {
-        "REP",
-        ARGV_STEP,
-        ARG_REP,
-    },
-    {
-        "ALL",
-        ARGV_STEP,
-        ARG_ALL,
-    },
+    {"CALL", ARGV_STEP, ARG_CALL}, /* step  */
+    {"JP", ARGV_STEP, ARG_JP},
+    {"REP", ARGV_STEP, ARG_REP},
+    {"ALL", ARGV_STEP, ARG_ALL},
 
-    {
-        "ALL",
-        ARGV_ALL,
-        ARG_ALL,
-    }, /* reg   */
+    {"ALL", ARGV_ALL, ARG_ALL}, /* reg   */
 
-    {
-        "FULL",
-        ARGV_RESIZE,
-        ARG_FULL,
-    }, /* resize*/
-    {
-        "HALF",
-        ARGV_RESIZE,
-        ARG_HALF,
-    },
+    {"FULL", ARGV_RESIZE, ARG_FULL}, /* resize*/
+    {"HALF", ARGV_RESIZE, ARG_HALF},
 #ifdef SUPPORT_DOUBLE
-    {
-        "DOUBLE",
-        ARGV_RESIZE,
-        ARG_DOUBLE,
-    },
+    {"DOUBLE", ARGV_RESIZE, ARG_DOUBLE},
 #endif
-    {
-        "FULLSCREEN",
-        ARGV_RESIZE,
-        ARG_FULLSCREEN,
-    },
-    {
-        "WINDOW",
-        ARGV_RESIZE,
-        ARG_WINDOW,
-    },
+    {"FULLSCREEN", ARGV_RESIZE, ARG_FULLSCREEN},
+    {"WINDOW", ARGV_RESIZE, ARG_WINDOW},
 
-    {
-        "SHOW",
-        ARGV_DRIVE,
-        ARG_SHOW,
-    }, /* drive */
-    {
-        "EJECT",
-        ARGV_DRIVE,
-        ARG_EJECT,
-    },
-    {
-        "EMPTY",
-        ARGV_DRIVE,
-        ARG_EMPTY,
-    },
-    {
-        "SET",
-        ARGV_DRIVE,
-        ARG_SET,
-    },
+    {"SHOW", ARGV_DRIVE, ARG_SHOW}, /* drive */
+    {"EJECT", ARGV_DRIVE, ARG_EJECT},
+    {"EMPTY", ARGV_DRIVE, ARG_EMPTY},
+    {"SET", ARGV_DRIVE, ARG_SET},
 
-    {
-        "SHOW",
-        ARGV_FILE,
-        ARG_SHOW,
-    }, /* file  */
-    {
-        "CREATE",
-        ARGV_FILE,
-        ARG_CREATE,
-    },
-    {
-        "RENAME",
-        ARGV_FILE,
-        ARG_RENAME,
-    },
-    {
-        "PROTECT",
-        ARGV_FILE,
-        ARG_PROTECT,
-    },
-    {
-        "UNPROTECT",
-        ARGV_FILE,
-        ARG_UNPROTECT,
-    },
-    {
-        "FORMAT",
-        ARGV_FILE,
-        ARG_FORMAT,
-    },
-    {
-        "UNFORMAT",
-        ARGV_FILE,
-        ARG_UNFORMAT,
-    },
+    {"SHOW", ARGV_FILE, ARG_SHOW}, /* file  */
+    {"CREATE", ARGV_FILE, ARG_CREATE},
+    {"RENAME", ARGV_FILE, ARG_RENAME},
+    {"PROTECT", ARGV_FILE, ARG_PROTECT},
+    {"UNPROTECT", ARGV_FILE, ARG_UNPROTECT},
+    {"FORMAT", ARGV_FILE, ARG_FORMAT},
+    {"UNFORMAT", ARGV_FILE, ARG_UNFORMAT},
 
-    {
-        "BINARY",
-        ARGV_BASIC,
-        ARG_BINARY,
-    }, /*savebas*/
-    {
-        "ASCII",
-        ARGV_BASIC,
-        ARG_ASCII,
-    },
+    {"BINARY", ARGV_BASIC, ARG_BINARY}, /*savebas*/
+    {"ASCII", ARGV_BASIC, ARG_ASCII},
 
-    {
-        "BMP",
-        ARGV_SNAPSHOT,
-        ARG_BMP,
-    }, /*snapshot*/
-    {
-        "PPM",
-        ARGV_SNAPSHOT,
-        ARG_PPM,
-    },
-    {
-        "RAW",
-        ARGV_SNAPSHOT,
-        ARG_RAW,
-    },
+    {"BMP", ARGV_SNAPSHOT, ARG_BMP}, /*snapshot*/
+    {"PPM", ARGV_SNAPSHOT, ARG_PPM},
+    {"RAW", ARGV_SNAPSHOT, ARG_RAW},
 };
 
 enum SetType {
@@ -1451,897 +1141,182 @@ enum SetType {
   EndofTYPE
 };
 static struct {
-  char *var_name;
-  char *port_mes;
+  const char *var_name;
+  const char *port_mes;
   int var_type;
   void *var_ptr;
 } monitor_variable[] = {
-    {
-        "boot_dipsw",
-        "(boot:3031)",
-        MTYPE_INT_C,
-        &boot_dipsw,
-    },
-    {
-        "boot_from_rom",
-        "(boot:40>>3)",
-        MTYPE_INT_C,
-        &boot_from_rom,
-    },
-    {
-        "boot_clock_4mhz",
-        "(boot:6E>>7)",
-        MTYPE_INT_C,
-        &boot_clock_4mhz,
-    },
-    {
-        "boot_basic",
-        "(boot:3031)",
-        MTYPE_INT_C,
-        &boot_basic,
-    },
-    {
-        "sound_board",
-        "(-sd/-sd2)",
-        MTYPE_INT_C,
-        &sound_board,
-    },
-    {
-        "use_extram",
-        "(-extram)",
-        MTYPE_INT_C,
-        &use_extram,
-    },
-    {
-        "use_jisho_rom",
-        "(-jisho)",
-        MTYPE_INT_C,
-        &use_jisho_rom,
-    },
-    {
-        "",
-        "",
-        MTYPE_NEWLINE,
-        NULL,
-    },
+    {"boot_dipsw", "(boot:3031)", MTYPE_INT_C, &boot_dipsw},
+    {"boot_from_rom", "(boot:40>>3)", MTYPE_INT_C, &boot_from_rom},
+    {"boot_clock_4mhz", "(boot:6E>>7)", MTYPE_INT_C, &boot_clock_4mhz},
+    {"boot_basic", "(boot:3031)", MTYPE_INT_C, &boot_basic},
+    {"sound_board", "(-sd/-sd2)", MTYPE_INT_C, &sound_board},
+    {"use_extram", "(-extram)", MTYPE_INT_C, &use_extram},
+    {"use_jisho_rom", "(-jisho)", MTYPE_INT_C, &use_jisho_rom},
+    {"", "", MTYPE_NEWLINE, nullptr},
 
-    {
-        "sys_ctrl",
-        "(OUT:30)",
-        MTYPE_BYTE_C,
-        &sys_ctrl,
-    },
-    {
-        "grph_ctrl",
-        "(OUT:31)",
-        MTYPE_BYTE_C,
-        &grph_ctrl,
-    },
-    {
-        "misc_ctrl",
-        "(I/O:32)",
-        MTYPE_BYTE_C,
-        &misc_ctrl,
-    },
-    {
-        "ALU1_ctrl",
-        "(OUT:34)",
-        MTYPE_BYTE,
-        &ALU1_ctrl,
-    },
-    {
-        "ALU2_ctrl",
-        "(OUT:35)",
-        MTYPE_BYTE_C,
-        &ALU2_ctrl,
-    },
-    {
-        "ctrl_signal",
-        "(OUT:40)",
-        MTYPE_BYTE_C,
-        &ctrl_signal,
-    },
-    {
-        "grph_pile",
-        "(OUT:53)",
-        MTYPE_BYTE_C,
-        &grph_pile,
-    },
-    {
-        "intr_level",
-        "(OUT:E4&07)",
-        MTYPE_INT_C,
-        &intr_level,
-    },
-    {
-        "intr_priority",
-        "(OUT:E4&08)",
-        MTYPE_INT_C,
-        &intr_priority,
-    },
-    {
-        "intr_sio_enable",
-        "(OUT:E6&04)",
-        MTYPE_INT_C,
-        &intr_sio_enable,
-    },
-    {
-        "intr_vsync_enable",
-        "(OUT:E6&02)",
-        MTYPE_INT_C,
-        &intr_vsync_enable,
-    },
-    {
-        "intr_rtc_enable",
-        "(OUT:E6&01)",
-        MTYPE_INT_C,
-        &intr_rtc_enable,
-    },
-    {
-        "intr_sound_enable",
-        "(IO:~32AA&80)",
-        MTYPE_INT_C,
-        &intr_sound_enable,
-    },
-    {
-        "sound_ENABLE_A",
-        "(sd[27])",
-        MTYPE_INT,
-        &sound_ENABLE_A,
-    },
-    {
-        "sound_ENABLE_B",
-        "(sd[27])",
-        MTYPE_INT,
-        &sound_ENABLE_B,
-    },
-    {
-        "sound_LOAD_A",
-        "(sd[27])",
-        MTYPE_INT,
-        &sound_LOAD_A,
-    },
+    {"sys_ctrl", "(OUT:30)", MTYPE_BYTE_C, &sys_ctrl},
+    {"grph_ctrl", "(OUT:31)", MTYPE_BYTE_C, &grph_ctrl},
+    {"misc_ctrl", "(I/O:32)", MTYPE_BYTE_C, &misc_ctrl},
+    {"ALU1_ctrl", "(OUT:34)", MTYPE_BYTE, &ALU1_ctrl},
+    {"ALU2_ctrl", "(OUT:35)", MTYPE_BYTE_C, &ALU2_ctrl},
+    {"ctrl_signal", "(OUT:40)", MTYPE_BYTE_C, &ctrl_signal},
+    {"grph_pile", "(OUT:53)", MTYPE_BYTE_C, &grph_pile},
+    {"intr_level", "(OUT:E4&07)", MTYPE_INT_C, &intr_level},
+    {"intr_priority", "(OUT:E4&08)", MTYPE_INT_C, &intr_priority},
+    {"intr_sio_enable", "(OUT:E6&04)", MTYPE_INT_C, &intr_sio_enable},
+    {"intr_vsync_enable", "(OUT:E6&02)", MTYPE_INT_C, &intr_vsync_enable},
+    {"intr_rtc_enable", "(OUT:E6&01)", MTYPE_INT_C, &intr_rtc_enable},
+    {"intr_sound_enable", "(IO:~32AA&80)", MTYPE_INT_C, &intr_sound_enable},
+    {"sound_ENABLE_A", "(sd[27])", MTYPE_INT, &sound_ENABLE_A},
+    {"sound_ENABLE_B", "(sd[27])", MTYPE_INT, &sound_ENABLE_B},
+    {"sound_LOAD_A", "(sd[27])", MTYPE_INT, &sound_LOAD_A},
     {
         "sound_LOAD_B",
         "(sd[27])",
         MTYPE_INT,
         &sound_LOAD_B,
     },
-    {
-        "sound_FLAG_A",
-        "(IN:44)",
-        MTYPE_INT,
-        &sound_FLAG_A,
-    },
-    {
-        "sound_FLAG_B",
-        "(IN:44)",
-        MTYPE_INT,
-        &sound_FLAG_B,
-    },
-    {
-        "sound_TIMER_A",
-        "(sd[24]-[25])",
-        MTYPE_INT,
-        &sound_TIMER_A,
-    },
-    {
-        "sound_TIMER_B",
-        "(sd[26])",
-        MTYPE_INT,
-        &sound_TIMER_B,
-    },
-    {
-        "sound_prescaler",
-        "(sd[2D]-[2F])",
-        MTYPE_INT,
-        &sound_prescaler,
-    },
-    {
-        "sound_reg[27]",
-        "(sd[27])",
-        MTYPE_BYTE,
-        &sound_reg[0x27],
-    },
-    {
-        "sound2_EN_EOS",
-        "(sd[29])",
-        MTYPE_INT,
-        &sound2_EN_EOS,
-    },
-    {
-        "sound2_EN_BRDY",
-        "(sd[29])",
-        MTYPE_INT,
-        &sound2_EN_BRDY,
-    },
-    {
-        "sound2_EN_ZERO",
-        "(sd[29])",
-        MTYPE_INT,
-        &sound2_EN_ZERO,
-    },
-    {
-        "use_cmdsing",
-        "",
-        MTYPE_BEEP,
-        &use_cmdsing,
-    },
-    {
-        "",
-        "",
-        MTYPE_NEWLINE,
-        NULL,
-    },
-    {
-        "RS232C_flag",
-        "",
-        MTYPE_INT,
-        &RS232C_flag,
-    },
-    {
-        "VSYNC_flag",
-        "",
-        MTYPE_INT,
-        &VSYNC_flag,
-    },
-    {
-        "ctrl_vrtc",
-        "",
-        MTYPE_INT,
-        &ctrl_vrtc,
-    },
-    {
-        "RTC_flag",
-        "",
-        MTYPE_INT,
-        &RTC_flag,
-    },
-    {
-        "SOUND_flag",
-        "",
-        MTYPE_INT,
-        &SOUND_flag,
-    },
-    {
-        "",
-        "",
-        MTYPE_NEWLINE,
-        NULL,
-    },
+    {"sound_FLAG_A", "(IN:44)", MTYPE_INT, &sound_FLAG_A},
+    {"sound_FLAG_B", "(IN:44)", MTYPE_INT, &sound_FLAG_B},
+    {"sound_TIMER_A", "(sd[24]-[25])", MTYPE_INT, &sound_TIMER_A},
+    {"sound_TIMER_B", "(sd[26])", MTYPE_INT, &sound_TIMER_B},
+    {"sound_prescaler", "(sd[2D]-[2F])", MTYPE_INT, &sound_prescaler},
+    {"sound_reg[27]", "(sd[27])", MTYPE_BYTE, &sound_reg[0x27]},
+    {"sound2_EN_EOS", "(sd[29])", MTYPE_INT, &sound2_EN_EOS},
+    {"sound2_EN_BRDY", "(sd[29])", MTYPE_INT, &sound2_EN_BRDY},
+    {"sound2_EN_ZERO", "(sd[29])", MTYPE_INT, &sound2_EN_ZERO},
+    {"use_cmdsing", "", MTYPE_BEEP, &use_cmdsing},
+    {"", "", MTYPE_NEWLINE, nullptr},
+    {"RS232C_flag", "", MTYPE_INT, &RS232C_flag},
+    {"VSYNC_flag", "", MTYPE_INT, &VSYNC_flag},
+    {"ctrl_vrtc", "", MTYPE_INT, &ctrl_vrtc},
+    {"RTC_flag", "", MTYPE_INT, &RTC_flag},
+    {"SOUND_flag", "", MTYPE_INT, &SOUND_flag},
+    {"", "", MTYPE_NEWLINE, nullptr},
 
-    {
-        "mem",
-        "",
-        MTYPE_MEM,
-        NULL,
-    },
-    {
-        "",
-        "",
-        MTYPE_NEWLINE,
-        NULL,
-    },
-    {
-        "key",
-        "(IN:00..0F)",
-        MTYPE_KEY,
-        NULL,
-    },
-    {
-        "",
-        "",
-        MTYPE_NEWLINE,
-        NULL,
-    },
-    {
-        "palette",
-        "(OUT:5254..5B)",
-        MTYPE_PALETTE,
-        NULL,
-    },
-    {
-        "",
-        "",
-        MTYPE_NEWLINE,
-        NULL,
-    },
-    {
-        "crtc",
-        "",
-        MTYPE_CRTC,
-        NULL,
-    },
-    {
-        "",
-        "",
-        MTYPE_NEWLINE,
-        NULL,
-    },
-    {
-        "pio",
-        "(IO:FC..FF)",
-        MTYPE_PIO,
-        NULL,
-    },
-    {
-        "",
-        "",
-        MTYPE_NEWLINE,
-        NULL,
-    },
+    {"mem", "", MTYPE_MEM, nullptr},
+    {"", "", MTYPE_NEWLINE, nullptr},
+    {"key", "(IN:00..0F)", MTYPE_KEY, nullptr},
+    {"", "", MTYPE_NEWLINE, nullptr},
+    {"palette", "(OUT:5254..5B)", MTYPE_PALETTE, nullptr},
+    {"", "", MTYPE_NEWLINE, nullptr},
+    {"crtc", "", MTYPE_CRTC, nullptr},
+    {"", "", MTYPE_NEWLINE, nullptr},
+    {"pio", "(IO:FC..FF)", MTYPE_PIO, nullptr},
+    {"", "", MTYPE_NEWLINE, nullptr},
 
 #ifdef USE_SOUND
-    {
-        "volume",
-        "(-vol)",
-        MTYPE_VOLUME,
-        NULL,
-    },
-    {
-        "fm-mixer",
-        "(-fmvol)",
-        MTYPE_FMMIXER,
-        NULL,
-    },
-    {
-        "psg-mixer",
-        "(-psgvol)",
-        MTYPE_PSGMIXER,
-        NULL,
-    },
-    {
-        "beep-mixer",
-        "(-beepvol)",
-        MTYPE_BEEPMIXER,
-        NULL,
-    },
-    {
-        "rhythm-mixer",
-        "(-rhythmvol)",
-        MTYPE_RHYTHMMIXER,
-        NULL,
-    },
-    {
-        "adpcm-mixer",
-        "(-adpcmvol)",
-        MTYPE_ADPCMMIXER,
-        NULL,
-    },
+    {"volume", "(-vol)", MTYPE_VOLUME, nullptr},
+    {"fm-mixer", "(-fmvol)", MTYPE_FMMIXER, nullptr},
+    {"psg-mixer", "(-psgvol)", MTYPE_PSGMIXER, nullptr},
+    {"beep-mixer", "(-beepvol)", MTYPE_BEEPMIXER, nullptr},
+    {"rhythm-mixer", "(-rhythmvol)", MTYPE_RHYTHMMIXER, nullptr},
+    {"adpcm-mixer", "(-adpcmvol)", MTYPE_ADPCMMIXER, nullptr},
 #ifdef USE_FMGEN
-    {
-        "fmgen-mixer",
-        "(-fmgenvol)",
-        MTYPE_FMGENMIXER,
-        NULL,
-    },
+    {"fmgen-mixer", "(-fmgenvol)", MTYPE_FMGENMIXER, nullptr},
 #endif
-    {
-        "sample-mixer",
-        "(-samplevol)",
-        MTYPE_SAMPLEMIXER,
-        NULL,
-    },
-    {
-        "",
-        "",
-        MTYPE_MIXER,
-        NULL,
-    },
-    {
-        "",
-        "",
-        MTYPE_NEWLINE,
-        NULL,
-    },
+    {"sample-mixer", "(-samplevol)", MTYPE_SAMPLEMIXER, nullptr},
+    {"", "", MTYPE_MIXER, nullptr},
+    {"", "", MTYPE_NEWLINE, nullptr},
 #endif
 
-    {
-        "cpu_timing",
-        "(-cpu)",
-        MTYPE_INT,
-        &cpu_timing,
-    },
-    {
-        "select_main_cpu",
-        "",
-        MTYPE_INT,
-        &select_main_cpu,
-    },
-    {
-        "dual_cpu_count",
-        "",
-        MTYPE_INT,
-        &dual_cpu_count,
-    },
-    {
-        "CPU_1_COUNT",
-        "",
-        MTYPE_INT,
-        &CPU_1_COUNT,
-    },
-    {
-        "cpu_slice_us",
-        "(-cpu2us)",
-        MTYPE_INT,
-        &cpu_slice_us,
-    },
-    {
-        "calendar_stop",
-        "(-timestop)",
-        MTYPE_INT,
-        &calendar_stop,
-    },
-    {
-        "cmt_speed",
-        "(-cmt_speed)",
-        MTYPE_INT,
-        &cmt_speed,
-    },
-    {
-        "cmt_intr",
-        "(-cmt_intr)",
-        MTYPE_INT,
-        &cmt_intr,
-    },
-    {
-        "cmt_wait",
-        "(-cmt_wait)",
-        MTYPE_INT,
-        &cmt_wait,
-    },
-    {
-        "highspeed_mode",
-        "(-hsbasic)",
-        MTYPE_INT,
-        &highspeed_mode,
-    },
-    {
-        "monitor_15k",
-        "(-15k)",
-        MTYPE_INT,
-        &monitor_15k,
-    },
-    {
-        "use_pcg",
-        "(-pcg)",
-        MTYPE_FONT,
-        &use_pcg,
-    },
-    {
-        "font_type",
-        "",
-        MTYPE_FONT,
-        &font_type,
-    },
-    {
-        "memory_wait",
-        "(-mem_wait)",
-        MTYPE_INT,
-        &memory_wait,
-    },
-    {
-        "sub_load_rate",
-        "(-subload)",
-        MTYPE_INT,
-        &sub_load_rate,
-    },
-    {
-        "disk_exchange",
-        "(-exchange)",
-        MTYPE_INT,
-        &disk_exchange,
-    },
-    {
-        "fdc_debug_mode",
-        "(-fdcdebug)",
-        MTYPE_INT,
-        &fdc_debug_mode,
-    },
+    {"cpu_timing", "(-cpu)", MTYPE_INT, &cpu_timing},
+    {"select_main_cpu", "", MTYPE_INT, &select_main_cpu},
+    {"dual_cpu_count", "", MTYPE_INT, &dual_cpu_count},
+    {"CPU_1_COUNT", "", MTYPE_INT, &CPU_1_COUNT},
+    {"cpu_slice_us", "(-cpu2us)", MTYPE_INT, &cpu_slice_us},
+    {"calendar_stop", "(-timestop)", MTYPE_INT, &calendar_stop},
+    {"cmt_speed", "(-cmt_speed)", MTYPE_INT, &cmt_speed},
+    {"cmt_intr", "(-cmt_intr)", MTYPE_INT, &cmt_intr},
+    {"cmt_wait", "(-cmt_wait)", MTYPE_INT, &cmt_wait},
+    {"highspeed_mode", "(-hsbasic)", MTYPE_INT, &highspeed_mode},
+    {"monitor_15k", "(-15k)", MTYPE_INT, &monitor_15k},
+    {"use_pcg", "(-pcg)", MTYPE_FONT, &use_pcg},
+    {"font_type", "", MTYPE_FONT, &font_type},
+    {"memory_wait", "(-mem_wait)", MTYPE_INT, &memory_wait},
+    {"sub_load_rate", "(-subload)", MTYPE_INT, &sub_load_rate},
+    {"disk_exchange", "(-exchange)", MTYPE_INT, &disk_exchange},
+    {"fdc_debug_mode", "(-fdcdebug)", MTYPE_INT, &fdc_debug_mode},
     {"fdc_ignore_readonly", "(-ignore_ro)", MTYPE_INT, &fdc_ignore_readonly},
-    {
-        "fdc_wait",
-        "(-fdc_wait)",
-        MTYPE_INT,
-        &fdc_wait,
-    },
-    {
-        "frameskip_rate",
-        "(-frameskip)",
-        MTYPE_FRAMESKIP,
-        &frameskip_rate,
-    },
-    {
-        "monitor_analog",
-        "(-analog)",
-        MTYPE_INT,
-        &monitor_analog,
-    },
-    {
-        "use_auto_skip",
-        "(-autoskip)",
-        MTYPE_INT,
-        &use_auto_skip,
-    },
-    {
-        "use_interlace",
-        "(-interlace)",
-        MTYPE_INTERLACE,
-        &use_interlace,
-    },
-    {
-        "use_half_interp",
-        "(-interp)",
-        MTYPE_INTERP,
-        &use_half_interp,
-    },
-    {
-        "mon_aspect",
-        "(-aspect)",
-        MTYPE_DOUBLE,
-        &mon_aspect,
-    },
-    {
-        "hide_mouse",
-        "(-hide_mouse)",
-        MTYPE_INT,
-        &hide_mouse,
-    },
-    {
-        "grab_mouse",
-        "(-grab_mouse)",
-        MTYPE_INT,
-        &grab_mouse,
-    },
-    {
-        "mouse_mode",
-        "(-mouse)",
-        MTYPE_INT,
-        &mouse_mode,
-    },
-    {
-        "mouse_swap_button",
-        "(-mouseswap)",
-        MTYPE_INT,
-        &mouse_swap_button,
-    },
-    {
-        "mouse_sensitivity",
-        "(-mousespeed)",
-        MTYPE_INT,
-        &mouse_sensitivity,
-    },
-    {
-        "joy_key_mode",
-        "(-joykey)",
-        MTYPE_INT,
-        &joy_key_mode,
-    },
-    {
-        "joy_swap_button",
-        "(-joyswap)",
-        MTYPE_INT,
-        &joy_swap_button,
-    },
-    {
-        "joy2_key_mode",
-        "",
-        MTYPE_INT,
-        &joy2_key_mode,
-    },
-    {
-        "joy2_swap_button",
-        "",
-        MTYPE_INT,
-        &joy2_swap_button,
-    },
-    {
-        "tenkey_emu",
-        "(-tenkey)",
-        MTYPE_INT,
-        &tenkey_emu,
-    },
-    {
-        "numlock_emu",
-        "(-numlock)",
-        MTYPE_INT,
-        &numlock_emu,
-    },
-    {
-        "function_f[1]",
-        "",
-        MTYPE_INT,
-        &function_f[1],
-    },
-    {
-        "function_f[2]",
-        "",
-        MTYPE_INT,
-        &function_f[2],
-    },
-    {
-        "function_f[3]",
-        "",
-        MTYPE_INT,
-        &function_f[3],
-    },
-    {
-        "function_f[4]",
-        "",
-        MTYPE_INT,
-        &function_f[4],
-    },
-    {
-        "function_f[5]",
-        "",
-        MTYPE_INT,
-        &function_f[5],
-    },
-    {
-        "function_f[6]",
-        "(-f6)",
-        MTYPE_INT,
-        &function_f[6],
-    },
-    {
-        "function_f[7]",
-        "(-f7)",
-        MTYPE_INT,
-        &function_f[7],
-    },
-    {
-        "function_f[8]",
-        "(-f8)",
-        MTYPE_INT,
-        &function_f[8],
-    },
-    {
-        "function_f[9]",
-        "(-f9)",
-        MTYPE_INT,
-        &function_f[9],
-    },
-    {
-        "function_f[10]",
-        "(-f10)",
-        MTYPE_INT,
-        &function_f[10],
-    },
-    {
-        "function_f[11]",
-        "",
-        MTYPE_INT,
-        &function_f[11],
-    },
-    {
-        "function_f[12]",
-        "",
-        MTYPE_INT,
-        &function_f[12],
-    },
-    {
-        "function_f[13]",
-        "",
-        MTYPE_INT,
-        &function_f[13],
-    },
-    {
-        "function_f[14]",
-        "",
-        MTYPE_INT,
-        &function_f[14],
-    },
-    {
-        "function_f[15]",
-        "",
-        MTYPE_INT,
-        &function_f[15],
-    },
-    {
-        "function_f[16]",
-        "",
-        MTYPE_INT,
-        &function_f[16],
-    },
-    {
-        "function_f[17]",
-        "",
-        MTYPE_INT,
-        &function_f[17],
-    },
-    {
-        "function_f[18]",
-        "",
-        MTYPE_INT,
-        &function_f[18],
-    },
-    {
-        "function_f[19]",
-        "",
-        MTYPE_INT,
-        &function_f[19],
-    },
-    {
-        "function_f[20]",
-        "",
-        MTYPE_INT,
-        &function_f[20],
-    },
-    {
-        "romaji_type",
-        "(-romaji)",
-        MTYPE_INT,
-        &romaji_type,
-    },
-    {
-        "need_focus",
-        "(-focus)",
-        MTYPE_INT,
-        &need_focus,
-    },
-    {
-        "cpu_clock_mhz",
-        "(-clock)",
-        MTYPE_CLOCK,
-        &cpu_clock_mhz,
-    },
-    {
-        "sound_clock_mhz",
-        "(-soundclock)",
-        MTYPE_CLOCK,
-        &sound_clock_mhz,
-    },
-    {
-        "vsync_freq_hz",
-        "(-vsync)",
-        MTYPE_CLOCK,
-        &vsync_freq_hz,
-    },
-    {
-        "wait_rate",
-        "(-speed)",
-        MTYPE_INT,
-        &wait_rate,
-    },
-    {
-        "wait_by_sleep",
-        "(-sleep)",
-        MTYPE_INT,
-        &wait_by_sleep,
-    },
-    {
-        "no_wait",
-        "(-nowait)",
-        MTYPE_INT,
-        &no_wait,
-    },
+    {"fdc_wait", "(-fdc_wait)", MTYPE_INT, &fdc_wait},
+    {"frameskip_rate", "(-frameskip)", MTYPE_FRAMESKIP, &frameskip_rate},
+    {"monitor_analog", "(-analog)", MTYPE_INT, &monitor_analog},
+    {"use_auto_skip", "(-autoskip)", MTYPE_INT, &use_auto_skip},
+    {"use_interlace", "(-interlace)", MTYPE_INTERLACE, &use_interlace},
+    {"use_half_interp", "(-interp)", MTYPE_INTERP, &use_half_interp},
+    {"mon_aspect", "(-aspect)", MTYPE_DOUBLE, &mon_aspect},
+    {"hide_mouse", "(-hide_mouse)", MTYPE_INT, &hide_mouse},
+    {"grab_mouse", "(-grab_mouse)", MTYPE_INT, &grab_mouse},
+    {"mouse_mode", "(-mouse)", MTYPE_INT, &mouse_mode},
+    {"mouse_swap_button", "(-mouseswap)", MTYPE_INT, &mouse_swap_button},
+    {"mouse_sensitivity", "(-mousespeed)", MTYPE_INT, &mouse_sensitivity},
+    {"joy_key_mode", "(-joykey)", MTYPE_INT, &joy_key_mode},
+    {"joy_swap_button", "(-joyswap)", MTYPE_INT, &joy_swap_button},
+    {"joy2_key_mode", "", MTYPE_INT, &joy2_key_mode},
+    {"joy2_swap_button", "", MTYPE_INT, &joy2_swap_button},
+    {"tenkey_emu", "(-tenkey)", MTYPE_INT, &tenkey_emu},
+    {"numlock_emu", "(-numlock)", MTYPE_INT, &numlock_emu},
+    {"function_f[1]", "", MTYPE_INT, &function_f[1]},
+    {"function_f[2]", "", MTYPE_INT, &function_f[2]},
+    {"function_f[3]", "", MTYPE_INT, &function_f[3]},
+    {"function_f[4]", "", MTYPE_INT, &function_f[4]},
+    {"function_f[5]", "", MTYPE_INT, &function_f[5]},
+    {"function_f[6]", "(-f6)", MTYPE_INT, &function_f[6]},
+    {"function_f[7]", "(-f7)", MTYPE_INT, &function_f[7]},
+    {"function_f[8]", "(-f8)", MTYPE_INT, &function_f[8]},
+    {"function_f[9]", "(-f9)", MTYPE_INT, &function_f[9]},
+    {"function_f[10]", "(-f10)", MTYPE_INT, &function_f[10]},
+    {"function_f[11]", "", MTYPE_INT, &function_f[11]},
+    {"function_f[12]", "", MTYPE_INT, &function_f[12]},
+    {"function_f[13]", "", MTYPE_INT, &function_f[13]},
+    {"function_f[14]", "", MTYPE_INT, &function_f[14]},
+    {"function_f[15]", "", MTYPE_INT, &function_f[15]},
+    {"function_f[16]", "", MTYPE_INT, &function_f[16]},
+    {"function_f[17]", "", MTYPE_INT, &function_f[17]},
+    {"function_f[18]", "", MTYPE_INT, &function_f[18]},
+    {"function_f[19]", "", MTYPE_INT, &function_f[19]},
+    {"function_f[20]", "", MTYPE_INT, &function_f[20]},
+    {"romaji_type", "(-romaji)", MTYPE_INT, &romaji_type},
+    {"need_focus", "(-focus)", MTYPE_INT, &need_focus},
+    {"cpu_clock_mhz", "(-clock)", MTYPE_CLOCK, &cpu_clock_mhz},
+    {"sound_clock_mhz", "(-soundclock)", MTYPE_CLOCK, &sound_clock_mhz},
+    {"vsync_freq_hz", "(-vsync)", MTYPE_CLOCK, &vsync_freq_hz},
+    {"wait_rate", "(-speed)", MTYPE_INT, &wait_rate},
+    {"wait_by_sleep", "(-sleep)", MTYPE_INT, &wait_by_sleep},
+    {"no_wait", "(-nowait)", MTYPE_INT, &no_wait},
     /*{ "boost",        "(-boost)", MTYPE_BOOST,    &boost,         },*/
     /*{ "wait_sleep_min_us",    "(-sleepparm)", MTYPE_INT,  &wait_sleep_min_us, },*/
-    {
-        "status_imagename",
-        "(-statusimage)",
-        MTYPE_INT,
-        &status_imagename,
-    },
-    {
-        "menu_lang",
-        "(-english)",
-        MTYPE_INT,
-        &menu_lang,
-    },
-    {
-        "menu_readonly",
-        "(-ro)",
-        MTYPE_INT,
-        &menu_readonly,
-    },
-    {
-        "menu_swapdrv",
-        "(-swapdrv)",
-        MTYPE_INT,
-        &menu_swapdrv,
-    },
-    {
-        "file_coding",
-        "(-euc/-sjis)",
-        MTYPE_INT,
-        &file_coding,
-    },
+    {"status_imagename", "(-statusimage)", MTYPE_INT, &status_imagename},
+    {"menu_lang", "(-english)", MTYPE_INT, &menu_lang},
+    {"menu_readonly", "(-ro)", MTYPE_INT, &menu_readonly},
+    {"menu_swapdrv", "(-swapdrv)", MTYPE_INT, &menu_swapdrv},
+    {"file_coding", "(-euc/-sjis)", MTYPE_INT, &file_coding},
     {"filename_synchronize", "", MTYPE_INT, &filename_synchronize},
-    {
-        "verbose_proc",
-        "(-verbose&01)",
-        MTYPE_INT,
-        &verbose_proc,
-    },
-    {
-        "verbose_z80",
-        "(-verbose&02)",
-        MTYPE_INT,
-        &verbose_z80,
-    },
-    {
-        "verbose_io",
-        "(-verbose&04)",
-        MTYPE_INT,
-        &verbose_io,
-    },
-    {
-        "verbose_pio",
-        "(-verbose&08)",
-        MTYPE_INT,
-        &verbose_pio,
-    },
-    {
-        "verbose_fdc",
-        "(-verbose&10)",
-        MTYPE_INT,
-        &verbose_fdc,
-    },
-    {
-        "verbose_wait",
-        "(-verbose&20)",
-        MTYPE_INT,
-        &verbose_wait,
-    },
-    {
-        "verbose_suspend",
-        "(-verbose&40)",
-        MTYPE_INT,
-        &verbose_suspend,
-    },
-    {
-        "verbose_snd",
-        "(-verbose&80)",
-        MTYPE_INT,
-        &verbose_snd,
-    },
-    {
-        "",
-        "",
-        MTYPE_NEWLINE,
-        NULL,
-    },
+    {"verbose_proc", "(-verbose&01)", MTYPE_INT, &verbose_proc},
+    {"verbose_z80", "(-verbose&02)", MTYPE_INT, &verbose_z80},
+    {"verbose_io", "(-verbose&04)", MTYPE_INT, &verbose_io},
+    {"verbose_pio", "(-verbose&08)", MTYPE_INT, &verbose_pio},
+    {"verbose_fdc", "(-verbose&10)", MTYPE_INT, &verbose_fdc},
+    {"verbose_wait", "(-verbose&20)", MTYPE_INT, &verbose_wait},
+    {"verbose_suspend", "(-verbose&40)", MTYPE_INT, &verbose_suspend},
+    {"verbose_snd", "(-verbose&80)", MTYPE_INT, &verbose_snd},
+    {"", "", MTYPE_NEWLINE, nullptr},
 
 #ifdef PROFILER
-    {
-        "debug_profiler",
-        "for debug",
-        MTYPE_INT,
-        &debug_profiler,
-    },
+    {"debug_profiler", "for debug", MTYPE_INT, &debug_profiler},
 #endif
 #ifdef DEBUGLOG
-    {
-        "pio_debug",
-        "for debug",
-        MTYPE_INT,
-        &pio_debug,
-    },
-    {
-        "fdc_debug",
-        "for debug",
-        MTYPE_INT,
-        &fdc_debug,
-    },
-    {
-        "main_debug",
-        "for debug",
-        MTYPE_INT,
-        &main_debug,
-    },
-    {
-        "sub_debug",
-        "for debug",
-        MTYPE_INT,
-        &sub_debug,
-    },
+    {"pio_debug", "for debug", MTYPE_INT, &pio_debug},
+    {"fdc_debug", "for debug", MTYPE_INT, &fdc_debug},
+    {"main_debug", "for debug", MTYPE_INT, &main_debug},
+    {"sub_debug", "for debug", MTYPE_INT, &sub_debug},
 #endif
 
 };
 
 static struct {
-  char *block_name;
+  const char *block_name;
   int start;
   int end;
 } monitor_variable_block[] = {
@@ -2545,7 +1520,7 @@ static char *d_argv[MAX_ARGS];
 
 static int argv_counter;
 
-static void getarg(void) {
+static void getarg() {
   char *p = &buf[0];
 
   argv_counter = 1;
@@ -2608,7 +1583,7 @@ static struct {
   char *str; /* 引数の文字列   d_argv[xxx]と同じ  */
 } argv;
 
-static void shift(void) {
+static void shift() {
   int i, size = FALSE;
   char *p, *chk;
 
@@ -2680,7 +1655,7 @@ static void shift(void) {
 
 /* 引数の値 (ARG_xxx) から、引数の文字列 (大文字) を得る */
 
-static char *argv2str(int argv_val) {
+static const char *argv2str(int argv_val) {
   int i;
 
   for (i = 0; i < COUNTOF(monitor_argv); i++) {
@@ -2709,7 +1684,7 @@ enum { LANG_EUC, LANG_JIS, LANG_SJIS };
 
 static int lang = -1;
 
-static void set_lang(void) {
+static void set_lang() {
   if (lang >= 0)
     return;
 
@@ -2728,8 +1703,8 @@ static void set_lang(void) {
 #endif
 }
 
-void print_hankaku(FILE *fp, Uchar *str, char ach) {
-  Uchar *ptr;
+void print_hankaku(FILE *fp, char *str, char ach) {
+  char *ptr;
 
   /* 標準出力じゃないならそのまま */
   if (fp != stdout) {
@@ -2784,9 +1759,9 @@ void print_hankaku(FILE *fp, Uchar *str, char ach) {
 /* help [<cmd>]                         */
 /*  ヘルプを表示する                    */
 /*--------------------------------------------------------------*/
-static void monitor_help(void) {
+static void monitor_help() {
   int i;
-  char *cmd = NULL;
+  char *cmd = nullptr;
 
   if (exist_argv()) { /* [cmd] */
     cmd = argv.str;
@@ -2795,7 +1770,7 @@ static void monitor_help(void) {
   if (exist_argv())
     error();
 
-  if (cmd == NULL) { /* 引数なし。全ヘルプ表示 */
+  if (cmd == nullptr) { /* 引数なし。全ヘルプ表示 */
 
     printf("help\n");
     for (i = 0; i < COUNTOF(monitor_cmd); i++) {
@@ -2822,7 +1797,7 @@ static void monitor_help(void) {
 /*--------------------------------------------------------------*/
 static int save_dump_addr = -1;
 static int save_dump_bank = ARG_MAIN;
-static void monitor_dump(void) {
+static void monitor_dump() {
   int i, j;
   byte c;
   int bank = save_dump_bank;
@@ -2883,8 +1858,6 @@ static void monitor_dump(void) {
     printf("|\n");
   }
   printf("\n");
-
-  return;
 }
 
 /*----------------------------------------------------------------------*/
@@ -2896,7 +1869,7 @@ static void monitor_dump(void) {
 static int save_dumpext_addr = -1;
 static int save_dumpext_bank = ARG_EXT0;
 static int save_dumpext_board = 1;
-static void monitor_dumpext(void) {
+static void monitor_dumpext() {
   int i, j;
   byte c;
   int bank = save_dumpext_bank;
@@ -2973,8 +1946,6 @@ static void monitor_dumpext(void) {
     printf("|\n");
   }
   printf("\n");
-
-  return;
 }
 
 /*--------------------------------------------------------------*/
@@ -2982,7 +1953,7 @@ static void monitor_dumpext(void) {
 /* fill [<bank>] <start-addr> #<size>    <value>        */
 /*  メモリを埋める                       */
 /*--------------------------------------------------------------*/
-static void monitor_fill(void) {
+static void monitor_fill() {
   int i;
   int bank = ARG_MAIN;
   int start, size, value;
@@ -3021,8 +1992,6 @@ static void monitor_fill(void) {
   for (i = 0; i < size; i++) {
     poke_memory(bank, start + i, value);
   }
-
-  return;
 }
 
 /*--------------------------------------------------------------*/
@@ -3030,7 +1999,7 @@ static void monitor_fill(void) {
 /* move [<bank>] <src-addr> #size      [<bank>] <dist-addr> */
 /*  メモリ転送                     */
 /*--------------------------------------------------------------*/
-static void monitor_move(void) {
+static void monitor_move() {
   int i;
   int s_bank = ARG_MAIN;
   int d_bank = ARG_MAIN;
@@ -3085,8 +2054,6 @@ static void monitor_move(void) {
       poke_memory(d_bank, dist + i, data);
     }
   }
-
-  return;
 }
 
 /*--------------------------------------------------------------*/
@@ -3097,7 +2064,7 @@ static int save_search_addr = -1;
 static int save_search_size = -1;
 static int save_search_bank = ARG_MAIN;
 static byte save_search_data;
-static void monitor_search(void) {
+static void monitor_search() {
   int i, j;
 
   if (!exist_argv()) {
@@ -3154,15 +2121,13 @@ static void monitor_search(void) {
   }
   if (j != 0)
     printf("\n");
-
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* read [<bank>] <addr>                     */
 /*  特定のアドレスをリード                   */
 /*--------------------------------------------------------------*/
-static void monitor_read(void) {
+static void monitor_read() {
   int i, j;
   int addr;
   byte data;
@@ -3194,14 +2159,12 @@ static void monitor_read(void) {
     printf("%d", (data & j) ? 1 : 0);
   }
   printf("B )\n");
-
-  return;
 }
 /*--------------------------------------------------------------*/
 /* write [<bank>] <addr> <data>                 */
 /*  特定のアドレスにライト                   */
 /*--------------------------------------------------------------*/
-static void monitor_write(void) {
+static void monitor_write() {
   int i, j;
   int addr;
   byte data;
@@ -3238,15 +2201,13 @@ static void monitor_write(void) {
     printf("%d", (data & j) ? 1 : 0);
   }
   printf("B )\n");
-
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* in [<cpu>] <port>                        */
 /*  特定のポートから入力                  */
 /*--------------------------------------------------------------*/
-static void monitor_in(void) {
+static void monitor_in() {
   int i, j;
   int cpu = ARG_MAIN, port;
   byte data;
@@ -3279,15 +2240,13 @@ static void monitor_in(void) {
     printf("%d", (data & j) ? 1 : 0);
   }
   printf(")\n");
-
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* out [<cpu>] <port> <data>                    */
 /*  特定のポートに出力                 */
 /*--------------------------------------------------------------*/
-static void monitor_out(void) {
+static void monitor_out() {
   int i, j;
   int cpu = ARG_MAIN, port;
   byte data;
@@ -3325,15 +2284,13 @@ static void monitor_out(void) {
     printf("%d", (data & j) ? 1 : 0);
   }
   printf(")\n");
-
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* reset [<bas-mode>] [<clock-mode>] [<sound-board>] [<dipsw>]  */
 /*  リセット。モードとサウンドボードとディップを設定できる   */
 /*--------------------------------------------------------------*/
-static void monitor_reset(void) {
+static void monitor_reset() {
   T_RESET_CFG cfg;
   int dipsw = -1, bas_mode = -1, ck_mode = -1, sd_mode = -1;
 
@@ -3416,7 +2373,7 @@ static void monitor_reset(void) {
 /*  reg all                         */
 /*  レジスタの内容を表示／変更             */
 /*--------------------------------------------------------------*/
-static void monitor_reg(void) {
+static void monitor_reg() {
   int all = FALSE;
   int cpu = -1, reg = -1, value = 0;
   z80arch *z80;
@@ -3562,7 +2519,7 @@ static void monitor_reg(void) {
 /*--------------------------------------------------------------*/
 static int save_disasm_cpu = -1;
 static int save_disasm_addr[2] = {-1, -1};
-static void monitor_disasm(void) {
+static void monitor_disasm() {
   int i, pc;
   int addr = -1;
   int cpu = -1;
@@ -3642,7 +2599,7 @@ static void monitor_disasm(void) {
 /* go                               */
 /*  実行                          */
 /*--------------------------------------------------------------*/
-static void monitor_go(void) {
+static void monitor_go() {
   if (exist_argv())
     error();
 
@@ -3656,7 +2613,7 @@ static void monitor_go(void) {
 /*  指定したステップ分またはCPU処理が変わるまで、実行    */
 /*--------------------------------------------------------------*/
 static int save_trace_change = FALSE;
-static void monitor_trace(void) {
+static void monitor_trace() {
   int change = FALSE, step = trace_counter;
 
   if (exist_argv()) {
@@ -3701,7 +2658,7 @@ static void monitor_trace(void) {
 /*  1ステップ、実行                      */
 /*  CALL、DJNZ、LDIR etc のスキップが指定可能       */
 /*--------------------------------------------------------------*/
-static void monitor_step(void) {
+static void monitor_step() {
   int call = FALSE, jp = FALSE, rep = FALSE;
   int flag = FALSE;
   int cpu;
@@ -3788,7 +2745,7 @@ static void monitor_step(void) {
 /* S                                */
 /*  step all に同じ                      */
 /*--------------------------------------------------------------*/
-static void monitor_stepall(void) {
+static void monitor_stepall() {
   int flag = FALSE;
   int cpu;
   byte code;
@@ -3854,9 +2811,9 @@ static void monitor_stepall(void) {
 /* break                            */
 /*  ブレークポイントの設定／解除／表示         */
 /*--------------------------------------------------------------*/
-static void monitor_break(void) {
+static void monitor_break() {
   int show = FALSE, i, j;
-  char *s = NULL;
+  const char *s = nullptr;
   int cpu = BP_MAIN, action = ARG_PC, addr = 0, number = 0;
 
   if (exist_argv()) {
@@ -3989,7 +2946,7 @@ static void monitor_break(void) {
 /* loadmem <filename> <bank> <start-addr> [#<size>]     */
 /*  ファイルからメモリにロード             */
 /*--------------------------------------------------------------*/
-static void monitor_loadmem(void) {
+static void monitor_loadmem() {
   int addr, size, bank;
   char *filename;
   FILE *fp;
@@ -4060,7 +3017,7 @@ static void monitor_loadmem(void) {
 /* savemem <filename> <bank> <start-addr> #<size>       */
 /*  メモリをファイルにセーブ                */
 /*--------------------------------------------------------------*/
-static void monitor_savemem(void) {
+static void monitor_savemem() {
   int addr, size, bank;
   char *filename;
   FILE *fp;
@@ -4116,9 +3073,9 @@ static void monitor_savemem(void) {
 /*  FDC ブレークポイントの設定／解除／表示             */
 /*              この機能は peach氏により実装されました  */
 /*----------------------------------------------------------------------*/
-static void monitor_fbreak(void) {
+static void monitor_fbreak() {
   int show = FALSE, i;
-  char *s = NULL;
+  const char *s = nullptr;
   int action = ARG_READ, number = 0;
   int drive = -1, track = -1, sector = -1;
 
@@ -4231,13 +3188,13 @@ static void monitor_fbreak(void) {
 /*  テキスト画面をコンソールに表示                   */
 /*              この機能は peach氏により実装されました  */
 /*----------------------------------------------------------------------*/
-static void print_text_screen(void) {
+static void print_text_screen() {
   /*FILE *fp;*/
   int i, j;
   int line;
   int width;
   int end;
-  Uchar text_buf[82]; /* 80文字 + '\n' + '\0' */
+  char text_buf[82]; /* 80文字 + '\n' + '\0' */
 
   if (grph_ctrl & 0x20)
     line = 25;
@@ -4268,7 +3225,7 @@ static void print_text_screen(void) {
   }
 }
 
-static void monitor_textscr(void) {
+static void monitor_textscr() {
   if (exist_argv()) { /* <char> */
     alt_char = argv.str[0];
     shift();
@@ -4282,7 +3239,7 @@ static void monitor_textscr(void) {
 /*  BASIC LIST を読み込む                  */
 /*--------------------------------------------------------------*/
 #if 1 /* experimental by peach */
-static void monitor_loadbas(void) {
+static void monitor_loadbas() {
   char *filename;
   int size;
   int type = ARG_ASCII;
@@ -4317,14 +3274,14 @@ static void monitor_loadbas(void) {
   }
 }
 #else
-static void monitor_loadbas(void) { printf("sorry, not support\n"); }
+static void monitor_loadbas() { printf("sorry, not support\n"); }
 #endif
 /*--------------------------------------------------------------*/
 /* savebas [<filename> [<type>]]                */
 /*  BASIC LIST を出力                    */
 /*--------------------------------------------------------------*/
 #if 1 /* experimental by peach */
-static void monitor_savebas(void) {
+static void monitor_savebas() {
   char *filename;
   int size;
   int type = ARG_ASCII;
@@ -4340,13 +3297,13 @@ static void monitor_savebas(void) {
       shift();
     }
   } else {
-    filename = NULL;
+    filename = nullptr;
   }
 
   if (exist_argv())
     error();
 
-  if (filename == NULL) {
+  if (filename == nullptr) {
     basic_decode_list(stdout);
   } else if ((fp = fopen(filename, "w"))) {
     if (type == ARG_ASCII) {
@@ -4362,7 +3319,7 @@ static void monitor_savebas(void) {
   }
 }
 #else
-static void monitor_savebas(void) { printf("sorry, not support\n"); }
+static void monitor_savebas() { printf("sorry, not support\n"); }
 #endif
 
 /*--------------------------------------------------------------*/
@@ -4370,7 +3327,7 @@ static void monitor_savebas(void) { printf("sorry, not support\n"); }
 /* show [<variable> ]                       */
 /*  内部変数を表示／変更                  */
 /*--------------------------------------------------------------*/
-static void monitor_set_mem_printf(void) /*** set mem ***/
+static void monitor_set_mem_printf() /*** set mem ***/
 {
   const char *r0000, *r6000, *r8000, *r8400, *rC000, *rF000;
   const char *w0000, *w6000, *w8000, *w8400, *wC000, *wF000;
@@ -4450,7 +3407,7 @@ static void monitor_set_mem_printf(void) /*** set mem ***/
   printf("    %-12s%-12s%-12s        ", "F000-FFFF", rF000, wF000);
   printf("\n");
 }
-static void monitor_set_key_printf(void) /*** set key ***/
+static void monitor_set_key_printf() /*** set key ***/
 {
   int j;
   printf("  %-23s %-15s", "key_scan[0]-[15]", "(IN:00..0F)");
@@ -4462,7 +3419,7 @@ static void monitor_set_key_printf(void) /*** set key ***/
     printf("%02X ", key_scan[j]);
   printf("\n");
 }
-static void monitor_set_palette_printf(void) /*** set palette ***/
+static void monitor_set_palette_printf() /*** set palette ***/
 {
   int j;
   const char *now = "    [Pal-mode is   ]";
@@ -4477,7 +3434,7 @@ static void monitor_set_palette_printf(void) /*** set palette ***/
            vram_palette[j].red, vram_palette[j].blue);
   }
 }
-static void monitor_set_crtc_printf(void) /*** set crtc ***/
+static void monitor_set_crtc_printf() /*** set crtc ***/
 {
   int j;
   const char *dmamode[] = {"(burst)", "(character)"};
@@ -4580,7 +3537,7 @@ static void monitor_set_crtc_printf(void) /*** set crtc ***/
          (text_display == TEXT_DISABLE) ? "TEXT_DISABLE"
                                         : ((text_display == TEXT_ENABLE) ? "TEXT_ENABLE" : "TEXT_ATTR_ONLY"));
 }
-static void monitor_set_pio_printf(void) /*** set pio ***/
+static void monitor_set_pio_printf() /*** set pio ***/
 {
   printf("  pio_AB[0][0].type     %s    ___    ___  %s   pio_AB[1][0].type\n",
          (pio_AB[0][0].type == PIO_READ) ? "R" : "W", (pio_AB[1][0].type == PIO_READ) ? "R" : "W");
@@ -4665,7 +3622,7 @@ static void monitor_set_samplemixer_printf(int index) {
   printf("  %-23s %-15s %d\n", monitor_variable[index].var_name, monitor_variable[index].port_mes,
          xmame_cfg_get_mixer_volume(XMAME_MIXER_SAMPLE));
 }
-static void monitor_set_mixer_printf(void) {
+static void monitor_set_mixer_printf() {
   if (xmame_has_sound()) {
     printf("\n  Following is mixing level of xmame-sound-driver.\n");
     xmame_cfg_set_mixer_volume(-1, -1);
@@ -4775,7 +3732,7 @@ static void monitor_set_show_printf(int index) /*** set (print) ***/
   }
 }
 
-static void monitor_set(void) {
+static void monitor_set() {
   void *var_ptr;
   int set_type, index = 0, value = 0, i, block = 0;
   double dvalue = 0.0;
@@ -4995,7 +3952,7 @@ static void monitor_set(void) {
   }
 }
 
-static void monitor_show(void) {
+static void monitor_show() {
   int set_type, index = 0;
 
   set_type = 0;
@@ -5030,7 +3987,7 @@ static void monitor_show(void) {
 /* resize <screen_size>                     */
 /*  画面サイズを変更                    */
 /*--------------------------------------------------------------*/
-static void monitor_resize(void) {
+static void monitor_resize() {
   int command = -1;
 
   if (exist_argv()) {
@@ -5074,7 +4031,6 @@ static void monitor_resize(void) {
 
   screen_update_immidiate();
 
-  return;
 }
 
 /*--------------------------------------------------------------*/
@@ -5088,9 +4044,9 @@ static void monitor_resize(void) {
 /*      ドライブを一時的に空にする         */
 /*      ドライブにファイルをセット(交換)     */
 /*--------------------------------------------------------------*/
-static void monitor_drive(void) {
+static void monitor_drive() {
   int i, j, command, drv = -1, img = 0;
-  char *filename = NULL;
+  char *filename = nullptr;
 
   if (!exist_argv()) {
     command = ARG_SHOW;
@@ -5230,8 +4186,6 @@ static void monitor_drive(void) {
     }
     break;
   }
-
-  return;
 }
 
 /*--------------------------------------------------------------*/
@@ -5251,13 +4205,13 @@ static void monitor_drive(void) {
 /*      イメージをアンフォーマット         */
 /*      イメージ名を変更                */
 /*--------------------------------------------------------------*/
-static void monitor_file(void) {
+static void monitor_file() {
   int command, num, drv, img = 0, result = -1, ro = FALSE;
-  char *filename, *imagename = NULL;
+  char *filename, *imagename = nullptr;
   long offset;
   OSD_FILE *fp;
-  Uchar c[32];
-  char *s = NULL;
+  char c[32];
+  const char *s = nullptr;
 
   if (!argv_is(ARGV_FILE))
     error(); /* <command> */
@@ -5301,8 +4255,8 @@ static void monitor_file(void) {
 
   switch (command) {
   case ARG_SHOW:
-    if ((fp = osd_fopen(FTYPE_DISK, filename, "rb")) == NULL) {
-      if ((fp = osd_fopen(FTYPE_DISK, filename, "r+b")) == NULL) {
+    if ((fp = osd_fopen(FTYPE_DISK, filename, "rb")) == nullptr) {
+      if ((fp = osd_fopen(FTYPE_DISK, filename, "r+b")) == nullptr) {
         printf("Open error! %s\n", filename);
         break;
       }
@@ -5366,7 +4320,7 @@ static void monitor_file(void) {
 
     /* ファイルを開く */
     fp = osd_fopen(FTYPE_DISK, c, "r+b"); /* "r+b" でオープン */
-    if (fp == NULL) {
+    if (fp == nullptr) {
       fp = osd_fopen(FTYPE_DISK, c, "rb"); /* "rb" でオープン */
       ro = TRUE;
     }
@@ -5380,7 +4334,7 @@ static void monitor_file(void) {
         drv = -1; /* チェックする     */
     }
 
-    if (fp == NULL) { /* オープン失敗 */
+    if (fp == nullptr) { /* オープン失敗 */
       printf("Open error! %s\n", filename);
       break;
     } else if (ro) { /* リードオンリーなので処理不可 */
@@ -5476,8 +4430,8 @@ static void monitor_file(void) {
 /* statesave [<filename>]                   */
 /*  ステートセーブ                       */
 /*--------------------------------------------------------------*/
-static void monitor_statesave(void) {
-  char *filename = NULL;
+static void monitor_statesave() {
+  char *filename = nullptr;
 
   if (exist_argv()) {
     filename = argv.str;
@@ -5485,7 +4439,7 @@ static void monitor_statesave(void) {
     if (exist_argv())
       error();
   } else {
-    filename = NULL;
+    filename = nullptr;
   }
 
   if (filename) {
@@ -5510,8 +4464,8 @@ static void monitor_statesave(void) {
 /* stateload [<filename>]                   */
 /*  ステートロード                       */
 /*--------------------------------------------------------------*/
-static void monitor_stateload(void) {
-  char *filename = NULL;
+static void monitor_stateload() {
+  char *filename = nullptr;
 
   if (exist_argv()) {
     filename = argv.str;
@@ -5519,7 +4473,7 @@ static void monitor_stateload(void) {
     if (exist_argv())
       error();
   } else {
-    filename = NULL;
+    filename = nullptr;
   }
 
   if (filename) {
@@ -5542,14 +4496,13 @@ static void monitor_stateload(void) {
       printf("stateload failed\n");
     }
   }
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* snapshot                         */
 /*  スクリーンスナップショットの保存            */
 /*--------------------------------------------------------------*/
-static void monitor_snapshot(void) {
+static void monitor_snapshot() {
   int format = -1;
 
   if (exist_argv()) {
@@ -5578,15 +4531,14 @@ static void monitor_snapshot(void) {
   if (screen_snapshot_save() == 0) {
     printf("save-snapshot failed\n");
   }
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* loadfont <filename> <format> <type>              */
 /*  フォントファイルのロード                */
 /*--------------------------------------------------------------*/
-static void monitor_loadfont(void) {
-  char *filename = NULL;
+static void monitor_loadfont() {
+  char *filename = nullptr;
   int format = 0;
   int type = 0;
 
@@ -5695,16 +4647,14 @@ static void monitor_loadfont(void) {
     fclose(fp);
     screen_update_immidiate();
   }
-
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* savefont <filename> <format> <type>              */
 /*  フォントファイルのセーブ                */
 /*--------------------------------------------------------------*/
-static void monitor_savefont(void) {
-  char *filename = NULL;
+static void monitor_savefont() {
+  char *filename = nullptr;
   int format = 0;
   int type = 0;
 
@@ -5804,8 +4754,8 @@ static void monitor_savefont(void) {
 /* tapeload [<filename>]                    */
 /*  ロード用テープイメージファイルのセット           */
 /*--------------------------------------------------------------*/
-static void monitor_tapeload(void) {
-  char *filename = NULL;
+static void monitor_tapeload() {
+  char *filename = nullptr;
 
   if (exist_argv()) {
     filename = argv.str;
@@ -5832,15 +4782,14 @@ static void monitor_tapeload(void) {
       printf("** Tape %s can't set **\n", filename);
     }
   }
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* tapesave [<filename>]                    */
 /*  セーブ用テープイメージファイルのセット           */
 /*--------------------------------------------------------------*/
-static void monitor_tapesave(void) {
-  char *filename = NULL;
+static void monitor_tapesave() {
+  char *filename = nullptr;
 
   if (exist_argv()) {
     filename = argv.str;
@@ -5867,15 +4816,14 @@ static void monitor_tapesave(void) {
       printf("** Tape %s can't set **\n", filename);
     }
   }
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* printer [<filename>]                     */
 /*  プリントアウト用イメージファイルのセット        */
 /*--------------------------------------------------------------*/
-static void monitor_printer(void) {
-  char *filename = NULL;
+static void monitor_printer() {
+  char *filename = nullptr;
 
   if (exist_argv()) {
     filename = argv.str;
@@ -5902,15 +4850,14 @@ static void monitor_printer(void) {
       printf("** Printout image %s can't set **\n", filename);
     }
   }
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* serialin [<filename>]                    */
 /*  シリアル入力用イメージファイルのセット           */
 /*--------------------------------------------------------------*/
-static void monitor_serialin(void) {
-  char *filename = NULL;
+static void monitor_serialin() {
+  char *filename = nullptr;
 
   if (exist_argv()) {
     filename = argv.str;
@@ -5950,15 +4897,14 @@ static void monitor_serialin(void) {
       printf("** Serial-In image %s can't set **\n", filename);
     }
   }
-  return;
 }
 
 /*--------------------------------------------------------------*/
 /* serialout <filename>                     */
 /*  シリアル出力用イメージファイルのセット           */
 /*--------------------------------------------------------------*/
-static void monitor_serialout(void) {
-  char *filename = NULL;
+static void monitor_serialout() {
+  char *filename = nullptr;
 
   if (exist_argv()) {
     filename = argv.str;
@@ -5985,11 +4931,10 @@ static void monitor_serialout(void) {
       printf("** Serial-Out image %s can't set **\n", filename);
     }
   }
-  return;
 }
 
 /*----------------------------------*/
-static void monitor_misc(void) {
+static void monitor_misc() {
 /*
   int ch;
   extern const char *mixer_get_name(int ch);
@@ -6020,7 +4965,7 @@ static void monitor_misc(void) {
 #endif
 
   /*
-    extern void monitor_fdc(void);
+    extern void monitor_fdc();
     monitor_fdc();
   */
   /*
@@ -6050,13 +4995,13 @@ char *command_generator(char *text, int state);
 char *set_arg_generator(char *text, int state);
 char **fileman_completion(char *text, int start, int end);
 
-static void initialize_readline(void) {
+static void initialize_readline() {
   rl_readline_name = "QUASI88kai"; /*よくわからんが ~/.inputrc に関係あるらしい*/
   rl_attempted_completion_function = (rl_completion_func_t *)fileman_completion;
 }
 
 char **fileman_completion(char *text, int start, int end) {
-  char **matches = NULL;
+  char **matches = nullptr;
 
   int i = 0;
   char c; /* "set " と入力された場合 */
@@ -6087,7 +5032,7 @@ char **fileman_completion(char *text, int start, int end) {
 
 char *command_generator(char *text, int state) {
   static int count, len;
-  char *name;
+  const char *name;
 
   if (state == 0) { /* この関数、最初は state=0 で呼び出される */
     count = 0;      /* らしいので、その時に変数を初期化する。  */
@@ -6100,7 +5045,7 @@ char *command_generator(char *text, int state) {
     count++;
 
     if (strncmp(name, text, len) == 0) {
-      char *p = malloc(strlen(name) + 1);
+      char *p = (char *)malloc(strlen(name) + 1);
       if (p) {
         strcpy(p, name);
       }
@@ -6108,12 +5053,12 @@ char *command_generator(char *text, int state) {
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 char *set_arg_generator(char *text, int state) {
   static int count, len; /* set コマンドが入力済みの場合 */
-  char *name;
+  const char *name;
 
   if (state == 0) {
     count = 0;
@@ -6129,7 +5074,7 @@ char *set_arg_generator(char *text, int state) {
       continue;
 
     if (strncmp(name, text, len) == 0) {
-      char *p = malloc(strlen(name) + 1);
+      char *p = (char *)malloc(strlen(name) + 1);
       if (p) {
         strcpy(p, name);
       }
@@ -6137,7 +5082,7 @@ char *set_arg_generator(char *text, int state) {
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 #endif
 
@@ -6147,7 +5092,7 @@ char *set_arg_generator(char *text, int state) {
 
 static int monitor_job = 0;
 
-void monitor_init(void) {
+void monitor_init() {
   monitor_job = 0;
 
   save_dump_addr = -1;
@@ -6184,7 +5129,7 @@ void monitor_init(void) {
     }
   }
 
-  fflush(NULL);
+  fflush(nullptr);
 
   if (quasi88_event_flags & EVENT_DEBUG) {
     quasi88_event_flags &= ~EVENT_DEBUG;
@@ -6212,13 +5157,13 @@ void monitor_init(void) {
   }
 
   status_message_default(0, " MONITOR ");
-  status_message_default(1, NULL);
-  status_message_default(2, NULL);
+  status_message_default(1, nullptr);
+  status_message_default(2, nullptr);
 
   screen_update_immidiate();
 }
 
-void monitor_main(void) {
+void monitor_main() {
   int i;
 
   /* モードが切り替わるまで、処理を続行 */
@@ -6231,9 +5176,9 @@ void monitor_main(void) {
 #ifndef USE_GNU_READLINE
 
       printf("QUASI88kai> ");
-      if (fgets(buf, MAX_CHRS, stdin) == NULL) { /* ^D が入力されたら */
-#ifndef IGNORE_CTRL_D                            /* 強制的に終了。    */
-        quasi88_quit();                          /* 回避方法がわからん*/
+      if (fgets(buf, MAX_CHRS, stdin) == nullptr) { /* ^D が入力されたら */
+#ifndef IGNORE_CTRL_D                               /* 強制的に終了。    */
+        quasi88_quit();                             /* 回避方法がわからん*/
 #else
         quasi88_monitor(); /* IRIX/AIXは大丈夫? */
 #endif
@@ -6245,13 +5190,13 @@ void monitor_main(void) {
       char *p, *chk;
       HIST_ENTRY *ph;
       p = readline("QUASI88kai> "); /* GNU readline の  */
-      if (p == NULL) {              /* 仕様がいまいち   */
+      if (p == nullptr) {           /* 仕様がいまいち   */
         printf("\n");               /* わからん。       */
         break;                      /* man で斜め読み   */
       } else {                      /* してみたが、英語 */
                                     /* は理解しがたい。 */
         ph = previous_history();
-        if (*p == '\0' && ph != NULL) {         /* リターンキーで直前の */
+        if (*p == '\0' && ph != nullptr) {      /* リターンキーで直前の */
           strncpy(buf, ph->line, MAX_CHRS - 1); /*コマンドを実行 */
         } else
           strncpy(buf, p, MAX_CHRS - 1);
@@ -6264,7 +5209,7 @@ void monitor_main(void) {
             continue;
           }
           /* 同じコマンドは履歴に残さない */
-          else if (ph != NULL && strcmp(chk, ph->line) == 0)
+          else if (ph != nullptr && strcmp(chk, ph->line) == 0)
             break;
           else {
             add_history(chk);
@@ -6296,7 +5241,7 @@ void monitor_main(void) {
           } else { /* 通常の命令の場合 */
             monitor_job = monitor_cmd[i].job;
             shift();
-            fflush(NULL);
+            fflush(nullptr);
           }
         }
       }

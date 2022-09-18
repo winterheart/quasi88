@@ -29,14 +29,14 @@ extern int RTC_flag;
 extern int SOUND_flag;
 extern int RS232C_flag;
 
-void interval_work_init_all(void);
+void interval_work_init_all();
 
 void interval_work_set_RS232C(int bps, int framesize);
 
-void interval_work_set_TIMER_A(void);
-void interval_work_set_TIMER_B(void);
+void interval_work_set_TIMER_A();
+void interval_work_set_TIMER_B();
 
-void interval_work_set_BDRY(void);
+void interval_work_set_BDRY();
 void interval_work_set_EOS(int length);
 
 void change_sound_flags(int port);
@@ -44,10 +44,10 @@ void change_sound_prescaler(int new_prescaler);
 
 void boost_change(int new_val);
 
-void main_INT_init(void);
-void main_INT_update(void);
-int main_INT_chk(void);
+void main_INT_init();
+void main_INT_update();
+int main_INT_chk();
 
-int quasi88_info_vsync_count(void);
+int quasi88_info_vsync_count();
 
 #endif /* INTR_H_INCLUDED */

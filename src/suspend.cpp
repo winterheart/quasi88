@@ -6,14 +6,15 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
+#include <cstring>
+#include <cctype>
 
+extern "C" {
 #include "quasi88.h"
 #include "suspend.h"
 #include "file-op.h"
 #include "utility.h"
+}
 
 int resume_flag = FALSE;  /* 起動時のレジューム  */
 int resume_force = FALSE; /* 強制レジューム    */
@@ -235,7 +236,7 @@ static int write_id(OSD_FILE *fp, const char id[4], int size) {
 static OSD_FILE *statesave_fp;
 
 /* ヘッダ情報を書き込む */
-static int statesave_header(void) {
+static int statesave_header() {
   size_t off;
   char header[SZ_HEADER];
   OSD_FILE *fp = statesave_fp;
@@ -366,7 +367,7 @@ static OSD_FILE *stateload_fp;
 static int statefile_rev = 0;
 
 /* ヘッダ情報を取り出す */
-static int stateload_header(void) {
+static int stateload_header() {
   char header[SZ_HEADER + 1];
   char *title, *ver, *rev;
   OSD_FILE *fp = stateload_fp;
@@ -685,7 +686,7 @@ int statesave(void) {
           break;
 
         success = TRUE;
-      } while (0);
+      } while (false);
     }
 
     osd_fclose(statesave_fp);
@@ -752,7 +753,7 @@ int stateload(void) {
           break;
 
         success = TRUE;
-      } while (0);
+      } while (false);
     }
 
     osd_fclose(stateload_fp);

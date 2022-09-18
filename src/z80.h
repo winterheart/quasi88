@@ -30,8 +30,8 @@ typedef struct {
   byte (*io_read)(byte);         /* I/O 入力関数     */
   void (*io_write)(byte, byte);  /* I/O 出力関数     */
 
-  void (*intr_update)(void); /* 割込情報更新関数 */
-  int (*intr_ack)(void);     /* 割込応答関数       */
+  void (*intr_update)(); /* 割込情報更新関数 */
+  int (*intr_ack)();     /* 割込応答関数       */
 
   pair PC_prev; /* 直前の PC (モニタ用)  */
 
@@ -65,7 +65,7 @@ extern int z80_state_intchk; /* このstate数実行後、割込判定する   *
 
 extern void z80_reset(z80arch *z80);
 extern int z80_emu(z80arch *z80, int state_of_exec);
-extern void z80_debug(z80arch *z80, char *mes);
+extern void z80_debug(z80arch *z80, const char *mes);
 extern int z80_line_disasm(z80arch *z80, word addr);
 
 extern void z80_logging(z80arch *z80);

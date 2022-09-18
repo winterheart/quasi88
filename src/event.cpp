@@ -1,5 +1,6 @@
-#include <string.h>
+#include <cstring>
 
+extern "C" {
 #include "quasi88.h"
 
 #include "drive.h"
@@ -18,6 +19,7 @@
 #if USE_RETROACHIEVEMENTS
 #include "retroachievements.h"
 #endif
+}
 
 /***********************************************************************
  * QUASI88 起動中のステートロード処理関数
@@ -84,7 +86,7 @@ int quasi88_stateload(int serial) {
 
   } else { /* ステートロード失敗したら・・・ */
 
-    quasi88_reset(NULL); /* とりあえずリセット */
+    quasi88_reset(nullptr); /* とりあえずリセット */
   }
 
   if (quasi88_is_exec()) {
@@ -210,7 +212,7 @@ int quasi88_drag_and_drop(const char *filename) {
 #endif
 
   if (success) {
-    quasi88_reset(NULL);
+    quasi88_reset(nullptr);
 
     if (quasi88_is_pause()) {
       quasi88_exec();
@@ -312,7 +314,7 @@ int quasi88_disk_insert_all(const char *filename, int ro) {
   }
 
   if (quasi88_is_exec()) {
-    status_message_default(1, NULL);
+    status_message_default(1, nullptr);
   }
   return success;
 }
@@ -358,7 +360,7 @@ int quasi88_disk_insert(int drv, const char *filename, int image, int ro) {
   }
 
   if (quasi88_is_exec()) {
-    status_message_default(1, NULL);
+    status_message_default(1, nullptr);
   }
   return success;
 }
@@ -400,7 +402,7 @@ int quasi88_disk_eject_all(void) {
   boot_from_rom = TRUE;
 
   if (quasi88_is_exec()) {
-    status_message_default(1, NULL);
+    status_message_default(1, nullptr);
   }
 
   return TRUE;
@@ -433,7 +435,7 @@ int quasi88_disk_eject(int drv) {
   }
 
   if (quasi88_is_exec()) {
-    status_message_default(1, NULL);
+    status_message_default(1, nullptr);
   }
 
   return TRUE;
@@ -488,7 +490,7 @@ static void disk_image_sub(int drv, int type, int img) {
   }
 
   if (quasi88_is_exec()) {
-    status_message_default(1, NULL);
+    status_message_default(1, nullptr);
   }
   status_message(1, STATUS_INFO_TIME, str);
 }

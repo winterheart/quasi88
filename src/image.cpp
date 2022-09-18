@@ -4,14 +4,15 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
+#include <cstring>
 
+extern "C" {
 #include "quasi88.h"
 #include "initval.h"
 #include "drive.h"
 #include "image.h"
 #include "file-op.h"
+}
 
 /***********************************************************************
  * 指定されたオフセット位置から、ヘッダ情報 32バイトを読み出す。
@@ -32,7 +33,7 @@
  *  但し、返り値が D88_SUCCESS 以外の時は、header[]の内容は不定。
  ************************************************************************/
 
-int d88_read_header(OSD_FILE *fp, long offset, unsigned char header[32]) {
+int d88_read_header(OSD_FILE *fp, long offset, char header[32]) {
   long size;
   char c;
   long current;
@@ -247,7 +248,7 @@ int d88_append_blank(OSD_FILE *fp, int drv) {
  *----------------------------------------------------------------------*/
 
 static int d88_search_image(OSD_FILE *fp, int img, long *image_top) {
-  unsigned char c[32];
+  char c[32];
   long offset = 0;
   int num = 0, result;
 
