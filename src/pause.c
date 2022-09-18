@@ -15,11 +15,7 @@
 #include "quasi88.h"
 #include "pause.h"
 
-#include "emu.h"
-#include "initval.h"
 #include "status.h"
-#include "screen.h"
-#include "wait.h"
 #include "event.h"
 
 int need_focus = FALSE; /* フォーカスアウト停止あり */

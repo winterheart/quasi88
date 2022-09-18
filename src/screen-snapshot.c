@@ -8,7 +8,6 @@
 
 #include "quasi88.h"
 #include "screen.h"
-#include "screen-func.h"
 #include "crtcdmac.h"
 #include "memory.h"
 extern char screen_snapshot[];

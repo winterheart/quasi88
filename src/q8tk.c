@@ -16,11 +16,9 @@
 #include "q8tk.h"
 #include "q8tk-glib.h"
 
-#include "menu-screen.h"
 
 #include "file-op.h"
 #include "fname.h"
-#include "wait.h"
 
 #include "keyboard.h" /* mouse_x, mouse_y */
 #include "event.h"

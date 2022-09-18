@@ -13,17 +13,11 @@
 
 #include "pc88cpu.h"
 
-#include "screen.h"
 #include "keyboard.h"
 #include "intr.h"
 #include "event.h"
-#include "menu.h"
-#include "monitor.h"
-#include "pause.h"
-#include "wait.h"
 #include "suspend.h"
 #include "status.h"
-#include "graph.h"
 #include "snddrv.h"
 
 break_t break_point[2][NR_BP];        /* ブレークポイント     */

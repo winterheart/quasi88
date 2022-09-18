@@ -14,16 +14,11 @@
 
 #include <stdio.h>
 
-#include <sys/types.h>      /* select                        */
 #include <sys/time.h>       /* select           gettimeofday */
 #include <unistd.h>     /* select usleep                 */
-#include <time.h>       /*        nanosleep clock        */
 
 #include "quasi88.h"
-#include "initval.h"
 #include "wait.h"
-#include "suspend.h"
-#include "event.h"      /* quasi88_is_exec      */
 
 #include "intr.h"       /* test */
 #include "screen.h"     /* test */

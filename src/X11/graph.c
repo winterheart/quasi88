@@ -9,7 +9,6 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <unistd.h>
 
 #include "quasi88.h"
 #include "graph.h"

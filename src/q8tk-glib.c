@@ -12,7 +12,6 @@
 
 #include "quasi88.h"
 #include "memory.h" /* has_kanji_rom    */
-#include "screen.h" /* screen_scale_* */
 
 #include "q8tk.h"
 #include "q8tk-glib.h"

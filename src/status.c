@@ -18,7 +18,6 @@
 #include "menu.h"
 
 #include "drive.h" /* get_drive_ready()    */
-#include "event.h" /* get_keysym_menu()    */
 
 /*---------------------------------------------------------------------------*/
 

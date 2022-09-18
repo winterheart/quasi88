@@ -8,7 +8,6 @@
 #include <stdio.h>
 
 #include "quasi88.h"
-#include "device.h"
 
 #include "getconf.h" /* config_init */
 #include "menu.h"    /* menu_about_osd_msg */

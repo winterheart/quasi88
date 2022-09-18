@@ -5,7 +5,6 @@
 /************************************************************************/
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <SDL2/SDL.h>
 
 #include "quasi88.h"
@@ -14,7 +13,6 @@
 #include "getconf.h"  /* config_init */
 #include "suspend.h"  /* stateload_system */
 #include "menu.h"     /* menu_about_osd_msg */
-#include "keyboard.h" /* romaji_type */
 
 /***********************************************************************
  * オプション

@@ -10,15 +10,10 @@
 
 #include "pc88cpu.h"
 #include "pc88main.h"
-#include "screen.h"
 #include "crtcdmac.h"
-#include "keyboard.h"
 #include "soundbd.h"
 
-#include "event.h"
-#include "emu.h"
 #include "snddrv.h"
-#include "wait.h"
 #include "suspend.h"
 
 int intr_level;        /* OUT[E4] 割り込みレベル    */

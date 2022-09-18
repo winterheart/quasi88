@@ -12,9 +12,7 @@
 
 #include "pc88cpu.h"
 #include "fdc.h"
-#include "screen.h" /* state_of_vsync */
 #include "intr.h"   /* state_of_vsync */
-#include "event.h"
 #include "memory.h"
 #include "pio.h"
 

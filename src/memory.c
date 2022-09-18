@@ -11,7 +11,6 @@
 #include "quasi88.h"
 #include "initval.h"
 #include "memory.h"
-#include "pc88main.h"
 
 #include "soundbd.h" /* sound_board, sound2_adpcm    */
 

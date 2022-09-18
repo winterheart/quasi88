@@ -10,7 +10,6 @@
 #include "initval.h"
 #include "soundbd.h"
 
-#include "pc88cpu.h"
 #include "pc88main.h"
 #include "intr.h"
 

@@ -12,21 +12,15 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 
-#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "quasi88.h"
-#include "getconf.h"
 #include "keyboard.h"
 #include "joystick.h"
 
 #include "drive.h"
 
-#include "emu.h"
 #include "device.h"
-#include "status.h"
-#include "screen.h"
 #include "event.h"
 #include "file-op.h"
 #include "utility.h"

@@ -5,7 +5,6 @@
 /************************************************************************/
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -24,7 +23,6 @@
 #include "soundbd.h"
 #include "fdc.h" /* disk_ex_drv */
 
-#include "event.h"
 #include "emu.h"
 #include "drive.h"
 #include "snddrv.h"

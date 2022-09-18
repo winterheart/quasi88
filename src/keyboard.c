@@ -8,22 +8,18 @@
 #include "event.h"
 
 #include "soundbd.h" /* sound_reg[]          */
-#include "graph.h"   /* set_key_and_mouse()      */
 #include "pc88cpu.h" /* z80main_cpu          */
 #include "intr.h"    /* state_of_cpu         */
 
 #include "snddrv.h"   /* xmame_XXX            */
-#include "wait.h"     /* wait_rate            */
 #include "pc88main.h" /* boot_clock_4mhz      */
 
 #include "drive.h"
 
-#include "emu.h"
 #include "status.h"
 #include "pause.h"
 #include "menu.h"
 #include "screen.h"
-#include "snapshot.h"
 
 #include "suspend.h"
 #include "utility.h"
@@ -1635,138 +1631,39 @@ static struct { /* ver 0.6.3以降との、機能の対応表 */
   int old;
   int now;
 } func_f_convert[] = {
-    {
-        OLD_FN_FUNC,
-        FN_FUNC,
-    },
-    {
-        OLD_FN_FRATE_UP,
-        FN_FRATE_UP,
-    },
-    {
-        OLD_FN_FRATE_DOWN,
-        FN_FRATE_DOWN,
-    },
-    {
-        OLD_FN_VOLUME_UP,
-        FN_VOLUME_UP,
-    },
-    {
-        OLD_FN_VOLUME_DOWN,
-        FN_VOLUME_DOWN,
-    },
-    {
-        OLD_FN_PAUSE,
-        FN_PAUSE,
-    },
-    {
-        OLD_FN_RESIZE,
-        FN_RESIZE,
-    },
-    {
-        OLD_FN_NOWAIT,
-        FN_NOWAIT,
-    },
-    {
-        OLD_FN_SPEED_UP,
-        FN_SPEED_UP,
-    },
-    {
-        OLD_FN_SPEED_DOWN,
-        FN_SPEED_DOWN,
-    },
-    {
-        OLD_FN_MOUSE_HIDE,
-        FN_FUNC,
-    },
-    {
-        OLD_FN_FULLSCREEN,
-        FN_FULLSCREEN,
-    },
-    {
-        OLD_FN_IMAGE_NEXT1,
-        FN_IMAGE_NEXT1,
-    },
-    {
-        OLD_FN_IMAGE_PREV1,
-        FN_IMAGE_PREV1,
-    },
-    {
-        OLD_FN_IMAGE_NEXT2,
-        FN_IMAGE_NEXT2,
-    },
-    {
-        OLD_FN_IMAGE_PREV2,
-        FN_IMAGE_PREV2,
-    },
-    {
-        OLD_FN_NUMLOCK,
-        FN_NUMLOCK,
-    },
-    {
-        OLD_FN_RESET,
-        FN_RESET,
-    },
-    {
-        OLD_FN_KANA,
-        FN_KANA,
-    },
-    {
-        OLD_FN_ROMAJI,
-        FN_ROMAJI,
-    },
-    {
-        OLD_FN_CAPS,
-        FN_CAPS,
-    },
-    {
-        OLD_FN_KETTEI,
-        KEY88_KETTEI,
-    },
-    {
-        OLD_FN_HENKAN,
-        KEY88_HENKAN,
-    },
-    {
-        OLD_FN_ZENKAKU,
-        KEY88_ZENKAKU,
-    },
-    {
-        OLD_FN_PC,
-        KEY88_PC,
-    },
-    {
-        OLD_FN_SNAPSHOT,
-        FN_SNAPSHOT,
-    },
-    {
-        OLD_FN_STOP,
-        KEY88_STOP,
-    },
-    {
-        OLD_FN_COPY,
-        KEY88_COPY,
-    },
-    {
-        OLD_FN_STATUS,
-        FN_STATUS,
-    },
-    {
-        OLD_FN_MENU,
-        FN_MENU,
-    },
-    {
-        OLD_FN_FUNC,
-        FN_MAX_SPEED,
-    },
-    {
-        OLD_FN_FUNC,
-        FN_MAX_CLOCK,
-    },
-    {
-        OLD_FN_FUNC,
-        FN_MAX_BOOST,
-    },
+    {OLD_FN_FUNC, FN_FUNC},
+    {OLD_FN_FRATE_UP, FN_FRATE_UP},
+    {OLD_FN_FRATE_DOWN, FN_FRATE_DOWN},
+    {OLD_FN_VOLUME_UP, FN_VOLUME_UP},
+    {OLD_FN_VOLUME_DOWN, FN_VOLUME_DOWN},
+    {OLD_FN_PAUSE, FN_PAUSE},
+    {OLD_FN_RESIZE, FN_RESIZE},
+    {OLD_FN_NOWAIT, FN_NOWAIT},
+    {OLD_FN_SPEED_UP, FN_SPEED_UP},
+    {OLD_FN_SPEED_DOWN, FN_SPEED_DOWN},
+    {OLD_FN_MOUSE_HIDE, FN_FUNC},
+    {OLD_FN_FULLSCREEN, FN_FULLSCREEN},
+    {OLD_FN_IMAGE_NEXT1, FN_IMAGE_NEXT1},
+    {OLD_FN_IMAGE_PREV1, FN_IMAGE_PREV1},
+    {OLD_FN_IMAGE_NEXT2, FN_IMAGE_NEXT2},
+    {OLD_FN_IMAGE_PREV2, FN_IMAGE_PREV2},
+    {OLD_FN_NUMLOCK, FN_NUMLOCK},
+    {OLD_FN_RESET, FN_RESET},
+    {OLD_FN_KANA, FN_KANA},
+    {OLD_FN_ROMAJI, FN_ROMAJI},
+    {OLD_FN_CAPS, FN_CAPS},
+    {OLD_FN_KETTEI, KEY88_KETTEI},
+    {OLD_FN_HENKAN, KEY88_HENKAN},
+    {OLD_FN_ZENKAKU, KEY88_ZENKAKU},
+    {OLD_FN_PC, KEY88_PC},
+    {OLD_FN_SNAPSHOT, FN_SNAPSHOT},
+    {OLD_FN_STOP, KEY88_STOP},
+    {OLD_FN_COPY, KEY88_COPY},
+    {OLD_FN_STATUS, FN_STATUS},
+    {OLD_FN_MENU, FN_MENU},
+    {OLD_FN_FUNC, FN_MAX_SPEED},
+    {OLD_FN_FUNC, FN_MAX_CLOCK},
+    {OLD_FN_FUNC, FN_MAX_BOOST},
 
 };
 static int old_func_f[1 + 20];
