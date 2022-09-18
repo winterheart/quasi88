@@ -13,10 +13,10 @@ extern int fdc_ignore_readonly; /* 読込専用時、ライトを無視する   
 int fdc_ctrl(int interval);
 
 void fdc_write(byte data);
-byte fdc_read(void);
-byte fdc_status(void);
-void fdc_TC(void);
+byte fdc_read();
+byte fdc_status();
+void fdc_TC();
 
-void pc88fdc_break_point(void);
+void pc88fdc_break_point();
 
 #endif /* FDC_H_INCLUDED */

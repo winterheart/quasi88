@@ -4,13 +4,15 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
 
+extern "C" {
 #include "quasi88.h"
 #include "keyboard.h"
 #include "romaji.h"
+}
 
 #define Bt7 0x80
 #define Bt6 0x40

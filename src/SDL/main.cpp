@@ -4,9 +4,9 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
 #include <SDL2/SDL.h>
 
+extern "C" {
 #include "quasi88.h"
 #include "device.h"
 
@@ -16,6 +16,7 @@
 #endif
 #include "suspend.h"  /* stateload_system */
 #include "menu.h"     /* menu_about_osd_msg */
+}
 
 /***********************************************************************
  * オプション
@@ -35,28 +36,28 @@ static const T_CONFIG_TABLE sdl_options[] = {
     /*  -- GRAPHIC -- */
 
     /*  -- INPUT -- */
-    {311, "use_joy", X_FIX, &use_joydevice, TRUE, 0, 0, 0},
-    {311, "nouse_joy", X_FIX, &use_joydevice, FALSE, 0, 0, 0},
-    {312, "keyboard", X_INT, &keyboard_type, 0, 2, 0, 0},
-    {313, "keyconf", X_STR, &file_keyboard, 0, 0, 0, 0},
-    {314, "cmdkey", X_FIX, &use_cmdkey, TRUE, 0, 0, 0},
-    {314, "nocmdkey", X_FIX, &use_cmdkey, FALSE, 0, 0, 0},
+    {311, "use_joy", X_FIX, &use_joydevice, TRUE, 0, nullptr, nullptr},
+    {311, "nouse_joy", X_FIX, &use_joydevice, FALSE, 0, nullptr, nullptr},
+    {312, "keyboard", X_INT, &keyboard_type, 0, 2, nullptr, nullptr},
+    {313, "keyconf", X_STR, &file_keyboard, 0, 0, nullptr, nullptr},
+    {314, "cmdkey", X_FIX, &use_cmdkey, TRUE, 0, nullptr, nullptr},
+    {314, "nocmdkey", X_FIX, &use_cmdkey, FALSE, 0, nullptr, nullptr},
 
     /*  -- SYSTEM -- */
-    {320, "videodrv", X_STR, NULL, 0, 0, o_videodrv, 0},
-    {321, "audiodrv", X_STR, NULL, 0, 0, o_audiodrv, 0},
-    {322, "show_fps", X_FIX, &show_fps, TRUE, 0, 0, 0},
-    {322, "hide_fps", X_FIX, &show_fps, FALSE, 0, 0, 0},
+    {320, "videodrv", X_STR, nullptr, 0, 0, o_videodrv, nullptr},
+    {321, "audiodrv", X_STR, nullptr, 0, 0, o_audiodrv, nullptr},
+    {322, "show_fps", X_FIX, &show_fps, TRUE, 0, nullptr, nullptr},
+    {322, "hide_fps", X_FIX, &show_fps, FALSE, 0, nullptr, nullptr},
 
     /*  -- 無視 -- (他システムの引数つきオプション) */
-    {0, "cmap", X_INV, &invalid_arg, 0, 0, 0, 0},
-    {0, "sleepparm", X_INT, &invalid_arg, 0, 0, 0, 0},
+    {0, "cmap", X_INV, &invalid_arg, 0, 0, nullptr, nullptr},
+    {0, "sleepparm", X_INT, &invalid_arg, 0, 0, nullptr, nullptr},
 
     /* 終端 */
-    {0, NULL, X_INV, 0, 0, 0, 0, 0},
+    {0, nullptr, X_INV, nullptr, 0, 0, nullptr, nullptr},
 };
 
-static void help_msg_sdl(void) {
+static void help_msg_sdl() {
   fprintf(stdout, "  ** INPUT (SDL depend) **\n"
                   "    -use_joy/-nouse_joy     Enable/Disabel system joystick [-use_joy]\n"
                   "    -keyboard <0|1|2>       Set keyboard type (0:config/1:106key/2:101key) [1]\n"
@@ -71,7 +72,7 @@ static void help_msg_sdl(void) {
 /***********************************************************************
  * メイン処理
  ************************************************************************/
-static void finish(void);
+static void finish();
 
 int main(int argc, char *argv[]) {
   int x = 1;
@@ -124,7 +125,7 @@ int main(int argc, char *argv[]) {
 /*
  * 強制終了時のコールバック関数 (quasi88_exit()呼出時に、処理される)
  */
-static void finish(void) {
+static void finish() {
   sdl_exit();    /* SDL関連後始末 */
   config_exit(); /* 引数処理後始末 */
 }

@@ -28,18 +28,18 @@
 /* このファイルが EUC-japan か Shift-JIS かをチェックする・・・ */
 
 const char *menu_kanji_code = "漢字";
-const char menu_kanji_code_euc[]  = { 0xb4, 0xc1, 0xbb, 0xfa, 0x00 };
-const char menu_kanji_code_sjis[] = { 0x8a, 0xbf, 0x8e, 0x9a, 0x00 };
-const char menu_kanji_code_utf8[] = { 0xe6, 0xbc, 0xa2, 0xe5, 0xad, 0x97, 0x00 };
+const char menu_kanji_code_euc[]  = { (char)0xb4, (char)0xc1, (char)0xbb, (char)0xfa, 0x00 };
+const char menu_kanji_code_sjis[] = { (char)0x8a, (char)0xbf, (char)0x8e, (char)0x9a, 0x00 };
+const char menu_kanji_code_utf8[] = { (char)0xe6, (char)0xbc, (char)0xa2, (char)0xe5, (char)0xad, (char)0x97, 0x00 };
 
 
 typedef struct {
-    char    *str[2];    /* [0]…ANK文字列  [1]…日本語文字列 */
+    const char    *str[2];    /* [0]…ANK文字列  [1]…日本語文字列 */
     int     val;        /* int値 汎用                */
 } t_menudata;
 
 typedef struct {
-    char    *str[2];    /* [0]…ANK文字列  [1]…日本語文字列 */
+    const char    *str[2];    /* [0]…ANK文字列  [1]…日本語文字列 */
 } t_menulabel;
 
 
@@ -635,7 +635,7 @@ static const t_menulabel data_volume_type[] =
 
 
 typedef struct {
-  char  *str[2];
+  const char  *str[2];
   int   val;
   int   min;
   int   max;
@@ -743,7 +743,7 @@ static const t_menulabel data_dipsw[] =
 
 
 typedef struct{
-  char  *str[2];
+  const char  *str[2];
   int   val;
   const t_menudata *p;
 } t_dipsw;
@@ -1687,13 +1687,13 @@ static const char *help_jp[] =
   "てみてください。 また、動作するけれどもディスクのアクセス時に速度が",
   "低下する、サウンドが途切れる、などの場合も設定を変えると改善する",
   "可能性があります。",
-  0,
+  nullptr,
 };
 
 static const char *help_en[] =
 {
   " I'm waiting for translator... ",
-  0,
+  nullptr,
 };
 
 /*--------------------------------------------------------------
@@ -1703,7 +1703,7 @@ static const char *help_en[] =
 /* キーボード配列 (新旧別) のウィジット生成用データ */
 
 typedef struct{
-  char  *str;       /* キートップの文字 or パディング用空白     */
+  const char  *str;       /* キートップの文字 or パディング用空白     */
   int   code;       /* キーコード       or  0          */
 } t_keymap;
 
@@ -2664,9 +2664,9 @@ static void START_FILE_SELECTION(const char *label, /* タイトル       */
     q8tk_file_selection_set_filename(f, filename);
 
     q8tk_signal_connect(Q8TK_FILE_SELECTION(f)->ok_button,
-            "clicked", cb_fsel_ok, f);
+            "clicked", (Q8tkSignalFunc)cb_fsel_ok, f);
     q8tk_signal_connect(Q8TK_FILE_SELECTION(f)->cancel_button,
-            "clicked", cb_fsel_cancel, f);
+            "clicked", (Q8tkSignalFunc)cb_fsel_cancel, f);
     q8tk_widget_set_focus(Q8TK_FILE_SELECTION(f)->cancel_button);
 
     FSEL.ok_button       = ok_button;
@@ -2738,7 +2738,7 @@ static  Q8tkWidget  *dialog_accel;
 
 /* ダイアログ作成開始 */
 
-static  void    dialog_create(void)
+static  void    dialog_create()
 {
     int i;
     Q8tkWidget *d = q8tk_dialog_new();
@@ -2794,7 +2794,7 @@ static  void    dialog_set_check_button(const char *label, int on,
 
 /* ダイアログにセパレータを追加。 */
 
-static  void    dialog_set_separator(void)
+static  void    dialog_set_separator()
 {
     Q8tkWidget *s = q8tk_hseparator_new();
 
@@ -2843,7 +2843,7 @@ static  void    dialog_set_entry(const char *text, int max_length,
 
 /* ダイアログ内の、エントリの文字列をとり出す */
 
-static  const   char    *dialog_get_entry(void)
+static  const   char    *dialog_get_entry()
 {
     return q8tk_entry_get_text(dialog_entry);
 }
@@ -2858,7 +2858,7 @@ static  void    dialog_accel_key(int key)
 
 /* ダイアログ表示開始 (グラブされる。フォーカスは最後に追加したボタンへ) */
 
-static  void    dialog_start(void)
+static  void    dialog_start()
 {
     q8tk_widget_show(dialog_main);
     q8tk_grab_add(dialog_main);
@@ -2870,7 +2870,7 @@ static  void    dialog_start(void)
 
 /* ダイアログを消去 (ウインドウを消去し、グラブを解除する) */
 
-static  void    dialog_destroy(void)
+static  void    dialog_destroy()
 {
     int i;
     for (i=0; i<DIA_MAX; i++) {

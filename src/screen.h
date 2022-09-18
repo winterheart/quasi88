@@ -208,8 +208,8 @@ extern Ulong status_pixel[STATUS_COLOR_END]; /* ステータスの色コード  
  *  screen_init()   画面を生成する。起動時に呼ばれる。
  *  screen_exit()   後かたづけする。終了時に呼ばれる。
  ************************************************************************/
-int screen_init(void);
-void screen_exit(void);
+int screen_init();
+void screen_exit();
 
 /***********************************************************************
  * モード切り替え時の、各種再設定
@@ -217,14 +217,14 @@ void screen_exit(void);
  *  grab_mouse 、 hide_mouse などに基づき、マウスの設定をする。
  *  キーリピートや、ステータスも設定する。
  ************************************************************************/
-void screen_switch(void);
+void screen_switch();
 
 /***********************************************************************
  *
  ************************************************************************/
-void screen_attr_mouse_move(void);
-void screen_attr_mouse_click(void);
-int screen_attr_mouse_debug(void);
+void screen_attr_mouse_move();
+void screen_attr_mouse_click();
+int screen_attr_mouse_debug();
 
 /***********************************************************************
  * PC-8801の最終的な色を取得する
@@ -235,55 +235,55 @@ void screen_get_menu_palette(PC88_PALETTE_T pal[16]);
 /***********************************************************************
  * 描画
  ************************************************************************/
-void screen_update(void);           /* 描画   (1/60sec毎)  */
-void screen_update_immidiate(void); /* 即描画 (モニター用) */
+void screen_update();           /* 描画   (1/60sec毎)  */
+void screen_update_immidiate(); /* 即描画 (モニター用) */
 
 /***********************************************************************
  * フレームスキップ
  ************************************************************************/
-void frameskip_blink_reset(void);   /* 点滅処理 再初期化        */
-void frameskip_counter_reset(void); /* フレームスキップ 再初期化    */
+void frameskip_blink_reset();   /* 点滅処理 再初期化        */
+void frameskip_counter_reset(); /* フレームスキップ 再初期化    */
 void frameskip_check(int on_time);  /* フレームスキップ 判定  */
 
-int quasi88_cfg_now_frameskip_rate(void);
+int quasi88_cfg_now_frameskip_rate();
 void quasi88_cfg_set_frameskip_rate(int rate);
 
 /***********************************************************************
  * HALFサイズ時の色補完の有効・無効関連の関数
  ***********************************************************************/
-int quasi88_cfg_can_interp(void);
-int quasi88_cfg_now_interp(void);
+int quasi88_cfg_can_interp();
+int quasi88_cfg_now_interp();
 void quasi88_cfg_set_interp(int enable);
 
 /***********************************************************************
  * INTERLACEの設定関連の関数
  ***********************************************************************/
-int quasi88_cfg_now_interlace(void);
+int quasi88_cfg_now_interlace();
 void quasi88_cfg_set_interlace(int interlace_mode);
 
 /***********************************************************************
  * ステータス表示設定関連の関数
  ***********************************************************************/
-int quasi88_cfg_can_showstatus(void);
-int quasi88_cfg_now_showstatus(void);
+int quasi88_cfg_can_showstatus();
+int quasi88_cfg_now_showstatus();
 void quasi88_cfg_set_showstatus(int show);
 
 /***********************************************************************
  * 全画面設定・画面サイズ設定関連の関数
  ***********************************************************************/
-int quasi88_cfg_can_fullscreen(void);
-int quasi88_cfg_now_fullscreen(void);
+int quasi88_cfg_can_fullscreen();
+int quasi88_cfg_now_fullscreen();
 void quasi88_cfg_set_fullscreen(int fullscreen);
-int quasi88_cfg_max_size(void);
-int quasi88_cfg_min_size(void);
-int quasi88_cfg_now_size(void);
+int quasi88_cfg_max_size();
+int quasi88_cfg_min_size();
+int quasi88_cfg_now_size();
 void quasi88_cfg_set_size(int new_size);
-void quasi88_cfg_set_size_large(void);
-void quasi88_cfg_set_size_small(void);
+void quasi88_cfg_set_size_large();
+void quasi88_cfg_set_size_small();
 
 /***********************************************************************
  * ???
  ***********************************************************************/
-int quasi88_info_draw_count(void);
+int quasi88_info_draw_count();
 
 #endif /* SCREEN_H_INCLUDED */

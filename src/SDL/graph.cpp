@@ -4,12 +4,14 @@
  *  詳細は、 graph.h 参照
  ************************************************************************/
 
-#include <stdio.h>
+#include <cstdio>
 #include <SDL2/SDL.h>
 
+extern "C" {
 #include "quasi88.h"
 #include "graph.h"
 #include "device.h"
+}
 
 int sdl_mouse_rel_move; /* マウス相対移動量検知可能か  */
 
@@ -31,7 +33,7 @@ int sdl_init(void) {
     SDL_version libver;
     SDL_GetVersion(&libver);
     printf("Initializing SDL (%d.%d.%d) ... ", libver.major, libver.minor, libver.patch);
-    fflush(NULL);
+    fflush(nullptr);
   }
 
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
@@ -58,14 +60,14 @@ void sdl_exit(void) { SDL_Quit(); }
 const T_GRAPH_SPEC *graph_init(void) {
   if (SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_OPENGL, &sdl_window, &sdl_renderer) != 0) {
     printf("Failed to initialize SDL: %s!\n", SDL_GetError());
-    return NULL;
+    return nullptr;
   }
 
   if (verbose_proc) {
     SDL_RendererInfo ri;
     if (SDL_GetRendererInfo(sdl_renderer, &ri) < 0) {
       printf("Failed to get info from SDL: %s\n", SDL_GetError());
-      return NULL;
+      return nullptr;
     }
     printf("Initializing Graphic System (SDL:%s) ... \n", ri.name);
   }
@@ -73,7 +75,7 @@ const T_GRAPH_SPEC *graph_init(void) {
   // Get the highest possible mode
   if (SDL_GetDisplayMode(0, 0, &sdl_display_mode) != 0) {
     printf("Failed to get info from SDL: %s\n", SDL_GetError());
-    return NULL;
+    return nullptr;
   }
   printf("  Best mode: %dx%dx%d @ %d Hz\n", sdl_display_mode.w, sdl_display_mode.h,
          SDL_BITSPERPIXEL(sdl_display_mode.format), sdl_display_mode.refresh_rate);
@@ -138,8 +140,8 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double as
     printf("%s\n", (sdl_offscreen && sdl_texture) ? "OK" : "FAILED");
   }
 
-  if (sdl_offscreen == NULL || sdl_texture == NULL)
-    return NULL;
+  if (sdl_offscreen == nullptr || sdl_texture == nullptr)
+    return nullptr;
 
   graph_info.fullscreen = fullscreen;
   graph_info.width = sdl_offscreen->w;
@@ -150,8 +152,8 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double as
   graph_info.nr_color = 255;
   graph_info.write_only = FALSE;
   graph_info.broken_mouse = FALSE;
-  graph_info.draw_start = NULL;
-  graph_info.draw_finish = NULL;
+  graph_info.draw_start = nullptr;
+  graph_info.draw_finish = nullptr;
   graph_info.dont_frameskip = FALSE;
 
   if (verbose_proc) {
@@ -167,7 +169,7 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double as
 }
 
 void graph_exit(void) {
-  SDL_SetRelativeMouseMode(FALSE);
+  SDL_SetRelativeMouseMode(SDL_FALSE);
   SDL_FreeSurface(sdl_offscreen);
   SDL_DestroyTexture(sdl_texture);
   SDL_DestroyRenderer(sdl_renderer);
@@ -191,9 +193,9 @@ void graph_remove_color(int nr_pixel, unsigned long pixel[]) {
  * Update main texture and draw it to render
  */
 void graph_update(int nr_rect, T_GRAPH_RECT rect[]) {
-  SDL_UpdateTexture(sdl_texture, NULL, sdl_offscreen->pixels, sdl_offscreen->pitch);
+  SDL_UpdateTexture(sdl_texture, nullptr, sdl_offscreen->pixels, sdl_offscreen->pitch);
   SDL_RenderClear(sdl_renderer);
-  SDL_RenderCopy(sdl_renderer, sdl_texture, NULL, NULL);
+  SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
   SDL_RenderPresent(sdl_renderer);
 }
 
@@ -206,16 +208,16 @@ void graph_set_attribute(int mouse_show, int grab, int keyrepeat_on) {
     SDL_ShowCursor(SDL_DISABLE);
 
   if (grab)
-    SDL_SetRelativeMouseMode(TRUE);
+    SDL_SetRelativeMouseMode(SDL_TRUE);
   else
-    SDL_SetRelativeMouseMode(FALSE);
+    SDL_SetRelativeMouseMode(SDL_FALSE);
   /*
     if (keyrepeat_on)
       SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
     else
       SDL_EnableKeyRepeat(0, 0);
   */
-  sdl_mouse_rel_move = (mouse_show == FALSE && grab) ? TRUE : FALSE;
+  sdl_mouse_rel_move = (!mouse_show && grab) ? TRUE : FALSE;
 
   /* SDL は、グラブ中かつマウスオフなら、ウインドウの端にマウスが
      ひっかかっても、マウス移動の相対量を検知できる。

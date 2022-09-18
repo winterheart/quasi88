@@ -95,42 +95,42 @@ include_directories(
 )
 
 set(COMMON_SOURCES
-	src/basic.c
-	src/crtcdmac.c
+	src/basic.cpp
+	src/crtcdmac.cpp
 	src/debug.c
-	src/emu.c
-	src/event.c
-	src/fdc.c
+	src/emu.cpp
+	src/event.cpp
+	src/fdc.cpp
 	src/file-op.cpp
 	src/fname.c
-	src/getconf.c
-	src/image.c
-	src/intr.c
-	src/keyboard.c
-	src/memory.c
-	src/menu.c
-	src/menu-screen.c
-	src/monitor.c
-	src/pause.c
-	src/pc88main.c
-	src/pc88sub.c
-	src/pio.c
-	src/romaji.c
-	src/screen.c
+	src/getconf.cpp
+	src/image.cpp
+	src/intr.cpp
+	src/keyboard.cpp
+	src/memory.cpp
+	src/menu.cpp
+	src/menu-screen.cpp
+	src/monitor.cpp
+	src/pause.cpp
+	src/pc88main.cpp
+	src/pc88sub.cpp
+	src/pio.cpp
+	src/romaji.cpp
+	src/screen.cpp
 	src/screen-8bpp.c
 	src/screen-16bpp.c
 	src/screen-32bpp.c
-	src/screen-snapshot.c
-	src/snapshot.c
-	src/soundbd.c
-	src/status.c
-	src/suspend.c
+	src/screen-snapshot.cpp
+	src/snapshot.cpp
+	src/soundbd.cpp
+	src/status.cpp
+	src/suspend.cpp
 	src/q8tk.c
 	src/q8tk-glib.c
 	src/quasi88.cpp
 	src/utility.c
-	src/z80.c
-	src/z80-debug.c
+	src/z80.cpp
+	src/z80-debug.cpp
 )
 
 #### Double size screen support
@@ -258,11 +258,11 @@ if(ENABLE_SDL)
 	)
 
 	set(SDL_SOURCES
-		src/SDL/event.c
-		src/SDL/graph.c
+		src/SDL/event.cpp
+		src/SDL/graph.cpp
 		src/SDL/keymap.cpp
-		src/SDL/main.c
-		src/SDL/wait.c
+		src/SDL/main.cpp
+		src/SDL/wait.cpp
 	)
 
 	#### SDL Sound

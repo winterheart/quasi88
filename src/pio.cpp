@@ -4,8 +4,9 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
+#include <cstdio>
 
+extern "C" {
 #include "quasi88.h"
 #include "pio.h"
 
@@ -13,6 +14,7 @@
 
 #include "emu.h"
 #include "suspend.h"
+}
 
 /*
   PIOアクセスと、サブCPUの駆動
@@ -62,7 +64,7 @@ static z80arch *z80[2] = {&z80main_cpu, &z80sub_cpu};
 /* PIO 初期化                                */
 /*  PA / PCL 受信 ／ PB / PCH 送信                 */
 /*----------------------------------------------------------------------*/
-void pio_init(void) {
+void pio_init() {
   int side;
 
   for (side = 0; side < 2; side++) {
@@ -178,7 +180,6 @@ void pio_write_AB(int side, int port, byte data) {
       break;
     }
   }
-  return;
 }
 
 /*----------------------------------------------------------------------*/
@@ -276,7 +277,6 @@ void pio_write_C(int side, byte data) {
     }
     break;
   }
-  return;
 }
 
 /*--------------------------------------------------------------*/
@@ -306,7 +306,6 @@ void pio_write_C_direct(int side, byte data) {
     }
     break;
   }
-  return;
 }
 
 /*----------------------------------------------------------------------*/
@@ -411,7 +410,7 @@ static T_SUSPEND_W suspend_pio_work[] = {
     {TYPE_INT, &pio_C[1][1].cont_f},
     {TYPE_BYTE, &pio_C[1][1].data},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 int statesave_pio(void) {

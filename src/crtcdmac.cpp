@@ -4,12 +4,14 @@
 /*                                  */
 /************************************************************************/
 
+extern "C" {
 #include "quasi88.h"
 #include "crtcdmac.h"
 #include "memory.h"
 
 #include "screen.h"
 #include "suspend.h"
+}
 
 /*======================================================================
  *
@@ -149,7 +151,7 @@ void crtc_send_sync_signal(int flag) {}
 
 /*-------- 初期化 --------*/
 
-void crtc_init(void) {
+void crtc_init() {
   crtc_out_command(CRTC_RESET << 5);
   crtc_out_parameter(0xce);
   crtc_out_parameter(0x98);
@@ -272,7 +274,7 @@ byte crtc_in_status(void) { return crtc_status; }
 
 /*-------- パラメータ出力時 --------*/
 
-byte crtc_in_parameter(void) {
+byte crtc_in_parameter() {
   byte data = 0xff;
 
   switch (crtc_command) {
@@ -314,7 +316,7 @@ void dmac_out_mode(byte data) {
   set_text_display();
   screen_set_dirty_all();
 }
-byte dmac_in_status(void) { return 0x1f; }
+byte dmac_in_status() { return 0x1f; }
 
 void dmac_out_address(byte addr, byte data) {
   if (dmac_flipflop == 0)
@@ -360,7 +362,7 @@ byte dmac_in_counter(byte addr) {
 /***********************************************************************
  * CRTC,DMAC設定時および、I/O 31H / 53H 出力時に呼ぶ
  ************************************************************************/
-void set_text_display(void) {
+void set_text_display() {
   if ((dmac_mode & 0x4) && (crtc_active) && crtc_intr_mask == 3) {
     if (!(grph_pile & GRPH_PILE_TEXT)) {
       text_display = TEXT_ENABLE;
@@ -738,7 +740,7 @@ static T_SUSPEND_W suspend_crtcdmac_work[] = {
     {TYPE_PAIR, &dmac_counter[3]},
     {TYPE_INT, &dmac_mode},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 int statesave_crtcdmac(void) {

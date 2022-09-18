@@ -4,9 +4,10 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
+extern "C" {
 #include "quasi88.h"
 #include "debug.h"
 #include "initval.h"
@@ -24,6 +25,7 @@
 #include "q8tk.h"
 
 #include "pause.h" /* pause_event_focus_in_when_pause() */
+}
 
 PC88_PALETTE_T vram_bg_palette; /* OUT[52/54-5B]        */
 PC88_PALETTE_T vram_palette[8]; /*      各種パレット  */
@@ -131,8 +133,8 @@ Ulong status_pixel[STATUS_COLOR_END]; /* ステータスの色コード   */
 
 static int screen_write_only; /* 画面バッファ読出不可なら、真   */
 
-static void (*draw_start)(void);  /* 描画前のコールバック関数 */
-static void (*draw_finish)(void); /* 描画後のコールバック関数 */
+static void (*draw_start)();  /* 描画前のコールバック関数 */
+static void (*draw_finish)(); /* 描画後のコールバック関数 */
 static int dont_frameskip;        /* フレームスキップ禁止なら、真   */
 
 static int drawn_count; /* fps計算用の描画回数カウンタ  */
@@ -150,28 +152,28 @@ enum {
 };
 static void screen_attr_setup(int stat);
 
-static void check_half_interp(void);
+static void check_half_interp();
 static void trans_palette(PC88_PALETTE_T syspal[]);
-static void set_vram2screen_list(void);
-static void clear_all_screen(void);
-static void put_image_all(void);
+static void set_vram2screen_list();
+static void clear_all_screen();
+static void put_image_all();
 
 /***********************************************************************
  * 画面処理の初期化・終了
  ************************************************************************/
 static const T_GRAPH_SPEC *spec;
 
-static int open_window(void);
-static void open_window_or_exit(void);
+static int open_window();
+static void open_window_or_exit();
 
-int screen_init(void) {
+int screen_init() {
   int i;
   int w, h, max, min;
 
   status_init(); /* ステータス表示のワーク初期化   */
 
   spec = graph_init();
-  if (spec == NULL) {
+  if (spec == nullptr) {
     return FALSE;
   }
 
@@ -231,7 +233,7 @@ int screen_init(void) {
   }
 }
 
-void screen_exit(void) { graph_exit(); }
+void screen_exit() { graph_exit(); }
 
 /*----------------------------------------------------------------------
  * ウインドウの生成
@@ -252,7 +254,7 @@ static unsigned long added_pixel[120 + 16];
     screen_bx     , screen_by
  */
 
-static int open_window(void) {
+static int open_window() {
   int i, size, found = FALSE;
   int w = 0, h = 0, status_displayable = FALSE;
   const T_GRAPH_INFO *info;
@@ -537,7 +539,7 @@ static int open_window(void) {
 /*
  * ウインドウの再生成。失敗したら exit
  */
-static void open_window_or_exit(void) {
+static void open_window_or_exit() {
   if (!open_window()) {
     fprintf(stderr, "Sorry : Graphic System Fatal Error !!!\n");
 
@@ -548,7 +550,7 @@ static void open_window_or_exit(void) {
 /*----------------------------------------------------------------------
  * HALFサイズ色補間の有無ワークを設定
  *----------------------------------------------------------------------*/
-static void check_half_interp(void) {
+static void check_half_interp() {
   if (now_screen_size == SCREEN_SIZE_HALF && /* 現在 HALFサイズで    */
       enable_half_interp &&                  /* フィルタリング可能で   */
       use_half_interp) {                     /* 色補完してありなら   */
@@ -563,8 +565,8 @@ static void check_half_interp(void) {
 /***********************************************************************
  * モード切り替え時の、各種再設定
  ************************************************************************/
-void screen_switch(void) {
-  char *title;
+void screen_switch() {
+  const char *title;
 
   /* 全エリア強制描画の準備 */
 
@@ -670,15 +672,15 @@ void screen_switch(void) {
 /*#define DEBUG_ALL_MOUSE_PATTERN*/ /* デバッグ(全マウス設定の組合せを検証) */
 
 #ifdef DEBUG_ALL_MOUSE_PATTERN
-int screen_attr_mouse_debug(void) { return TRUE; }
+int screen_attr_mouse_debug() { return TRUE; }
 #else
-int screen_attr_mouse_debug(void) { return FALSE; }
+int screen_attr_mouse_debug() { return FALSE; }
 #endif
 
 #define AUTO_MOUSE_TIMEOUT (2 * 60)
 
 /* マウスが動いたら呼び出される */
-void screen_attr_mouse_move(void) {
+void screen_attr_mouse_move() {
   if (auto_mouse) {
     if (auto_mouse_timer == 0) {
       screen_attr_setup(SETUP_MOVE);
@@ -689,7 +691,7 @@ void screen_attr_mouse_move(void) {
 }
 
 /* マウスのクリック時に呼び出される */
-void screen_attr_mouse_click(void) {
+void screen_attr_mouse_click() {
   if (auto_grab) {
     screen_attr_setup(SETUP_CLICK);
     auto_grab = FALSE;
@@ -697,7 +699,7 @@ void screen_attr_mouse_click(void) {
 }
 
 /* 1/60sec毎に呼び出される */
-static void screen_attr_update(void) {
+static void screen_attr_update() {
   if (auto_mouse) {
     if (auto_mouse_timer > 0) {
       if (--auto_mouse_timer == 0) {
@@ -836,10 +838,10 @@ static void screen_attr_setup(int stat) {
  ***********************************************************************/
 
 /* 色補完の可否を返す */
-int quasi88_cfg_can_interp(void) { return enable_half_interp; }
+int quasi88_cfg_can_interp() { return enable_half_interp; }
 
 /* 色補完の現在状態を返す */
-int quasi88_cfg_now_interp(void) { return use_half_interp; }
+int quasi88_cfg_now_interp() { return use_half_interp; }
 
 /* 色補完の有無を設定する */
 void quasi88_cfg_set_interp(int enable) {
@@ -855,7 +857,7 @@ void quasi88_cfg_set_interp(int enable) {
  ***********************************************************************/
 
 /* 現在のインタレース状態を返す */
-int quasi88_cfg_now_interlace(void) { return use_interlace; }
+int quasi88_cfg_now_interlace() { return use_interlace; }
 
 /* インタレース状態を設定する */
 void quasi88_cfg_set_interlace(int interlace_mode) {
@@ -870,10 +872,10 @@ void quasi88_cfg_set_interlace(int interlace_mode) {
  ***********************************************************************/
 
 /* ステータス表示の可否を返す */
-int quasi88_cfg_can_showstatus(void) { return enable_status; }
+int quasi88_cfg_can_showstatus() { return enable_status; }
 
 /* ステータス表示の現在状態を返す */
-int quasi88_cfg_now_showstatus(void) { return now_status; }
+int quasi88_cfg_now_showstatus() { return now_status; }
 
 /* ステータスの表示を設定する */
 void quasi88_cfg_set_showstatus(int show) {
@@ -891,10 +893,10 @@ void quasi88_cfg_set_showstatus(int show) {
  ***********************************************************************/
 
 /* 全画面の可否を返す */
-int quasi88_cfg_can_fullscreen(void) { return enable_fullscreen; }
+int quasi88_cfg_can_fullscreen() { return enable_fullscreen; }
 
 /* 全画面の現在状態を返す */
-int quasi88_cfg_now_fullscreen(void) { return now_fullscreen; }
+int quasi88_cfg_now_fullscreen() { return now_fullscreen; }
 
 /* 全画面の切替を設定する */
 void quasi88_cfg_set_fullscreen(int fullscreen) {
@@ -906,13 +908,13 @@ void quasi88_cfg_set_fullscreen(int fullscreen) {
 }
 
 /* 画面サイズの最大を返す */
-int quasi88_cfg_max_size(void) { return screen_size_max; }
+int quasi88_cfg_max_size() { return screen_size_max; }
 
 /* 画面サイズの最小を返す */
-int quasi88_cfg_min_size(void) { return screen_size_min; }
+int quasi88_cfg_min_size() { return screen_size_min; }
 
 /* 画面サイズの現在状態を返す */
-int quasi88_cfg_now_size(void) { return now_screen_size; }
+int quasi88_cfg_now_size() { return now_screen_size; }
 
 /* 画面サイズを設定する */
 void quasi88_cfg_set_size(int new_size) {
@@ -924,7 +926,7 @@ void quasi88_cfg_set_size(int new_size) {
 }
 
 /* 画面サイズを大きくする */
-void quasi88_cfg_set_size_large(void) {
+void quasi88_cfg_set_size_large() {
   if (++screen_size > screen_size_max)
     screen_size = screen_size_min;
 
@@ -932,7 +934,7 @@ void quasi88_cfg_set_size_large(void) {
 }
 
 /* 画面サイズを小さくする */
-void quasi88_cfg_set_size_small(void) {
+void quasi88_cfg_set_size_small() {
   if (--screen_size < screen_size_min)
     screen_size = screen_size_max;
 
@@ -1000,19 +1002,19 @@ static void trans_palette(PC88_PALETTE_T syspal[]) {
  * GVRAM/TVRAMを画像バッファに転送する関数の、リストを作成
  *  この関数は、 bpp ・ サイズ ・ エフェクト の変更時に呼び出す。
  *----------------------------------------------------------------------*/
-static int (*vram2screen_list[4][4][2])(void);
-static void (*screen_buf_init_p)(void);
+static int (*vram2screen_list[4][4][2])();
+static void (*screen_buf_init_p)();
 
-static int (*menu2screen_p)(void);
+static int (*menu2screen_p)();
 
 static void (*status2screen_p)(int kind, byte pixmap[], int w, int h);
-/*static    void    (*status_buf_init_p)(void);*/
-static void (*status_buf_clear_p)(void);
+/*static    void    (*status_buf_init_p)();*/
+static void (*status_buf_clear_p)();
 
-static void set_vram2screen_list(void) {
-  typedef int (*V2S_FUNC_TYPE)(void);
+static void set_vram2screen_list() {
+  typedef int (*V2S_FUNC_TYPE)();
   typedef V2S_FUNC_TYPE V2S_FUNC_LIST[4][4][2];
-  V2S_FUNC_LIST *list = NULL;
+  V2S_FUNC_LIST *list = nullptr;
 
   if (DEPTH <= 8) { /* ----------------------------------------- */
 
@@ -1195,7 +1197,7 @@ static void set_vram2screen_list(void) {
   memcpy(vram2screen_list, list, sizeof(vram2screen_list));
 }
 
-static void clear_all_screen(void) {
+static void clear_all_screen() {
   if (draw_start) {
     (draw_start)();
   } /* システム依存の描画前処理 */
@@ -1284,7 +1286,7 @@ static int vram2screen(int method) {
 /*----------------------------------------------------------------------
  * 画面表示 ボーダー(枠)領域、メイン領域、ステータス領域の全てを表示
  *----------------------------------------------------------------------*/
-static void put_image_all(void) {
+static void put_image_all() {
   T_GRAPH_RECT rect[1];
 
   rect[0].x = 0;
@@ -1436,7 +1438,7 @@ void screen_get_emu_palette(PC88_PALETTE_T pal[16]) {
  *
  *  この関数は、表示タイミング (約 1/60秒毎) に呼び出される。
  ************************************************************************/
-void screen_update(void) {
+void screen_update() {
   int i;
   int skip = FALSE;
   int all_area = FALSE; /* 全エリア転送フラグ  */
@@ -1638,14 +1640,14 @@ void screen_update(void) {
 #endif
 }
 
-void screen_update_immidiate(void) {
+void screen_update_immidiate() {
   screen_set_dirty_frame();  /* 全領域 更新 */
   frameskip_counter_reset(); /* 次回描画 */
 
   screen_update(); /* 描画処理 */
 }
 
-int quasi88_info_draw_count(void) { return drawn_count; }
+int quasi88_info_draw_count() { return drawn_count; }
 
 /***********************************************************************
  * システムイベント処理 EXPOSE / FOCUS-IN / FOCUS-OUT
@@ -1654,7 +1656,7 @@ int quasi88_info_draw_count(void) { return drawn_count; }
 /*======================================================================
  *
  *======================================================================*/
-void quasi88_expose(void) {
+void quasi88_expose() {
   screen_set_dirty_frame(); /* 全領域 更新 */
 
   frameskip_counter_reset(); /* 次回描画 */
@@ -1663,14 +1665,14 @@ void quasi88_expose(void) {
 /*======================================================================
  *
  *======================================================================*/
-void quasi88_focus_in(void) {
+void quasi88_focus_in() {
   if (quasi88_is_pause()) {
 
     pause_event_focus_in_when_pause();
   }
 }
 
-void quasi88_focus_out(void) {
+void quasi88_focus_out() {
   int kana_on, caps_on;
 
   kana_on = IS_KEY88_PRESS(KEY88_KANA);
@@ -1694,7 +1696,7 @@ void quasi88_focus_out(void) {
  * テキスト点滅 (カーソルおよび、文字属性の点滅) 処理のワーク設定
  *  CRTC の frameskip_rate, blink_cycle が変更されるたびに呼び出す
  ************************************************************************/
-void frameskip_blink_reset(void) {
+void frameskip_blink_reset() {
   int wk;
 
   wk = blink_cycle / frameskip_rate;
@@ -1710,7 +1712,7 @@ void frameskip_blink_reset(void) {
  * フレームカウンタ初期化
  *  次フレームは、必ず表示される。(スキップされない)
  ************************************************************************/
-void frameskip_counter_reset(void) {
+void frameskip_counter_reset() {
   frame_counter = 0;
   do_skip_draw = FALSE;
   already_skip_draw = FALSE;
@@ -1746,7 +1748,7 @@ void frameskip_check(int on_time) {
 /***********************************************************************
  * フレームスキップレートの取得・設定
  ************************************************************************/
-int quasi88_cfg_now_frameskip_rate(void) { return frameskip_rate; }
+int quasi88_cfg_now_frameskip_rate() { return frameskip_rate; }
 void quasi88_cfg_set_frameskip_rate(int rate) {
   char str[32];
 
@@ -1816,14 +1818,14 @@ static T_SUSPEND_W suspend_screen_work[] = {
     {TYPE_END, 0},
 };
 
-int statesave_screen(void) {
+int statesave_screen() {
   if (statesave_table(SID, suspend_screen_work) == STATE_OK)
     return TRUE;
   else
     return FALSE;
 }
 
-int stateload_screen(void) {
+int stateload_screen() {
   if (stateload_table(SID, suspend_screen_work) == STATE_OK)
     return TRUE;
   else

@@ -1,6 +1,7 @@
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
+extern "C" {
 #include "quasi88.h"
 #include "fname.h"
 #include "keyboard.h"
@@ -23,6 +24,7 @@
 
 #include "suspend.h"
 #include "utility.h"
+}
 
 /******************************************************************************
  *
@@ -128,8 +130,8 @@ int romaji_type = 0; /* ローマ字変換のタイプ       */
  *  キー操作 記録・再生
  */
 
-char *file_rec = NULL; /* キー入力記録のファイル名 */
-char *file_pb = NULL;  /* キー入力再生のファイル名 */
+char *file_rec = nullptr; /* キー入力記録のファイル名 */
+char *file_pb = nullptr;  /* キー入力再生のファイル名 */
 
 static OSD_FILE *fp_rec;
 static OSD_FILE *fp_pb;
@@ -147,7 +149,7 @@ static struct {  /* キー入力記録構造体      */
 /*---------------------------------------------------------------------------
  * キーのバインディング変更 (キーコード、機能)
  *---------------------------------------------------------------------------*/
-static void clr_key_function(void) {
+static void clr_key_function() {
   int i;
   for (i = 0; i < COUNTOF(key_func); i++) {
     key_func[i] = 0;
@@ -451,7 +453,7 @@ void keyboard_reset(void) {
 /****************************************************************************
  * キー入力をワーク(ポート)に反映     エミュモードのみ
  *****************************************************************************/
-static void record_playback(void);
+static void record_playback();
 
 void keyboard_update(void) {
   int status;
@@ -627,8 +629,8 @@ void key_record_playback_init(void) {
   key_record.image[0] = -1;
   key_record.image[1] = -1;
 
-  fp_pb = NULL;
-  fp_rec = NULL;
+  fp_pb = nullptr;
+  fp_rec = nullptr;
 
   if (file_pb && file_pb[0]) { /* 再生用ファイルをオープン */
 
@@ -658,13 +660,13 @@ void key_record_playback_init(void) {
 void key_record_playback_exit(void) {
   if (fp_pb) {
     osd_fclose(fp_pb);
-    fp_pb = NULL;
+    fp_pb = nullptr;
     if (file_pb)
       file_pb[0] = '\0';
   }
   if (fp_rec) {
     osd_fclose(fp_rec);
-    fp_rec = NULL;
+    fp_rec = nullptr;
     if (file_rec)
       file_rec[0] = '\0';
   }
@@ -673,7 +675,7 @@ void key_record_playback_exit(void) {
 /*----------------------------------------------------------------------
  * キー入力 記録・再生処理
  *----------------------------------------------------------------------*/
-static void record_playback(void) {
+static void record_playback() {
   int i, img;
 
   if (!quasi88_is_exec())
@@ -704,7 +706,7 @@ static void record_playback(void) {
     } else {
       printf("Can't write Record file <%s>\n", file_rec);
       osd_fclose(fp_rec);
-      fp_rec = NULL;
+      fp_rec = nullptr;
     }
   }
 
@@ -732,7 +734,7 @@ static void record_playback(void) {
       printf(" (( %s : Playback file EOF ))\n", file_pb);
       status_message(1, STATUS_INFO_TIME, "Playback  [EOF]");
       osd_fclose(fp_pb);
-      fp_pb = NULL;
+      fp_pb = nullptr;
     }
   }
 
@@ -1174,7 +1176,7 @@ static int do_func(int func, int on) {
 
   case FN_RESET: /* リセット */
     if (on)
-      quasi88_reset(NULL);
+      quasi88_reset(nullptr);
     return 0;
 
   case FN_KANA: /* カナ */
@@ -1667,7 +1669,7 @@ static struct { /* ver 0.6.3以降との、機能の対応表 */
 
 };
 static int old_func_f[1 + 20];
-static void function_new2old(void) {
+static void function_new2old() {
   int i, j;
   for (i = 1; i <= 20; i++) {
     old_func_f[i] = OLD_FN_FUNC;
@@ -1679,7 +1681,7 @@ static void function_new2old(void) {
     }
   }
 }
-static void function_old2new(void) {
+static void function_old2new() {
   int i, j;
   for (i = 1; i <= 20; i++) {
     function_f[i] = FN_FUNC;
@@ -1765,7 +1767,7 @@ static T_SUSPEND_W suspend_keyboard_work[] = {
 
 static T_SUSPEND_W suspend_keyboard_work2[] = {
     {TYPE_INT, &jop1_time},
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 static T_SUSPEND_W suspend_keyboard_work3[] = {
@@ -1775,7 +1777,7 @@ static T_SUSPEND_W suspend_keyboard_work3[] = {
     {TYPE_INT, &function_f[10]}, {TYPE_INT, &function_f[11]}, {TYPE_INT, &function_f[12]},
     {TYPE_INT, &function_f[13]}, {TYPE_INT, &function_f[14]}, {TYPE_INT, &function_f[15]},
     {TYPE_INT, &function_f[16]}, {TYPE_INT, &function_f[17]}, {TYPE_INT, &function_f[18]},
-    {TYPE_INT, &function_f[19]}, {TYPE_INT, &function_f[20]}, {TYPE_END, 0},
+    {TYPE_INT, &function_f[19]}, {TYPE_INT, &function_f[20]}, {TYPE_END, nullptr},
 };
 
 static T_SUSPEND_W suspend_keyboard_work4[] = {
@@ -1801,7 +1803,7 @@ static T_SUSPEND_W suspend_keyboard_work4[] = {
     {TYPE_INT, &serial_mouse_y},
     {TYPE_INT, &serial_mouse_step},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 int statesave_keyboard(void) {
@@ -2076,7 +2078,7 @@ int keyboard_str2key88(const char *str) {
   char *conv_end;
   unsigned long l;
 
-  if (str == NULL)
+  if (str == nullptr)
     return -1;
   len = strlen(str);
   if (len == 0)
@@ -2131,7 +2133,7 @@ const char *keyboard_key882str(int key88) {
       return key88sym_list[i].name;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /****************************************************************************
@@ -2221,7 +2223,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
                              const T_SYMBOL_TABLE table_symbol2int[], int table_size, int table_ignore_case,
                              const char *(*setting_callback)(int type, int code, int key88, int numlock_key88)) {
   const char *filename;
-  OSD_FILE *fp = NULL;
+  OSD_FILE *fp = nullptr;
   int working = FALSE;
   int effective = FALSE;
 
@@ -2236,7 +2238,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
 
   /* キー設定ファイルを開く */
 
-  if (keyconf_filename == NULL) {                 /* ファイル名未指定ならば */
+  if (keyconf_filename == nullptr) {                 /* ファイル名未指定ならば */
     filename = filename_alloc_keyboard_cfgname(); /* デフォルト名を取得 */
   } else {
     filename = keyconf_filename;
@@ -2252,12 +2254,12 @@ int config_read_keyconf_file(const char *keyconf_filename,
         printf("\n");
       }
     }
-    if (keyconf_filename == NULL) { /* デフォルトならば */
+    if (keyconf_filename == nullptr) { /* デフォルトならば */
       free((void *)filename);       /* メモリ解放しとく */
     }
   }
 
-  if (fp == NULL)
+  if (fp == nullptr)
     return FALSE; /* 開けなかったら偽を返す */
 
   /* キー設定ファイルを1行づつ解析 */
@@ -2265,7 +2267,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
   while (osd_fgets(line, MAX_KEYFILE_LINE, fp)) {
 
     line_cnt++;
-    parm1 = parm2 = parm3 = parm4 = NULL;
+    parm1 = parm2 = parm3 = parm4 = nullptr;
 
     /* 行の内容をトークンに分解。各トークンは、parm1 〜 parm4 にセット */
 
@@ -2297,11 +2299,11 @@ int config_read_keyconf_file(const char *keyconf_filename,
     }
 
     /* トークンがなければ次の行へ */
-    if (parm1 == NULL)
+    if (parm1 == nullptr)
       continue;
 
     /* トークンが四個以上あれば、その行はエラーなので次の行へ */
-    if (parm4 != NULL) {
+    if (parm4 != nullptr) {
       if (working) {
         fprintf(stderr, "warning: too many argument in line %d\n", line_cnt);
       }
@@ -2314,7 +2316,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
       /* コールバック関数を呼び出して、有効な識別タグかを判定 */
       err_mes = (identify_callback)(parm1, parm2, parm3);
 
-      if (err_mes == NULL) { /* 有効な識別タグだった */
+      if (err_mes == nullptr) { /* 有効な識別タグだった */
         working = TRUE;
         effective = TRUE;
 
@@ -2340,7 +2342,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
       if (working) {
 
         /* 「設定行」で、トークン一個だけは、エラー。次の行へ */
-        if (parm2 == NULL) {
+        if (parm2 == nullptr) {
           fprintf(stderr, "warning: error in line %d (ignored)\n", line_cnt);
         } else {
 
@@ -2365,7 +2367,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
 
             err_mes = (setting_callback)(type, code, key88, numlock_key88);
 
-            if (err_mes == NULL) { /* 有効な設定だった */
+            if (err_mes == nullptr) { /* 有効な設定だった */
               /* OK */;
             } else { /* 無効な設定だった */
               /* NG */
@@ -2401,7 +2403,7 @@ static int symbol2int(const char *str, const T_SYMBOL_TABLE table_symbol2int[], 
   char *conv_end;
   unsigned long l;
 
-  if (str == NULL)
+  if (str == nullptr)
     return -1;
   if (*str == '\0')
     return -1;

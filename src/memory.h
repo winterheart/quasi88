@@ -47,12 +47,12 @@ extern byte *dummy_rom;             /* ダミーROM (32KB)  */
 extern byte *dummy_ram;             /* ダミーRAM (32KB)  */
 extern byte kanji_dummy_rom[16][2]; /* 漢字ダミーROM   */
 
-int memory_allocate(void);
-void memory_free(void);
+int memory_allocate();
+void memory_free();
 
-void memory_reset_font(void);
-void memory_set_font(void);
+void memory_reset_font();
+void memory_set_font();
 
-int memory_allocate_additional(void);
+int memory_allocate_additional();
 
 #endif /* MEMORY_H_INCLUDED */

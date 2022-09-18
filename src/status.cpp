@@ -4,9 +4,9 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
-#include <string.h>
+#include <cstring>
 
+extern "C" {
 #include "quasi88.h"
 #include "initval.h"
 #include "status.h"
@@ -18,6 +18,7 @@
 #include "menu.h"
 
 #include "drive.h" /* get_drive_ready()    */
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -777,7 +778,7 @@ void status_setup(int show) {
  *      NULL の場合は、既定の内容を表示する。
  *      (既定の内容 … 左:BASICモード / 中:空白 / 右:FDD状態)
  ****************************************************************************/
-static const char *status_get_filename(void);
+static const char *status_get_filename();
 void status_message_default(int pos, const char *msg) {
   if (msg) { /* メッセージ指定ある場合 */
 
@@ -840,7 +841,7 @@ void status_message(int pos, int frames, const char *msg) {
 
   } else {
 
-    status_message_default(pos, NULL);
+    status_message_default(pos, nullptr);
   }
 }
 
@@ -984,7 +985,7 @@ static void status_fdd(int pos) {
   }
 }
 
-static const char *status_get_filename(void) {
+static const char *status_get_filename() {
   static char buf[STATUS_LENGTH + 1];
   int i, drv;
   char str[2][25];

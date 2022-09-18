@@ -5,6 +5,7 @@
  * グラフィック処理 (システム依存)
  ************************************************************************/
 
+#include <stdbool.h>
 #include "screen.h" /* PC88_PALETTE_T */
 
 /* A structure that summarizes basic information about the screen */
@@ -95,8 +96,8 @@ typedef struct {
                     /*  と思うので、 FALSE をセットして */
                     /*  おくこと。         */
 
-  void (*draw_start)(void);
-  void (*draw_finish)(void);
+  void (*draw_start)();
+  void (*draw_finish)();
   /* 画面のバッファにアクセスする際に、  */
   /* その前後に呼び出される関数      */
   /*  buffer のライトに際して、必要な */

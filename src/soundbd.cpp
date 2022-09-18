@@ -4,8 +4,9 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
+#include <cstdio>
 
+extern "C" {
 #include "quasi88.h"
 #include "initval.h"
 #include "soundbd.h"
@@ -15,6 +16,7 @@
 
 #include "snddrv.h"
 #include "suspend.h"
+}
 
 /*
  * サウンドボードIIの対応はそうとういい加減です。
@@ -69,7 +71,7 @@ int sound2_reg_select = 0x00;
 
 /* サウンドボード II  ADPCM 部 */
 
-byte *sound2_adpcm = NULL; /* ADPCM用 DRAM (256KB)        */
+byte *sound2_adpcm = nullptr; /* ADPCM用 DRAM (256KB)        */
 
 static int sound2_mem = 0;              /* ADPCM メモリ 1:アクセス可能 */
 static int sound2_rec = 0;              /* ADPCM        1:録音 0:再生   */
@@ -583,17 +585,17 @@ static T_SUSPEND_W suspend_sound_work[] = {
     {TYPE_INT, &sound2_notice_EOS},
     {TYPE_INT, &sound2_delay},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 static T_SUSPEND_W suspend_sound_work2[] = {
     {TYPE_INT, &sound_prescaler_sel},
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 static T_SUSPEND_W suspend_sound_work3[] = {
     {TYPE_INT, &use_cmdsing},
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 int statesave_sound(void) {

@@ -10,13 +10,15 @@
 /*  ・pause_by_focus_out != 0 の時                   */
 /*      X のマウスが画面内に入ると解除                */
 
-#include <stdio.h>
+#include <cstdio>
 
+extern "C" {
 #include "quasi88.h"
 #include "pause.h"
 
 #include "status.h"
 #include "event.h"
+}
 
 int need_focus = FALSE; /* フォーカスアウト停止あり */
 
@@ -54,7 +56,7 @@ void pause_event_key_on_menu(void) { quasi88_menu(); }
 void pause_init(void) {
   status_message_default(0, " PAUSE ");
   status_message_default(1, "<ESC> key to return");
-  status_message_default(2, NULL);
+  status_message_default(2, nullptr);
 }
 
 void pause_main(void) {

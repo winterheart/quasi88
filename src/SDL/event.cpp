@@ -8,6 +8,7 @@
 
 #include <string.h>
 
+extern "C" {
 #include "quasi88.h"
 #include "graph.h"
 #include "keyboard.h"
@@ -21,15 +22,16 @@
 #include "intr.h" /* test */
 #include "keymap.h"
 #include "utility.h"
+}
 
 int show_fps;                      /* test */
-static int display_fps_init(void); /* test */
-static void display_fps(void);     /* test */
+static int display_fps_init(); /* test */
+static void display_fps();     /* test */
 
 int use_cmdkey = 1; /* Commandキーでメニューへ遷移     */
 
 int keyboard_type = 1;      /* キーボードの種類                */
-char *file_keyboard = NULL; /* キー設定ファイル名         */
+char *file_keyboard = nullptr; /* キー設定ファイル名         */
 
 int use_joydevice = TRUE; /* ジョイスティックデバイスを開く? */
 
@@ -125,9 +127,9 @@ static const char *debug_sdlkeysym(int code); /* デバッグ用 */
  *
  *  1/60毎に呼び出される。
  *****************************************************************************/
-static int joystick_init(void);
-static void joystick_exit(void);
-static int analyze_keyconf_file(void);
+static int joystick_init();
+static void joystick_exit();
+static int analyze_keyconf_file();
 
 void event_init(void) {
   /* Keymapping initialization */
@@ -233,7 +235,7 @@ void event_update(void) {
     case SDL_JOYAXISMOTION: /*------------------------------------------*/
       /*printf("%d %d %d\n",E.jaxis.which,E.jaxis.axis,E.jaxis.value);*/
 
-      if (E.jbutton.which < JOY_MAX && joy_info[E.jbutton.which].dev != NULL) {
+      if (E.jbutton.which < JOY_MAX && joy_info[E.jbutton.which].dev != nullptr) {
 
         int now, chg;
         T_JOY_INFO *joy = &joy_info[E.jbutton.which];
@@ -281,7 +283,7 @@ void event_update(void) {
     case SDL_JOYBUTTONUP:
       /*printf("%d %d\n",E.jbutton.which,E.jbutton.button);*/
 
-      if (E.jbutton.which < JOY_MAX && joy_info[E.jbutton.which].dev != NULL) {
+      if (E.jbutton.which < JOY_MAX && joy_info[E.jbutton.which].dev != nullptr) {
 
         T_JOY_INFO *joy = &joy_info[E.jbutton.which];
         int offset = (joy->num) * KEY88_PAD_OFFSET;
@@ -306,14 +308,14 @@ void event_update(void) {
       switch (E.window.event) {
       case SDL_WINDOWEVENT_FOCUS_GAINED:
         quasi88_focus_in();
-        graph_update(1, NULL);
+        graph_update(1, nullptr);
         break;
       case SDL_WINDOWEVENT_FOCUS_LOST:
         quasi88_focus_out();
         break;
       case SDL_WINDOWEVENT_EXPOSED:
       case SDL_WINDOWEVENT_SIZE_CHANGED:
-        graph_update(1, NULL);
+        graph_update(1, nullptr);
         break;
       default:
         break;
@@ -383,7 +385,7 @@ void event_switch(void) {
  * Joystick initialization
  * @return -1 - initialization failed, >= 0 - number of found joysticks
  */
-static int joystick_init(void) {
+static int joystick_init() {
   SDL_Joystick *dev;
   int i, max, nr_button;
 
@@ -391,7 +393,7 @@ static int joystick_init(void) {
 
   memset(joy_info, 0, sizeof(joy_info));
   for (i = 0; i < JOY_MAX; i++) {
-    joy_info[i].dev = NULL;
+    joy_info[i].dev = nullptr;
   }
 
   /* ジョイスティックサブシステム初期化 */
@@ -700,7 +702,7 @@ static const char *debug_sdlkeysym(int code) {
 
 static const char *identify_callback(const char *parm1, const char *parm2, const char *parm3) {
   if (my_strcmp(parm1, "[SDL]") == 0) {
-    return NULL; /* 有効 */
+    return nullptr; /* 有効 */
   }
 
   return ""; /* 無効 */
@@ -715,12 +717,12 @@ static const char *setting_callback(int type, int code, int key88, int numlock_k
     keymap_numlock_add(code, numlock_key88);
   }
 
-  return NULL; /* 有効 */
+  return nullptr; /* 有効 */
 }
 
 /* キー設定ファイルの処理関数 */
 
-static int analyze_keyconf_file(void) {
+static int analyze_keyconf_file() {
   return config_read_keyconf_file(file_keyboard,           /* キー設定ファイル*/
                                   identify_callback,       /* 識別タグ行 関数 */
                                   sdlkeysym_list,          /* 変換テーブル    */
@@ -738,7 +740,7 @@ static int analyze_keyconf_file(void) {
 #define FPS_INTRVAL (1000) /* 1000ms毎に表示する */
 static Uint32 display_fps_callback(Uint32 interval, void *dummy);
 
-static int display_fps_init(void) {
+static int display_fps_init() {
   if (show_fps == FALSE)
     return TRUE;
 
@@ -748,7 +750,7 @@ static int display_fps_init(void) {
     }
   }
 
-  SDL_AddTimer(FPS_INTRVAL, display_fps_callback, NULL);
+  SDL_AddTimer(FPS_INTRVAL, display_fps_callback, nullptr);
   return TRUE;
 }
 
@@ -769,15 +771,15 @@ static Uint32 display_fps_callback(Uint32 interval, void *dummy) {
 
   user_event.type = SDL_USEREVENT;
   user_event.user.code = 1;
-  user_event.user.data1 = NULL;
-  user_event.user.data2 = NULL;
+  user_event.user.data1 = nullptr;
+  user_event.user.data2 = nullptr;
   SDL_PushEvent(&user_event); /* エラーは無視 */
 #endif
 
   return FPS_INTRVAL;
 }
 
-static void display_fps(void) {
+static void display_fps() {
   static int prev_drawn_count;
   static int prev_vsync_count;
   int now_drawn_count;

@@ -4,10 +4,11 @@
 /*                                  */
 /************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
+extern "C" {
 #include "quasi88.h"
 #include "initval.h"
 #include "memory.h"
@@ -17,6 +18,7 @@
 #include "menu.h" /* menu_lang    */
 #include "file-op.h"
 #include "suspend.h"
+}
 
 int set_version; /* 起動時のバージョン強制変更 '0' 〜 '9'  */
 int rom_version; /* (変更前の) BASIC ROMバージョン      */
@@ -83,20 +85,20 @@ enum {
   ROM_END
 };
 
-static char *rom_list[ROM_END][5] = {
-    {"N88.ROM", "n88.rom", 0, 0, 0},
-    {"N88EXT0.ROM", "n88ext0.rom", "N88_0.ROM", "n88_0.rom", 0},
-    {"N88EXT1.ROM", "n88ext1.rom", "N88_1.ROM", "n88_1.rom", 0},
-    {"N88EXT2.ROM", "n88ext2.rom", "N88_2.ROM", "n88_2.rom", 0},
-    {"N88EXT3.ROM", "n88ext3.rom", "N88_3.ROM", "n88_3.rom", 0},
-    {"N88N.ROM", "n88n.rom", "N80.ROM", "n80.rom", 0},
-    {"N88SUB.ROM", "n88sub.rom", "DISK.ROM", "disk.rom", 0},
-    {"N88KNJ1.ROM", "n88knj1.rom", "KANJI1.ROM", "kanji1.rom", 0},
-    {"N88KNJ2.ROM", "n88knj2.rom", "KANJI2.ROM", "kanji2.rom", 0},
-    {"N88JISHO.ROM", "n88jisho.rom", "JISYO.ROM", "jisyo.rom", 0},
-    {"FONT.ROM", "font.rom", 0, 0, 0},
-    {"FONT2.ROM", "font2.rom", 0, 0, 0},
-    {"FONT3.ROM", "font3.rom", 0, 0, 0},
+static const char *rom_list[ROM_END][5] = {
+    {"N88.ROM", "n88.rom", nullptr, nullptr, nullptr},
+    {"N88EXT0.ROM", "n88ext0.rom", "N88_0.ROM", "n88_0.rom", nullptr},
+    {"N88EXT1.ROM", "n88ext1.rom", "N88_1.ROM", "n88_1.rom", nullptr},
+    {"N88EXT2.ROM", "n88ext2.rom", "N88_2.ROM", "n88_2.rom", nullptr},
+    {"N88EXT3.ROM", "n88ext3.rom", "N88_3.ROM", "n88_3.rom", nullptr},
+    {"N88N.ROM", "n88n.rom", "N80.ROM", "n80.rom", nullptr},
+    {"N88SUB.ROM", "n88sub.rom", "DISK.ROM", "disk.rom", nullptr},
+    {"N88KNJ1.ROM", "n88knj1.rom", "KANJI1.ROM", "kanji1.rom", nullptr},
+    {"N88KNJ2.ROM", "n88knj2.rom", "KANJI2.ROM", "kanji2.rom", nullptr},
+    {"N88JISHO.ROM", "n88jisho.rom", "JISYO.ROM", "jisyo.rom", nullptr},
+    {"FONT.ROM", "font.rom", nullptr, nullptr, nullptr},
+    {"FONT2.ROM", "font2.rom", nullptr, nullptr, nullptr},
+    {"FONT3.ROM", "font3.rom", nullptr, nullptr, nullptr},
 };
 
 byte *main_rom;               /* メイン ROM [0x8000] (32KB)    */
@@ -193,7 +195,7 @@ static int mem_alloc_finish(void) /* メモリ確保完了(偽で失敗) */
 #define DISP_RESULT (1)
 #define DISP_IF_EXIST (2)
 
-static int load_rom(char *filelist[], byte *ptr, int size, int disp) {
+static int load_rom(const char *filelist[], byte *ptr, int size, int disp) {
   OSD_FILE *fp;
   int i = 0, load_size = -1;
   char buf[OSD_MAX_FILENAME];
@@ -307,7 +309,7 @@ static void load_compat_rom_close(OSD_FILE *fp) {
 
 #define FONT_SZ (8 * 256 * 1)
 
-int memory_allocate(void) {
+int memory_allocate() {
   int size;
 
   /* 標準メモリを確保 */
@@ -336,7 +338,7 @@ int memory_allocate(void) {
 
   /* ROMイメージをファイルから読み込む */
 
-  if (file_compatrom == NULL) { /* 通常のROMイメージファイル */
+  if (file_compatrom == nullptr) { /* 通常のROMイメージファイル */
 
     load_rom(rom_list[N88_ROM], main_rom, 0x8000, DISP_RESULT);
     load_rom(rom_list[EXT0_ROM], main_rom_ext[0], 0x2000, DISP_RESULT);
@@ -552,7 +554,7 @@ int memory_allocate(void) {
  *****************************************************************************/
 static int alloced_extram = 0; /* 確保した拡張RAMの数  */
 
-int memory_allocate_additional(void) {
+int memory_allocate_additional() {
 
   /* 拡張メモリを確保 */
 
@@ -567,10 +569,10 @@ int memory_allocate_additional(void) {
     /* 確保済みサイズが小さければ、確保しなおし */
     if (ext_ram && alloced_extram < use_extram) {
       free(ext_ram);
-      ext_ram = NULL;
+      ext_ram = nullptr;
     }
 
-    if (ext_ram == NULL) {
+    if (ext_ram == nullptr) {
 
       char msg[80];
       sprintf(msg, "Allocating memory for Extended RAM(%dKB)...", use_extram * 128);
@@ -579,9 +581,9 @@ int memory_allocate_additional(void) {
 
       ext_ram = (byte(*)[0x8000])mem_alloc(sizeof(byte) * 0x8000 * 4 * use_extram);
 
-      if (dummy_rom == NULL)
+      if (dummy_rom == nullptr)
         dummy_rom = (byte *)mem_alloc(sizeof(byte) * 0x8000);
-      if (dummy_ram == NULL)
+      if (dummy_ram == nullptr)
         dummy_ram = (byte *)mem_alloc(sizeof(byte) * 0x8000);
 
       if (mem_alloc_finish() == FALSE) {
@@ -600,7 +602,7 @@ int memory_allocate_additional(void) {
 
   if (use_jisho_rom) {
 
-    if (jisho_rom == NULL) {
+    if (jisho_rom == nullptr) {
 
       mem_alloc_start("Allocating memory for Jisho ROM...");
 
@@ -618,7 +620,7 @@ int memory_allocate_additional(void) {
 
   if (sound_board == SOUND_II) {
 
-    if (sound2_adpcm == NULL) {
+    if (sound2_adpcm == nullptr) {
 
       mem_alloc_start("Allocating memory for ADPCM RAM...");
 
@@ -639,7 +641,7 @@ int memory_allocate_additional(void) {
  * フォント初期化
  *  PCGフォントデータを通常のフォントで初期化
  *****************************************************************************/
-void memory_reset_font(void) {
+void memory_reset_font() {
   memcpy(font_pcg, font_mem, sizeof(byte) * 8 * 256 * 2);
 
   memory_set_font();
@@ -649,7 +651,7 @@ void memory_reset_font(void) {
  * 使用するフォントを決定
  *
  *****************************************************************************/
-void memory_set_font(void) {
+void memory_set_font() {
   if (use_pcg) {
     font_rom = font_pcg;
   } else {
@@ -666,7 +668,7 @@ void memory_set_font(void) {
  * 確保したメモリの解放
  *  終了するんなら解放する必要もないけど…
  *****************************************************************************/
-void memory_free(void) {
+void memory_free() {
   if (main_rom)
     free(main_rom);
   if (main_rom_ext)
@@ -724,12 +726,12 @@ static T_SUSPEND_W suspend_memory_work[] = {
 
     {TYPE_INT, &use_pcg},
 
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 static T_SUSPEND_W suspend_memory_work2[] = {
     {TYPE_INT, &linear_ext_ram},
-    {TYPE_END, 0},
+    {TYPE_END, nullptr},
 };
 
 int statesave_memory(void) {

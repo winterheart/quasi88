@@ -25,7 +25,7 @@ typedef struct {
 
 extern pio_work pio_AB[2][2], pio_C[2][2];
 
-void pio_init(void);
+void pio_init();
 
 byte pio_read_AB(int side, int port);
 void pio_write_AB(int side, int port, byte data);
