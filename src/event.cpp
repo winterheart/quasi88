@@ -341,7 +341,7 @@ int quasi88_disk_insert(int drv, const char *filename, int image, int ro) {
     if (success) {
 
       if (drv == DRIVE_1)
-        boot_from_rom = FALSE;
+        boot_from_rom = BOOT_DISK;
 
       strcpy(file_disk[drv], filename);
       readonly_disk[drv] = ro;
@@ -399,7 +399,7 @@ int quasi88_disk_eject_all(void) {
       return FALSE;
   }
 
-  boot_from_rom = TRUE;
+  boot_from_rom = BOOT_ROM;
 
   if (quasi88_is_exec()) {
     status_message_default(1, nullptr);

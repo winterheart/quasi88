@@ -2751,9 +2751,9 @@ static void bootup_work_init() {
 
   if (boot_from_rom == BOOT_AUTO) {
     if (disk_image_exist(0)) /* ディスク挿入時はDISK */
-      boot_from_rom = FALSE;
+      boot_from_rom = BOOT_DISK;
     else /* それ以外は、    ROM  */
-      boot_from_rom = TRUE;
+      boot_from_rom = BOOT_ROM;
   }
 
   /* 起動時の BASICモード未定の時    */
