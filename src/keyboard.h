@@ -1,12 +1,6 @@
 #ifndef KEYBOARD_H_INCLUDED
 #define KEYBOARD_H_INCLUDED
 
-/* mouse_mode の値 */
-#define MOUSE_NONE 0     /* マウス・ジョイスティックなし             */
-#define MOUSE_MOUSE 1    /* マウスを装着                             */
-#define MOUSE_JOYMOUSE 2 /* マウスを擬似ジョイスティックモードで装着 */
-#define MOUSE_JOYSTICK 3 /* ジョイスティックを装着                   */
-
 extern int mouse_mode; /* マウス 0:No 1:Yes 2:Joy   */
 
 extern int mouse_sensitivity; /* マウス感度          */
@@ -119,7 +113,7 @@ void quasi88_cfg_key_romaji(int on);
 
 typedef struct {
   const char *name; /* keysym (キーシンボル) 文字列 */
-  int val;    /* 対応する、 int値       */
+  int val;          /* 対応する、 int値       */
 } T_SYMBOL_TABLE;
 
 int keyboard_str2key88(const char *str);

@@ -76,7 +76,7 @@ int romaji_input_mode = FALSE; /* 真:ローマ字入力中    */
  *  設定
  */
 
-int mouse_mode = 0; /* マウス・ジョイステック処理  */
+int mouse_mode = MOUSE_NONE; /* マウス・ジョイステック処理  */
 
 int mouse_sensitivity = 100;   /* マウス感度          */
 int mouse_swap_button = FALSE; /* マウスボタンを入れ替える     */

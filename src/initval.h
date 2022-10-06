@@ -29,6 +29,13 @@ enum BaudRate {
   BAUDRATE_9600,
   BAUDRATE_19200
 };
+/* Values of mouse_mode */
+enum MouseMode {
+  MOUSE_NONE = 0, /* No mouse/joystick */
+  MOUSE_MOUSE,    /* Use mouse */
+  MOUSE_JOYMOUSE, /* Use mouse in pseudo-joystick mode */
+  MOUSE_JOYSTICK  /* Use joystick */
+};
 
 /* DEFAULT_BASIC    BASIC モード       -1:自動 / 0:N / 1:V1S / 2:V1H / 3:V2  */
 /* DEFAULT_CLOCK    CPUクロック        -1:自動 / 0:8MHz / 1:4MHz             */
