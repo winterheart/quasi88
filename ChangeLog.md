@@ -5,6 +5,7 @@ this file can be found in `document/HISTORY.TXT` file.
 
 ## 0.8.0 - Unreleased
 * Removed GTK2 support.
+* Removed old MINI support.
 
 ## 0.7.0 - 2022-09-11
 * Removed old Classic Mac OS support.
