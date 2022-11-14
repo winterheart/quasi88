@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file. An old version of
 this file can be found in `document/HISTORY.TXT` file.
 
+## 0.8.0 - Unreleased
+* Removed GTK2 support.
+
 ## 0.7.0 - 2022-09-11
 * Removed old Classic Mac OS support.
 * Unify file operations functions for all supported platforms. Now project requires C++17 capable compiler.

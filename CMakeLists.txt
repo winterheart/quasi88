@@ -10,7 +10,6 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-option(ENABLE_GTK2 "Enable building for GTK2" OFF)
 option(ENABLE_SDL "Enable building for libSDL" ON)
 option(ENABLE_X11 "Enable building for X.org" OFF)
 option(ENABLE_WIN "Enable building for Windows" OFF)
@@ -347,45 +346,6 @@ if(ENABLE_SDL)
 	target_include_directories(${PROJECT_NAME}.sdl PRIVATE ${SDL_INCLUDES})
 	target_link_libraries(${PROJECT_NAME}.sdl	${COMMON_LIBS} ${SDL_LIBS})
 endif(ENABLE_SDL)
-
-if(ENABLE_GTK2)
-	add_definitions(-DQUASI88_GTK)
-	find_package(GTK2 REQUIRED)
-	find_package(SDL2 REQUIRED)
-	include(FindPkgConfig)
-	pkg_check_modules(CAIRO REQUIRED cairo)
-
-	list(APPEND GTK_LIBS ${GTK2_LIBRARIES} ${CAIRO_LIBRARIES} ${SDL2_LIBRARIES})
-
-	list(APPEND GTK_INCLUDES
-		src/GTK
-		${SDL2_INCLUDE_DIR}
-	)
-
-	set(GTK_SOURCES
-		src/GTK/event.c
-		src/GTK/graph.c
-		src/GTK/main.c
-		src/GTK/menubar.c
-		src/GTK/wait.c
-	)
-
-	if(ENABLE_SOUND)
-		set(GTK_SOUND_SOURCES
-			src/snddrv/quasi88/SDL/audio.c
-			src/snddrv/quasi88/SDL/sdl.c
-		)
-		list(APPEND GTK_INCLUDES src/snddrv/SDL)
-	endif(ENABLE_SOUND)
-
-	add_executable(
-		${PROJECT_NAME}.gtk ${COMMON_SOURCES} ${GTK_SOURCES} ${SOUND_SOURCES} ${GTK_SOUND_SOURCES}
-	)
-	target_include_directories(${PROJECT_NAME}.gtk PRIVATE ${GTK_INCLUDES})
-	target_include_directories(${PROJECT_NAME}.gtk SYSTEM PRIVATE ${GTK2_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS})
-	target_link_libraries(${PROJECT_NAME}.gtk ${COMMON_LIBS} ${GTK_LIBS})
-
-endif(ENABLE_GTK2)
 
 if(ENABLE_WIN)
 	add_definitions(-DQUASI88_WIN32)

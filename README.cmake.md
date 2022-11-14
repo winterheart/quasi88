@@ -12,7 +12,6 @@ and (probably) *BSD and macOS. Minimal development requirements are:
 * libX11 1.6.9 (for X.Org backend)
 * libxxf86dga (for X.Org backend)
 * libxxf86vm-dev (for X.Org backend)
-* GTK2+ 2.24 (for GTK backend)
 * ReadLine 7 (optional for Monitor)
 
 On Windows dependencies are controlled via [vcpkg package manager](https://vcpkg.io/). Here quick commands how to get
@@ -36,17 +35,17 @@ cmake --build build -j2
 ## Quick start
 
 ```
-cmake -B build -G Ninja -DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_JOYSTICK=SDL
+cmake -B build -G Ninja -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_JOYSTICK=SDL
 cmake --build build -j2
 ```
 
 ## Configuration and compilation
 
-Call cmake with one of supported backend (X11, SDL, GTK2, WIN). By default, enabled only SDL, but you can enable all of
+Call cmake with one of supported backend (X11, SDL, WIN). By default, enabled only SDL, but you can enable all of
 them. Here is example:
 
 ```
-cmake -B build -G Ninja -DENABLE_GTK2=ON -DENABLE_X11=ON -DENABLE_SDL=ON
+cmake -B build -G Ninja -DENABLE_X11=ON -DENABLE_SDL=ON
 ```
 
 After that you ready to compile quasi88kai:
@@ -63,7 +62,6 @@ Here list of all options that can be enabled/disabled via -DENABLE_FOO=ON/OFF di
 
 | Option                     | Meaning                           | Default |
 |----------------------------|-----------------------------------|---------|
-| ENABLE_GTK2                | Enable GTK2 backend               | OFF     |
 | ENABLE_SDL                 | Enable SDL backend                | ON      |
 | ENABLE_X11                 | Enable X.Org backend              | OFF     |
 | ENABLE_WIN                 | Enable Windows backend            | OFF     |
