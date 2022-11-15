@@ -9,9 +9,6 @@ and (probably) *BSD and macOS. Minimal development requirements are:
 * cmake 3.10
 * ninja (optionally)
 * libSDL 2.0.12 (for SDL backend)
-* libX11 1.6.9 (for X.Org backend)
-* libxxf86dga (for X.Org backend)
-* libxxf86vm-dev (for X.Org backend)
 * ReadLine 7 (optional for Monitor)
 
 On Windows dependencies are controlled via [vcpkg package manager](https://vcpkg.io/). Here quick commands how to get
@@ -41,7 +38,7 @@ cmake --build build -j2
 
 ## Configuration and compilation
 
-Call cmake with one of supported backend (X11, SDL, WIN). By default, enabled only SDL, but you can enable all of
+Call cmake with one of supported backend (SDL, WIN). By default, enabled only SDL, but you can enable all of
 them. Here is example:
 
 ```
@@ -63,7 +60,6 @@ Here list of all options that can be enabled/disabled via -DENABLE_FOO=ON/OFF di
 | Option                     | Meaning                           | Default |
 |----------------------------|-----------------------------------|---------|
 | ENABLE_SDL                 | Enable SDL backend                | ON      |
-| ENABLE_X11                 | Enable X.Org backend              | OFF     |
 | ENABLE_WIN                 | Enable Windows backend            | OFF     |
 | ENABLE_JOYSTICK            | Enable joystick support for X.Org (options: NO, SDL, LINUX_USB, BSD_USB) | NO      |
 | ENABLE_SOUND               | Enable sound support              | ON      |

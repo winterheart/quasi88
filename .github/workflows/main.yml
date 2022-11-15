@@ -16,9 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: ubuntu-latest, cc: "gcc", cxx: "g++", opts: "-DENABLE_X11=OFF -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
-          - { os: ubuntu-latest, cc: "clang", cxx: "clang++", opts: "-DENABLE_X11=OFF -DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
-          - { os: windows-latest, cc: "cl", cxx: "cl", opts: "-DCMAKE_TOOLCHAIN_FILE='vcpkg/scripts/buildsystems/vcpkg.cmake' -DENABLE_WIN=ON -DENABLE_X11=OFF -DENABLE_SDL=ON -DENABLE_MONITOR=OFF -DENABLE_JOYSTICK=SDL" }
+          - { os: ubuntu-latest, cc: "gcc", cxx: "g++", opts: "-DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
+          - { os: ubuntu-latest, cc: "clang", cxx: "clang++", opts: "-DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
+          - { os: windows-latest, cc: "cl", cxx: "cl", opts: "-DCMAKE_TOOLCHAIN_FILE='vcpkg/scripts/buildsystems/vcpkg.cmake' -DENABLE_WIN=ON -DENABLE_SDL=ON -DENABLE_MONITOR=OFF -DENABLE_JOYSTICK=SDL" }
     steps:
       - uses: actions/checkout@v1
       - name: Install dependencies (ubuntu)
