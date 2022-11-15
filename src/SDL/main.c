@@ -11,6 +11,9 @@
 #include "device.h"
 
 #include "getconf.h"  /* config_init */
+#ifdef WIN32
+#include "keyboard.h" /* WIN32 romaji_type */
+#endif
 #include "suspend.h"  /* stateload_system */
 #include "menu.h"     /* menu_about_osd_msg */
 
