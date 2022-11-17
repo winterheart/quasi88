@@ -194,8 +194,6 @@ if(ENABLE_SOUND)
 		src/snddrv/quasi88
 		src/snddrv/src/sound
 		src/snddrv/src
-		src/snddrv/src/unix
-		src/snddrv/src/unix/sysdep
 	)
 
 	if(ENABLE_FMGEN)

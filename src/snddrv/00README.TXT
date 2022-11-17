@@ -70,65 +70,12 @@ src/sound/ymdeltat.c        音量処理追加
 src/sound/ymdeltat.h        
 
 
-●src/unix ディレクトリ以下のソースは、
-  XMAME 0.106 のソースを QUASI88向けに改変したものです。
-
-
-src/unix/sound.c                オプション修正
-src/unix/sysdep/begin_code.h            
-src/unix/sysdep/end_code.h          
-src/unix/sysdep/fifo.h              
-src/unix/sysdep/misc.c              
-src/unix/sysdep/misc.h              
-src/unix/sysdep/plugin_manager.c        
-src/unix/sysdep/plugin_manager.h        
-src/unix/sysdep/plugin_manager_priv.h       
-src/unix/sysdep/rc.c                独自オプション処理追加
-src/unix/sysdep/rc.h                独自オプション処理追加
-src/unix/sysdep/rc_priv.h           
-src/unix/sysdep/sysdep_dsp.c            VERBOSE対応
-src/unix/sysdep/sysdep_dsp.h            
-src/unix/sysdep/sysdep_dsp_plugins.h        
-src/unix/sysdep/sysdep_dsp_priv.h       
-src/unix/sysdep/sysdep_mixer.c          VERBOSE対応
-src/unix/sysdep/sysdep_mixer.h          
-src/unix/sysdep/sysdep_mixer_plugins.h      
-src/unix/sysdep/sysdep_mixer_priv.h     
-src/unix/sysdep/sysdep_sound_stream.c       独自オプション処理追加
-src/unix/sysdep/sysdep_sound_stream.h       
-src/unix/sysdep/sysdep_sound_stream_priv.h  
-src/unix/sysdep/dsp-drivers/alsa.c      
-src/unix/sysdep/dsp-drivers/arts.c      
-src/unix/sysdep/dsp-drivers/artssound.c     
-src/unix/sysdep/dsp-drivers/coreaudio.c     
-src/unix/sysdep/dsp-drivers/esound.c        VERBOSE対応
-src/unix/sysdep/dsp-drivers/io-audio.c      
-src/unix/sysdep/dsp-drivers/irix.c      
-src/unix/sysdep/dsp-drivers/irix_al.c       
-src/unix/sysdep/dsp-drivers/netbsd.c        
-src/unix/sysdep/dsp-drivers/oss.c       VERBOSE対応
-src/unix/sysdep/dsp-drivers/sdl.c       VERBOSE対応
-src/unix/sysdep/dsp-drivers/solaris.c       
-src/unix/sysdep/dsp-drivers/soundkit.m      
-src/unix/sysdep/dsp-drivers/waveout.c       VERBOSE対応
-src/unix/sysdep/mixer-drivers/alsa.c        
-src/unix/sysdep/mixer-drivers/oss.c     
-src/unix/sysdep/mixer-drivers/solaris.c     
-
-
 -------------------------------------------------------------------------------
 ●MAME で必要なワークの宣言・定義用に、以下のファイルを作成しました。
 
     snddrv/quasi88/mame-quasi88.c
     snddrv/quasi88/mame-quasi88.h
     snddrv/quasi88/machine.c
-
-
-●X11版 QUASI88 と MAME/XMAME とのインターフェイス部として、以下のファイルを
-  作成しました。
-
-    snddrv/quasi88/X11/audio.c
-    snddrv/quasi88/X11/audio.h
 
 
 ●SDL版 QUASI88 と MAME とのインターフェイス部として、以下のファイルを
