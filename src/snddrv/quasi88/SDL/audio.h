@@ -5,6 +5,9 @@
 #ifndef SNDDRV_SDL_H_INCLUDED
 #define SNDDRV_SDL_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #undef  EXTERN
 #ifdef  SNDDRV_WORK_DEFINE
@@ -51,6 +54,8 @@ struct sysdep_dsp_create_params {
    int flags;
 };
 
+typedef struct sysdep_dsp_struct dsp_struct;
+typedef struct sysdep_dsp_create_params dsp_create_params;
 
 /* src/unix/sysdep/sysdep_dsp.h ============================================ */
 
@@ -68,12 +73,14 @@ struct sysdep_dsp_create_params {
 
 /* QUASI88 ***************************************************************** */
 
-extern void *sdl_dsp_create(const void *flags);
+extern void *sdl_dsp_create(const dsp_create_params *flags);
 
 extern  int sdl_buffersize; /* audio buffer size (512..8192, power of 2) */
 
 
-
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif      /* SNDDRV_SDL_H_INCLUDED */

@@ -34,13 +34,13 @@ Version 0.1, January 2002
 
 
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #if 0       /* QUASI88 */
 #include <strings.h>
 #endif      /* QUASI88 */
-#include "SDL2/SDL.h"
+#include <SDL2/SDL.h>
 #if 0       /* QUASI88 */
 #include "sysdep/sysdep_dsp.h"
 #include "sysdep/sysdep_dsp_priv.h"
@@ -58,13 +58,13 @@ int sdl_buffersize = 2048;
 
 /* private variables */
 static struct {
-    Uint8 *data;
+    uint8_t *data;
     int dataSize;
     int amountRemain;
     int amountWrite;
     int amountRead;
     int tmp;
-    Uint32 soundlen;
+    uint32_t soundlen;
     int sound_n_pos;
     int sound_w_pos;
     int sound_r_pos;
@@ -73,17 +73,14 @@ static struct {
 static int sdl_dsp_bytes_per_sample[4] = SYSDEP_DSP_BYTES_PER_SAMPLE;
 
 /* callback function prototype */
-static void sdl_fill_sound(void *unused, Uint8 *stream, int len);
+static void sdl_fill_sound(void *unused, uint8_t *stream, int len);
 
 /* public methods prototypes */
 #if 0       /* QUASI88 */
 static void *sdl_dsp_create(const void *flags);
-#else       /* QUASI88 */
-extern void *sdl_dsp_create(const void *flags);
 #endif      /* QUASI88 */
-static void sdl_dsp_destroy(struct sysdep_dsp_struct *dsp);
-static int sdl_dsp_write(struct sysdep_dsp_struct *dsp, unsigned char *data,
-   int count);
+static void sdl_dsp_destroy(dsp_struct *dsp);
+static int sdl_dsp_write(dsp_struct *dsp, unsigned char *data, int count);
 
 
 #if 0       /* QUASI88 */
@@ -105,29 +102,29 @@ const struct plugin_struct sysdep_dsp_sdl = {
 #if 0       /* QUASI88 */
 static void *sdl_dsp_create(const void *flags)
 #else       /* QUASI88 */
-extern void *sdl_dsp_create(const void *flags)
+extern void *sdl_dsp_create(const dsp_create_params *flags)
 #endif      /* QUASI88 */
 {
-   struct sdl_dsp_priv_data *priv = NULL;
-   struct sysdep_dsp_struct *dsp = NULL;
-   const struct sysdep_dsp_create_params *params = flags;
+   struct sdl_dsp_priv_data *priv = nullptr;
+   dsp_struct *dsp = nullptr;
+   const dsp_create_params *params = flags;
    const char *device = params->device;
    SDL_AudioSpec *audiospec;
    
    /* allocate the dsp struct */
-   if (!(dsp = calloc(1, sizeof(struct sysdep_dsp_struct))))
+   if (!(dsp = (dsp_struct *)calloc(1, sizeof(dsp_struct))))
    {
       fprintf(stderr,
          "error malloc failed for struct sysdep_dsp_struct\n");
-      return NULL;
+      return nullptr;
    }
    
    
-   if (!(audiospec = calloc(1, sizeof(SDL_AudioSpec))))
+   if (!(audiospec = (SDL_AudioSpec *)calloc(1, sizeof(SDL_AudioSpec))))
    {
         fprintf(stderr, "error malloc failed for SDL_AudioSpec\n");
         sdl_dsp_destroy(dsp);
-        return NULL;
+        return nullptr;
    }
 
    
@@ -159,7 +156,7 @@ extern void *sdl_dsp_create(const void *flags)
    /* set callback funcion */
    audiospec->callback = sdl_fill_sound;
    
-   audiospec->userdata = NULL;
+   audiospec->userdata = nullptr;
    
 #if 0       /* QUASI88 */
    /* Open audio device */
@@ -172,18 +169,18 @@ extern void *sdl_dsp_create(const void *flags)
    if( ! SDL_WasInit( SDL_INIT_AUDIO ) ) SDL_Init( SDL_INIT_AUDIO );
 #endif      /* QUASI88 */
 
-   if (SDL_OpenAudio(audiospec, NULL) != 0) { 
+   if (SDL_OpenAudio(audiospec, nullptr) != 0) {
         fprintf(stderr, "failed opening audio device\n");
-        return NULL;
+        return nullptr;
    }
 
    sample.dataSize = audiospec->size * 4;
    free(audiospec);
-   if (!(sample.data = calloc(sample.dataSize, sizeof(Uint8))))
+   if (!(sample.data = (uint8_t *)calloc(sample.dataSize, sizeof(uint8_t))))
    {
         fprintf(stderr, "error malloc failed for data\n");
         sdl_dsp_destroy(dsp);
-        return NULL;
+        return nullptr;
    }
 
    SDL_PauseAudio(0);
@@ -199,7 +196,7 @@ extern void *sdl_dsp_create(const void *flags)
    return dsp;
 }
 
-static void sdl_dsp_destroy(struct sysdep_dsp_struct *dsp)
+static void sdl_dsp_destroy(dsp_struct *dsp)
 { 
    SDL_CloseAudio();
     
@@ -210,18 +207,17 @@ static void sdl_dsp_destroy(struct sysdep_dsp_struct *dsp)
        free(sample.data);
    }
    memset(&sample, 0, sizeof(sample));
-   sample.data = NULL;
+   sample.data = nullptr;
 #endif      /* QUASI88 */
 }
    
 
-static int sdl_dsp_write(struct sysdep_dsp_struct *dsp, unsigned char *data,
-   int count)
+static int sdl_dsp_write(dsp_struct *dsp, unsigned char *data, int count)
 {
     /* sound_n_pos = normal position
        sound_r_pos = read position
        and so on.                   */
-    Uint8 *src;
+    uint8_t *src;
     int bytes_written = 0;
     SDL_LockAudio();
     
@@ -236,7 +232,7 @@ static int sdl_dsp_write(struct sysdep_dsp_struct *dsp, unsigned char *data,
     if(sample.amountRemain < sample.amountWrite) sample.amountWrite = sample.amountRemain;
         sample.sound_n_pos += sample.amountWrite;
         
-        src = (Uint8 *)data;
+        src = (uint8_t *)data;
         sample.tmp = sample.dataSize - sample.sound_w_pos;
         
         if(sample.tmp < sample.amountWrite){
@@ -259,10 +255,10 @@ static int sdl_dsp_write(struct sysdep_dsp_struct *dsp, unsigned char *data,
 }
 
 /* Private method */
-static void sdl_fill_sound(void *unused, Uint8 *stream, int len) 
+static void sdl_fill_sound(void *unused, uint8_t *stream, int len)
 {
     int result;
-    Uint8 *dst;
+    uint8_t *dst;
     // Initialize stream before audio playback to prevent noise
     memset(stream, 0, len);
     sample.amountRead = len;
@@ -273,7 +269,7 @@ static void sdl_fill_sound(void *unused, Uint8 *stream, int len)
         result = (int)sample.amountRead;
         sample.sound_n_pos -= sample.amountRead;
         
-        dst = (Uint8*)stream;
+        dst = (uint8_t*)stream;
         
         sample.tmp = sample.dataSize - sample.sound_r_pos;
         if(sample.tmp<sample.amountRead){

@@ -4,11 +4,10 @@
  *      詳細は、 snddrv.h / mame-quasi88.h 参照
  ************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #ifdef  USE_SOUND
+
+#include <cstdio>
+#include <cstdlib>
 
 #include "mame-quasi88.h"
 
@@ -21,7 +20,7 @@
 static int use_audiodevice = 1;     /* use audio-devide for audio output */
 /* static int attenuation = 0;       * ボリューム -32〜0 [db] 現在未サポート */
 
-static struct sysdep_dsp_struct *sysdep_sound_dsp = NULL;
+static dsp_struct *sysdep_sound_dsp = nullptr;
 
 /*===========================================================================*/
 /*              QUASI88 から呼び出される、MAME の処理関数                    */
@@ -64,52 +63,52 @@ static  const   T_CONFIG_TABLE xmame_options[] =
 {
   /* 350〜399: サウンド依存オプション */
 
-  { 351, "sound",        X_FIX,  &use_sound,       TRUE,                  0,0, OPT_SAVE },
-  { 351, "snd",          X_FIX,  &use_sound,       TRUE,                  0,0, 0        },
-  { 351, "nosound",      X_FIX,  &use_sound,       FALSE,                 0,0, OPT_SAVE },
-  { 351, "nosnd",        X_FIX,  &use_sound,       FALSE,                 0,0, 0        },
+  { 351, "sound",        X_FIX,  &use_sound,       true,                  0,nullptr, OPT_SAVE },
+  { 351, "snd",          X_FIX,  &use_sound,       true,                  0,nullptr, nullptr        },
+  { 351, "nosound",      X_FIX,  &use_sound,       false,                 0,nullptr, OPT_SAVE },
+  { 351, "nosnd",        X_FIX,  &use_sound,       false,                 0,nullptr, nullptr        },
 
-  { 352, "audio",        X_FIX,  &use_audiodevice, TRUE,                  0,0, OPT_SAVE },
-  { 352, "ao",           X_FIX,  &use_audiodevice, TRUE,                  0,0, 0        },
-  { 352, "noaudio",      X_FIX,  &use_audiodevice, FALSE,                 0,0, OPT_SAVE },
-  { 352, "noao",         X_FIX,  &use_audiodevice, FALSE,                 0,0, 0        },
+  { 352, "audio",        X_FIX,  &use_audiodevice, true,                  0,nullptr, OPT_SAVE },
+  { 352, "ao",           X_FIX,  &use_audiodevice, true,                  0,nullptr, nullptr        },
+  { 352, "noaudio",      X_FIX,  &use_audiodevice, false,                 0,nullptr, OPT_SAVE },
+  { 352, "noao",         X_FIX,  &use_audiodevice, false,                 0,nullptr, nullptr        },
 
-  { 353, "fmgen",        X_FIX,  &use_fmgen,       TRUE,                  0,0, OPT_SAVE },
-  { 353, "nofmgen",      X_FIX,  &use_fmgen,       FALSE,                 0,0, OPT_SAVE },
+  { 353, "fmgen",        X_FIX,  &use_fmgen,       true,                  0,nullptr, OPT_SAVE },
+  { 353, "nofmgen",      X_FIX,  &use_fmgen,       false,                 0,nullptr, OPT_SAVE },
 
 /*{ 354, "volume",       X_INT,  &attenuation,     -32, 0,                  0, OPT_SAVE },*/
 /*{ 354, "v",            X_INT,  &attenuation,     -32, 0,                  0, 0        },*/
 
-  { 355, "fmvol",        X_INT,  &fmvol,           0, 100,                  0, OPT_SAVE },
-  { 355, "fv",           X_INT,  &fmvol,           0, 100,                  0, 0        },
-  { 356, "psgvol",       X_INT,  &psgvol,          0, 100,                  0, OPT_SAVE },
-  { 356, "pv",           X_INT,  &psgvol,          0, 100,                  0, 0        },
-  { 357, "beepvol",      X_INT,  &beepvol,         0, 100,                  0, OPT_SAVE },
-  { 357, "bv",           X_INT,  &beepvol,         0, 100,                  0, 0        },
-  { 358, "rhythmvol",    X_INT,  &rhythmvol,       0, 200,                  0, OPT_SAVE },
-  { 358, "rv",           X_INT,  &rhythmvol,       0, 200,                  0, 0        },
-  { 359, "adpcmvol",     X_INT,  &adpcmvol,        0, 200,                  0, OPT_SAVE },
-  { 359, "av",           X_INT,  &adpcmvol,        0, 200,                  0, 0        },
-  { 360, "fmgenvol",     X_INT,  &fmgenvol,        0, 100,                  0, OPT_SAVE },
-  { 360, "fmv",          X_INT,  &fmgenvol,        0, 100,                  0, 0        },
-  { 361, "samplevol",    X_INT,  &samplevol,       0, 100,                  0, OPT_SAVE },
-  { 361, "sv",           X_INT,  &samplevol,       0, 100,                  0, 0        },
+  { 355, "fmvol",        X_INT,  &fmvol,           0, 100,                  nullptr, OPT_SAVE },
+  { 355, "fv",           X_INT,  &fmvol,           0, 100,                  nullptr, nullptr        },
+  { 356, "psgvol",       X_INT,  &psgvol,          0, 100,                  nullptr, OPT_SAVE },
+  { 356, "pv",           X_INT,  &psgvol,          0, 100,                  nullptr, nullptr        },
+  { 357, "beepvol",      X_INT,  &beepvol,         0, 100,                  nullptr, OPT_SAVE },
+  { 357, "bv",           X_INT,  &beepvol,         0, 100,                  nullptr, nullptr        },
+  { 358, "rhythmvol",    X_INT,  &rhythmvol,       0, 200,                  nullptr, OPT_SAVE },
+  { 358, "rv",           X_INT,  &rhythmvol,       0, 200,                  nullptr, nullptr        },
+  { 359, "adpcmvol",     X_INT,  &adpcmvol,        0, 200,                  nullptr, OPT_SAVE },
+  { 359, "av",           X_INT,  &adpcmvol,        0, 200,                  nullptr, nullptr        },
+  { 360, "fmgenvol",     X_INT,  &fmgenvol,        0, 100,                  nullptr, OPT_SAVE },
+  { 360, "fmv",          X_INT,  &fmgenvol,        0, 100,                  nullptr, nullptr        },
+  { 361, "samplevol",    X_INT,  &samplevol,       0, 100,                  nullptr, OPT_SAVE },
+  { 361, "sv",           X_INT,  &samplevol,       0, 100,                  nullptr, nullptr        },
 
-  { 362, "samplefreq",   X_INT,  &options.samplerate, 8000, 48000,          0, OPT_SAVE },
-  { 362, "sf",           X_INT,  &options.samplerate, 8000, 48000,          0, 0        },
+  { 362, "samplefreq",   X_INT,  &options.samplerate, 8000, 48000,          nullptr, OPT_SAVE },
+  { 362, "sf",           X_INT,  &options.samplerate, 8000, 48000,          nullptr, nullptr        },
 
-  { 363, "samples",      X_FIX,  &options.use_samples, 1,                 0,0, OPT_SAVE },
-  { 363, "sam",          X_FIX,  &options.use_samples, 1,                 0,0, 0        },
-  { 363, "nosamples",    X_FIX,  &options.use_samples, 0,                 0,0, OPT_SAVE },
-  { 363, "nosam",        X_FIX,  &options.use_samples, 0,                 0,0, 0        },
+  { 363, "samples",      X_FIX,  &options.use_samples, 1,                 0,nullptr, OPT_SAVE },
+  { 363, "sam",          X_FIX,  &options.use_samples, 1,                 0,nullptr, nullptr        },
+  { 363, "nosamples",    X_FIX,  &options.use_samples, 0,                 0,nullptr, OPT_SAVE },
+  { 363, "nosam",        X_FIX,  &options.use_samples, 0,                 0,nullptr, nullptr        },
 
-  { 364, "sdlbufsize",   X_INT,  &sdl_buffersize,  32, 65536,               0, OPT_SAVE },
-  { 365, "sdlbufnum",    X_INV,  &invalid_arg,                          0,0,0, 0        },
-  { 366, "close",        X_FIX,  &close_device,    TRUE,                  0,0, OPT_SAVE },
-  { 366, "noclose",      X_FIX,  &close_device,    FALSE,                 0,0, OPT_SAVE },
+  { 364, "sdlbufsize",   X_INT,  &sdl_buffersize,  32, 65536,               nullptr, OPT_SAVE },
+  { 365, "sdlbufnum",    X_INV,  &invalid_arg,                          0,0,nullptr, nullptr        },
+  { 366, "close",        X_FIX,  &close_device,    true,                  0,nullptr, OPT_SAVE },
+  { 366, "noclose",      X_FIX,  &close_device,    false,                 0,nullptr, OPT_SAVE },
 
   /* 終端 */
-  {   0, NULL,           X_INV,                                       0,0,0,0, 0        },
+  {   0, nullptr,           X_INV,                                       nullptr,0,0,nullptr, nullptr        },
 };
 
 const T_CONFIG_TABLE *xmame_config_get_opt_tbl(void)
@@ -231,14 +230,14 @@ T_SNDDRV_CONFIG *xmame_config_get_sndopt_tbl(void)
             &sdl_buffersize,  32, 65536,
         },
         {
-            SNDDRV_NULL, 0, 0, 0, 0,
+            SNDDRV_NULL, nullptr, nullptr, 0, 0,
         },
     };
 
     if (use_audiodevice) {
         return config;
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -258,14 +257,14 @@ T_SNDDRV_CONFIG *xmame_config_get_sndopt_tbl(void)
 int     xmame_has_audiodevice(void)
 {
     if (use_sound) {
-        if (sysdep_sound_dsp) return TRUE;
+        if (sysdep_sound_dsp) return true;
     }
-    return FALSE;
+    return false;
 }
 
 int     xmame_has_mastervolume(void)
 {
-    return FALSE;
+    return false;
 }
 
 
@@ -329,19 +328,19 @@ int     xmame_has_mastervolume(void)
 
 static float sound_bufsize = 3.0;
 static int sound_samples_per_frame = 0;
-static int type = -1;
+static int sysdep_type = -1;
 
 
 /*
  * xmame-0.106/src/unix/sysdep/sysdep_dsp.c 
  */
-static struct sysdep_dsp_struct *sysdep_dsp_create(
-        int     *samplerate,    /* sample_rate (==44100) */
-        int     *type,          /* */
+static dsp_struct *sysdep_dsp_create(
+        const int     *samplerate,    /* sample_rate (==44100) */
+        const int     *type,          /* */
         float   bufsize)        /* 3.0 / 55.4 */
 {
-    struct sysdep_dsp_struct *dsp = NULL;
-    struct sysdep_dsp_create_params params;
+    dsp_struct *dsp = nullptr;
+    dsp_create_params params;
 
     /* fill the params struct */
     params.bufsize = bufsize;
@@ -351,9 +350,9 @@ static struct sysdep_dsp_struct *sysdep_dsp_create(
     params.flags = 0;   /* SYSDEP_DSP_EMULATE_TYPE | SYSDEP_DSP_O_NONBLOCK */
 
     /* create the instance */
-    if (!(dsp = sdl_dsp_create(&params)))
+    if (!(dsp = (dsp_struct *)sdl_dsp_create(&params)))
     {
-        return NULL;
+        return nullptr;
     }
 
     /* calculate buf_size if not done by the plugin */
@@ -378,9 +377,10 @@ static void sysdep_dsp_destroy(struct sysdep_dsp_struct *dsp)
  */
 int osd_start_audio_stream(int stereo)
 {
-    type = SYSDEP_DSP_16BIT | (stereo? SYSDEP_DSP_STEREO:SYSDEP_DSP_MONO);
+    sysdep_type = SYSDEP_DSP_16BIT | (stereo? SYSDEP_DSP_STEREO:SYSDEP_DSP_MONO);
 
-    sysdep_sound_dsp    = NULL;
+
+    sysdep_sound_dsp    = nullptr;
 
     osd_sound_enable(1);
     
@@ -410,7 +410,7 @@ void osd_stop_audio_stream(void)
 void osd_sound_enable(int enable_it)
 {
     if (use_audiodevice == 0) {
-        sysdep_sound_dsp = NULL;
+        sysdep_sound_dsp = nullptr;
         sound_samples_per_frame = (int) (Machine->sample_rate / Machine->refresh_rate);
         return;
     }
@@ -420,12 +420,12 @@ void osd_sound_enable(int enable_it)
         /* in case we get called twice with enable_it true
            OR we get called when osd_start_audio stream
            has never been called */
-        if (sysdep_sound_dsp || (type==-1))
+        if (sysdep_sound_dsp || (sysdep_type==-1))
             return;
         
         if(!(sysdep_sound_dsp = sysdep_dsp_create(
                         &(Machine->sample_rate),
-                        &type,
+                        &sysdep_type,
                         sound_bufsize * (1 / Machine->refresh_rate))))
         {
             /* デバイスが開けなくても、気にせず続行 */
@@ -440,7 +440,7 @@ void osd_sound_enable(int enable_it)
         if (sysdep_sound_dsp)
         {
             sysdep_dsp_destroy(sysdep_sound_dsp);
-            sysdep_sound_dsp = NULL;
+            sysdep_sound_dsp = nullptr;
         }
     }
 }

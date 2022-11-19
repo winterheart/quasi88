@@ -5,6 +5,9 @@
 #ifndef MAME_QUASI88_H_INCLUDED
 #define MAME_QUASI88_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -371,5 +374,9 @@ extern  int samplevol;          /* level of SAMPLE (0-100)[%] */
 extern  int use_fmgen;          /* 1:use fmgen / 0:not use */
 extern  int has_samples;        /* 1:use samples / 0:not use */
 extern  int quasi88_is_paused;  /* for mame_is_paused() */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif      /* MAME_QUASI88_H_INCLUDED */
