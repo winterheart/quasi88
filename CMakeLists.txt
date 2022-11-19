@@ -266,8 +266,8 @@ if(ENABLE_SDL)
 	#### SDL Sound
 	if(ENABLE_SOUND)
 		set(SDL_SOUND_SOURCES
-			src/snddrv/quasi88/SDL/audio.c
-			src/snddrv/quasi88/SDL/sdl.c
+			src/snddrv/quasi88/SDL/audio.cpp
+			src/snddrv/quasi88/SDL/sdl.cpp
 		)
 		list(APPEND SDL_INCLUDES src/snddrv/SDL)
 	endif(ENABLE_SOUND)
