@@ -30,7 +30,7 @@ extern int menu2screen_H_N__8(void);
 extern int menu2screen_H_P__8(void);
 extern int menu2screen_D_N__8(void);
 
-extern void status2screen__8(int kind, byte pixmap[], int w, int h);
+extern void status2screen__8(int kind, uint8_t pixmap[], int w, int h);
 extern void status_buf_init__8(void);
 extern void status_buf_clear__8(void);
 #endif
@@ -58,7 +58,7 @@ extern int menu2screen_H_N_16(void);
 extern int menu2screen_H_P_16(void);
 extern int menu2screen_D_N_16(void);
 
-extern void status2screen_16(int kind, byte pixmap[], int w, int h);
+extern void status2screen_16(int kind, uint8_t pixmap[], int w, int h);
 extern void status_buf_init_16(void);
 extern void status_buf_clear_16(void);
 #endif
@@ -86,7 +86,7 @@ extern int menu2screen_H_N_32();
 extern int menu2screen_H_P_32();
 extern int menu2screen_D_N_32();
 
-extern void status2screen_32(int kind, byte pixmap[], int w, int h);
+extern void status2screen_32(int kind, uint8_t pixmap[], int w, int h);
 extern void status_buf_init_32();
 extern void status_buf_clear_32();
 #endif

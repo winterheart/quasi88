@@ -22,7 +22,7 @@ extern int sound_TIMER_B;
 
 extern int sound_prescaler; /* 1/プリスケーラー (2,3,6) */
 
-extern byte sound_reg[0x100];
+extern uint8_t sound_reg[0x100];
 extern int sound_reg_select;
 
 extern int sound2_MSK_TA;   /* TIMER A 割り込みマスク    */
@@ -42,9 +42,9 @@ extern int sound2_FLAG_BRDY;   /* FLAG BRDY の状態      */
 extern int sound2_FLAG_ZERO;   /* FLAG ZERO の状態      */
 extern int sound2_FLAG_PCMBSY; /* FLAG PCMBSY の状態        */
 
-extern byte sound2_reg[0x100];
+extern uint8_t sound2_reg[0x100];
 extern int sound2_reg_select;
-extern byte *sound2_adpcm; /* ADPCM用 DRAM (256KB)    */
+extern uint8_t *sound2_adpcm; /* ADPCM用 DRAM (256KB)    */
 
 extern int sound2_repeat;     /* ADPCM リピートプレイ  */
 extern int sound2_intr_base;  /* ADPCM 割り込みレート  */
@@ -54,14 +54,14 @@ extern int use_cmdsing; /* 真で、CMD SING有効  */
 
 void sound_board_init();
 
-void sound_out_reg(byte data);
-void sound_out_data(byte data);
-byte sound_in_status();
-byte sound_in_data(int always_sound_II);
-void sound2_out_reg(byte data);
-void sound2_out_data(byte data);
-byte sound2_in_status();
-byte sound2_in_data();
+void sound_out_reg(uint8_t data);
+void sound_out_data(uint8_t data);
+uint8_t sound_in_status();
+uint8_t sound_in_data(int always_sound_II);
+void sound2_out_reg(uint8_t data);
+void sound2_out_data(uint8_t data);
+uint8_t sound2_in_status();
+uint8_t sound2_in_data();
 
 void sound_output_after_stateload();
 

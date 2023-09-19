@@ -80,10 +80,9 @@
 
 #include <stdio.h>
 
-extern "C" {
 #include "quasi88.h"
+
 #include "z80.h"
-}
 
 #define S_FLAG (0x80)
 #define Z_FLAG (0x40)
@@ -142,10 +141,10 @@ void z80_reset(z80arch *z80) {
   z80->state0 = 0;
   z80->icount = 0;
 
-  z80->HALT = FALSE;
-  z80->INT_active = FALSE;
+  z80->HALT = false;
+  z80->INT_active = false;
 
-  z80->skip_intr_chk = FALSE;
+  z80->skip_intr_chk = false;
 
   z80->PC_prev.W = 0x0000;
 }
@@ -1234,7 +1233,7 @@ enum CodesED {
 
 INLINE void z80_code_CB(z80arch *z80) {
   int opcode;
-  byte I;
+  uint8_t I;
 
   opcode = M_FETCH(z80->PC.W++);
   z80->R++;
@@ -1250,7 +1249,7 @@ INLINE void z80_code_CB(z80arch *z80) {
 
 INLINE void z80_code_ED(z80arch *z80) {
   int opcode;
-  byte I;
+  uint8_t I;
   pair J;
 
   opcode = M_FETCH(z80->PC.W++);
@@ -1268,7 +1267,7 @@ INLINE void z80_code_ED(z80arch *z80) {
 
 INLINE void z80_code_DD(z80arch *z80) {
   int opcode;
-  byte I;
+  uint8_t I;
   pair J;
 
   opcode = M_FETCH(z80->PC.W++);
@@ -1305,7 +1304,7 @@ INLINE void z80_code_DD(z80arch *z80) {
 
 INLINE void z80_code_FD(z80arch *z80) {
   int opcode;
-  byte I;
+  uint8_t I;
   pair J;
 
   opcode = M_FETCH(z80->PC.W++);
@@ -1391,7 +1390,7 @@ INLINE void z80_interrupt(z80arch *z80) {
     z80->state0 += 2;
 
     if (z80->HALT) { /* HALT 状態解除 */
-      z80->HALT = FALSE;
+      z80->HALT = false;
       z80->PC.W++;
     }
 
@@ -1405,7 +1404,7 @@ INLINE void z80_interrupt(z80arch *z80) {
       break;
     case 2: /*      IM 2 の時 */
       M_PUSH(PC);
-      level = ((word)z80->I << 8) | (level << 1);
+      level = ((uint16_t)z80->I << 8) | (level << 1);
       z80->PC.B.l = M_RDMEM(level++);
       z80->PC.B.h = M_RDMEM(level);
       z80->state0 += 17;
@@ -1437,7 +1436,7 @@ int z80_state_intchk; /* このstate数実行後、割込判定する   */
 
 int z80_emu(z80arch *z80, int state_of_exec) {
   int opcode, istate = 0;
-  byte I;
+  uint8_t I;
   pair J;
   int total_state = 0; /* 関数終了時までに、処理したステート数        */
 
@@ -1516,7 +1515,7 @@ int z80_emu(z80arch *z80, int state_of_exec) {
     /* ======== 割込発生チェックし、発生していたら応答する ======== */
 
     if (z80->skip_intr_chk) { /* 割込応答しない場合 (EI,DD/FD不当命令直後)*/
-      z80->skip_intr_chk = FALSE;
+      z80->skip_intr_chk = false;
 
       if (z80->IFF == INT_ENABLE && /* 割込をとりこぼしてたら  */
           z80->INT_active) {        /* 直後に割込応答するため、*/

@@ -1,10 +1,12 @@
 #ifndef STATUS_H_INCLUDED
 #define STATUS_H_INCLUDED
 
+#include <cstdint>
+
 extern int status_imagename; /* イメージ名表示有無 */
 
 typedef struct {
-  byte *pixmap; /* ステータスのイメージ用バッファ */
+  uint8_t *pixmap; /* ステータスのイメージ用バッファ */
   int w;        /* イメージ表示サイズ 幅 0〜   */
   int h;        /*                    高          */
 } T_STATUS_INFO;

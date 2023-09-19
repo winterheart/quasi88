@@ -4,14 +4,12 @@
 /*                                  */
 /************************************************************************/
 
-extern "C" {
 #include "quasi88.h"
+
 #include "crtcdmac.h"
 #include "memory.h"
-
 #include "screen.h"
 #include "suspend.h"
-}
 
 /*======================================================================
  *
@@ -58,14 +56,14 @@ int dma_next_vline = 0; /* DMAウェイトを再計算する次のステート�
 static int crtc_command;
 static int crtc_param_num;
 
-static byte crtc_status;
-static byte crtc_light_pen[2];
-static byte crtc_load_cursor_position;
+static uint8_t crtc_status;
+static uint8_t crtc_light_pen[2];
+static uint8_t crtc_load_cursor_position;
 
 int crtc_active;     /* CRTCの状態 0:CRTC作動 1:CRTC停止 */
 int crtc_intr_mask;  /* CRTCの割込マスク ==3 で表示     */
 int crtc_cursor[2];  /* カーソル位置 非表示の時は(-1,-1) */
-byte crtc_format[5]; /* CRTC 期化時のフォーマット      */
+uint8_t crtc_format[5]; /* CRTC 期化時のフォーマット      */
 
 int crtc_reverse_display; /* 真…反転表示 / 偽…通常表示  */
 
@@ -166,7 +164,7 @@ void crtc_init() {
 
 /*-------- コマンド入力時 --------*/
 
-void crtc_out_command(byte data) {
+void crtc_out_command(uint8_t data) {
   crtc_command = data >> 5;
   crtc_param_num = 0;
 
@@ -174,7 +172,7 @@ void crtc_out_command(byte data) {
 
   case CRTC_RESET: /* リセット */
     crtc_status &= ~(CRTC_STATUS_VE | CRTC_STATUS_N | CRTC_STATUS_E);
-    crtc_active = FALSE;
+    crtc_active = false;
     set_text_display();
     screen_set_dirty_all();
     break;
@@ -183,7 +181,7 @@ void crtc_out_command(byte data) {
     crtc_reverse_display = data & 0x01;
     crtc_status |= CRTC_STATUS_VE;
     crtc_status &= ~(CRTC_STATUS_U);
-    crtc_active = TRUE;
+    crtc_active = true;
     set_text_display();
     screen_set_dirty_palette();
     break;
@@ -213,7 +211,7 @@ void crtc_out_command(byte data) {
 
 /*-------- パラメータ入力時 --------*/
 
-void crtc_out_parameter(byte data) {
+void crtc_out_parameter(uint8_t data) {
   switch (crtc_command) {
   case CRTC_RESET:
     if (crtc_param_num < 5) {
@@ -270,12 +268,12 @@ void crtc_out_parameter(byte data) {
 
 /*-------- ステータス出力時 --------*/
 
-byte crtc_in_status(void) { return crtc_status; }
+uint8_t crtc_in_status(void) { return crtc_status; }
 
 /*-------- パラメータ出力時 --------*/
 
-byte crtc_in_parameter() {
-  byte data = 0xff;
+uint8_t crtc_in_parameter() {
+  uint8_t data = 0xff;
 
   switch (crtc_command) {
   case CRTC_READ_LIGHT_PEN:
@@ -309,16 +307,16 @@ void dmac_init(void) {
   dmac_counter[3].W = 0;
 }
 
-void dmac_out_mode(byte data) {
+void dmac_out_mode(uint8_t data) {
   dmac_flipflop = 0;
   dmac_mode = data;
 
   set_text_display();
   screen_set_dirty_all();
 }
-byte dmac_in_status() { return 0x1f; }
+uint8_t dmac_in_status() { return 0x1f; }
 
-void dmac_out_address(byte addr, byte data) {
+void dmac_out_address(uint8_t addr, uint8_t data) {
   if (dmac_flipflop == 0)
     dmac_address[addr].B.l = data;
   else
@@ -327,7 +325,7 @@ void dmac_out_address(byte addr, byte data) {
   dmac_flipflop ^= 0x1;
   screen_set_dirty_all(); /* 本当は、addr==2の時のみ……… */
 }
-void dmac_out_counter(byte addr, byte data) {
+void dmac_out_counter(uint8_t addr, uint8_t data) {
   if (dmac_flipflop == 0)
     dmac_counter[addr].B.l = data;
   else
@@ -336,8 +334,8 @@ void dmac_out_counter(byte addr, byte data) {
   dmac_flipflop ^= 0x1;
 }
 
-byte dmac_in_address(byte addr) {
-  byte data;
+uint8_t dmac_in_address(uint8_t addr) {
+  uint8_t data;
 
   if (dmac_flipflop == 0)
     data = dmac_address[addr].B.l;
@@ -347,8 +345,8 @@ byte dmac_in_address(byte addr) {
   dmac_flipflop ^= 0x1;
   return data;
 }
-byte dmac_in_counter(byte addr) {
-  byte data;
+uint8_t dmac_in_counter(uint8_t addr) {
+  uint8_t data;
 
   if (dmac_flipflop == 0)
     data = dmac_counter[addr].B.l;
@@ -407,18 +405,18 @@ void set_text_display() {
  *======================================================================*/
 
 int text_attr_flipflop = 0;
-Ushort text_attr_buf[2][2048]; /* アトリビュート情報  */
+uint16_t text_attr_buf[2][2048]; /* アトリビュート情報  */
                                /* ↑ 80文字x25行=2000で足りるのだが、  */
                                /* 余分に使うので、多めに確保する。 */
 
 void crtc_make_text_attr(void) {
   int global_attr = (ATTR_G | ATTR_R | ATTR_B);
-  int global_blink = FALSE;
+  int global_blink = false;
   int i, j, tmp;
   int column, attr, attr_rest;
-  word char_start_addr, attr_start_addr;
-  word c_addr, a_addr;
-  Ushort *text_attr = &text_attr_buf[text_attr_flipflop][0];
+  uint16_t char_start_addr, attr_start_addr;
+  uint16_t c_addr, a_addr;
+  uint16_t *text_attr = &text_attr_buf[text_attr_flipflop][0];
 
   /* CRTC も DMAC も止まっている場合 */
   /*  (文字もアトリビュートも無効)   */
@@ -463,8 +461,8 @@ void crtc_make_text_attr(void) {
           global_attr |= ATTR_SECRET;
         }
 
-        *text_attr++ = ((Ushort)main_ram[c_addr++] << 8) | global_attr;
-        *text_attr++ = ((Ushort)main_ram[c_addr++] << 8) | global_attr;
+        *text_attr++ = ((uint16_t)main_ram[c_addr++] << 8) | global_attr;
+        *text_attr++ = ((uint16_t)main_ram[c_addr++] << 8) | global_attr;
       }
 
       if (crtc_skip_line) {
@@ -510,7 +508,7 @@ void crtc_make_text_attr(void) {
         if (j == 0 && column == 0x80) {
           column = 0;
 /*                 global_attr = (ATTR_G|ATTR_R|ATTR_B);
-                   global_blink= FALSE;  }*/}
+                   global_blink= false;  }*/}
 
 if (column == 0x80 && !attr_rest) { /* 8bit目は */
   attr_rest = attr | 0x100;         /* 使用済の */
@@ -553,7 +551,7 @@ else if (column <= CRTC_SZ_COLUMNS && !text_attr[column]) {
           }
         }
 
-        *text_attr++ = ((Ushort)main_ram[c_addr++] << 8) | global_attr;
+        *text_attr++ = ((uint16_t)main_ram[c_addr++] << 8) | global_attr;
       }
 
       if (crtc_skip_line) {                       /* 1行飛ばし指定時は*/
@@ -638,8 +636,8 @@ else if (column <= CRTC_SZ_COLUMNS && !text_attr[column]) {
 
 void get_font_gryph(int attr, T_GRYPH *gryph, int *color) {
   int chara;
-  bit32 *src;
-  bit32 *dst = (bit32 *)gryph;
+  uint32_t *src;
+  uint32_t *dst = (uint32_t *)gryph;
 
   *color = ((attr & COLOR_MASK) >> 5) | 8;
 
@@ -663,9 +661,9 @@ void get_font_gryph(int attr, T_GRYPH *gryph, int *color) {
     chara = attr >> 8;
 
     if (attr & ATTR_GRAPH)
-      src = (bit32 *)&font_rom[(chara | 0x100) * 8];
+      src = (uint32_t *)&font_rom[(chara | 0x100) * 8];
     else
-      src = (bit32 *)&font_rom[(chara)*8];
+      src = (uint32_t *)&font_rom[(chara)*8];
 
     /* フォントをまず内部ワークにコピー */
     *dst++ = *src++;
@@ -745,14 +743,14 @@ static T_SUSPEND_W suspend_crtcdmac_work[] = {
 
 int statesave_crtcdmac(void) {
   if (statesave_table(SID, suspend_crtcdmac_work) == STATE_OK)
-    return TRUE;
+    return true;
   else
-    return FALSE;
+    return true;
 }
 
 int stateload_crtcdmac(void) {
   if (stateload_table(SID, suspend_crtcdmac_work) == STATE_OK)
-    return TRUE;
+    return true;
   else
-    return FALSE;
+    return false;
 }

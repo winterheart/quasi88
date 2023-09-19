@@ -20,14 +20,13 @@
 #include <cstring>
 #include <cctype>
 
-extern "C" {
 #include "quasi88.h"
-#include "z80.h"
-#include "memory.h"
-#include "screen.h"
-#include "monitor.h"
+
 #include "basic.h"
-}
+#include "memory.h"
+#include "monitor.h"
+#include "screen.h"
+#include "z80.h"
 
 #define BASIC_MAX_ERR_NUM 4  /* エラー登録可能数     */
 #define BASIC_MAX_ERR_STR 20 /* エラー表示文字数     */
@@ -62,39 +61,39 @@ extern "C" {
 
 /* 仮想プロセス時エラー構造体 */
 typedef struct {
-  word pc;
+  uint16_t pc;
   char str[BASIC_MAX_ERR_STR];
 } basic_err;
 
-int basic_mode = FALSE;
+int basic_mode = false;
 
 static z80arch pseudo_z80_cpu; /* 仮想 CPU               */
 
-static byte *pseudo_ram;          /* 仮想メモリ (MAIN RAM)  */
-static word pseudo_window_offset; /* 仮想メモリ用ウインドウ */
+static uint8_t *pseudo_ram;          /* 仮想メモリ (MAIN RAM)  */
+static uint8_t pseudo_window_offset; /* 仮想メモリ用ウインドウ */
 
-static byte *read_pseudo_mem_0000_7fff; /* 仮想メモリリードポインタ  */
-static byte *read_pseudo_mem_8000_83ff;
+static uint8_t *read_pseudo_mem_0000_7fff; /* 仮想メモリリードポインタ  */
+static uint8_t *read_pseudo_mem_8000_83ff;
 
-static byte *write_pseudo_mem_8000_83ff; /* 仮想メモリライトポインタ  */
+static uint8_t *write_pseudo_mem_8000_83ff; /* 仮想メモリライトポインタ  */
 
-static word basic_top_addr_addr; /* 中間コード始点アドレス格納*/
-static word basic_end_addr_addr; /* 中間コード終点アドレス格納*/
-static word basic_top_addr;      /* 中間コード始点アドレス    */
-static word basic_end_addr;      /* 中間コード終点アドレス    */
-static word basic_buffer_addr;   /* 中間コードバッファアドレス*/
-static word basic_buffer_size;   /* 中間コードバッファサイズ  */
-static word basic_sp;            /* 開始時のスタックポインタ  */
+static uint16_t basic_top_addr_addr; /* 中間コード始点アドレス格納*/
+static uint16_t basic_end_addr_addr; /* 中間コード終点アドレス格納*/
+static uint16_t basic_top_addr;      /* 中間コード始点アドレス    */
+static uint16_t basic_end_addr;      /* 中間コード終点アドレス    */
+static uint16_t basic_buffer_addr;   /* 中間コードバッファアドレス*/
+static uint16_t basic_buffer_size;   /* 中間コードバッファサイズ  */
+static uint16_t basic_sp;            /* 開始時のスタックポインタ  */
 
-static word basic_conv_buffer_addr; /* 変換用バッファアドレス */
+static uint16_t basic_conv_buffer_addr; /* 変換用バッファアドレス */
 
-static word encode_start_pc;                    /* エンコード開始アドレス */
-static word encode_end_pc;                      /* エンコード終了アドレス */
+static uint16_t encode_start_pc;                    /* エンコード開始アドレス */
+static uint16_t encode_end_pc;                      /* エンコード終了アドレス */
 static basic_err encode_err[BASIC_MAX_ERR_NUM]; /* エンコードエラー       */
 static int encode_err_num;                      /* エンコードエラー登録数 */
 
-static word decode_start_pc;                    /* デコード開始アドレス   */
-static word decode_end_pc;                      /* デコード終了アドレス   */
+static uint16_t decode_start_pc;                    /* デコード開始アドレス   */
+static uint16_t decode_end_pc;                      /* デコード終了アドレス   */
 static basic_err decode_err[BASIC_MAX_ERR_NUM]; /* デコードエラー         */
 static int decode_err_num;                      /* デコードエラー登録数   */
 
@@ -116,7 +115,7 @@ static void pseudo_memory_mapping() {
 /*------------------------------------------------------*/
 /* 仮想メモリ・ライト                  */
 /*------------------------------------------------------*/
-static void pseudo_mem_write(word addr, byte data) {
+static void pseudo_mem_write(uint16_t addr, uint8_t data) {
   if (addr < 0x8000)
     pseudo_ram[addr] = data;
   else if (addr < 0x8400)
@@ -128,7 +127,7 @@ static void pseudo_mem_write(word addr, byte data) {
 /*------------------------------------------------------*/
 /* 仮想メモリ・リード                  */
 /*------------------------------------------------------*/
-static byte pseudo_mem_read(word addr) {
+static uint8_t pseudo_mem_read(uint16_t addr) {
   if (addr < 0x8000)
     return read_pseudo_mem_0000_7fff[addr];
   else if (addr < 0x8400)
@@ -140,9 +139,9 @@ static byte pseudo_mem_read(word addr) {
 /*------------------------------------------------------*/
 /* 仮想ポート・ライト                  */
 /*------------------------------------------------------*/
-static void pseudo_io_out(byte port, byte data) {
+static void pseudo_io_out(uint8_t port, uint8_t data) {
   if (port == 0x70) {
-    pseudo_window_offset = (word)data << 8;
+    pseudo_window_offset = (uint16_t)data << 8;
     pseudo_memory_mapping();
   }
 }
@@ -150,8 +149,8 @@ static void pseudo_io_out(byte port, byte data) {
 /*------------------------------------------------------*/
 /* 仮想ポート・リード                  */
 /*------------------------------------------------------*/
-static byte pseudo_io_in(byte port) {
-  static byte port40_toggle = 0;
+static uint8_t pseudo_io_in(uint8_t port) {
+  static uint8_t port40_toggle = 0;
 
   switch (port) {
   /* N-mode decode */
@@ -172,7 +171,7 @@ static byte pseudo_io_in(byte port) {
 /*------------------------------------------------------*/
 /*                          */
 /*------------------------------------------------------*/
-void pseudo_intr_update() { pseudo_z80_cpu.skip_intr_chk = TRUE; }
+void pseudo_intr_update() { pseudo_z80_cpu.skip_intr_chk = true; }
 int pseudo_intr_ack() { return -1; }
 
 /*------------------------------------------------------*/
@@ -197,7 +196,7 @@ static void pseudo_z80_init() {
 static int pseudo_mem_init() {
   if (verbose_proc)
     printf("Allocating 64kB for pseudo ram...");
-  pseudo_ram = (byte *)malloc(sizeof(byte) * 0x10000);
+  pseudo_ram = (uint8_t *)malloc(sizeof(uint8_t) * 0x10000);
   if (pseudo_ram == nullptr) {
     if (verbose_proc) {
       printf("FAILED\n");
@@ -336,7 +335,7 @@ int basic_encode_list(FILE *fp) {
   if (!pseudo_mem_init())
     return (0);
 
-  basic_mode = TRUE;
+  basic_mode = true;
   size = 0;
 
   encode_set_mem();
@@ -392,7 +391,7 @@ int basic_encode_list(FILE *fp) {
   write_basic_addr();
 
 end_basic_encode_list:
-  basic_mode = FALSE;
+  basic_mode = false;
   free(pseudo_ram);
 
   return (size);
@@ -409,7 +408,7 @@ static int decode_mem_set1() {
   WRITE_WORD(pseudo_ram, basic_end_addr_addr, basic_end_addr);
   if (basic_end_addr < basic_top_addr) {
     printf("Error : no basic code.\n");
-    return (FALSE);
+    return (false);
   }
   memcpy(&pseudo_ram[basic_top_addr], &main_ram[basic_top_addr], basic_end_addr - basic_top_addr + 1);
 
@@ -427,7 +426,7 @@ static int decode_mem_set1() {
     WRITE_WORD(pseudo_ram, 0xeaf1, 0xe3fd);
     WRITE_BYTE(pseudo_ram, 0xef89, 0x50); /* 横の最大文字数 */
   }
-  return (TRUE);
+  return true;
 }
 
 /*------------------------------------------------------*/
@@ -449,7 +448,7 @@ static void decode_mem_set2() {
 /*------------------------------------------------------*/
 /* デコード用仮想 CPU レジスタ設定         */
 /*------------------------------------------------------*/
-static void decode_z80_set_register(word top_addr) {
+static void decode_z80_set_register(uint16_t top_addr) {
   SET_REG(pseudo_z80_cpu.PC, decode_start_pc); /* start addr */
   SET_REG(pseudo_z80_cpu.HL, top_addr);
   SET_REG(pseudo_z80_cpu.SP, basic_sp);
@@ -465,8 +464,8 @@ int basic_decode_list(FILE *fp) {
   int size = 0;
   int text_line_num;
   long loop;
-  word line_top_addr, line_end_addr;
-  word line_num;
+  uint16_t line_top_addr, line_end_addr;
+  uint16_t line_num;
 
   pseudo_window_offset = 0;
   pseudo_set_addr();
@@ -477,7 +476,7 @@ int basic_decode_list(FILE *fp) {
   if (!decode_mem_set1())
     goto end_basic_decode_list;
 
-  basic_mode = TRUE;
+  basic_mode = true;
   size = 0;
 
   line_top_addr = basic_top_addr;
@@ -527,7 +526,7 @@ int basic_decode_list(FILE *fp) {
 
 end_basic_decode_list:
 
-  basic_mode = FALSE;
+  basic_mode = false;
   free(pseudo_ram);
 
   return (size);

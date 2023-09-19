@@ -17,7 +17,7 @@
 /*                                  */
 /************************************************************************/
 
-static byte SZ_table[256] =
+static uint8_t SZ_table[256] =
 {
 #define Z Z_FLAG
 #define S S_FLAG
@@ -41,7 +41,7 @@ static byte SZ_table[256] =
 #undef Z
 };
 
-static byte SZP_table[256] =
+static uint8_t SZP_table[256] =
 {
 #define Z Z_FLAG
 #define S S_FLAG
@@ -190,7 +190,7 @@ static int state_XXCB_table[256] =
 
 
 
-static word DAA_table[2048] =
+static uint16_t DAA_table[2048] =
 {
   0x0044,0x0100,0x0200,0x0304,0x0400,0x0504,0x0604,0x0700,
   0x0808,0x090C,0x1010,0x1114,0x1214,0x1310,0x1414,0x1510,

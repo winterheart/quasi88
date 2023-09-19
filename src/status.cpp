@@ -6,23 +6,19 @@
 
 #include <cstring>
 
-extern "C" {
 #include "quasi88.h"
-#include "initval.h"
-#include "status.h"
-
-#include "pc88main.h" /* boot_basic   */
-#include "memory.h"   /* font_mem */
-#include "keyboard.h" /* key_scan */
-#include "screen.h"
-#include "menu.h"
 
 #include "drive.h" /* get_drive_ready()    */
-}
+#include "keyboard.h" /* key_scan */
+#include "memory.h"   /* font_mem */
+#include "menu.h"
+#include "pc88main.h" /* boot_basic   */
+#include "screen.h"
+#include "status.h"
 
 /*---------------------------------------------------------------------------*/
 
-int status_imagename = FALSE; /* イメージ名表示有無 */
+int status_imagename = false; /* イメージ名表示有無 */
 
 #define STATUS_LENGTH (48)
 
@@ -33,7 +29,7 @@ int status_imagename = FALSE; /* イメージ名表示有無 */
 #define PIXMAP_WIDTH (STATUS_LENGTH * 8)
 #define PIXMAP_HEIGHT (16)
 
-static byte pixmap[3][PIXMAP_WIDTH * PIXMAP_HEIGHT];
+static uint8_t pixmap[3][PIXMAP_WIDTH * PIXMAP_HEIGHT];
 
 /* 実際の表示処理は、以下のワークを経由して、
    表示するステータスのイメージ用バッファと、そのサイズを取得する */
@@ -113,7 +109,7 @@ enum {
   FNT_END
 };
 
-static const byte status_font[0x20][8 * 16] = {
+static const uint8_t status_font[0x20][8 * 16] = {
 #define X STATUS_BG
 #define F STATUS_FG
 #define W STATUS_WHITE
@@ -663,15 +659,15 @@ static const byte status_font[0x20][8 * 16] = {
  */
 static void status_puts(int pos, const char *str) {
   int i, j, k, c, w, h16;
-  const byte *p;
-  byte mask;
-  byte *dst = status_info[pos].pixmap;
+  const uint8_t *p;
+  uint8_t mask;
+  uint8_t *dst = status_info[pos].pixmap;
 
   if (str) {
     w = MIN(strlen(str) * 8, PIXMAP_WIDTH);
 
     for (i = 0; i < w; i += 8) {
-      c = *(const byte *)str;
+      c = *(const uint8_t *)str;
       str++;
       if (c == '\0')
         break;
@@ -685,7 +681,7 @@ static void status_puts(int pos, const char *str) {
           h16 = TRUE;
         } else {
           p = &font_mem[c * 8];
-          h16 = FALSE;
+          h16 = false;
         }
         for (j = 0; j < 16; j++) {
           for (mask = 0x80, k = 0; k < 8; k++, mask >>= 1) {
@@ -719,7 +715,7 @@ static void status_puts(int pos, const char *str) {
 /*
  * ピックスマップをステータスのイメージ用バッファに転送
  */
-static  void    status_bitmap(int pos, const byte bitmap[], int size)
+static  void    status_bitmap(int pos, const uint8_t bitmap[], int size)
 {
     if (bitmap) {
     memcpy(status_info[ pos ].pixmap, bitmap, size);
@@ -796,7 +792,7 @@ void status_message_default(int pos, const char *msg) {
     switch (status_wk[pos].default_disp) {
 
     case STATUS_DISP_MSG:
-      if (status_imagename == FALSE) {
+      if (status_imagename == false) {
         status_puts(pos, "");
         status_wk[pos].dirty = TRUE;
 
@@ -856,7 +852,7 @@ void status_message(int pos, int frames, const char *msg) {
 
 static void status_mode(int pos) {
   int mode = 0; /* bit :  ....  num kana caps 8mhz basic basic */
-  byte buf[16];
+  uint8_t buf[16];
   static const char *mode_str[] = {
       "N   4MHz       ", "V1S 4MHz       ", "V1H 4MHz       ", "V2  4MHz       ",
       "N   8MHz       ", "V1S 8MHz       ", "V1H 8MHz       ", "V2  8MHz       ",
@@ -876,7 +872,7 @@ static void status_mode(int pos) {
     mode += 3;
     break;
   }
-  if (boot_clock_4mhz == FALSE)
+  if (boot_clock_4mhz == false)
     mode += 4;
 
   if ((key_scan[0x0a] & 0x80) == 0)
@@ -914,7 +910,7 @@ static void status_mode(int pos) {
 }
 
 static void status_fdd(int pos) {
-  byte *p, buf[16];
+  uint8_t *p, buf[16];
   int fdd = 0; /* bit :  ....  tape tape drv2 drv1 */
 
   if (!get_drive_ready(0)) {
@@ -991,7 +987,7 @@ static const char *status_get_filename() {
   char str[2][25];
 
   for (i = 0; i < 2; i++) {
-    if (menu_swapdrv == FALSE) {
+    if (menu_swapdrv == false) {
       if (i == 0)
         drv = DRIVE_1;
       else
@@ -1003,7 +999,7 @@ static const char *status_get_filename() {
         drv = DRIVE_1;
     }
 
-    if (disk_image_exist(drv) && drive_check_empty(drv) == FALSE) {
+    if (disk_image_exist(drv) && drive_check_empty(drv) == false) {
 
       sprintf(str[i], "%1d: %-16s", drv + 1, drive[drv].image[disk_image_selected(drv)].name);
     } else {
@@ -1057,7 +1053,7 @@ void status_update(void) {
     }
 
     if (status_wk[i].dirty) { /* 結果、表示内容に変化あり */
-      status_wk[i].dirty = FALSE;
+      status_wk[i].dirty = false;
       screen_dirty_status |= 1 << i;
     }
   }

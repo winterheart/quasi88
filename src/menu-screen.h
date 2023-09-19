@@ -21,7 +21,7 @@
  *
  *--------------------------------------------------------------*/
 
-extern byte menu_cursor_on[16];
-extern byte menu_cursor_off[16];
+extern uint8_t menu_cursor_on[16];
+extern uint8_t menu_cursor_off[16];
 
 #endif /* MENU_SCREEN_H_INCLUDED */

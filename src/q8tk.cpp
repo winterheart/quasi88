@@ -8,6 +8,7 @@
 /************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -43,7 +44,7 @@
 
 #define Q8tkAssert(e, s) ((e) ? (void)0 : _Q8tkAssert(__FILE__, __LINE__, #e, s))
 
-static void _Q8tkAssert(char *file, int line, char *exp, const char *s) {
+static void _Q8tkAssert(const char *file, int line, const char *exp, const char *s) {
   fprintf(stderr, "Fatal Error | %s <%s:%d>\n", exp, file, line);
   fprintf(stderr, "message = %s\n", (s) ? s : "---");
   quasi88_exit(-1);
@@ -125,7 +126,7 @@ static struct {
 } mouse;
 
 static int kanji_code = Q8TK_KANJI_ANK;
-static int disp_cursor = FALSE;
+static int disp_cursor = false;
 
 static int now_shift_on;
 static int now_mouse_on;
@@ -158,9 +159,9 @@ static Q8tkWidget *malloc_widget(void) {
   if (t == NULL) {
     add = 512;
     if (MAX_WIDGET == 0) {
-      widget_table = malloc((MAX_WIDGET + add) * sizeof(Q8tkWidget *));
+      widget_table = (Q8tkWidget **)malloc((MAX_WIDGET + add) * sizeof(Q8tkWidget *));
     } else {
-      widget_table = realloc(widget_table, (MAX_WIDGET + add) * sizeof(Q8tkWidget *));
+      widget_table = (Q8tkWidget **)realloc(widget_table, (MAX_WIDGET + add) * sizeof(Q8tkWidget *));
     }
     if (widget_table) {
       for (i = 0; i < add; i++) {
@@ -178,11 +179,11 @@ static Q8tkWidget *malloc_widget(void) {
       *t = w;
       return w;
     } else {
-      Q8tkAssert(FALSE, "memory exhoused");
+      Q8tkAssert(false, "memory exhoused");
     }
   }
 
-  Q8tkAssert(FALSE, "work 'widget' exhoused");
+  Q8tkAssert(false, "work 'widget' exhoused");
   return NULL;
 }
 static void free_widget(Q8tkWidget *w) {
@@ -194,7 +195,7 @@ static void free_widget(Q8tkWidget *w) {
       return;
     }
   }
-  Q8tkAssert(FALSE, "pointer is not malloced widget");
+  Q8tkAssert(false, "pointer is not malloced widget");
 }
 /*--------------------------------------------------------------
  *  List
@@ -215,9 +216,9 @@ static Q8List *malloc_list(void) {
   if (t == NULL) {
     add = 512;
     if (MAX_LIST == 0) {
-      list_table = malloc((MAX_LIST + add) * sizeof(Q8List *));
+      list_table = (Q8List **)malloc((MAX_LIST + add) * sizeof(Q8List *));
     } else {
-      list_table = realloc(list_table, (MAX_LIST + add) * sizeof(Q8List *));
+      list_table = (Q8List **)realloc(list_table, (MAX_LIST + add) * sizeof(Q8List *));
     }
     if (list_table) {
       for (i = 0; i < add; i++) {
@@ -234,11 +235,11 @@ static Q8List *malloc_list(void) {
       *t = l;
       return l;
     } else {
-      Q8tkAssert(FALSE, "memory exhoused");
+      Q8tkAssert(false, "memory exhoused");
     }
   }
 
-  Q8tkAssert(FALSE, "work 'list' exhoused");
+  Q8tkAssert(false, "work 'list' exhoused");
   return NULL;
 }
 static void free_list(Q8List *l) {
@@ -250,7 +251,7 @@ static void free_list(Q8List *l) {
       return;
     }
   }
-  Q8tkAssert(FALSE, "pointer is not malloced list");
+  Q8tkAssert(false, "pointer is not malloced list");
 }
 
 #if 0
@@ -400,7 +401,7 @@ int q8tk_set_kanjicode(int code) {
 /************************************************************************/
 /* カーソル表示の有無                          */
 /************************************************************************/
-void q8tk_set_cursor(int enable) { disp_cursor = (enable) ? TRUE : FALSE; }
+void q8tk_set_cursor(int enable) { disp_cursor = (enable) ? TRUE : false; }
 
 /************************************************************************/
 /* 初期化と終了                               */
@@ -458,7 +459,7 @@ void q8tk_init(void) {
   window_layer_level = -1;
 
   set_main_loop_flag(TRUE);
-  set_construct_flag(FALSE);
+  set_construct_flag(false);
 
   set_drag_widget(NULL);
   widget_focus_list_init();
@@ -469,8 +470,8 @@ void q8tk_init(void) {
   mouse.x_old = mouse.x = mouse_x;
   mouse.y_old = mouse.y = mouse_y;
 
-  now_shift_on = FALSE;
-  now_mouse_on = FALSE;
+  now_shift_on = false;
+  now_mouse_on = false;
 
   q8tk_disp_init_flag = TRUE;
 }
@@ -523,7 +524,7 @@ void q8tk_grab_add(Q8tkWidget *widget) {
       return;
     }
   }
-  Q8tkAssert(FALSE, "overflow window level");
+  Q8tkAssert(false, "overflow window level");
 }
 /*--------------------------------------------------------------
  *  モーダル解除
@@ -600,12 +601,12 @@ Q8tkWidget *q8tk_window_new(int window_type) {
     break;
 
   case Q8TK_WINDOW_DIALOG:
-    w->stat.window.no_frame = FALSE;
+    w->stat.window.no_frame = false;
     w->stat.window.shadow_type = Q8TK_SHADOW_OUT;
     break;
 
   case Q8TK_WINDOW_POPUP:
-    w->stat.window.no_frame = FALSE;
+    w->stat.window.no_frame = false;
     w->stat.window.shadow_type = Q8TK_SHADOW_ETCHED_OUT;
     w->event_button_on = window_event_button_on;
     break;
@@ -973,7 +974,7 @@ static void radio_button_event_key_on(Q8tkWidget *widget, int key) {
   if (key == Q8TK_KEY_LEFT || key == Q8TK_KEY_UP || key == Q8TK_KEY_RIGHT || key == Q8TK_KEY_DOWN) {
 
 #if 0 /* OFF状態でフォーカスありの場合、カーソルキーでボタン押下とみなす */
-    if (widget->stat.button.active == FALSE) {
+    if (widget->stat.button.active == false) {
         radio_button_event_do(widget);
     }
     else
@@ -1043,7 +1044,7 @@ Q8tkWidget *q8tk_radio_button_new(Q8tkWidget *group) {
     w->stat.button.active = TRUE;
   } else { /* 2個目以降   */
     list = group->stat.button.list;
-    w->stat.button.active = FALSE;
+    w->stat.button.active = false;
   }
   w->stat.button.list = q8_list_append(list, w);
 
@@ -1191,9 +1192,9 @@ static void combo_event_list_callback(Q8tkWidget *list_item, Q8tkWidget *parent)
 
 /* コンボの一覧表示ボタンをマウスクリックしたら、ポップアップウインドウ生成 */
 static void combo_event_button_on(Q8tkWidget *widget) {
-  int selected = FALSE;
+  int selected = false;
   Q8List *l;
-  int scrolled = FALSE;
+  int scrolled = false;
   int y_pos = widget->y + 1; /* ポップアップウインドウ表示位置 */
 
   widget->stat.combo.popup_window = q8tk_window_new(Q8TK_WINDOW_POPUP);
@@ -1206,14 +1207,14 @@ static void combo_event_button_on(Q8tkWidget *widget) {
 
     /* エントリの文字列の一致するリストアイテムを、選択状態とする。          */
     /* q8tk_listbox_select_child()はシグナル発生するのでシグナル登録前に処理 */
-    if (selected == FALSE) { /* l->data->child は LABEL */
+    if (selected == false) { /* l->data->child は LABEL */
       if (strcmp(widget->stat.combo.entry->name, ((Q8tkWidget *)(l->data))->child->name) == 0) {
         q8tk_listbox_select_child(widget->stat.combo.popup_list, (Q8tkWidget *)(l->data));
         selected = TRUE;
       }
     }
 
-    q8tk_signal_connect((Q8tkWidget *)(l->data), "select", combo_event_list_callback, widget);
+    q8tk_signal_connect((Q8tkWidget *)(l->data), "select", (Q8tkSignalFunc)combo_event_list_callback, widget);
     l = l->next;
   }
 
@@ -1223,13 +1224,13 @@ static void combo_event_button_on(Q8tkWidget *widget) {
   if (widget->y + widget->stat.combo.nr_items + 2 <= (24 + 1)) {
     /* 下部に表示しても、画面からはみ出さない (通常の WINDOW 生成)*/
 
-    scrolled = FALSE;
+    scrolled = false;
     y_pos = widget->y + 1;
 
   } else if (widget->y - widget->stat.combo.nr_items - 2 >= (0 - 1)) {
     /* 上部に表示すれば、画面からはみ出さない (通常の WINDOW 生成)*/
 
-    scrolled = FALSE;
+    scrolled = false;
     y_pos = widget->y - widget->stat.combo.nr_items - 2;
 
   } else {
@@ -1318,12 +1319,12 @@ static void combo_event_button_on(Q8tkWidget *widget) {
   widget->stat.combo.popup_window->stat.window.x = widget->x - 1 - ((widget->stat.combo.popup_scrolled_window) ? 1 : 0);
   widget->stat.combo.popup_window->stat.window.y = y_pos;
 
-  q8tk_signal_connect(widget->stat.combo.popup_window, "inactivate", combo_fake_callback, widget);
+  q8tk_signal_connect(widget->stat.combo.popup_window, "inactivate", (Q8tkSignalFunc)combo_fake_callback, widget);
 
   /* ESC キーを押した時リストを消去するための、ダミーを生成 */
 
   widget->stat.combo.popup_fake = q8tk_button_new();
-  q8tk_signal_connect(widget->stat.combo.popup_fake, "clicked", combo_fake_callback, widget);
+  q8tk_signal_connect(widget->stat.combo.popup_fake, "clicked", (Q8tkSignalFunc)combo_fake_callback, widget);
 
   widget->stat.combo.popup_accel_group = q8tk_accel_group_new();
   q8tk_accel_group_attach(widget->stat.combo.popup_accel_group, widget->stat.combo.popup_window);
@@ -1367,10 +1368,10 @@ Q8tkWidget *q8tk_combo_new(void) {
 
   w->stat.combo.entry->stat.entry.combo = w;
 
-  q8tk_combo_set_editable(w, FALSE);
+  q8tk_combo_set_editable(w, false);
   q8tk_widget_show(w->stat.combo.entry);
-  q8tk_signal_connect(w->stat.combo.entry, "activate", combo_event_entry_activate, w);
-  q8tk_signal_connect(w->stat.combo.entry, "changed", combo_event_entry_changed, w);
+  q8tk_signal_connect(w->stat.combo.entry, "activate", (Q8tkSignalFunc)combo_event_entry_activate, w);
+  q8tk_signal_connect(w->stat.combo.entry, "changed", (Q8tkSignalFunc)combo_event_entry_changed, w);
 
   w->event_button_on = combo_event_button_on;
   w->event_key_on = combo_event_key_on;
@@ -1907,7 +1908,7 @@ Q8tkWidget *q8tk_label_new(const char *label) {
 
   w->stat.label.foreground = Q8GR_PALETTE_FOREGROUND;
   w->stat.label.background = Q8GR_PALETTE_BACKGROUND;
-  w->stat.label.reverse = FALSE;
+  w->stat.label.reverse = false;
 
   return w;
 }
@@ -2373,7 +2374,7 @@ static void adjustment_do(Q8tkWidget *widget, int mode) {
   static int old = -1; /* マウスボタン押しっぱなしにした時に、
               スライダーが行ったり来たりするのを防ぐ */
 
-  if (now_mouse_on == FALSE)
+  if (now_mouse_on == false)
     old = -1;
 
   switch (mode) {
@@ -2381,38 +2382,38 @@ static void adjustment_do(Q8tkWidget *widget, int mode) {
     adj->value -= adj->step_increment;
     if (adj->value < adj->lower) {
       adj->value = adj->lower;
-      repeat = FALSE;
+      repeat = false;
     }
     break;
   case ADJ_STEP_INC:
     adj->value += adj->step_increment;
     if (adj->value > adj->upper) {
       adj->value = adj->upper;
-      repeat = FALSE;
+      repeat = false;
     }
     break;
   case ADJ_PAGE_DEC:
     if (old == ADJ_PAGE_INC) {
       mode = -1;
-      repeat = FALSE;
+      repeat = false;
       break;
     }
     adj->value -= adj->page_increment;
     if (adj->value < adj->lower) {
       adj->value = adj->lower;
-      repeat = FALSE;
+      repeat = false;
     }
     break;
   case ADJ_PAGE_INC:
     if (old == ADJ_PAGE_DEC) {
       mode = -1;
-      repeat = FALSE;
+      repeat = false;
       break;
     }
     adj->value += adj->page_increment;
     if (adj->value > adj->upper) {
       adj->value = adj->upper;
-      repeat = FALSE;
+      repeat = false;
     }
     break;
   case ADJ_SLIDER_DRAG:
@@ -2430,7 +2431,7 @@ static void adjustment_do(Q8tkWidget *widget, int mode) {
   if (repeat)
     now_mouse_on = TRUE;
   else
-    now_mouse_on = FALSE;
+    now_mouse_on = false;
 
   old = mode;
 }
@@ -2593,7 +2594,7 @@ static void adjustment_event_key_on(Q8tkWidget *widget, int key) {
 
   /* カーソルキーを押しっぱなしにすると、
      マウスボタンの押しっぱなし時の処理に遷移してしまうので、それを防ぐ */
-  now_mouse_on = FALSE;
+  now_mouse_on = false;
 }
 
 Q8tkWidget *q8tk_adjustment_new(int value, int lower, int upper, int step_increment, int page_increment) {
@@ -2719,8 +2720,8 @@ Q8tkWidget *q8tk_hscale_new(Q8tkWidget *adjustment) {
   w->stat.scale.adj->stat.adj.horizontal = TRUE;
   w->stat.scale.adj->parent = w;
 
-  w->stat.scale.adj->key_up_used = FALSE;
-  w->stat.scale.adj->key_down_used = FALSE;
+  w->stat.scale.adj->key_up_used = false;
+  w->stat.scale.adj->key_down_used = false;
   w->stat.scale.adj->key_left_used = TRUE;
   w->stat.scale.adj->key_right_used = TRUE;
 
@@ -2769,13 +2770,13 @@ Q8tkWidget *q8tk_vscale_new(Q8tkWidget *adjustment) {
     w->stat.scale.adj = q8tk_adjustment_new(0, 0, 10, 1, 2);
   }
 
-  w->stat.scale.adj->stat.adj.horizontal = FALSE;
+  w->stat.scale.adj->stat.adj.horizontal = false;
   w->stat.scale.adj->parent = w;
 
   w->stat.scale.adj->key_up_used = TRUE;
   w->stat.scale.adj->key_down_used = TRUE;
-  w->stat.scale.adj->key_left_used = FALSE;
-  w->stat.scale.adj->key_right_used = FALSE;
+  w->stat.scale.adj->key_left_used = false;
+  w->stat.scale.adj->key_right_used = false;
 
   return w;
 }
@@ -2908,8 +2909,8 @@ Q8tkWidget *q8tk_scrolled_window_new(Q8tkWidget *hadjustment, Q8tkWidget *vadjus
   q8tk_adjustment_set_length(w->stat.scrolled.hadj, 7);
   w->stat.scrolled.hadj->stat.adj.horizontal = TRUE;
   w->stat.scrolled.hadj->parent = w;
-  w->stat.scrolled.hadj->key_up_used = FALSE;
-  w->stat.scrolled.hadj->key_down_used = FALSE;
+  w->stat.scrolled.hadj->key_up_used = false;
+  w->stat.scrolled.hadj->key_down_used = false;
   w->stat.scrolled.hadj->key_left_used = TRUE;
   w->stat.scrolled.hadj->key_right_used = TRUE;
 
@@ -2921,12 +2922,12 @@ Q8tkWidget *q8tk_scrolled_window_new(Q8tkWidget *hadjustment, Q8tkWidget *vadjus
   }
   q8tk_adjustment_set_arrow(w->stat.scrolled.vadj, TRUE);
   q8tk_adjustment_set_length(w->stat.scrolled.vadj, 7);
-  w->stat.scrolled.vadj->stat.adj.horizontal = FALSE;
+  w->stat.scrolled.vadj->stat.adj.horizontal = false;
   w->stat.scrolled.vadj->parent = w;
   w->stat.scrolled.vadj->key_up_used = TRUE;
   w->stat.scrolled.vadj->key_down_used = TRUE;
-  w->stat.scrolled.vadj->key_left_used = FALSE;
-  w->stat.scrolled.vadj->key_right_used = FALSE;
+  w->stat.scrolled.vadj->key_left_used = false;
+  w->stat.scrolled.vadj->key_right_used = false;
 
   w->event_button_on = scrolled_window_event_button_on;
 
@@ -2939,13 +2940,13 @@ void q8tk_scrolled_window_set_policy(Q8tkWidget *scrolledw, int hscrollbar_polic
   if (scrolledw->stat.scrolled.hpolicy == Q8TK_POLICY_ALWAYS) {
     scrolledw->stat.scrolled.hscrollbar = TRUE;
   } else if (scrolledw->stat.scrolled.hpolicy == Q8TK_POLICY_NEVER) {
-    scrolledw->stat.scrolled.hscrollbar = FALSE;
+    scrolledw->stat.scrolled.hscrollbar = false;
   }
 
   if (scrolledw->stat.scrolled.vpolicy == Q8TK_POLICY_ALWAYS) {
     scrolledw->stat.scrolled.vscrollbar = TRUE;
   } else if (scrolledw->stat.scrolled.vpolicy == Q8TK_POLICY_NEVER) {
-    scrolledw->stat.scrolled.vscrollbar = FALSE;
+    scrolledw->stat.scrolled.vscrollbar = false;
   }
 
   set_construct_flag(TRUE);
@@ -3030,7 +3031,7 @@ static void q8tk_entry_malloc(Q8tkWidget *entry, int strsize) {
 static void entry_event_button_on(Q8tkWidget *widget) {
   int m_x = mouse.x / 8;
 
-  if (widget->stat.entry.editable == FALSE)
+  if (widget->stat.entry.editable == false)
     return;
 
   if (widget->stat.entry.cursor_pos < 0) { /* カーソル非表示なら       */
@@ -3048,7 +3049,7 @@ static void entry_event_button_on(Q8tkWidget *widget) {
 /* 文字キーを押したら、文字列編集し、シグナル発生 (編集可能時のみ) */
 /* リターンを押したら、シグナル発生               (編集可能時のみ) */
 static void entry_event_key_on(Q8tkWidget *widget, int key) {
-  if (widget->stat.entry.editable == FALSE)
+  if (widget->stat.entry.editable == false)
     return;
   if (widget->stat.entry.cursor_pos < 0)
     return;
@@ -3605,7 +3606,7 @@ static void fsel_selected_callback(Q8tkWidget *item, void *fselect) {
        つまり『前とは違う』リストアイテムがクリックされた場合は、
        そのリストアイテムの保持するファイル名を、エントリにセットする */
 
-    Q8TK_FILE_SELECTION((Q8tkWidget *)fselect)->selection_changed = FALSE;
+    Q8TK_FILE_SELECTION((Q8tkWidget *)fselect)->selection_changed = false;
 
     q8tk_entry_set_text(Q8TK_FILE_SELECTION((Q8tkWidget *)fselect)->selection_entry, name);
 
@@ -3643,7 +3644,7 @@ static void fsel_activate_callback(Q8tkWidget *entry, void *fselect) {
 static void fsel_update(Q8tkWidget *fselect, const char *filename, int type) {
   char wk[Q8TK_MAX_FILENAME];
 
-  if (osd_path_join(Q8TK_FILE_SELECTION(fselect)->pathname, filename, wk, Q8TK_MAX_FILENAME) == FALSE) {
+  if (osd_path_join(Q8TK_FILE_SELECTION(fselect)->pathname, filename, wk, Q8TK_MAX_FILENAME) == false) {
     strcpy(wk, "");
   }
 
@@ -3668,7 +3669,7 @@ static int fsel_opendir(Q8tkWidget *fselect, const char *filename, int type) {
   }
 
   if (osd_path_normalize(filename, path, Q8TK_MAX_FILENAME) /* 正規化 */
-      == FALSE) {
+      == false) {
     strcpy(path, "");
     type = FILE_STAT_DIR;
   }
@@ -3685,7 +3686,7 @@ static int fsel_opendir(Q8tkWidget *fselect, const char *filename, int type) {
 
   } else { /* filename はファイルらしい */
            /* ディレクトリ名と分離する  */
-    if (osd_path_split(path, dir, file, Q8TK_MAX_FILENAME) == FALSE) {
+    if (osd_path_split(path, dir, file, Q8TK_MAX_FILENAME) == false) {
       strcpy(dir, "");    /* 失敗したら     */
       strcpy(file, path); /* 適当にごまかす */
     }
@@ -3761,7 +3762,7 @@ static int fsel_opendir_sub(Q8tkWidget *fselect, const char *dirname) {
         old_dirname = NULL;
       }
 
-      q8tk_signal_connect(item, "select", fsel_selected_callback, fselect);
+      q8tk_signal_connect(item, "select", (Q8tkSignalFunc)fsel_selected_callback, fselect);
       nr++;
     }
     osd_closedir(dirp);
@@ -3800,7 +3801,7 @@ static int fsel_opendir_sub(Q8tkWidget *fselect, const char *dirname) {
 }
 
 static void fsel_selection_view_callback(UNUSED_WIDGET, void *fselect) {
-  q8tk_utility_view(q8tk_file_selection_get_filename(fselect));
+  q8tk_utility_view(q8tk_file_selection_get_filename((Q8tkWidget*)fselect));
 }
 
 #if 0 /* ver 0.5.x までの表示形式 */
@@ -3970,7 +3971,7 @@ Q8tkWidget *q8tk_file_selection_new(const char *title, int select_ro) {
     fselect->stat.fselect.file_list = q8tk_listbox_new();
     q8tk_container_add(fselect->stat.fselect.scrolled_window, fselect->stat.fselect.file_list);
     q8tk_widget_show(fselect->stat.fselect.file_list);
-    q8tk_signal_connect(fselect->stat.fselect.file_list, "selection_changed", fsel_selection_changed_callback, window);
+    q8tk_signal_connect(fselect->stat.fselect.file_list, "selection_changed", (Q8tkSignalFunc)fsel_selection_changed_callback, window);
 
     q8tk_misc_set_placement(fselect->stat.fselect.scrolled_window, Q8TK_PLACEMENT_X_CENTER, Q8TK_PLACEMENT_Y_CENTER);
     q8tk_scrolled_window_set_policy(fselect->stat.fselect.scrolled_window, Q8TK_POLICY_AUTOMATIC, Q8TK_POLICY_ALWAYS);
@@ -4013,7 +4014,7 @@ Q8tkWidget *q8tk_file_selection_new(const char *title, int select_ro) {
       q8tk_box_pack_start(vv, fselect->stat.fselect.view_button);
       q8tk_widget_show(fselect->stat.fselect.view_button);
       q8tk_misc_set_placement(fselect->stat.fselect.view_button, Q8TK_PLACEMENT_X_CENTER, Q8TK_PLACEMENT_Y_CENTER);
-      q8tk_signal_connect(fselect->stat.fselect.view_button, "clicked", fsel_selection_view_callback, window);
+      q8tk_signal_connect(fselect->stat.fselect.view_button, "clicked", (Q8tkSignalFunc)fsel_selection_view_callback, window);
 
       for (i = 0; i < 2; i++) { /* 空行 */
         wk = q8tk_label_new("");
@@ -4072,7 +4073,7 @@ Q8tkWidget *q8tk_file_selection_new(const char *title, int select_ro) {
     q8tk_box_pack_start(hbox, fselect->stat.fselect.selection_entry);
     q8tk_widget_show(fselect->stat.fselect.selection_entry);
     q8tk_misc_set_size(fselect->stat.fselect.selection_entry, 50, 0);
-    q8tk_signal_connect(fselect->stat.fselect.selection_entry, "activate", fsel_activate_callback, window);
+    q8tk_signal_connect(fselect->stat.fselect.selection_entry, "activate", (Q8tkSignalFunc)fsel_activate_callback, window);
     q8tk_set_kanjicode(save_code);
   }
 
@@ -4086,7 +4087,7 @@ Q8tkWidget *q8tk_file_selection_new(const char *title, int select_ro) {
 const char *q8tk_file_selection_get_filename(Q8tkWidget *fselect) {
   if (osd_path_join(Q8TK_FILE_SELECTION(fselect)->pathname,
                     q8tk_entry_get_text(Q8TK_FILE_SELECTION(fselect)->selection_entry),
-                    Q8TK_FILE_SELECTION(fselect)->filename, Q8TK_MAX_FILENAME) == FALSE) {
+                    Q8TK_FILE_SELECTION(fselect)->filename, Q8TK_MAX_FILENAME) == false) {
     return "";
   }
 
@@ -4145,11 +4146,11 @@ int q8tk_utility_view(const char *filename) {
          (filename[l - 2] == 'X' || filename[l - 2] == 'x') && (filename[l - 1] == 'T' || filename[l - 1] == 't'))) {
       file_text = TRUE;
     } else {
-      file_text = FALSE;
+      file_text = false;
     }
   }
 
-  if (file_text == FALSE) { /* バイナリファイル */
+  if (file_text == false) { /* バイナリファイル */
 
     file_code = Q8TK_KANJI_ANK;
 
@@ -4189,7 +4190,7 @@ int q8tk_utility_view(const char *filename) {
       q8tk_widget_show(b);
 
       q8tk_misc_set_placement(b, Q8TK_PLACEMENT_X_CENTER, Q8TK_PLACEMENT_Y_CENTER);
-      q8tk_signal_connect(b, "clicked", q8tk_utility_view_end, NULL);
+      q8tk_signal_connect(b, "clicked", (Q8tkSignalFunc)q8tk_utility_view_end, NULL);
 
       q8tk_accel_group_add(view_widget_accel, Q8TK_KEY_ESC, b, "clicked");
     }
@@ -4211,17 +4212,17 @@ int q8tk_utility_view(const char *filename) {
       c2 = osd_fgetc(fp);
 
       line = 0;
-      end_of_file = FALSE;
+      end_of_file = false;
       memset(src, 0, sizeof(src));
 
-      while (end_of_file == FALSE) {
+      while (end_of_file == false) {
 
         if (file_text) { /* テキストファイル */
           column = 0;
-          end_of_line = FALSE;
+          end_of_line = false;
           memset(src, 0, sizeof(src));
 
-          while (end_of_line == FALSE) {
+          while (end_of_line == false) {
 
             c1 = c2;
             c2 = osd_fgetc(fp);
@@ -4389,7 +4390,7 @@ void q8tk_misc_set_size(Q8tkWidget *widget, int width, int height) {
 
   default:
     fprintf(stderr, "Cant resize widget=%s\n", debug_type(widget->type));
-    Q8tkAssert(FALSE, NULL);
+    Q8tkAssert(false, NULL);
     return;
   }
   set_construct_flag(TRUE);
@@ -4543,7 +4544,7 @@ void q8tk_widget_show(Q8tkWidget *widget) {
   widget_map(widget);
 }
 void q8tk_widget_hide(Q8tkWidget *widget) {
-  widget->visible = FALSE;
+  widget->visible = false;
   widget_map(widget);
 }
 
@@ -4564,7 +4565,7 @@ void q8tk_widget_hide(Q8tkWidget *widget) {
  *
  *  NOTEPAGE は、内部でコンテナ(NOTEPAGE)を自動生成する仕組みなので、
  *  操作可否を設定できない。 (無理やりさせたければ、
- *  q8tk_widget_set_sensitive(widget->parent, FALSE) でできるが…)
+ *  q8tk_widget_set_sensitive(widget->parent, false) でできるが…)
  *
  *  ADJUSTMENT は操作可否を設定できるが、スケールなどのほうで設定する
  *  だろうから、直接指定することはないだろう。
@@ -4800,7 +4801,7 @@ static void widget_signal_do(Q8tkWidget *widget, const char *name) {
   }
 
   fprintf(stderr, "BAD signal %s '%s'\n", debug_type(widget->type), name);
-  Q8tkAssert(FALSE, NULL);
+  Q8tkAssert(false, NULL);
   return;
 }
 
@@ -4920,7 +4921,7 @@ int q8tk_signal_connect(Q8tkWidget *widget, const char *name, Q8tkSignalFunc fun
   }
 
   fprintf(stderr, "Undefined signal %s '%s'\n", debug_type(widget->type), name);
-  Q8tkAssert(FALSE, NULL);
+  Q8tkAssert(false, NULL);
   return 0;
 }
 
@@ -4973,10 +4974,10 @@ static void widget_key_on(Q8tkWidget *focus, int key) {
  *--------------------------------------------------------------*/
 void q8tk_event_key_on(int code) {
   Q8tkWidget *w;
-  int change = FALSE;
-  int back = FALSE;
+  int change = false;
+  int back = false;
 
-  now_mouse_on = FALSE;
+  now_mouse_on = false;
 
   if (code == Q8TK_KEY_SHIFT)
     now_shift_on = TRUE;
@@ -4991,34 +4992,34 @@ void q8tk_event_key_on(int code) {
       if (now_shift_on)
         back = TRUE;
       else
-        back = FALSE;
+        back = false;
       break;
 
 #ifdef OLD_FOCUS_CHANGE
       /* DO NOTHING */
 #else /* 新たなフォーカス移動方式 */
     case Q8TK_KEY_UP:
-      if (w->key_up_used == FALSE) {
+      if (w->key_up_used == false) {
         change = TRUE;
         back = TRUE;
       }
       break;
     case Q8TK_KEY_DOWN:
-      if (w->key_down_used == FALSE) {
+      if (w->key_down_used == false) {
         change = TRUE;
-        back = FALSE;
+        back = false;
       }
       break;
     case Q8TK_KEY_LEFT:
-      if (w->key_left_used == FALSE) {
+      if (w->key_left_used == false) {
         change = TRUE;
         back = TRUE;
       }
       break;
     case Q8TK_KEY_RIGHT:
-      if (w->key_right_used == FALSE) {
+      if (w->key_right_used == false) {
         change = TRUE;
-        back = FALSE;
+        back = false;
       }
       break;
 #endif
@@ -5063,10 +5064,10 @@ void q8tk_event_key_on(int code) {
 }
 
 void q8tk_event_key_off(int code) {
-  now_mouse_on = FALSE;
+  now_mouse_on = false;
 
   if (code == Q8TK_KEY_SHIFT)
-    now_shift_on = FALSE;
+    now_shift_on = false;
 }
 
 void q8tk_event_mouse_on(int code) {
@@ -5096,7 +5097,7 @@ void q8tk_event_mouse_on(int code) {
 }
 
 void q8tk_event_mouse_off(int code) {
-  now_mouse_on = FALSE;
+  now_mouse_on = false;
 
   if (code == Q8TK_BUTTON_L) { /* 左ボタン OFF     */
     if (get_drag_widget()) {   /* 只今 ドラッグ中   */
@@ -5117,13 +5118,13 @@ void q8tk_event_mouse_moved(int x, int y) {
   if (mouse.x / 8 != mouse.x_old / 8 || /* マウス 8dot以上 移動  */
       mouse.y / 16 != mouse.y_old / 16) {
     block_moved = TRUE;
-    now_mouse_on = FALSE;
+    now_mouse_on = false;
 
     if (disp_cursor) {
       set_construct_flag(TRUE);
     }
   } else {
-    block_moved = FALSE;
+    block_moved = false;
   }
 
   if (get_drag_widget()) { /* 只今 ドラッグ中 かつ    */
@@ -5148,7 +5149,7 @@ static int cursor_timer = 0;
 
 void q8gr_set_cursor_exist(int exist_flag) { cursor_exist = exist_flag; }
 int q8gr_get_cursor_exist(void) { return cursor_exist; }
-int q8gr_get_cursor_blink(void) { return (cursor_timer < Q8GR_CURSOR_BLINK) ? TRUE : FALSE; }
+int q8gr_get_cursor_blink(void) { return (cursor_timer < Q8GR_CURSOR_BLINK) ? TRUE : false; }
 void q8gr_set_cursor_blink(void) { cursor_timer = 0; }
 
 /*--------------------------------------------------------------
@@ -5217,11 +5218,11 @@ int q8tk_main_loop(void) {
     if (get_construct_flag()) { /* 画面構成変更時は、描画 */
 
       widget_construct();
-      set_construct_flag(FALSE);
+      set_construct_flag(false);
 
       if (q8tk_disp_init_flag) {
         screen_set_dirty_palette();
-        q8tk_disp_init_flag = FALSE;
+        q8tk_disp_init_flag = false;
       }
       screen_set_dirty_flag(0);
 
@@ -5246,14 +5247,14 @@ int q8tk_main_loop(void) {
   } else {
 
     q8tk_term();
-    return FALSE;
+    return false;
   }
 }
 
 /*--------------------------------------------------------------
  *
  *--------------------------------------------------------------*/
-void q8tk_main_quit(void) { set_main_loop_flag(FALSE); }
+void q8tk_main_quit(void) { set_main_loop_flag(false); }
 
 /************************************************************************/
 /*                                  */
@@ -5285,7 +5286,7 @@ static void widget_map(Q8tkWidget *widget) {
         ancestor = parent;
         parent = parent->parent;
       } else {
-        size_calc = FALSE;
+        size_calc = false;
         break;
       }
     }
@@ -5445,7 +5446,7 @@ static void widget_size(Q8tkWidget *widget, int *max_sx, int *max_sy, int *sum_s
       break;
 
     case Q8TK_TYPE_ADJUSTMENT: /* アジャストメント */
-      Q8tkAssert(FALSE, NULL);
+      Q8tkAssert(false, NULL);
       break;
 
     case Q8TK_TYPE_HSCALE: /* 水平スケール       */
@@ -5529,13 +5530,13 @@ static void widget_size(Q8tkWidget *widget, int *max_sx, int *max_sy, int *sum_s
         }
 
         if ((w == 0 || w == 1) && (h == 0 || h == 1)) {
-          widget->stat.scrolled.hscrollbar = FALSE;
-          widget->stat.scrolled.vscrollbar = FALSE;
+          widget->stat.scrolled.hscrollbar = false;
+          widget->stat.scrolled.vscrollbar = false;
         } else if ((w == 2) && (h == 0)) {
           widget->stat.scrolled.hscrollbar = TRUE;
-          widget->stat.scrolled.vscrollbar = FALSE;
+          widget->stat.scrolled.vscrollbar = false;
         } else if ((w == 0) && (h == 2)) {
-          widget->stat.scrolled.hscrollbar = FALSE;
+          widget->stat.scrolled.hscrollbar = false;
           widget->stat.scrolled.vscrollbar = TRUE;
         } else {
           widget->stat.scrolled.hscrollbar = TRUE;
@@ -5559,7 +5560,7 @@ static void widget_size(Q8tkWidget *widget, int *max_sx, int *max_sy, int *sum_s
         }
       }
       widget->stat.scrolled.vadj_value = widget->stat.scrolled.vadj->stat.adj.value;
-      widget->stat.scrolled.vadj->stat.adj.listbox_changed = FALSE;
+      widget->stat.scrolled.vadj->stat.adj.listbox_changed = false;
       widget->sx = widget->stat.scrolled.width;
       widget->sy = widget->stat.scrolled.height;
       break;
@@ -5570,14 +5571,14 @@ static void widget_size(Q8tkWidget *widget, int *max_sx, int *max_sy, int *sum_s
       break;
 
     case Q8TK_TYPE_DIALOG: /* ダイアログ      */
-      Q8tkAssert(FALSE, NULL);
+      Q8tkAssert(false, NULL);
       break;
     case Q8TK_TYPE_FILE_SELECTION: /* ファイルセレクション   */
-      Q8tkAssert(FALSE, NULL);
+      Q8tkAssert(false, NULL);
       break;
 
     default:
-      Q8tkAssert(FALSE, "Undefined type");
+      Q8tkAssert(false, "Undefined type");
     }
 
   } else {
@@ -5712,7 +5713,7 @@ static struct {
 static void widget_scrollin_init(void) {
   int i;
   for (i = 0; i < MAX_WIDGET_SCROLLIN; i++) {
-    widget_scrollin[i].drawn = FALSE;
+    widget_scrollin[i].drawn = false;
     widget_scrollin[i].widget = NULL;
   }
 }
@@ -5725,7 +5726,7 @@ static void widget_scrollin_register(Q8tkWidget *w) {
   }
   for (i = 0; i < MAX_WIDGET_SCROLLIN; i++) {
     if (widget_scrollin[i].widget == NULL) {
-      widget_scrollin[i].drawn = FALSE;
+      widget_scrollin[i].drawn = false;
       widget_scrollin[i].widget = w;
       return;
     }
@@ -5735,7 +5736,7 @@ static void widget_scrollin_register(Q8tkWidget *w) {
 static void widget_scrollin_adjust_reset(void) {
   int i;
   for (i = 0; i < MAX_WIDGET_SCROLLIN; i++) {
-    widget_scrollin[i].drawn = FALSE;
+    widget_scrollin[i].drawn = false;
   }
 }
 /* 設定：各ウィジットの描画毎に呼び出す */
@@ -5796,7 +5797,7 @@ static int widget_scrollin_adjust(void) {
               topleft = TRUE;
               d -= 1;
             } else {
-              topleft = FALSE;
+              topleft = false;
               d += 1;
             }
 
@@ -5832,7 +5833,7 @@ static int widget_scrollin_adjust(void) {
               topleft = TRUE;
               d -= 1;
             } else {
-              topleft = FALSE;
+              topleft = false;
               d += 1;
             }
 
@@ -5873,7 +5874,7 @@ static int widget_scrollin_adjust(void) {
           }
           p = p->parent;
         }
-        widget_scrollin[i].drawn = FALSE;
+        widget_scrollin[i].drawn = false;
         widget_scrollin[i].widget = NULL;
       }
     }
@@ -5956,12 +5957,12 @@ static Q8tkWidget *widget_focus_list_get_next(Q8tkWidget *widget, int back) {
     break;
 
   case Q8TK_TYPE_COMBO:
-    if (widget->stat.combo.entry->stat.entry.editable == FALSE) {
+    if (widget->stat.combo.entry->stat.entry.editable == false) {
       /* ENTRY が編集不可の場合は、COMBO 自身の前後へ */
       list = q8_list_find(widget_focus_list, widget);
     } else {
       /* ENTRY が編集可の場合は */
-      if (back == FALSE) {
+      if (back == false) {
         /* COMBO の次は、ENTRY の次に同じ */
         list = q8_list_find(widget_focus_list, widget->stat.combo.entry);
       } else {
@@ -5978,7 +5979,7 @@ static Q8tkWidget *widget_focus_list_get_next(Q8tkWidget *widget, int back) {
 #endif
 
   if (list) {
-    if (back == FALSE) {
+    if (back == false) {
       if (list->next)
         return (Q8tkWidget *)((list->next)->data);
       else
@@ -6009,14 +6010,14 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
   Q8tkWidget *sense_widget;
 
   /* 親がフォーカスありか、自身がフォーカスありで、フォーカスあり状態とする*/
-  focus = (parent_focus || (widget == get_focus_widget())) ? TRUE : FALSE;
+  focus = (parent_focus || (widget == get_focus_widget())) ? TRUE : false;
 
   /* 親が操作可能で、自身も操作可能なら、操作可能とする */
-  sensitive = (parent_sensitive && widget->sensitive) ? TRUE : FALSE;
+  sensitive = (parent_sensitive && widget->sensitive) ? TRUE : false;
   sense_widget = (sensitive) ? widget : NULL;
 
   /* 仲間にフォーカスを伝える場合、真。通常は伝えない */
-  next_focus = FALSE;
+  next_focus = false;
 
   widget_scrollin_drawn(widget);
 
@@ -6074,7 +6075,7 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
       if (child) {
         child->x = x + (widget->stat.window.no_frame ? 0 : 1);
         child->y = y + (widget->stat.window.no_frame ? 0 : 1);
-        widget_draw(child, FALSE, sensitive);
+        widget_draw(child, false, sensitive);
       }
       break;
 
@@ -6121,7 +6122,7 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
       if (child) {
         child->x = x + 1;
         child->y = y + 1;
-        widget_draw(child, FALSE, sensitive);
+        widget_draw(child, false, sensitive);
       }
       break;
 
@@ -6140,7 +6141,7 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
       if (child) {
         child->x = x;
         child->y = y;
-        widget_draw(child, FALSE, sensitive);
+        widget_draw(child, false, sensitive);
       }
       break;
     case Q8TK_TYPE_NOTEPAGE: /* ノートページ       */
@@ -6149,12 +6150,12 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
 
       q8gr_draw_notepage((widget->name) ? widget->code : Q8TK_KANJI_ANK, (widget->name) ? widget->name : "",
                          select_flag,
-                         /*(select_flag) ? FALSE :*/ focus, widget->parent, sense_widget);
+                         /*(select_flag) ? false :*/ focus, widget->parent, sense_widget);
       if (child && select_flag) {
         child->x = ((widget->parent)->x) + 1;
         child->y = ((widget->parent)->y) + 3;
         widget_focus_list_append(widget);
-        widget_draw(child, FALSE, sensitive);
+        widget_draw(child, false, sensitive);
       }
 #if defined(OLD_FOCUS_CHANGE)
       else {
@@ -6177,7 +6178,7 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
           y += child->sy;
         }
         child = widget->child;
-        widget_draw(child, FALSE, sensitive);
+        widget_draw(child, false, sensitive);
       }
       break;
     case Q8TK_TYPE_HBOX: /* 水平ボックス       */
@@ -6194,7 +6195,7 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
           y += 0;
         }
         child = widget->child;
-        widget_draw(child, FALSE, sensitive);
+        widget_draw(child, false, sensitive);
       }
       break;
 
@@ -6209,12 +6210,12 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
       widget->stat.combo.entry->x = x;
       widget->stat.combo.entry->y = y;
       widget->stat.combo.entry->sx = widget->sx - 3;
-      widget_draw(widget->stat.combo.entry, FALSE, sensitive);
+      widget_draw(widget->stat.combo.entry, false, sensitive);
 
 #if defined(OLD_FOCUS_CHANGE)
       widget_focus_list_append(sense_widget);
 #else /* 新たなフォーカス移動方式 */
-      if (widget->stat.combo.entry->stat.entry.editable == FALSE) {
+      if (widget->stat.combo.entry->stat.entry.editable == false) {
         widget_focus_list_append(sense_widget);
       }
 #endif
@@ -6242,10 +6243,10 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
 
     case Q8TK_TYPE_LIST_ITEM: /* リストアイテム    */
       if (child) {
-        int rev = (widget->parent->stat.listbox.selected == widget) ? TRUE : FALSE;
-        int under = (widget->parent->stat.listbox.active == widget) ? TRUE : FALSE;
+        int rev = (widget->parent->stat.listbox.selected == widget) ? TRUE : false;
+        int under = (widget->parent->stat.listbox.active == widget) ? TRUE : false;
         if (rev && under)
-          under = FALSE;
+          under = false;
 
         q8gr_draw_list_item(x, y, widget->sx, focus, rev, under, child->code, child->name, sense_widget);
       }
@@ -6253,12 +6254,12 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
       break;
 
     case Q8TK_TYPE_ADJUSTMENT: /* アジャストメント */
-      Q8tkAssert(FALSE, NULL);
+      Q8tkAssert(false, NULL);
       break;
 
     case Q8TK_TYPE_HSCALE: /* 水平スケール       */
       if (widget->stat.scale.adj) {
-        int a_focus = (focus || (widget->stat.scale.adj == get_focus_widget())) ? TRUE : FALSE;
+        int a_focus = (focus || (widget->stat.scale.adj == get_focus_widget())) ? TRUE : false;
         Q8tkWidget *a_widget = ((sensitive) ? widget->stat.scale.adj : NULL);
         widget_focus_list_append(a_widget);
         widget->stat.scale.adj->x = x;
@@ -6269,7 +6270,7 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
       break;
     case Q8TK_TYPE_VSCALE: /* 垂直スケール       */
       if (widget->stat.scale.adj) {
-        int a_focus = (focus || (widget->stat.scale.adj == get_focus_widget())) ? TRUE : FALSE;
+        int a_focus = (focus || (widget->stat.scale.adj == get_focus_widget())) ? TRUE : false;
         Q8tkWidget *a_widget = ((sensitive) ? widget->stat.scale.adj : NULL);
         widget_focus_list_append(a_widget);
         widget->stat.scale.adj->x = x;
@@ -6304,22 +6305,22 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
         child->x = x - widget->stat.scrolled.child_x0 + 1;
         child->y = y - widget->stat.scrolled.child_y0 + 1;
 
-        widget_draw(child, FALSE, sensitive);
+        widget_draw(child, false, sensitive);
         q8gr_reset_screen_mask();
 
         if (widget->stat.scrolled.vscrollbar) {
-          a_focus = (focus || (widget->stat.scrolled.vadj == get_focus_widget())) ? TRUE : FALSE;
+          a_focus = (focus || (widget->stat.scrolled.vadj == get_focus_widget())) ? TRUE : false;
           a_widget = ((sensitive) ? widget->stat.scrolled.vadj : NULL);
           /* フォーカスリストには入れないほうがいいのでは… */
           widget_focus_list_append(a_widget);
-          q8gr_draw_vscale(x + sx, y, &(widget->stat.scrolled.vadj->stat.adj), a_focus, FALSE, 0, a_widget);
+          q8gr_draw_vscale(x + sx, y, &(widget->stat.scrolled.vadj->stat.adj), a_focus, false, 0, a_widget);
         }
         if (widget->stat.scrolled.hscrollbar) {
-          a_focus = (focus || (widget->stat.scrolled.hadj == get_focus_widget())) ? TRUE : FALSE;
+          a_focus = (focus || (widget->stat.scrolled.hadj == get_focus_widget())) ? TRUE : false;
           a_widget = ((sensitive) ? widget->stat.scrolled.hadj : NULL);
           /* フォーカスリストには入れないほうがいいのでは… */
           widget_focus_list_append(a_widget);
-          q8gr_draw_hscale(x, y + sy, &(widget->stat.scrolled.hadj->stat.adj), a_focus, FALSE, 0, a_widget);
+          q8gr_draw_hscale(x, y + sy, &(widget->stat.scrolled.hadj->stat.adj), a_focus, false, 0, a_widget);
         }
       } else {
         q8gr_draw_window(x, y, widget->sx, widget->sy, Q8TK_SHADOW_ETCHED_OUT, NULL);
@@ -6339,14 +6340,14 @@ static void widget_draw(Q8tkWidget *widget, int parent_focus, int parent_sensiti
       break;
 
     case Q8TK_TYPE_DIALOG: /* ダイアログ      */
-      Q8tkAssert(FALSE, NULL);
+      Q8tkAssert(false, NULL);
       break;
     case Q8TK_TYPE_FILE_SELECTION: /* ファイルセレクション   */
-      Q8tkAssert(FALSE, NULL);
+      Q8tkAssert(false, NULL);
       break;
 
     default:
-      Q8tkAssert(FALSE, "Undefined type");
+      Q8tkAssert(false, "Undefined type");
     }
   }
 
@@ -6386,7 +6387,7 @@ static void widget_construct(void) {
 
         widget_size(widget, &tmp, &tmp, &tmp, &tmp);
 
-        if (widget->stat.window.set_position == FALSE) {
+        if (widget->stat.window.set_position == false) {
           widget->x = (Q8GR_SCREEN_X - widget->sx) / 2;
           widget->y = (Q8GR_SCREEN_Y - widget->sy) / 2;
         } else {
@@ -6397,7 +6398,7 @@ static void widget_construct(void) {
         widget_scrollin_adjust_reset();
 
         widget_focus_list_reset();
-        widget_draw(widget, FALSE, widget->sensitive);
+        widget_draw(widget, false, widget->sensitive);
 
         if (widget_scrollin_adjust()) {
           /* Redraw! */
@@ -6432,7 +6433,7 @@ static void widget_construct(void) {
         } while (w != q8tk_tab_top_widget);
         q8tk_tab_top_widget = w;
 
-        exist = FALSE;      /* event_widget が実在するかチェック */
+        exist = false;      /* event_widget が実在するかチェック */
         do {            
         if (w == get_event_widget()) {
             exist = TRUE;

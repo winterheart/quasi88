@@ -22,33 +22,35 @@
 #include <cstring>
 #include <cctype>
 
-extern "C" {
 #include "quasi88.h"
-#include "debug.h"
-#include "initval.h"
 
-#include "pc88main.h"
-#include "pc88sub.h"
-#include "graph.h"
-#include "memory.h"
-#include "file-op.h"
-#include "fname.h"
-
-#include "emu.h"
 #include "drive.h"
+#include "emu.h"
+#include "event.h"
+#include "fname.h"
+#include "graph.h"
+#include "initval.h"
+#include "intr.h"
 #include "keyboard.h"
+#include "memory.h"
+#include "menu.h"
 #include "monitor.h"
-#include "snddrv.h"
-#include "wait.h"
+#include "screen.h"
+#include "snapshot.h"
 #include "status.h"
 #include "suspend.h"
-#include "snapshot.h"
-#include "soundbd.h"
-#include "screen.h"
-#include "menu.h"
 #include "pause.h"
+#include "pc88main.h"
+#include "wait.h"
 #include "z80.h"
-#include "intr.h"
+
+extern "C" {
+#include "debug.h"
+
+#include "pc88sub.h"
+
+#include "snddrv.h"
+#include "soundbd.h"
 }
 
 #if USE_RETROACHIEVEMENTS
@@ -56,14 +58,14 @@ extern "C" {
 #endif
 
 int verbose_level = DEFAULT_VERBOSE; /* 冗長レベル      */
-int verbose_proc = FALSE;            /* 処理の進行状況の表示   */
-int verbose_z80 = FALSE;             /* Z80処理エラーを表示  */
-int verbose_io = FALSE;              /* 未実装I/Oアクセス表示*/
-int verbose_pio = FALSE;             /* PIO の不正使用を表示 */
-int verbose_fdc = FALSE;             /* FDイメージ異常を報告    */
-int verbose_wait = FALSE;            /* ウエイト時の異常を報告 */
-int verbose_suspend = FALSE;         /* サスペンド時の異常を報告 */
-int verbose_snd = FALSE;             /* サウンドのメッセージ   */
+int verbose_proc = false;            /* 処理の進行状況の表示   */
+int verbose_z80 = false;             /* Z80処理エラーを表示  */
+int verbose_io = false;              /* 未実装I/Oアクセス表示*/
+int verbose_pio = false;             /* PIO の不正使用を表示 */
+int verbose_fdc = false;             /* FDイメージ異常を報告    */
+int verbose_wait = false;            /* ウエイト時の異常を報告 */
+int verbose_suspend = false;         /* サスペンド時の異常を報告 */
+int verbose_snd = false;             /* サウンドのメッセージ   */
 
 static void status_override();
 
@@ -95,13 +97,13 @@ void quasi88_start(void) {
   SET_PROC(1);
 
   /* エミュレート用メモリの確保  */
-  if (memory_allocate() == FALSE) {
+  if (memory_allocate() == false) {
     quasi88_exit(-1);
   }
 
   if (resume_flag) { /* ステートロード        */
     SET_PROC(2);
-    if (stateload() == FALSE) {
+    if (stateload() == false) {
       fprintf(stderr, "stateload: Failed ! (filename = %s)\n", filename_get_state());
       quasi88_exit(-1);
     }
@@ -112,7 +114,7 @@ void quasi88_start(void) {
   SET_PROC(3);
 
   /* グラフィックシステム初期化  */
-  if (screen_init() == FALSE) {
+  if (screen_init() == false) {
     quasi88_exit(-1);
   }
   SET_PROC(4);
@@ -129,13 +131,13 @@ void quasi88_start(void) {
 #endif /* (ここもscreen_initの後で) */
 
   /* サウンドドライバ初期化    */
-  if (xmame_sound_start() == FALSE) {
+  if (xmame_sound_start() == false) {
     quasi88_exit(-1);
   }
   SET_PROC(5);
 
   /* ウエイト用タイマー初期化 */
-  if (wait_vsync_init() == FALSE) {
+  if (wait_vsync_init() == false) {
     quasi88_exit(-1);
   }
   SET_PROC(6);
@@ -282,7 +284,7 @@ void quasi88_atexit(void (*function)()) {
 void quasi88_exit(int status) {
   int i;
 
-  quasi88_stop(FALSE);
+  quasi88_stop(false);
 
   for (i = MAX_ATEXIT - 1; i >= 0; i--) {
     if (exit_function[i]) {
@@ -334,7 +336,7 @@ int quasi88_loop(void) {
       break;
 #endif
     case QUIT: /* QUIT なら、メインループ終了 */
-      return FALSE;
+      return false;
     }
 
     /* モード別イニシャル処理 */
@@ -454,7 +456,7 @@ int quasi88_loop(void) {
 
     /* ウェイト時間を元に、フレームスキップの有無を決定 */
     if (mode == EXEC) {
-      frameskip_check((stat == WAIT_JUST) ? TRUE : FALSE);
+      frameskip_check((stat == WAIT_JUST) ? TRUE : false);
     }
 
     /* ウェイト処理が完了したら、次 (INIT か MAIN) に遷移 */
@@ -579,14 +581,14 @@ static void status_override() {
       status_message(0, STATUS_INFO_TIME, Q_TITLE " " Q_VERSION);
 
       if (resume_flag == 0) {
-        if (status_imagename == FALSE) {
+        if (status_imagename == false) {
           status_message_default(1, "<F12> key to MENU");
         }
       } else {
         status_message(1, STATUS_INFO_TIME, "State-Load Successful");
       }
     }
-    first_fime = FALSE;
+    first_fime = false;
   }
 }
 
@@ -600,7 +602,7 @@ static void status_override() {
  *  一番安全。うーん、いまいち。
  *
  *  if( mode == EXEC ){
- *      quasi88_disk_insert_and_reset( file, FALSE );
+ *      quasi88_disk_insert_and_reset( file, false );
  *  }
  *
  ************************************************************************/
@@ -621,7 +623,7 @@ void quasi88_get_reset_cfg(T_RESET_CFG *cfg) {
 }
 
 void quasi88_reset(const T_RESET_CFG *cfg) {
-  int sb_changed = FALSE;
+  int sb_changed = false;
   int empty[2];
 
   if (verbose_proc)
@@ -647,15 +649,15 @@ void quasi88_reset(const T_RESET_CFG *cfg) {
   }
 
   /* メモリの再確保が必要なら、処理する */
-  if (memory_allocate_additional() == FALSE) {
+  if (memory_allocate_additional() == false) {
     quasi88_exit(-1); /* 失敗！ */
   }
 
   /* サウンド出力のリセット */
-  if (sb_changed == FALSE) {
+  if (sb_changed == false) {
     xmame_sound_reset();
   } else {
-    menu_sound_restart(FALSE); /* サウンドドライバの再初期化 */
+    menu_sound_restart(false); /* サウンドドライバの再初期化 */
   }
 
   /* ワークの初期化 */

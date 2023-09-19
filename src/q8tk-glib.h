@@ -1,6 +1,8 @@
 #ifndef Q8TK_GLIB_H_INCLUDED
 #define Q8TK_GLIB_H_INCLUDED
 
+#include "q8tk.h"
+
 /* 罫線 角 123456789_I = └┴┘├┼┤┌┬┐─│ */
 
 #define Q8GR_G_1 (0x9a)

@@ -9,14 +9,16 @@
 #include <cstring>
 #include <cctype>
 
-extern "C" {
 #include "quasi88.h"
-#include "screen.h"
-#include "screen-func.h"
 
 #include "crtcdmac.h"
 #include "file-op.h"
+#include "screen.h"
 #include "snapshot.h"
+
+extern "C" {
+#include "screen-func.h"
+
 #include "snddrv.h"
 }
 
@@ -24,12 +26,12 @@ char file_snap[QUASI88_MAX_FILENAME]; /* スナップショットベース部 */
 int snapshot_format = 0;              /* スナップショットフォーマット   */
 
 char snapshot_cmd[SNAPSHOT_CMD_SIZE]; /* スナップショット後コマンド    */
-char snapshot_cmd_do = FALSE;         /* コマンド実行の有無      */
+char snapshot_cmd_do = false;         /* コマンド実行の有無      */
 
 #ifdef USE_SSS_CMD
 char snapshot_cmd_enable = TRUE; /* コマンド実行の可否      */
 #else
-char snapshot_cmd_enable = FALSE; /* コマンド実行の可否      */
+char snapshot_cmd_enable = false; /* コマンド実行の可否      */
 #endif
 
 /* スナップショットを作成する一時バッファと、色のインデックス */
@@ -44,7 +46,7 @@ void screen_snapshot_init(void) {
   const char *s;
 
   if (file_snap[0] == '\0') {
-    filename_init_snap(FALSE);
+    filename_init_snap(false);
   }
 
   memset(snapshot_cmd, 0, SNAPSHOT_CMD_SIZE);
@@ -53,10 +55,10 @@ void screen_snapshot_init(void) {
     strcpy(snapshot_cmd, s);
   }
 
-  snapshot_cmd_do = FALSE; /* 初期値は、コマンド実行『しない』にする */
+  snapshot_cmd_do = false; /* 初期値は、コマンド実行『しない』にする */
 
   if (file_wav[0] == '\0') {
-    filename_init_wav(FALSE);
+    filename_init_wav(false);
   }
 }
 void screen_snapshot_exit(void) { waveout_save_stop(); }
@@ -387,7 +389,7 @@ void filename_set_snap_base(const char *filename) {
 
     truncate_filename(file_snap, snap_suffix);
   } else {
-    filename_init_snap(FALSE);
+    filename_init_snap(false);
   }
 }
 const char *filename_get_snap_base(void) { return file_snap; }
@@ -406,12 +408,12 @@ int screen_snapshot_save(void) {
   int i, j, len, success;
 
   if (snapshot_format >= COUNTOF(suffix))
-    return FALSE;
+    return false;
 
   /* ファイル名が未指定の場合、初期ファイル名にする */
 
   if (file_snap[0] == '\0') {
-    filename_init_snap(FALSE);
+    filename_init_snap(false);
   }
 
   /* file_snap[] の末端が NNNN.suffix なら削除 */
@@ -420,7 +422,7 @@ int screen_snapshot_save(void) {
 
   /* 存在しないファイル名を探しだす (0000.suffix〜 9999.suffix) */
 
-  success = FALSE;
+  success = false;
   for (j = 0; j < 10000; j++) {
 
     len = sprintf(filename, "%s%04d", file_snap, snapshot_no);
@@ -445,7 +447,7 @@ int screen_snapshot_save(void) {
 
   if (success) {
 
-    success = FALSE;
+    success = false;
     if ((fp = osd_fopen(FTYPE_SNAPSHOT_PPM, filename, "wb"))) {
 
       make_snapshot();
@@ -572,7 +574,7 @@ void filename_set_wav_base(const char *filename) {
 
     truncate_filename(file_wav, wav_suffix);
   } else {
-    filename_init_wav(FALSE);
+    filename_init_wav(false);
   }
 }
 const char *filename_get_wav_base(void) { return file_wav; }
@@ -588,7 +590,7 @@ int waveout_save_start(void) {
   /* ファイル名が未指定の場合、初期ファイル名にする */
 
   if (file_wav[0] == '\0') {
-    filename_init_wav(FALSE);
+    filename_init_wav(false);
   }
 
   /* file_wav[] の末端が NNNN.suffix なら削除 */
@@ -597,7 +599,7 @@ int waveout_save_start(void) {
 
   /* 存在しないファイル名を探しだす (0000.suffix〜 9999.suffix) */
 
-  success = FALSE;
+  success = false;
   for (j = 0; j < 10000; j++) {
 
     len = sprintf(filename, "%s%04d", file_wav, waveout_no);

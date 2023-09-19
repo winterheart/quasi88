@@ -1,5 +1,5 @@
-extern byte menu_cursor_on[];
-extern byte menu_cursor_off[];
+extern uint8_t menu_cursor_on[];
+extern uint8_t menu_cursor_off[];
 extern int menu_cursor_x;
 extern int menu_cursor_y;
 
@@ -19,15 +19,15 @@ int MENU2SCREEN(void) {
   for (y = 0; y < Q8GR_SCREEN_Y; y++) {
     for (x = 0; x < Q8GR_SCREEN_X; x++) {
 
-      if (*((Uint *)src) != *((Uint *)old)) {
+      if (*((uint32_t *)src) != *((uint32_t *)old)) {
 
         int i, font_inc, font_dup, font_skip;
-        byte style, *font_ptr;
+        uint8_t style, *font_ptr;
         int reverse = (src->reverse) ? 0xff : 0x00;
         int underline = src->underline;
         TYPE fg = COLOR_PIXEL(src->foreground);
         TYPE bg = COLOR_PIXEL(src->background);
-        byte *cur_ptr = (src->mouse) ? menu_cursor_on : menu_cursor_off;
+        uint8_t *cur_ptr = (src->mouse) ? menu_cursor_on : menu_cursor_off;
         WORK_DEFINE();
 
         if (src->mouse) {
@@ -100,7 +100,7 @@ int MENU2SCREEN(void) {
 
           PUT_FONT()
 
-          if (font_dup == FALSE || (i & 1)) {
+          if (font_dup == false || (i & 1)) {
             font_ptr += font_inc;
           }
           cur_ptr += font_skip;

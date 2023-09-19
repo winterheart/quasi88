@@ -73,16 +73,16 @@ void xmame_sound_suspend(void);
 void xmame_sound_resume(void);
 void xmame_sound_reset(void);
 
-byte xmame_dev_sound_in_data(void);
-byte xmame_dev_sound_in_status(void);
-void xmame_dev_sound_out_reg(byte data);
-void xmame_dev_sound_out_data(byte data);
-byte xmame_dev_sound2_in_data(void);
-byte xmame_dev_sound2_in_status(void);
-void xmame_dev_sound2_out_reg(byte data);
-void xmame_dev_sound2_out_data(byte data);
-void xmame_dev_beep_out_data(byte data);
-void xmame_dev_beep_cmd_sing(byte flag);
+uint8_t xmame_dev_sound_in_data(void);
+uint8_t xmame_dev_sound_in_status(void);
+void xmame_dev_sound_out_reg(uint8_t data);
+void xmame_dev_sound_out_data(uint8_t data);
+uint8_t xmame_dev_sound2_in_data(void);
+uint8_t xmame_dev_sound2_in_status(void);
+void xmame_dev_sound2_out_reg(uint8_t data);
+void xmame_dev_sound2_out_data(uint8_t data);
+void xmame_dev_beep_out_data(uint8_t data);
+void xmame_dev_beep_cmd_sing(uint8_t flag);
 void xmame_dev_sample_motoron(void);
 void xmame_dev_sample_motoroff(void);
 void xmame_dev_sample_headdown(void);
@@ -122,9 +122,9 @@ const char *xmame_version_fmgen(void);
 
 #define xmame_config_get_sndopt_tbl() (NULL)
 
-#define xmame_has_sound() (FALSE)
-#define xmame_has_audiodevice() (FALSE)
-#define xmame_has_mastervolume() (FALSE)
+#define xmame_has_sound() (false)
+#define xmame_has_audiodevice() (false)
+#define xmame_has_mastervolume() (false)
 
 #define xmame_sound_start() (TRUE)
 #define xmame_sound_update()
@@ -155,17 +155,17 @@ const char *xmame_version_fmgen(void);
 #define xmame_cfg_set_mastervolume(v)
 #define xmame_cfg_get_mixer_volume(c) (0)
 #define xmame_cfg_set_mixer_volume(c, l)
-#define xmame_cfg_get_use_fmgen() (FALSE)
-#define xmame_cfg_set_use_fmgen(e) (FALSE)
-#define xmame_cfg_get_use_samples() (FALSE)
-#define xmame_cfg_set_use_samples(e) (FALSE)
+#define xmame_cfg_get_use_fmgen() (false)
+#define xmame_cfg_set_use_fmgen(e) (false)
+#define xmame_cfg_get_use_samples() (false)
+#define xmame_cfg_set_use_samples(e) (false)
 #define xmame_cfg_get_sample_freq() (44100)
 #define xmame_cfg_set_sample_freq(f) (44100)
 
-#define xmame_wavout_open(f) (FALSE)
-#define xmame_wavout_opened() (FALSE)
+#define xmame_wavout_open(f) (false)
+#define xmame_wavout_opened() (false)
 #define xmame_wavout_close()
-#define xmame_wavout_damaged() (FALSE)
+#define xmame_wavout_damaged() (false)
 
 #define xmame_version_mame() ""
 #define xmame_version_fmgen() ""

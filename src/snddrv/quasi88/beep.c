@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include "driver.h"
@@ -12,10 +12,10 @@ typedef struct beep88_f {
     void            *param;
     int             clock;          /* 2400Hz */
     int             sample_rate;    /* 44100/22050 Hz */
-    int             sample_bit_8;   /* TRUE / FALSE */
+    int             sample_bit_8;   /* TRUE / false */
     int             cnt;            /* 0... */
     int             cnt_of_clock;   /* sample_rate/clock */
-    int             cmd_sing;       /* TRUE / FALSE */
+    int             cmd_sing;       /* TRUE / false */
     unsigned char   port40;         /* Output value of port 40 */
 } BEEP88;
 
@@ -93,7 +93,7 @@ void * BEEP88Init(void *param, int index, int clock, int sample_rate)
     BEEP->param  = param;
     BEEP->clock  = clock;
     BEEP->sample_rate  = sample_rate;
-    BEEP->sample_bit_8 = FALSE;   /* ...always false... */
+    BEEP->sample_bit_8 = false;   /* ...always false... */
     BEEP->cnt_of_clock = sample_rate * SCALE / clock;
     BEEP->cmd_sing = TRUE;
     BEEP88ResetChip(BEEP);

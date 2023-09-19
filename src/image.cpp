@@ -6,12 +6,14 @@
 
 #include <cstring>
 
-extern "C" {
 #include "quasi88.h"
-#include "initval.h"
+
 #include "drive.h"
-#include "image.h"
 #include "file-op.h"
+#include "initval.h"
+
+extern "C" {
+#include "image.h"
 }
 
 /***********************************************************************

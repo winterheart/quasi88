@@ -61,53 +61,53 @@
 
 /* 2ドット分のピクセル値(0〜7)を bit7〜4 と bit3〜0 にパック */
 #define get_pixel_index73(data)                                                                                        \
-  ((((data) & ((bit32)0x00000088)) >> 3) | (((data) & ((bit32)0x00008800)) >> 10) |                                    \
-   (((data) & ((bit32)0x00880000)) >> 17))
+  ((((data) & ((uint32_t)0x00000088)) >> 3) | (((data) & ((uint32_t)0x00008800)) >> 10) |                              \
+   (((data) & ((uint32_t)0x00880000)) >> 17))
 #define get_pixel_index62(data)                                                                                        \
-  ((((data) & ((bit32)0x00000044)) >> 2) | (((data) & ((bit32)0x00004400)) >> 9) |                                     \
-   (((data) & ((bit32)0x00440000)) >> 16))
+  ((((data) & ((uint32_t)0x00000044)) >> 2) | (((data) & ((uint32_t)0x00004400)) >> 9) |                               \
+   (((data) & ((uint32_t)0x00440000)) >> 16))
 #define get_pixel_index51(data)                                                                                        \
-  ((((data) & ((bit32)0x00000022)) >> 1) | (((data) & ((bit32)0x00002200)) >> 8) |                                     \
-   (((data) & ((bit32)0x00220000)) >> 15))
+  ((((data) & ((uint32_t)0x00000022)) >> 1) | (((data) & ((uint32_t)0x00002200)) >> 8) |                               \
+   (((data) & ((uint32_t)0x00220000)) >> 15))
 #define get_pixel_index40(data)                                                                                        \
-  ((((data) & ((bit32)0x00000011)) >> 0) | (((data) & ((bit32)0x00001100)) >> 7) |                                     \
-   (((data) & ((bit32)0x00110000)) >> 14))
+  ((((data) & ((uint32_t)0x00000011)) >> 0) | (((data) & ((uint32_t)0x00001100)) >> 7) |                               \
+   (((data) & ((uint32_t)0x00110000)) >> 14))
 
 /* 3ドット分のピクセル値(0〜7)を bit8〜6 と bit5〜3 と bit2〜0 にパック */
 #define get_pixel_index_52(data)                                                                                       \
-  ((((data) & ((bit32)0x00000024)) >> 2) | (((data) & ((bit32)0x00002400)) >> 9) |                                     \
-   (((data) & ((bit32)0x00240000)) >> 16))
+  ((((data) & ((uint32_t)0x00000024)) >> 2) | (((data) & ((uint32_t)0x00002400)) >> 9) |                               \
+   (((data) & ((uint32_t)0x00240000)) >> 16))
 #define get_pixel_index741(data)                                                                                       \
-  ((((data) & ((bit32)0x00000092)) >> 1) | (((data) & ((bit32)0x00009200)) >> 8) |                                     \
-   (((data) & ((bit32)0x00920000)) >> 15))
+  ((((data) & ((uint32_t)0x00000092)) >> 1) | (((data) & ((uint32_t)0x00009200)) >> 8) |                               \
+   (((data) & ((uint32_t)0x00920000)) >> 15))
 #define get_pixel_index630(data)                                                                                       \
-  ((((data) & ((bit32)0x00000049)) >> 0) | (((data) & ((bit32)0x00004900)) >> 7) |                                     \
-   (((data) & ((bit32)0x00490000)) >> 14))
+  ((((data) & ((uint32_t)0x00000049)) >> 0) | (((data) & ((uint32_t)0x00004900)) >> 7) |                               \
+   (((data) & ((uint32_t)0x00490000)) >> 14))
 
 #else
 
 #define get_pixel_index73(data)                                                                                        \
-  ((((data) & ((bit32)0x88000000)) >> 27) | (((data) & ((bit32)0x00880000)) >> 18) |                                   \
-   (((data) & ((bit32)0x00008800)) >> 9))
+  ((((data) & ((uint32_t)0x88000000)) >> 27) | (((data) & ((uint32_t)0x00880000)) >> 18) |                             \
+   (((data) & ((uint32_t)0x00008800)) >> 9))
 #define get_pixel_index62(data)                                                                                        \
-  ((((data) & ((bit32)0x44000000)) >> 26) | (((data) & ((bit32)0x00440000)) >> 17) |                                   \
-   (((data) & ((bit32)0x00004400)) >> 8))
+  ((((data) & ((uint32_t)0x44000000)) >> 26) | (((data) & ((uint32_t)0x00440000)) >> 17) |                             \
+   (((data) & ((uint32_t)0x00004400)) >> 8))
 #define get_pixel_index51(data)                                                                                        \
-  ((((data) & ((bit32)0x22000000)) >> 25) | (((data) & ((bit32)0x00220000)) >> 16) |                                   \
-   (((data) & ((bit32)0x00002200)) >> 7))
+  ((((data) & ((uint32_t)0x22000000)) >> 25) | (((data) & ((uint32_t)0x00220000)) >> 16) |                             \
+   (((data) & ((uint32_t)0x00002200)) >> 7))
 #define get_pixel_index40(data)                                                                                        \
-  ((((data) & ((bit32)0x11000000)) >> 24) | (((data) & ((bit32)0x00110000)) >> 15) |                                   \
-   (((data) & ((bit32)0x00001100)) >> 6))
+  ((((data) & ((uint32_t)0x11000000)) >> 24) | (((data) & ((uint32_t)0x00110000)) >> 15) |                             \
+   (((data) & ((uint32_t)0x00001100)) >> 6))
 
 #define get_pixel_index_52(data)                                                                                       \
-  ((((data) & ((bit32)0x24000000)) >> 26) | (((data) & ((bit32)0x00240000)) >> 17) |                                   \
-   (((data) & ((bit32)0x00002400)) >> 8))
+  ((((data) & ((uint32_t)0x24000000)) >> 26) | (((data) & ((uint32_t)0x00240000)) >> 17) |                             \
+   (((data) & ((uint32_t)0x00002400)) >> 8))
 #define get_pixel_index741(data)                                                                                       \
-  ((((data) & ((bit32)0x92000000)) >> 25) | (((data) & ((bit32)0x00920000)) >> 16) |                                   \
-   (((data) & ((bit32)0x00009200)) >> 7))
+  ((((data) & ((uint32_t)0x92000000)) >> 25) | (((data) & ((uint32_t)0x00920000)) >> 16) |                             \
+   (((data) & ((uint32_t)0x00009200)) >> 7))
 #define get_pixel_index630(data)                                                                                       \
-  ((((data) & ((bit32)0x49000000)) >> 24) | (((data) & ((bit32)0x00490000)) >> 15) |                                   \
-   (((data) & ((bit32)0x00004900)) >> 6))
+  ((((data) & ((uint32_t)0x49000000)) >> 24) | (((data) & ((uint32_t)0x00490000)) >> 15) |                             \
+   (((data) & ((uint32_t)0x00004900)) >> 6))
 #endif
 
 /*----------------------------------------------------------------------*/
@@ -156,8 +156,8 @@
 
 #define WORK_DEFINE()                                                                                                  \
   int m;                                                                                                               \
-  bit32 vram;                                                                                                          \
-  bit32 vcol[4];
+  uint32_t vram;                                                                                                       \
+  uint32_t vcol[4];
 
 #define GET_PIXEL_VCOL3(vram)                                                                                          \
   vcol[0] = get_pixel_index741(vram);                                                                                  \
@@ -178,8 +178,8 @@
 
 #define WORK_DEFINE()                                                                                                  \
   int m, l;                                                                                                            \
-  bit32 vram;                                                                                                          \
-  bit32 mask;                                                                                                          \
+  uint32_t vram;                                                                                                       \
+  uint32_t mask;                                                                                                       \
   make_mask_mono(mask);
 
 /*----------------------------------------------------------------------*/
@@ -192,7 +192,7 @@
 
 #define WORK_DEFINE()                                                                                                  \
   int m, l;                                                                                                            \
-  bit32 vram;
+  uint32_t vram;
 
 #else
 #error

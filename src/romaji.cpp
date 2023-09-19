@@ -8,11 +8,10 @@
 #include <cstring>
 #include <cctype>
 
-extern "C" {
 #include "quasi88.h"
+
 #include "keyboard.h"
 #include "romaji.h"
-}
 
 #define Bt7 0x80
 #define Bt6 0x40
@@ -40,7 +39,7 @@ extern "C" {
 #define Pe 14
 
 /* キューに蓄える値。ポート情報がパックしてある */
-#define RJ(port, bit, shift) ((Uchar)((port << 4) | (shift << 3) | bit))
+#define RJ(port, bit, shift) ((uint8_t)((port << 4) | (shift << 3) | bit))
 
 /*----------------------------------------------------------------------
  *
@@ -48,7 +47,7 @@ extern "C" {
 /*  ローマ字 → カナ 変換テーブル  */
 typedef struct {
   const char *s;
-  Uchar list[4];
+  uint8_t list[4];
 } romaji_list;
 
 #include "romaji-table.h"
@@ -77,7 +76,7 @@ static int input_size;    /* 入力済みの文字の数       */
 #define ROMAJI_QUE_SIZE (64)
 static int romaji_set;                    /* ローマ字入力されたカナは */
 static int romaji_ptr;                    /* キューに蓄えられ、順次   */
-static Uchar romaji_que[ROMAJI_QUE_SIZE]; /* I/O ポートに送られていく */
+static uint8_t romaji_que[ROMAJI_QUE_SIZE]; /* I/O ポートに送られていく */
 
 static int press_timer;         /* キーオン・オフのタイマー */
 #define KEY_ON_OFF_INTERVAL (4) /* キーオン・オフの時間       */
@@ -162,8 +161,8 @@ void romaji_clear(void) {
  *
  *----------------------------------------------------------------------*/
 
-static void set_romaji_que(const Uchar *p) {
-  Uchar c;
+static void set_romaji_que(const uint8_t *p) {
+  uint8_t c;
   while ((c = *p++)) {
     romaji_que[romaji_set++] = c;
     romaji_set &= (ROMAJI_QUE_SIZE - 1);
@@ -204,8 +203,8 @@ int romaji_input(int key) {
     int list_size = nr_list;
     romaji_list *list_p = list;
 
-    int same = FALSE;
-    int nearly = FALSE;
+    int same = false;
+    int nearly = false;
 
     for (i = 0; i < list_size; i++, list_p++) {
 
@@ -272,7 +271,7 @@ int romaji_input(int key) {
  *  キューからポートに出力していく関数
  */
 void romaji_output(void) {
-  Uint c;
+  uint32_t c;
 
   switch (press_timer) {
   case 0:

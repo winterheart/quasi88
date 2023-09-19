@@ -151,7 +151,7 @@ static void *ym2608_start(int sndindex, int clock, const void *config)
     pcmsizea = memory_region_length(info->intf->pcmrom);
 #else       /* QUASI88 */
     if( sound2_adpcm==NULL ){
-      sound2_adpcm = (byte *)malloc( 256 * 1024 * sizeof(char) );
+      sound2_adpcm = (uint8_t *)malloc( 256 * 1024 * sizeof(char) );
     }
     pcmbufa  = sound2_adpcm;
     pcmsizea = 256 * 1024;

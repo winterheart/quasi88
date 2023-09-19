@@ -7,11 +7,10 @@
 #include <cstdio>
 #include <SDL2/SDL.h>
 
-extern "C" {
 #include "quasi88.h"
-#include "graph.h"
+
 #include "device.h"
-}
+#include "graph.h"
 
 int sdl_mouse_rel_move; /* マウス相対移動量検知可能か  */
 
@@ -24,11 +23,11 @@ static SDL_Renderer *sdl_renderer;
 static SDL_Texture *sdl_texture;
 static SDL_Surface *sdl_offscreen;
 
-static SDL_DisplayMode sdl_display_mode = {SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0};
+static SDL_DisplayMode sdl_display_mode = {SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, nullptr};
 
 static int x_pos = SDL_WINDOWPOS_UNDEFINED, y_pos = SDL_WINDOWPOS_UNDEFINED;
 
-int sdl_init(void) {
+int sdl_init() {
   if (verbose_proc) {
     SDL_version libver;
     SDL_GetVersion(&libver);
@@ -41,15 +40,15 @@ int sdl_init(void) {
       printf("Failed\n");
     fprintf(stderr, "SDL Error: %s\n", SDL_GetError());
 
-    return FALSE;
+    return false;
   } else {
     if (verbose_proc)
       printf("OK\n");
-    return TRUE;
+    return true;
   }
 }
 
-void sdl_exit(void) { SDL_Quit(); }
+void sdl_exit() { SDL_Quit(); }
 
 /*
  * Initialize SDL window and renderer
@@ -57,7 +56,7 @@ void sdl_exit(void) { SDL_Quit(); }
  * Internally we are using SDL_PIXELFORMAT_RGB888 with 4 bpp and 32 bit depth.
  * During rendering SDL2 converts SDL_Texture to proper native conversion.
  */
-const T_GRAPH_SPEC *graph_init(void) {
+const T_GRAPH_SPEC *graph_init() {
   if (SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_OPENGL, &sdl_window, &sdl_renderer) != 0) {
     printf("Failed to initialize SDL: %s!\n", SDL_GetError());
     return nullptr;
@@ -150,11 +149,11 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double as
   graph_info.byte_per_line = sdl_offscreen->pitch;
   graph_info.buffer = sdl_offscreen->pixels;
   graph_info.nr_color = 255;
-  graph_info.write_only = FALSE;
-  graph_info.broken_mouse = FALSE;
+  graph_info.write_only = false;
+  graph_info.broken_mouse = false;
   graph_info.draw_start = nullptr;
   graph_info.draw_finish = nullptr;
-  graph_info.dont_frameskip = FALSE;
+  graph_info.dont_frameskip = false;
 
   if (verbose_proc) {
     int w, h;
@@ -168,7 +167,7 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double as
   return &graph_info;
 }
 
-void graph_exit(void) {
+void graph_exit() {
   SDL_SetRelativeMouseMode(SDL_FALSE);
   SDL_FreeSurface(sdl_offscreen);
   SDL_DestroyTexture(sdl_texture);
@@ -217,7 +216,7 @@ void graph_set_attribute(int mouse_show, int grab, int keyrepeat_on) {
     else
       SDL_EnableKeyRepeat(0, 0);
   */
-  sdl_mouse_rel_move = (!mouse_show && grab) ? TRUE : FALSE;
+  sdl_mouse_rel_move = (!mouse_show && grab) ? true : false;
 
   /* SDL は、グラブ中かつマウスオフなら、ウインドウの端にマウスが
      ひっかかっても、マウス移動の相対量を検知できる。

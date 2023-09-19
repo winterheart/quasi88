@@ -293,7 +293,7 @@ void profiler_video_output(int timing, int skip, int drawn) {
 
   if (debug_profiler & 4) {
     if (timing) {
-      if (skip == FALSE) {
+      if (!skip) {
         if (drawn)
           printf("@"); /* 画像処理の結果、更新が必要だった */
         else

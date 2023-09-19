@@ -4,17 +4,15 @@
 // ---------------------------------------------------------------------------
 //  $Id: opna.cpp,v 1.68 2003/06/12 14:03:44 cisc Exp $
 
+#include <cstdio>
+
+#include "quasi88.h"
+#include "file-op.h"
+
 #include "headers.h"
 #include "misc.h"
 #include "opna.h"
 #include "fmgeninl.h"
-
-// forQUASI88
-extern "C" {
-  #include <stdio.h>
-  #include "quasi88.h"
-  #include "file-op.h"
-}
 
 #define BUILD_OPN
 #define BUILD_OPNA

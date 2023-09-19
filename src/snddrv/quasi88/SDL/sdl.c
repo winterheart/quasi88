@@ -49,6 +49,7 @@ Version 0.1, January 2002
 
 #if 1       /* QUASI88 */
 #include "audio.h"
+#include "quasi88.h"
 
 int sdl_buffersize = 2048;
 

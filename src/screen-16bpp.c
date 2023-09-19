@@ -5,6 +5,8 @@
 /************************************************************************/
 
 #include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "quasi88.h"
 #include "screen.h"

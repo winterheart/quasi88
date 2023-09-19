@@ -10,7 +10,6 @@
 #include <cstring>
 #include <filesystem>
 
-#include "quasi88.h"
 #include "file-op.h"
 
 /*****************************************************************************/
@@ -59,9 +58,9 @@ const char *osd_dir_lcfg() { return dir_ini; }
 static int set_new_dir(const char *newdir, char *dir) {
   if (strlen(newdir) < OSD_MAX_FILENAME) {
     strcpy(dir, newdir);
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 
 int osd_set_dir_cwd(const char *d) { return set_new_dir(d, dir_cwd); }

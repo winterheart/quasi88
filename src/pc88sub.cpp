@@ -6,19 +6,22 @@
 
 #include <cstdio>
 
-extern "C" {
 #include "quasi88.h"
+
+#include "emu.h"
+#include "fdc.h"
+#include "memory.h"
+#include "suspend.h"
+#include "z80.h"
+
+extern "C" {
 #include "debug.h"
 #include "pc88sub.h"
 
 #include "pc88cpu.h"
-#include "fdc.h"
 #include "intr.h" /* state_of_vsync */
-#include "memory.h"
 #include "pio.h"
 
-#include "emu.h"
-#include "suspend.h"
 }
 
 z80arch z80sub_cpu; /* Z80 CPU ( sub system )   */
@@ -34,7 +37,7 @@ int sub_load_rate = 6; /*              */
 /*----------------------*/
 /*    メモリ・フェッチ  */
 /*----------------------*/
-byte sub_fetch(word addr) {
+uint8_t sub_fetch(uint16_t addr) {
   if (memory_wait) {
     if (addr < 0x4000)
       z80sub_cpu.state0 += 1; /* M1サイクルウェイト */
@@ -53,7 +56,7 @@ byte sub_fetch(word addr) {
 /*----------------------*/
 /*    メモリ・リード */
 /*----------------------*/
-byte sub_mem_read(word addr) {
+uint8_t sub_mem_read(uint16_t addr) {
 #if 0
   if( verbose_io ){
     if( ( 0x2000 <= addr && addr < 0x4000 ) || ( addr & 0x8000 ) ){
@@ -67,7 +70,7 @@ byte sub_mem_read(word addr) {
 /*----------------------*/
 /*     メモリライト   */
 /*----------------------*/
-void sub_mem_write(word addr, byte data) {
+void sub_mem_write(uint16_t addr, uint8_t data) {
   if ((addr & 0xc000) == 0x4000) {
 
     sub_romram[addr & 0x7fff] = data;
@@ -90,7 +93,7 @@ void sub_mem_write(word addr, byte data) {
 /*    ポート・ライト */
 /*----------------------*/
 
-void sub_io_out(byte port, byte data) {
+void sub_io_out(uint8_t port, uint8_t data) {
   switch (port) {
 
   case 0xf4: /* ドライブモード？ 2D/2DD/2HD ? */
@@ -134,7 +137,7 @@ void sub_io_out(byte port, byte data) {
 /*    ポート・リード */
 /*----------------------*/
 
-byte sub_io_in(byte port) {
+uint8_t sub_io_in(uint8_t port) {
   switch (port) {
 
   case 0xf8: /* FDC に TC を出力 */
@@ -152,12 +155,12 @@ byte sub_io_in(byte port) {
     /* ＰＩＯ */
 
   case 0xfc: {
-    byte data = pio_read_AB(PIO_SIDE_S, PIO_PORT_A);
+    uint8_t data = pio_read_AB(PIO_SIDE_S, PIO_PORT_A);
     logpio("   ==>%02x\n", data);
     return data;
   }
   case 0xfd: {
-    byte data = pio_read_AB(PIO_SIDE_S, PIO_PORT_B);
+    uint8_t data = pio_read_AB(PIO_SIDE_S, PIO_PORT_B);
     logpio("   -->%02x\n", data);
     return data;
   }
@@ -182,11 +185,11 @@ byte sub_io_in(byte port) {
 /*------------------------------*/
 /* 初期化(Z80リセット時に呼ぶ)   */
 /*------------------------------*/
-void sub_INT_init() { FDC_flag = FALSE; }
+void sub_INT_init() { FDC_flag = false; }
 
 /*----------------------------------------------------------------------*/
 /* 割り込みを生成する。と同時に、次の割り込みまでの、最小 state も計算    */
-/*  帰り値は、Z80処理強制終了のフラグ(TRUE/FALSE)            */
+/*  帰り値は、Z80処理強制終了のフラグ(TRUE/false)            */
 /*----------------------------------------------------------------------*/
 void sub_INT_update() {
   static int sub_total_state = 0; /* サブCPUが処理した命令数      */
@@ -197,7 +200,7 @@ void sub_INT_update() {
   if (FDC_flag) {
     z80sub_cpu.INT_active = TRUE;
   } else {
-    z80sub_cpu.INT_active = FALSE;
+    z80sub_cpu.INT_active = false;
   }
 
   /* キースキャンや画面表示の処理は、メインCPU処理で    */
@@ -236,7 +239,7 @@ void sub_INT_update() {
 /* チェック (割込許可時 1ステップ毎に呼ばれる)   */
 /*----------------------------------------------*/
 int sub_INT_chk() {
-  z80sub_cpu.INT_active = FALSE;
+  z80sub_cpu.INT_active = false;
 
   if (FDC_flag)
     return 0;
@@ -267,7 +270,7 @@ void pc88sub_init(int init) {
 #ifdef DEBUGLOG
   z80sub_cpu.log = TRUE;
 #else
-  z80sub_cpu.log = FALSE;
+  z80sub_cpu.log = false;
 #endif
 
   if (init == INIT_POWERON || init == INIT_RESET) {
@@ -287,7 +290,7 @@ void pc88sub_term(void) {}
 /************************************************************************/
 /* ブレークポイント関連                           */
 /************************************************************************/
-INLINE void check_break_point(int type, word addr, const char *str) {
+INLINE void check_break_point(int type, uint16_t addr, const char *str) {
   int i;
 
   if (quasi88_is_monitor())
@@ -301,27 +304,27 @@ INLINE void check_break_point(int type, word addr, const char *str) {
   }
 }
 
-byte sub_fetch_with_BP(word addr) {
+uint8_t sub_fetch_with_BP(uint16_t addr) {
   check_break_point(BP_READ, addr, "FETCH from");
   return sub_fetch(addr);
 }
 
-byte sub_mem_read_with_BP(word addr) {
+uint8_t sub_mem_read_with_BP(uint16_t addr) {
   check_break_point(BP_READ, addr, "READ from");
   return sub_mem_read(addr);
 }
 
-void sub_mem_write_with_BP(word addr, byte data) {
+void sub_mem_write_with_BP(uint16_t addr, uint8_t data) {
   check_break_point(BP_WRITE, addr, "WRITE to");
   sub_mem_write(addr, data);
 }
 
-byte sub_io_in_with_BP(byte port) {
+uint8_t sub_io_in_with_BP(uint8_t port) {
   check_break_point(BP_IN, port, "IN from");
   return sub_io_in(port);
 }
 
-void sub_io_out_with_BP(byte port, byte data) {
+void sub_io_out_with_BP(uint8_t port, uint8_t data) {
   check_break_point(BP_OUT, port, "OUT to");
   sub_io_out(port, data);
 }
@@ -441,12 +444,12 @@ int statesave_pc88sub(void) {
   if (statesave_table(SID, suspend_pc88sub_work) == STATE_OK)
     return TRUE;
   else
-    return FALSE;
+    return false;
 }
 
 int stateload_pc88sub(void) {
   if (stateload_table(SID, suspend_pc88sub_work) == STATE_OK)
     return TRUE;
   else
-    return FALSE;
+    return false;
 }

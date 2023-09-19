@@ -18,7 +18,7 @@ extern char *file_keyboard; /* キー設定ファイル名         */
 extern int use_joydevice;   /* ジョイスティックデバイスを開く? */
 extern int show_fps;        /* test */
 
-int sdl_init(void);
-void sdl_exit(void);
+int sdl_init();
+void sdl_exit();
 
 #endif /* DEVICE_H_INCLUDED */

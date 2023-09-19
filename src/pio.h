@@ -20,18 +20,18 @@ typedef struct {
   int type;   /* PORT の 機能   READ か WRITE か                     */
   int exist;  /* PA/PB …データの有無                     */
   int cont_f; /* PC 連続アクセスフラグ (CPU 切替えフラグ)         */
-  byte data;  /* PA/PB …入力するデータ PC …入力する/出力したデータ */
+  uint8_t data;  /* PA/PB …入力するデータ PC …入力する/出力したデータ */
 } pio_work;
 
 extern pio_work pio_AB[2][2], pio_C[2][2];
 
 void pio_init();
 
-byte pio_read_AB(int side, int port);
-void pio_write_AB(int side, int port, byte data);
-byte pio_read_C(int side);
-void pio_write_C(int side, byte data);
-void pio_write_C_direct(int side, byte data);
-void pio_set_mode(int side, byte data);
+uint8_t pio_read_AB(int side, int port);
+void pio_write_AB(int side, int port, uint8_t data);
+uint8_t pio_read_C(int side);
+void pio_write_C(int side, uint8_t data);
+void pio_write_C_direct(int side, uint8_t data);
+void pio_set_mode(int side, uint8_t data);
 
 #endif /* PIO_H_INCLUDED */

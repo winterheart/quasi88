@@ -17,7 +17,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "quasi88.h"
 #include "snddrv.h"
 #include "initval.h"
 #include "soundbd.h"

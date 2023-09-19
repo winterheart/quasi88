@@ -15,9 +15,9 @@ typedef struct {
 extern PC88_PALETTE_T vram_bg_palette; /* 背景パレット   */
 extern PC88_PALETTE_T vram_palette[8]; /* 各種パレット   */
 
-extern byte sys_ctrl;  /* OUT[30] SystemCtrl     */
-extern byte grph_ctrl; /* OUT[31] GraphCtrl      */
-extern byte grph_pile; /* OUT[53] 重ね合わせ     */
+extern uint8_t sys_ctrl;  /* OUT[30] SystemCtrl     */
+extern uint8_t grph_ctrl; /* OUT[31] GraphCtrl      */
+extern uint8_t grph_pile; /* OUT[53] 重ね合わせ     */
 
 #define SYS_CTRL_80 (0x01)   /* TEXT COLUMN80 / COLUMN40*/
 #define SYS_CTRL_MONO (0x02) /* TEXT MONO     / COLOR   */
@@ -139,9 +139,9 @@ extern char *status_start[3]; /* ステータス描画 先頭     */
 extern int status_sx[3];      /* ステータス描画サイズ       */
 extern int status_sy[3];
 
-extern Ulong color_pixel[16];          /* 色コード     */
-extern Ulong color_half_pixel[16][16]; /* 色補完時の色コード  */
-extern Ulong black_pixel;              /* 黒の色コード       */
+extern uint32_t color_pixel[16];          /* 色コード     */
+extern uint32_t color_half_pixel[16][16]; /* 色補完時の色コード  */
+extern uint32_t black_pixel;              /* 黒の色コード       */
 enum {                                 /* ステータスに使う色  */
        STATUS_BG,                      /*  背景色(白)  */
        STATUS_FG,                      /*  前景色(黒)  */
@@ -151,7 +151,7 @@ enum {                                 /* ステータスに使う色  */
        STATUS_GREEN,                   /*  緑色      */
        STATUS_COLOR_END
 };
-extern Ulong status_pixel[STATUS_COLOR_END]; /* ステータスの色コード   */
+extern uint32_t status_pixel[STATUS_COLOR_END]; /* ステータスの色コード   */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

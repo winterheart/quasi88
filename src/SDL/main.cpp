@@ -6,16 +6,19 @@
 
 #include <SDL2/SDL.h>
 
-extern "C" {
 #include "quasi88.h"
+
 #include "device.h"
+#include "event.h"
+#include "menu.h"     /* menu_about_osd_msg */
+#include "suspend.h"  /* stateload_system */
+
+extern "C" {
 
 #include "getconf.h"  /* config_init */
 #ifdef WIN32
 #include "keyboard.h" /* WIN32 romaji_type */
 #endif
-#include "suspend.h"  /* stateload_system */
-#include "menu.h"     /* menu_about_osd_msg */
 }
 
 /***********************************************************************
@@ -23,7 +26,7 @@ extern "C" {
  ************************************************************************/
 static int oo_env(const char *var, const char *str) {
   // TODO: Check this out
-  SDL_setenv(var, str, TRUE);
+  SDL_setenv(var, str, true);
   return 0;
 }
 static int o_videodrv(char *str) { return oo_env("SDL_VIDEODRIVER", str); }
@@ -36,18 +39,18 @@ static const T_CONFIG_TABLE sdl_options[] = {
     /*  -- GRAPHIC -- */
 
     /*  -- INPUT -- */
-    {311, "use_joy", X_FIX, &use_joydevice, TRUE, 0, nullptr, nullptr},
-    {311, "nouse_joy", X_FIX, &use_joydevice, FALSE, 0, nullptr, nullptr},
+    {311, "use_joy", X_FIX, &use_joydevice, true, 0, nullptr, nullptr},
+    {311, "nouse_joy", X_FIX, &use_joydevice, false, 0, nullptr, nullptr},
     {312, "keyboard", X_INT, &keyboard_type, 0, 2, nullptr, nullptr},
     {313, "keyconf", X_STR, &file_keyboard, 0, 0, nullptr, nullptr},
-    {314, "cmdkey", X_FIX, &use_cmdkey, TRUE, 0, nullptr, nullptr},
-    {314, "nocmdkey", X_FIX, &use_cmdkey, FALSE, 0, nullptr, nullptr},
+    {314, "cmdkey", X_FIX, &use_cmdkey, true, 0, nullptr, nullptr},
+    {314, "nocmdkey", X_FIX, &use_cmdkey, false, 0, nullptr, nullptr},
 
     /*  -- SYSTEM -- */
     {320, "videodrv", X_STR, nullptr, 0, 0, o_videodrv, nullptr},
     {321, "audiodrv", X_STR, nullptr, 0, 0, o_audiodrv, nullptr},
-    {322, "show_fps", X_FIX, &show_fps, TRUE, 0, nullptr, nullptr},
-    {322, "hide_fps", X_FIX, &show_fps, FALSE, 0, nullptr, nullptr},
+    {322, "show_fps", X_FIX, &show_fps, true, 0, nullptr, nullptr},
+    {322, "hide_fps", X_FIX, &show_fps, false, 0, nullptr, nullptr},
 
     /*  -- 無視 -- (他システムの引数つきオプション) */
     {0, "cmap", X_INV, &invalid_arg, 0, 0, nullptr, nullptr},
@@ -138,11 +141,11 @@ static void finish() {
  *  必要に応じて、システム固有の情報を付加してもいいかと。
  */
 
-int stateload_system(void) { return TRUE; }
-int statesave_system(void) { return TRUE; }
+int stateload_system(void) { return true; }
+int statesave_system(void) { return true; }
 
 /***********************************************************************
  * メニュー画面に表示する、システム固有メッセージ
  ************************************************************************/
 
-int menu_about_osd_msg(int req_japanese, int *result_code, const char *message[]) { return FALSE; }
+int menu_about_osd_msg(int req_japanese, int *result_code, const char *message[]) { return false; }
