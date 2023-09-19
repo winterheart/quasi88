@@ -36,16 +36,16 @@ uint8_t grph_ctrl; /* OUT[31] GraphCtrl        */
 uint8_t grph_pile; /* OUT[53] 重ね合わせ      */
 
 char screen_dirty_flag[0x4000 * 2];   /* メイン領域 差分更新 */
-int screen_dirty_all = TRUE;          /* メイン領域 全域更新 */
-int screen_dirty_palette = TRUE;      /* 色情報 更新     */
+int screen_dirty_all = true;          /* メイン領域 全域更新 */
+int screen_dirty_palette = true;      /* 色情報 更新     */
 int screen_dirty_status = false;      /* ステータス領域 更新 */
 int screen_dirty_status_hide = false; /* ステータス領域 消去 */
 int screen_dirty_status_show = false; /* ステータス領域 初期化*/
-int screen_dirty_frame = TRUE;        /* 全領域 更新         */
+int screen_dirty_frame = true;        /* 全領域 更新         */
 
 int frameskip_rate = DEFAULT_FRAMESKIP; /* 画面表示の更新間隔  */
-int monitor_analog = TRUE;              /* アナログモニター     */
-int use_auto_skip = TRUE;               /* 自動フレームスキップ   */
+int monitor_analog = true;              /* アナログモニター     */
+int use_auto_skip = true;               /* 自動フレームスキップ   */
 
 static int do_skip_draw = false;      /* 今回スキップするか? */
 static int already_skip_draw = false; /* 前回スキップしたか? */
@@ -68,7 +68,7 @@ int now_swcursor;                 /* 現在専用カーソル表示中?   */
 /*CFG*/ int use_interlace = SCREEN_INTERLACE_NO; /* インターレース表示  */
 
 static int enable_half_interp = false; /* HALF時、色補間可能か否か */
-/*CFG*/ int use_half_interp = TRUE;    /* HALF時、色補間する        */
+/*CFG*/ int use_half_interp = true;    /* HALF時、色補間する        */
 static int now_half_interp = false;    /* 現在、色補完中なら真       */
 
 typedef struct { /* 画面サイズのリスト      */
@@ -118,8 +118,8 @@ int screen_scale_dy = 0;
 /*CFG*/ int status_fg = 0x000000; /* ステータス前景色     */
 /*CFG*/ int status_bg = 0xd6d6d6; /* ステータス背景色     */
 
-static int enable_status = TRUE; /* ステータス表示可能かどうか  */
-/*CFG*/ int show_status = TRUE;  /* ステータス表示有無      */
+static int enable_status = true; /* ステータス表示可能かどうか  */
+/*CFG*/ int show_status = true;  /* ステータス表示有無      */
 static int now_status = false;   /* 現在、ステータス表示中なら真   */
 
 char *status_buf;      /* ステータス全域 先頭     */
@@ -211,7 +211,7 @@ int screen_init() {
   i = spec->forbid_half ? SCREEN_SIZE_FULL : SCREEN_SIZE_HALF;
 
   if (spec->fullscreen_max_width >= screen_size_tbl[i].w && spec->fullscreen_max_height >= screen_size_tbl[i].h) {
-    enable_fullscreen = TRUE;
+    enable_fullscreen = true;
   } else {
     enable_fullscreen = false;
   }
@@ -228,7 +228,7 @@ int screen_init() {
   if (open_window()) {
     clear_all_screen();
     put_image_all();
-    return TRUE;
+    return true;
   } else {
     return false;
   }
@@ -292,7 +292,7 @@ static int open_window() {
           }
           w += (0) * 2;
           h += STATUS_HEIGHT * 2;
-          status_displayable = TRUE;
+          status_displayable = true;
           break;
 
         case 2: /* 最適サイズ (ステータス不可) */
@@ -301,7 +301,7 @@ static int open_window() {
         }
 
         if (w <= spec->fullscreen_max_width && h <= spec->fullscreen_max_height) {
-          found = TRUE;
+          found = true;
           break;
         }
       }
@@ -331,7 +331,7 @@ static int open_window() {
           }
           w += screen_bx * 2;
           h += screen_by * 2 + STATUS_HEIGHT;
-          status_displayable = TRUE;
+          status_displayable = true;
           break;
 
         case 1: /* 指定サイズ (ステータス不可) */
@@ -346,7 +346,7 @@ static int open_window() {
         case 2: /* 最適サイズ + ステータス */
           w += 0;
           h += STATUS_HEIGHT;
-          status_displayable = TRUE;
+          status_displayable = true;
           break;
 
         case 3: /* 最適サイズ (ステータス不可) */
@@ -355,7 +355,7 @@ static int open_window() {
         }
 
         if (w * (mon_aspect ? mon_aspect : 1) <= spec->window_max_width && h <= spec->window_max_height) {
-          found = TRUE;
+          found = true;
           break;
         }
       }
@@ -392,12 +392,12 @@ static int open_window() {
 
     /* フルスクリーンで、ステータス表示が可能なサイズが確保できたか確認 */
     if ((info->fullscreen) && (info->height >= screen_size_tbl[size].h + STATUS_HEIGHT * 2)) {
-      status_displayable = TRUE;
+      status_displayable = true;
     }
 
     /* 本当にステータス表示が可能かどうかを、最終判断 */
     if (status_displayable && !spec->forbid_status) {
-      enable_status = TRUE;
+      enable_status = true;
       /* show_status は現在値のまま */
     } else {
       enable_status = false;
@@ -421,7 +421,7 @@ static int open_window() {
       if (enable_status) {
         HEIGHT -= STATUS_HEIGHT;
       }
-      now_fullscreen = TRUE;
+      now_fullscreen = true;
     } else {
       now_fullscreen = false;
     }
@@ -430,7 +430,7 @@ static int open_window() {
 
     /* 使える色の数をチェック */
     if (info->nr_color >= 144) { /* いっぱい使える */
-      enable_half_interp = TRUE;
+      enable_half_interp = true;
 
     } else if (info->nr_color >= 24) { /* 半分モードの色補間はだめ */
       enable_half_interp = false;
@@ -531,7 +531,7 @@ static int open_window() {
     /* ステータスの設定 */
     status_setup(now_status);
 
-    return TRUE;
+    return true;
   } else {
     return false;
   }
@@ -556,7 +556,7 @@ static void check_half_interp() {
       enable_half_interp &&                  /* フィルタリング可能で   */
       use_half_interp) {                     /* 色補完してありなら   */
 
-    now_half_interp = TRUE;
+    now_half_interp = true;
 
   } else {
     now_half_interp = false;
@@ -594,7 +594,7 @@ void screen_switch() {
   /* システムのマウス表示が異常、またはメニュー専用カーソル使用の場合 */
 
   if ((broken_mouse) || (!quasi88_is_exec() && /*now_fullscreen &&*/ use_swcursor)) {
-    now_swcursor = TRUE;
+    now_swcursor = true;
   } else {
     now_swcursor = false;
   }
@@ -673,7 +673,7 @@ void screen_switch() {
 /*#define DEBUG_ALL_MOUSE_PATTERN*/ /* デバッグ(全マウス設定の組合せを検証) */
 
 #ifdef DEBUG_ALL_MOUSE_PATTERN
-int screen_attr_mouse_debug() { return TRUE; }
+int screen_attr_mouse_debug() { return true; }
 #else
 int screen_attr_mouse_debug() { return false; }
 #endif
@@ -730,19 +730,19 @@ static void screen_attr_setup(int stat) {
     if (grab_mouse == UNGRAB_MOUSE) {
       grab = false;
     } else if (grab_mouse == GRAB_MOUSE) {
-      grab = TRUE;
+      grab = true;
     } else {
       if (stat == SETUP_START) {
         grab = false;
-        auto_grab = TRUE;
+        auto_grab = true;
       } else if (stat == SETUP_CLICK) {
-        grab = TRUE;
+        grab = true;
         auto_grab = false;
       } else {
         if (auto_grab) {
           grab = false;
         } else {
-          grab = TRUE;
+          grab = true;
         }
       }
     }
@@ -754,14 +754,14 @@ static void screen_attr_setup(int stat) {
       if (grab_mouse == UNGRAB_MOUSE && hide_mouse == SHOW_MOUSE) {
 
         /* グラブなし && マウスあり の場合のみ、その通りにする */
-        mouse = TRUE;
+        mouse = true;
         grab = false;
 
       } else {
 
         /* グラブありor自動 || マウスなしor自動 ならば、以下で固定 */
         mouse = false;
-        grab = TRUE;
+        grab = true;
       }
 
     } else { /* ウインドウ表示の場合 -------- */
@@ -769,7 +769,7 @@ static void screen_attr_setup(int stat) {
       if (grab_mouse == GRAB_MOUSE) {
 
         /* グラブありなら、マウスは消す */
-        grab = TRUE;
+        grab = true;
         mouse = false;
 
       } else {
@@ -777,7 +777,7 @@ static void screen_attr_setup(int stat) {
         if (grab_mouse == AUTO_MOUSE && stat == SETUP_CLICK) {
 
           /* 自動グラブで、ボタンクリック時は、マウス消す */
-          grab = TRUE;
+          grab = true;
           mouse = false;
 
           /* 以下はクリア */
@@ -789,7 +789,7 @@ static void screen_attr_setup(int stat) {
 
           /* グラブなしなら、マウスの有無は設定による */
           if (grab_mouse == AUTO_MOUSE) {
-            auto_grab = TRUE;
+            auto_grab = true;
           }
 
           grab = false;
@@ -797,10 +797,10 @@ static void screen_attr_setup(int stat) {
         DEBUG:
           switch (hide_mouse) {
           case AUTO_MOUSE:
-            auto_mouse = TRUE;
+            auto_mouse = true;
             if (stat == SETUP_START || stat == SETUP_MOVE) {
               auto_mouse_timer = AUTO_MOUSE_TIMEOUT;
-              mouse = TRUE;
+              mouse = true;
             } else {
               auto_mouse_timer = 0;
               mouse = false;
@@ -808,7 +808,7 @@ static void screen_attr_setup(int stat) {
             break;
 
           case SHOW_MOUSE:
-            mouse = TRUE;
+            mouse = true;
             break;
 
           case HIDE_MOUSE:
@@ -822,8 +822,8 @@ static void screen_attr_setup(int stat) {
 
   } else {
 
-    repeat = TRUE;
-    mouse = TRUE;
+    repeat = true;
+    mouse = true;
     grab = false;
 
     /* 全画面モードで、ソフトウェアカーソルを使うなら、マウスは消す */
@@ -1464,9 +1464,9 @@ void screen_update() {
     if (no_wait || !use_auto_skip || !do_skip_draw) {
       skip = false;
     } else {
-      skip = TRUE;
+      skip = true;
       /* 描画タイミングなのにスキップした場合は、そのことを覚えておく */
-      already_skip_draw = TRUE;
+      already_skip_draw = true;
     }
 
     /* カーソル点滅のワーク更新 */
@@ -1477,7 +1477,7 @@ void screen_update() {
       }
     }
   } else {
-    skip = TRUE;
+    skip = true;
   }
 
   /* メイン領域を描画する (スキップしない) 場合の処理 */
@@ -1500,7 +1500,7 @@ void screen_update() {
     if (screen_dirty_frame) {
       screen_set_dirty_all();
       screen_set_dirty_status();
-      all_area = TRUE;
+      all_area = true;
     }
 
     if (screen_dirty_palette) {
@@ -1581,13 +1581,13 @@ void screen_update() {
   if (screen_dirty_status_hide) {
     (status_buf_clear_p)(); /* ステータス領域 消去 */
     screen_dirty_status_hide = false;
-    all_area = TRUE;
+    all_area = true;
   }
 
   if (screen_dirty_status_show) {
     (status_buf_clear_p)(); /* ステータス領域 初期化 */
     screen_dirty_status_show = false;
-    all_area = TRUE;
+    all_area = true;
   }
 
   if (now_status) {
@@ -1736,7 +1736,7 @@ void frameskip_check(int on_time) {
 
     } else { /* 時間内に処理できていない */
 
-      do_skip_draw = TRUE; /* 次回描画スキップ */
+      do_skip_draw = true; /* 次回描画スキップ */
 
       skip_counter++; /* 但し、スキップしすぎなら */
       if (skip_counter >= skip_count_max) {
@@ -1821,14 +1821,14 @@ static T_SUSPEND_W suspend_screen_work[] = {
 
 int statesave_screen() {
   if (statesave_table(SID, suspend_screen_work) == STATE_OK)
-    return TRUE;
+    return true;
   else
     return false;
 }
 
 int stateload_screen() {
   if (stateload_table(SID, suspend_screen_work) == STATE_OK)
-    return TRUE;
+    return true;
   else
     return false;
 }

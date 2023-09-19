@@ -77,7 +77,7 @@ static void status_override();
 void quasi88(void) {
   quasi88_start();
   quasi88_main();
-  quasi88_stop(TRUE);
+  quasi88_stop(true);
 }
 
 /* =========================== メイン処理の初期化 ========================== */
@@ -456,7 +456,7 @@ int quasi88_loop(void) {
 
     /* ウェイト時間を元に、フレームスキップの有無を決定 */
     if (mode == EXEC) {
-      frameskip_check((stat == WAIT_JUST) ? TRUE : false);
+      frameskip_check((stat == WAIT_JUST) ? true : false);
     }
 
     /* ウェイト処理が完了したら、次 (INIT か MAIN) に遷移 */
@@ -566,12 +566,12 @@ void wait_vsync_switch(void) {
     wait_vsync_setup(dt, wait_by_sleep);
   } else {
     dt = (long)(1000000.0 / CONST_VSYNC_FREQ);
-    wait_vsync_setup(dt, TRUE);
+    wait_vsync_setup(dt, true);
   }
 }
 
 static void status_override() {
-  static int first_fime = TRUE;
+  static int first_fime = true;
 
   if (first_fime) {
 
@@ -634,7 +634,7 @@ void quasi88_reset(const T_RESET_CFG *cfg) {
 
   if (cfg) {
     if (sound_board != cfg->sound_board) {
-      sb_changed = TRUE;
+      sb_changed = true;
     }
 
     boot_basic = cfg->boot_basic;

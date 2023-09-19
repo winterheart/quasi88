@@ -3,7 +3,7 @@
 
 #define FONT_8x8()                                                                                                     \
   font_inc = 1;                                                                                                        \
-  font_dup = TRUE;                                                                                                     \
+  font_dup = true;                                                                                                     \
   font_skip = 1;
 
 #define FONT_8x16()                                                                                                    \

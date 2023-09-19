@@ -44,7 +44,7 @@ void event_switch();
  *  o キー押下／解放時
  *    押されたキーに応じて、以下の関数を呼び出す。
  *      押下時: quasi88_key(KEY88_XXX, TRUE);
- *      開放時: quasi88_key(KEY88_XXX, FALSE);
+ *      開放時: quasi88_key(KEY88_XXX, false);
  *
  *    この時の、押されたキーと KEY88_XXX の対応は任意 (システム依存) だが、
  *    ここで対応をしていない (割り当てていない) KEY88_XXX については、
@@ -56,17 +56,17 @@ void event_switch();
  *  o マウスボタン押下／解放時
  *    押されたボタンに応じて、以下の関数を呼び出す。
  *      押下時: quasi88_mouse(KEY88_MOUSE_XXX, TRUE);
- *      開放時: quasi88_mouse(KEY88_MOUSE_XXX, FALSE);
+ *      開放時: quasi88_mouse(KEY88_MOUSE_XXX, false);
  *
  *  o ジョイスティック押下／解放時
  *    押されたボタンに応じて、以下の関数を呼び出す。
  *      押下時: quasi88_pad(KEY88_PAD_XXX, TRUE);
- *      開放時: quasi88_pad(KEY88_PAD_XXX, FALSE);
+ *      開放時: quasi88_pad(KEY88_PAD_XXX, false);
  *
  *  o マウス移動時 (絶対座標 / 相対座標)
  *    移動先 x, y (ないし移動量 dx, xy) に応じて、以下の関数を呼び出す。
  *      移動先: quasi88_mouse_move( x,  y, TRUE);
- *      移動量: quasi88_mouse_move(dx, dy, FALSE);
+ *      移動量: quasi88_mouse_move(dx, dy, false);
  *
  *    絶対座標の場合、graph_setup() の戻り値にて応答した T_SCREEN_INFO 型の
  *    width * height に対する値をセットすること。(値は範囲外でも可)
@@ -126,14 +126,14 @@ void quasi88_mouse(int code, int on_flag);
 void quasi88_pad(int code, int on_flag);
 void quasi88_mouse_move(int x, int y, int abs_flag);
 
-#define quasi88_key_pressed(code) quasi88_key(code, TRUE)
-#define quasi88_key_released(code) quasi88_key(code, FALSE)
-#define quasi88_mouse_pressed(code) quasi88_mouse(code, TRUE)
-#define quasi88_mouse_released(code) quasi88_mouse(code, FALSE)
-#define quasi88_pad_pressed(code) quasi88_pad(code, TRUE)
-#define quasi88_pad_released(code) quasi88_pad(code, FALSE)
-#define quasi88_mouse_moved_abs(x, y) quasi88_mouse_move(x, y, TRUE)
-#define quasi88_mouse_moved_rel(x, y) quasi88_mouse_move(x, y, FALSE)
+#define quasi88_key_pressed(code) quasi88_key(code, true)
+#define quasi88_key_released(code) quasi88_key(code, false)
+#define quasi88_mouse_pressed(code) quasi88_mouse(code, true)
+#define quasi88_mouse_released(code) quasi88_mouse(code, false)
+#define quasi88_pad_pressed(code) quasi88_pad(code, true)
+#define quasi88_pad_released(code) quasi88_pad(code, false)
+#define quasi88_mouse_moved_abs(x, y) quasi88_mouse_move(x, y, true)
+#define quasi88_mouse_moved_rel(x, y) quasi88_mouse_move(x, y, false)
 
 void quasi88_expose();
 void quasi88_focus_in();

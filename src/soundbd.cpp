@@ -98,7 +98,7 @@ static int sound2_delay = 0; /* フラグの遅れ           */
 
 /* BEEP関連。手頃な定義場所がない… */
 
-int use_cmdsing = TRUE; /* 真で、CMD SING有効      */
+int use_cmdsing = true; /* 真で、CMD SING有効      */
 
 /********************************************************/
 /* SOUND 初期化                      */
@@ -347,7 +347,7 @@ void sound2_out_data(uint8_t data) {
             }
           }
           if (l) {
-            sound2_notice_EOS = TRUE;
+            sound2_notice_EOS = true;
             interval_work_set_EOS(l + 1);
           } else {
             sound2_notice_EOS = false;
@@ -608,7 +608,7 @@ int statesave_sound(void) {
   if (statesave_table(SID3, suspend_sound_work3) != STATE_OK)
     return false;
 
-  return TRUE;
+  return true;
 }
 
 int stateload_sound(void) {
@@ -636,7 +636,7 @@ int stateload_sound(void) {
     printf("stateload : Statefile is old. (ver 0.6.0, 1, 2 or 3?)\n");
   }
 
-  return TRUE;
+  return true;
 }
 
 #ifdef USE_SOUND

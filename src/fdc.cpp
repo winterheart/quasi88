@@ -167,11 +167,11 @@ static struct {
 
 #define printf_system_error(code)                                                                                      \
   do {                                                                                                                 \
-    if (code == 1)                                                                                                     \
+    if ((code) == 1)                                                                                                   \
       printf("FDC Read/Write Error in DRIVE %d:\n", drv + 1);                                                          \
-    else if (code == 2)                                                                                                \
+    else if ((code) == 2)                                                                                              \
       printf("FDC Seek Error in DRIVE %d:\n", drv + 1);                                                                \
-    else if (code == 3)                                                                                                \
+    else if ((code) == 3)                                                                                              \
       printf("FDC Over-size Error in DRIVE %d:\n", drv + 1);                                                           \
     else                                                                                                               \
       printf("Internal error !\n");                                                                                    \
@@ -295,7 +295,7 @@ static const char *cmd_name[] = {
 /*
  * FDC デバッグ処理は、peach氏により提供されました。
  */
-void pc88fdc_break_point(void) {
+void pc88fdc_break_point() {
   int i;
   for (i = 0; i < NR_BP; i++) {
     if (break_point_fdc[i].type != BP_NONE) {
@@ -320,7 +320,7 @@ void print_fdc_status(int nStatus, int nDrive, int nTrack, int nSector) {
   char c = ' ';
   int i;
 
-  if (fdc_debug_mode == TRUE) {
+  if (fdc_debug_mode) {
     if (oDrive < 0 || nStatus != oStatus || nDrive != oDrive || nTrack != oTrack[nDrive]) {
       oStatus = nStatus;
       oDrive = nDrive;
@@ -346,7 +346,7 @@ void print_fdc_status(int nStatus, int nDrive, int nTrack, int nSector) {
     }
   }
 
-  if (fdc_break_flag == TRUE) {
+  if (fdc_break_flag) {
     for (i = 0; i < NR_BP; i++) {
       if (break_point_fdc[i].type == nStatus && break_point_fdc[i].drive == nDrive + 1 &&
           break_point_fdc[i].track == nTrack) {
@@ -384,7 +384,7 @@ static int fill_sector_gap(int ptr, int drv, uint8_t fdc_mf);
 /* ドライブの初期化                         */
 /************************************************************************/
 static void fdc_init();
-void drive_init(void) {
+void drive_init() {
   int i;
 
   fdc_init();
@@ -392,7 +392,7 @@ void drive_init(void) {
   for (i = 0; i < NR_DRIVE; i++) {
     drive[i].fp = nullptr;
     drive[i].sec_nr = -1;
-    drive[i].empty = TRUE;
+    drive[i].empty = true;
     /* memset( drive[ i ].filename, 0, QUASI88_MAX_FILENAME ); */
   }
   disk_ex_drv = 0;
@@ -403,7 +403,7 @@ void drive_init(void) {
 /************************************************************************/
 /* ドライブのリセット。(現在設定されているイメージにワークを再設定)  */
 /************************************************************************/
-void drive_reset(void) {
+void drive_reset() {
   int i;
 
   fdc_init();
@@ -420,7 +420,7 @@ void drive_reset(void) {
 /* ドライブを一時的に空にする／もとに戻す／切替える／どっちの状態か知る   */
 /*  drv…ドライブ(0/1)                     */
 /************************************************************************/
-void drive_set_empty(int drv) { drive[drv].empty = TRUE; }
+void drive_set_empty(int drv) { drive[drv].empty = true; }
 void drive_unset_empty(int drv) { drive[drv].empty = false; }
 void drive_change_empty(int drv) { drive[drv].empty ^= 1; }
 int drive_check_empty(int drv) { return drive[drv].empty; }
@@ -446,7 +446,7 @@ int drive_check_empty(int drv) { return drive[drv].empty; }
       printf("[[[ %-26s ]]]\n", s);                                                                                    \
       printf("[[[   Eject Disk from drive %d: ]]]\n"                                                                   \
              "\n",                                                                                                     \
-             drv + 1);                                                                                                 \
+             (drv) + 1);                                                                                               \
     }                                                                                                                  \
     disk_eject(drv);                                                                                                   \
   } while (0)
@@ -488,7 +488,7 @@ int disk_insert(int drv, const char *filename, int img, int readonly) {
   }
   if (drive[drv].fp == nullptr) {
     drive[drv].fp = osd_fopen(FTYPE_DISK, filename, "rb");
-    open_as_readonly = TRUE;
+    open_as_readonly = true;
   }
 
   if (drive[drv].fp == nullptr) {
@@ -518,7 +518,7 @@ int disk_insert(int drv, const char *filename, int img, int readonly) {
   } else { /* 反対ドライブと違う場合 */
 
     if (open_as_readonly) {
-      drive[drv].read_only = TRUE;
+      drive[drv].read_only = true;
 
       DISK_WARNING(" (( %s : Set in drive %d: as read only ))\n", filename, drv + 1);
     } else {
@@ -561,29 +561,29 @@ int disk_insert(int drv, const char *filename, int img, int readonly) {
 
         if (num >= MAX_NR_IMAGE) { /* イメージ数が多い時は中断 */
           DISK_WARNING(" (( %s : Too many images [>=%d] ))\n", filename, MAX_NR_IMAGE);
-          drive[drv].over_image = TRUE;
-          exit_flag = TRUE;
+          drive[drv].over_image = true;
+          exit_flag = true;
         } else if (offset < 0) { /* イメージサイズが大きすぎ? */
           DISK_WARNING(" (( %s : Too big image? [%d] ))\n", filename, num + 1);
-          drive[drv].detect_broken_image = TRUE;
-          exit_flag = TRUE;
+          drive[drv].detect_broken_image = true;
+          exit_flag = true;
         }
         break;
 
       case D88_NO_IMAGE: /* これ以上イメージがない */
-        exit_flag = TRUE;
+        exit_flag = true;
         break;
 
       case D88_BAD_IMAGE: /* このイメージは壊れている */
         DISK_WARNING(" (( %s : Image No. %d Broken? ))\n", filename, num + 1);
-        drive[drv].detect_broken_image = TRUE;
-        exit_flag = TRUE;
+        drive[drv].detect_broken_image = true;
+        exit_flag = true;
         break;
 
       default: /* ??? */
         DISK_WARNING(" (( %s : Image No. %d Error? ))\n", filename, num + 1);
-        drive[drv].detect_broken_image = TRUE;
-        exit_flag = TRUE;
+        drive[drv].detect_broken_image = true;
+        exit_flag = true;
         break;
       }
     }
@@ -718,7 +718,7 @@ void disk_eject(int drv) {
   }
   drive[drv].fp = nullptr;
   drive[drv].sec_nr = -1;
-  drive[drv].empty = TRUE;
+  drive[drv].empty = true;
   /* memset( drive[ drv ].filename, 0, QUASI88_MAX_FILENAME ); */
 
   sec_buf.drv = -1;
@@ -915,7 +915,7 @@ void fdc_write(uint8_t data) {
   }
 }
 
-uint8_t fdc_read(void) {
+uint8_t fdc_read() {
   if ((fdc.status & DATA_IO)) {
     fdc.status &= ~REQ_MASTER;
     return fdc.read;
@@ -924,13 +924,13 @@ uint8_t fdc_read(void) {
   }
 }
 
-uint8_t fdc_status(void) { return fdc.status; }
+uint8_t fdc_status() { return fdc.status; }
 
-void fdc_TC(void) { fdc.TC = TRUE; }
+void fdc_TC() { fdc.TC = true; }
 
 /* FDC からCPUへの割り込み通知  */
 
-#define fdc_occur_interrupt() FDC_flag = TRUE
+#define fdc_occur_interrupt() FDC_flag = true
 #define fdc_cancel_interrupt() FDC_flag = false
 
 /* FDC処理ウェイトの制御 */
@@ -1051,7 +1051,7 @@ static int fdc_check_unit() {
       /*logfdc("### Head Down ###\n");*/
       xmame_dev_sample_headdown();
     }
-    fdc.hl_stat[drv] = TRUE;
+    fdc.hl_stat[drv] = true;
     fdc.wait += fdc.hlt_clk;
   }
   fdc.hl_wait[drv] = 0;
@@ -1176,7 +1176,7 @@ static int fdc_search_id() {
       ; /* このセクタは無視  */
 
     } else { /* このセクタには IAM がある         */
-      exist_iam = TRUE;
+      exist_iam = true;
 
       if (fdc.command == READ_DIAGNOSTIC) {   /* READ DIAG の場合          */
         if (sec_buf.status == STATUS_MA_MD) { /* DATA mark なし    */
@@ -1447,7 +1447,7 @@ static int fdc_write_data() {
 
     int write_protected = false; /* 書込不可が原因の場合、真 */
     if (!disk_not_exist(drv) && (drive[drv].read_only || drive[drv].protect == DISK_PROTECT_TRUE)) {
-      write_protected = TRUE;
+      write_protected = true;
     }
 
     fdc.st0 = ST0_IC_AT | (fdc.hd << 2) | fdc.us;
@@ -1526,7 +1526,7 @@ static int fdc_write_data() {
       total_size += (sec_buf.size + SZ_DISK_ID); /*  (その分、サイズ増)  */
 
     } else { /* drive[drv].sec == 0 */        /* 無し(先頭に戻った)ならば */
-      gap4_wrote = TRUE;                      /*  GAP4 に上書とみなす */
+      gap4_wrote = true;                      /*  GAP4 に上書とみなす */
       total_size += (gap4_size + SZ_DISK_ID); /*  (適当に、サイズ増)  */
       /* 次のトラックのデータを破壊するおそれあり。うーん。*/
     }
@@ -1609,7 +1609,7 @@ static int fdc_write_data() {
  * WRITE ID コマンドで、バッファ の IDR に基づきファイルに書き出す
  *  結果は ST0〜ST2
  *===========================================================================*/
-static int fdc_write_id(void) {
+static int fdc_write_id() {
   int size, error, i, j, id_ptr;
   long format_pos;
   char id[SZ_DISK_ID], data[128];
@@ -1624,7 +1624,7 @@ static int fdc_write_id(void) {
 
     int write_protected = false; /* 書込不可が原因の場合、真 */
     if (!disk_not_exist(drv) && (drive[drv].read_only || drive[drv].protect == DISK_PROTECT_TRUE)) {
-      write_protected = TRUE;
+      write_protected = true;
     }
 
     fdc.st0 = ST0_IC_AT | (fdc.hd << 2) | fdc.us;
@@ -2223,10 +2223,10 @@ static int e_phase_read_search() {
           (fdc.command == READ_DELETED_DATA && !(fdc.st2 & ST2_CM))) {
         /* スキップチェック */
         if (fdc.sk) {
-          skip_this = TRUE;
+          skip_this = true;
         } else {
           skip_this = false;
-          fdc.ddam_not_skipped = TRUE;
+          fdc.ddam_not_skipped = true;
         }
 
       } else {             /* (D)DAM が一致したなら    */
@@ -2359,7 +2359,7 @@ static int e_phase_read_end(int interval) {
         logfdc("TC(Noskip)\n");   /* ぜずなら、今のセクタのまま*/
 
       } else {               /* それ以外 (かREAD DIAG)なら*/
-        fdc_next_chrn(TRUE); /* 次セクタを指す            */
+        fdc_next_chrn(true); /* 次セクタを指す            */
         logfdc("TC\n");
       }
       ICOUNT(fdc.limit);
@@ -2659,7 +2659,7 @@ static int e_phase_write_end(int interval) {
 
   if (fdc.TC) { /* TC信号があった場合       */
 
-    fdc_next_chrn(TRUE); /* 次セクタを指す   */
+    fdc_next_chrn(true); /* 次セクタを指す   */
     logfdc("TC\n");
     ICOUNT(fdc.limit + CLOCK_BYTE());
     REPEAT();
@@ -3144,7 +3144,7 @@ int get_drive_ready(int drv) {
   } else
 
 #define RET_GAP_ERR(cond)                                                                                              \
-  if (cond != TRUE)                                                                                                    \
+  if (!(cond))                                                                                                           \
     return (-1);
 
 /*
@@ -3176,12 +3176,12 @@ int calc_gap3_size(int n, uint8_t fdc_mf) {
 INLINE
 int input_safely_data(int ptr, int *ad, int data, int size) {
   if (size == 0)
-    return (TRUE);
+    return true;
 
   if (ptr + *ad + size < DATA_BUF_SIZE) {
     memset(&data_buf[ptr + *ad], data, size);
     *ad += size;
-    return (TRUE);
+    return true;
   } else {
     printf("FDC : Buffer overflow\n");
     fflush(stdout);
@@ -3386,7 +3386,7 @@ static T_SUSPEND_W suspend_fdc_work2[] = {
     {TYPE_END, nullptr},
 };
 
-int statesave_fdc(void) {
+int statesave_fdc() {
   image_disk[0] = drive[0].selected_image;
   image_disk[1] = drive[1].selected_image;
 
@@ -3400,10 +3400,10 @@ int statesave_fdc(void) {
   if (statesave_table(SID2, suspend_fdc_work2) != STATE_OK)
     return false;
 
-  return TRUE;
+  return true;
 }
 
-int stateload_fdc(void) {
+int stateload_fdc() {
   if (stateload_table(SID, suspend_fdc_work) != STATE_OK)
     return false;
 
@@ -3429,10 +3429,10 @@ int stateload_fdc(void) {
     fdc.r1 = 0xff;      /* 255 Cyl. */
     fdc.intr_unit = 4;  /* non exist unit */
 
-    return TRUE;
+    return true;
   }
 
-  return TRUE;
+  return true;
 }
 
 /* デバッグ用の関数 */

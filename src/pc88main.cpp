@@ -81,8 +81,8 @@ static char calendar_data[7] = /* 時計停止時刻 (年月日曜時分秒)*/
 };
 
 int cmt_speed = 0;   /* テープ速度(BPS)、 0は自動   */
-int cmt_intr = TRUE; /* 真で、テープ読込に割込使用  */
-int cmt_wait = TRUE; /* 真で、テープ読込ウェイトあり   */
+int cmt_intr = true; /* 真で、テープ読込に割込使用  */
+int cmt_wait = true; /* 真で、テープ読込ウェイトあり   */
 
 int highspeed_mode = false; /* 真で、高速 BASIC 処理あり   */
 
@@ -271,7 +271,7 @@ INLINE void main_memory_mapping_0000_7fff() {
         read_mem_0000_5fff = &main_rom[0x0000];
         if (ext_rom_bank & EXT_ROM_NOT) { /* 通常ROM */
           read_mem_6000_7fff = &main_rom[0x6000];
-          highspeed_n88rom = TRUE;
+          highspeed_n88rom = true;
         } else { /* 拡張ROM */
           read_mem_6000_7fff = &main_rom_ext[misc_ctrl & MISC_CTRL_EBANK][0];
         }
@@ -304,7 +304,7 @@ INLINE void main_memory_mapping_0000_7fff() {
         read_mem_0000_5fff = &main_rom[0x0000];
         if (ext_rom_bank & EXT_ROM_NOT) { /* 通常ROM */
           read_mem_6000_7fff = &main_rom[0x6000];
-          highspeed_n88rom = TRUE;
+          highspeed_n88rom = true;
         } else { /* 拡張ROM */
           read_mem_6000_7fff = &main_rom_ext[misc_ctrl & MISC_CTRL_EBANK][0];
         }
@@ -350,7 +350,7 @@ INLINE void main_memory_mapping_0000_7fff(void) {
       read_mem_0000_5fff = &main_rom[0x0000];
       if (ext_rom_bank & EXT_ROM_NOT) { /* 通常ROM */
         read_mem_6000_7fff = &main_rom[0x6000];
-        highspeed_n88rom = TRUE;
+        highspeed_n88rom = true;
       } else { /* 拡張ROM */
         read_mem_6000_7fff = &main_rom_ext[misc_ctrl & MISC_CTRL_EBANK][0];
       }
@@ -417,7 +417,7 @@ INLINE void main_memory_mapping_c000_ffff() {
     read_mem_c000_efff = &main_ram[0xc000];
     if (high_mode && (misc_ctrl & MISC_CTRL_TEXT_MAIN)) {
       read_mem_f000_ffff = &main_high_ram[0x0000];
-      mem_wait_highram = TRUE;
+      mem_wait_highram = true;
     } else {
       read_mem_f000_ffff = &main_ram[0xf000];
     }
@@ -429,7 +429,7 @@ INLINE void main_memory_mapping_c000_ffff() {
   write_mem_c000_efff = &main_ram[0xc000];
   if (high_mode && (misc_ctrl & MISC_CTRL_TEXT_MAIN)) {
     write_mem_f000_ffff = &main_high_ram[0x0000];
-    mem_wait_highram = TRUE;
+    mem_wait_highram = true;
   } else {
     write_mem_f000_ffff = &main_ram[0xf000];
   }
@@ -611,7 +611,7 @@ uint8_t main_fetch(uint16_t addr) {
       int i;
       for (i = 0; highspeed_routine[i] != EndofBasicAddr; i++) {
         if (addr == highspeed_routine[i]) {
-          highspeed_flag = TRUE;
+          highspeed_flag = true;
           ret_addr = main_mem_read(z80main_cpu.SP.W) + (main_mem_read(z80main_cpu.SP.W + 1) << 8);
           hs_icount = z80_state_intchk;
 
@@ -1151,7 +1151,7 @@ void main_io_out(uint8_t port, uint8_t data) {
       CPU_REFRESH_INTERRUPT();
 
       /* 'ASHE対策…… */ /* thanks! peach */
-      z80main_cpu.skip_intr_chk = TRUE;
+      z80main_cpu.skip_intr_chk = true;
     }
     return;
 
@@ -1491,7 +1491,7 @@ uint8_t main_io_in(uint8_t port) {
       return 0xff;
   case 0xa9:
     if (sound_port & SD_PORT_A8_AD)
-      return sound_in_data(TRUE);
+      return sound_in_data(true);
     else
       return 0xff;
   case 0xaa:
@@ -1682,7 +1682,7 @@ int sio_open_tapesave(const char *filename) {
 
   if ((fp_to = osd_fopen(FTYPE_TAPE_SAVE, filename, "ab"))) {
 
-    return TRUE;
+    return true;
 
   } else {
     if (!quasi88_is_menu())
@@ -1714,7 +1714,7 @@ int sio_open_serialin(const char *filename) {
     if (osd_fseek(fp_si, 0, SEEK_SET))
       goto ERR;
 
-    return TRUE;
+    return true;
   }
 ERR:
   if (fp_si) {
@@ -1743,7 +1743,7 @@ int sio_open_serialout(const char *filename) {
 
   if ((fp_so = osd_fopen(FTYPE_COM_SAVE, filename, "ab"))) {
 
-    return TRUE;
+    return true;
 
   } else {
     if (!quasi88_is_menu())
@@ -1787,7 +1787,7 @@ int sio_tape_rewind(void) {
 
     size = osd_fread(buf, sizeof(char), sizeof(buf), fp_ti);
     if (size == sizeof(buf) && memcmp(buf, T88_HEADER_STR, sizeof(buf)) == 0) { /* T88 */
-      cmt_is_t88 = TRUE;
+      cmt_is_t88 = true;
       cmt_block_size = 0;
       cmt_EOF = false;
       cmt_skip = 0;
@@ -1800,7 +1800,7 @@ int sio_tape_rewind(void) {
     }
 
     while (cmt_stateload_chars--) { /* ステートロード時は、テープ早送り */
-      if (sio_getc(TRUE, nullptr) == EOF) {
+      if (sio_getc(true, nullptr) == EOF) {
         break;
       }
     }
@@ -1808,7 +1808,7 @@ int sio_tape_rewind(void) {
     cmt_stateload_chars = 0;
 
     /*printf("%d\n",osd_ftell(fp_ti));*/
-    return TRUE;
+    return true;
   }
 
 ERR:
@@ -1830,13 +1830,13 @@ int sio_tape_pos(long *cur, long *end) {
     if (cmt_EOF) { /* 終端なら、位置=0/終端=0 にし、真を返す */
       *cur = 0;
       *end = 0;
-      return TRUE;
+      return true;
     } else { /* 途中なら、位置と終端をセットし真を返す */
       v = osd_ftell(fp_ti);
       if (v >= 0) {
         *cur = v;
         *end = cmt_size;
-        return TRUE;
+        return true;
       }
     }
   }
@@ -1852,13 +1852,13 @@ int sio_com_pos(long *cur, long *end) {
     if (com_EOF) { /* 終端なら、位置=0/終端=0 にし、真を返す */
       *cur = 0;
       *end = 0;
-      return TRUE;
+      return true;
     } else { /* 途中なら、位置と終端をセットし真を返す */
       v = osd_ftell(fp_si);
       if (v >= 0) {
         *cur = v;
         *end = com_size;
-        return TRUE;
+        return true;
       }
     }
   }
@@ -1892,7 +1892,7 @@ static int sio_getc(int is_cmt, int *tick) {
     if (c == EOF) {
       printf(" (( %s : Serial input file EOF ))\n", file_sin);
       status_message(1, STATUS_WARN_TIME, "Serial input  [EOF]");
-      com_EOF = TRUE;
+      com_EOF = true;
     }
     return c;
 
@@ -2007,7 +2007,7 @@ static int sio_getc(int is_cmt, int *tick) {
     }
 
     if (c == EOF) {
-      cmt_EOF = TRUE;
+      cmt_EOF = true;
       status_message(1, STATUS_WARN_TIME, "Tape Read  [EOF]");
     } else {
       cmt_read_chars++;
@@ -2034,7 +2034,7 @@ static void sio_check_cmt_error() {
         printf("Tape read: lost 1 byte\n");
 
       if (c == EOF) {
-        cmt_EOF = TRUE;
+        cmt_EOF = true;
         status_message(1, STATUS_WARN_TIME, "Tape Read  [EOF]");
       } else {
         cmt_read_chars++;
@@ -2075,24 +2075,24 @@ static void sio_tape_highspeed_load() {
   /* マシン語ヘッダを探す */
 
   do { /* 0x3a が出てくるまでリード */
-    if ((c = sio_getc(TRUE, nullptr)) == EOF) {
+    if ((c = sio_getc(true, nullptr)) == EOF) {
       return;
     }
   } while (c != 0x3a);
   /* 転送先アドレス H */
-  if ((c = sio_getc(TRUE, nullptr)) == EOF) {
+  if ((c = sio_getc(true, nullptr)) == EOF) {
     return;
   }
   sum = c;
   addr = c * 256;
   /* 転送先アドレス L */
-  if ((c = sio_getc(TRUE, nullptr)) == EOF) {
+  if ((c = sio_getc(true, nullptr)) == EOF) {
     return;
   }
   sum += c;
   addr += c;
   /* ヘッダ部サム */
-  if ((c = sio_getc(TRUE, nullptr)) == EOF) {
+  if ((c = sio_getc(true, nullptr)) == EOF) {
     return;
   }
   sum += c;
@@ -2102,16 +2102,16 @@ static void sio_tape_highspeed_load() {
 
   /* あとはデータ部の繰り返し */
 
-  while (TRUE) {
+  while (true) {
 
     do { /* 0x3a が出てくるまでリード */
-      if ((c = sio_getc(TRUE, nullptr)) == EOF) {
+      if ((c = sio_getc(true, nullptr)) == EOF) {
         return;
       }
     } while (c != 0x3a);
 
     /* データ数 */
-    if ((c = sio_getc(TRUE, nullptr)) == EOF) {
+    if ((c = sio_getc(true, nullptr)) == EOF) {
       return;
     }
     sum = c;
@@ -2122,7 +2122,7 @@ static void sio_tape_highspeed_load() {
 
     for (; size; size--) { /* データ数分、転送 */
 
-      if ((c = sio_getc(TRUE, nullptr)) == EOF) {
+      if ((c = sio_getc(true, nullptr)) == EOF) {
         return;
       }
       sum += c;
@@ -2130,7 +2130,7 @@ static void sio_tape_highspeed_load() {
       addr++;
     }
     /* データ部サム */
-    if ((c = sio_getc(TRUE, nullptr)) == EOF) {
+    if ((c = sio_getc(true, nullptr)) == EOF) {
       return;
     }
     sum += c;
@@ -2253,10 +2253,10 @@ static void sio_out_data(uint8_t data) {
       if (data == 0x11) { /* ^Q 出力 */
         com_X_flow = false;
       } else if (data == 0x13) { /* ^S 出力 */
-        com_X_flow = TRUE;
+        com_X_flow = true;
       }
     } else { /* テープ出力の場合 */
-      is_cmt = TRUE;
+      is_cmt = true;
     }
     sio_putc(is_cmt, data);
   }
@@ -2288,11 +2288,11 @@ static uint8_t sio_in_status() {
       if (cmt_dummy_read_cnt >= 2) {
         cmt_dummy_read_cnt = 0;
 
-        c = sio_getc(TRUE, 0); /* テープから1文字読む */
+        c = sio_getc(true, 0); /* テープから1文字読む */
                                /*printf("[%03x]",c&0xfff);fflush(stdout);*/
         if (c != EOF) {
           sio_data = (uint8_t)c;
-          sio_data_exist = TRUE;
+          sio_data_exist = true;
         }
       }
     }
@@ -2338,7 +2338,7 @@ int sio_intr(void) {
 
         if (cmt_skip == 0) {
           if (cmt_wait) {
-            c = sio_getc(TRUE, &tick);
+            c = sio_getc(true, &tick);
             if (tick) {
               cmt_skip = tick_2_intr_skip(tick);
               if (cmt_skip != 0) {
@@ -2347,7 +2347,7 @@ int sio_intr(void) {
               }
             }
           } else {
-            c = sio_getc(TRUE, nullptr);
+            c = sio_getc(true, nullptr);
           }
         } else {               /* T88の場合は、    */
           cmt_skip--;          /* 無効データ部分の */
@@ -2360,9 +2360,9 @@ int sio_intr(void) {
 
     if (c != EOF) {
       sio_data = (uint8_t)c;
-      sio_data_exist = TRUE;
+      sio_data_exist = true;
       /*printf("<%02x> ",sio_data);fflush(stdout);*/
-      return TRUE; /* RxRDY割り込み発生 */
+      return true; /* RxRDY割り込み発生 */
     }
   }
   return false;
@@ -2373,9 +2373,9 @@ int sio_intr(void) {
  */
 int tape_exist(void) { return (fp_ti || fp_to); }
 
-int tape_readable(void) { return (fp_ti) ? TRUE : false; }
+int tape_readable(void) { return (fp_ti) ? true : false; }
 
-int tape_writable(void) { return (fp_to) ? TRUE : false; }
+int tape_writable(void) { return (fp_to) ? true : false; }
 
 int tape_reading(void) { return (fp_ti && (sio_command & 4) && ((sys_ctrl & 0x28) == 0x08)); }
 
@@ -2390,7 +2390,7 @@ int printer_open(const char *filename) {
 
   if ((fp_prn = osd_fopen(FTYPE_PRN, filename, "ab"))) {
 
-    return TRUE;
+    return true;
 
   } else {
     if (!quasi88_is_menu())
@@ -2810,7 +2810,7 @@ void pc88main_init(int init) {
   z80main_cpu.PC_prev = z80main_cpu.PC; /* dummy for monitor */
 
 #ifdef DEBUGLOG
-  z80main_cpu.log = TRUE;
+  z80main_cpu.log = true;
 #else
   z80main_cpu.log = false;
 #endif
@@ -2871,13 +2871,13 @@ void pc88main_init(int init) {
       dipsw_1 |= SW_N88;
       dipsw_2 |= SW_V1;
       dipsw_2 |= SW_H;
-      high_mode = TRUE;
+      high_mode = true;
       break;
     case BASIC_V2:
       dipsw_1 |= SW_N88;
       dipsw_2 &= ~SW_V1;
       dipsw_2 |= SW_H;
-      high_mode = TRUE;
+      high_mode = true;
       break;
     }
 
@@ -2929,7 +2929,7 @@ void pc88main_init(int init) {
 
   /* シリアルマウス初期化 */
   if (use_siomouse) {
-    sio_mouse_init(TRUE);
+    sio_mouse_init(true);
   }
 
   /* サウンドについて・・・ */
@@ -3188,7 +3188,7 @@ static T_SUSPEND_W suspend_pc88main_work2[] = {
     {TYPE_END, nullptr},
 };
 
-int statesave_pc88main(void) {
+int statesave_pc88main() {
   /*if( fp_ti ) printf("%d\n",osd_ftell(fp_ti));*/
 
   if (statesave_table(SID, suspend_pc88main_work) != STATE_OK)
@@ -3197,10 +3197,10 @@ int statesave_pc88main(void) {
   if (statesave_table(SID2, suspend_pc88main_work2) != STATE_OK)
     return false;
 
-  return TRUE;
+  return true;
 }
 
-int stateload_pc88main(void) {
+int stateload_pc88main() {
   if (stateload_table(SID, suspend_pc88main_work) != STATE_OK)
     return false;
 
@@ -3218,5 +3218,5 @@ int stateload_pc88main(void) {
 
   cmt_stateload_skip = cmt_skip;
 
-  return TRUE;
+  return true;
 }

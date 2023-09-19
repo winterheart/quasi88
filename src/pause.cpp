@@ -27,7 +27,7 @@ static int pause_by_focus_out = false;
  */
 void pause_event_focus_out_when_exec() {
   if (need_focus) { /* -focus 指定時は */
-    pause_by_focus_out = TRUE;
+    pause_by_focus_out = true;
     quasi88_pause(); /* ここで PAUSE する */
   }
 }

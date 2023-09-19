@@ -227,7 +227,7 @@ int d88_append_blank(OSD_FILE *fp, int drv) {
           drive[drv].image[img].size = img_size;
           drive[drv].image_nr++;
         } else {
-          drive[drv].over_image = TRUE;
+          drive[drv].over_image = true;
         }
       }
       if (drive[0].fp != drive[1].fp)

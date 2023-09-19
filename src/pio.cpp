@@ -415,16 +415,16 @@ static T_SUSPEND_W suspend_pio_work[] = {
     {TYPE_END, nullptr},
 };
 
-int statesave_pio(void) {
+int statesave_pio() {
   if (statesave_table(SID, suspend_pio_work) == STATE_OK)
-    return TRUE;
+    return true;
   else
     return false;
 }
 
-int stateload_pio(void) {
+int stateload_pio() {
   if (stateload_table(SID, suspend_pio_work) == STATE_OK)
-    return TRUE;
+    return true;
   else
     return false;
 }
