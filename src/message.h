@@ -222,7 +222,7 @@ static const t_menudata data_graph_misc2[] = {
     {{"Interlace Display       (-interlace)", "インターレース表示する       (-interlace)"}, SCREEN_INTERLACE_YES},
 };
 
-static const t_menudata data_graph_pcg[] = {{{" Noexist ", " なし "}, FALSE}, {{" Exist ", " あり  "}, TRUE}};
+static const t_menudata data_graph_pcg[] = {{{" Noexist ", " なし "}, false}, {{" Exist ", " あり  "}, true}};
 
 #if 0
 static const t_menudata data_graph_font[] =
@@ -533,8 +533,8 @@ static const t_menulabel data_volume_audio[] = {
 };
 
 static const t_menudata data_volume_audio_fmgen[] = {
-    {{" MAME built-in ", " MAME 内蔵  "}, FALSE},
-    {{" fmgen", " fmgen"}, TRUE},
+    {{" MAME built-in ", " MAME 内蔵  "}, false},
+    {{" fmgen", " fmgen"}, true},
 };
 static const t_menudata data_volume_audio_freq_combo[] = {
     {{"48000", "48000"}, 48000},
@@ -543,8 +543,8 @@ static const t_menudata data_volume_audio_freq_combo[] = {
     {{"11025", "11025"}, 11025},
 };
 static const t_menudata data_volume_audio_sample[] = {
-    {{" Not Use       ", " 使用しない "}, FALSE},
-    {{" Use", " 使用する "}, TRUE},
+    {{" Not Use       ", " 使用しない "}, false},
+    {{" Use", " 使用する "}, true},
 };
 
 static const t_menulabel data_volume_audiodevice_stop[] = {
@@ -579,8 +579,8 @@ static const t_menudata data_dipsw_b_ln25[] = {
     {{"20line/scrn", "２０行     "}, (2 << 1) | 1},
 };
 static const t_menudata data_dipsw_b_boot[] = {
-    {{"DISK       ", "ディスク   "}, FALSE},
-    {{"ROM        ", "ＲＯＭ     "}, TRUE},
+    {{"DISK       ", "ディスク   "}, false},
+    {{"ROM        ", "ＲＯＭ     "}, true},
 };
 
 static const t_dipsw data_dipsw_b[] = {
@@ -1229,10 +1229,10 @@ static const t_menulabel data_tape_save[] = {
 static const t_menudata data_tape_intr[] = {
     {{" Use Interrupt     (Choose in N88-BASIC mode) ",
       " 割り込みを使う     (N88-BASIC では、必ずこちらを選択してください) "},
-     TRUE},
+     true},
     {{" Not Use Interrupt (Choose in N-BASIC mode for LOAD speed-up) ",
       " 割り込みを使わない (N-BASIC は、こちらでも可。ロードが速くなります) "},
-     FALSE},
+     false},
 };
 
 /*--------------------------------------------------------------
@@ -1717,7 +1717,7 @@ static Q8tkWidget *PACK_CHECK_BUTTON(Q8tkWidget *box, const char *label, int on,
   Q8tkWidget *button = q8tk_check_button_new_with_label(label);
 
   if (on)
-    q8tk_toggle_button_set_state(button, TRUE);
+    q8tk_toggle_button_set_state(button, true);
 
   q8tk_signal_connect(button, "toggled", callback, parm);
   q8tk_widget_show(button);
@@ -1743,7 +1743,7 @@ static Q8tkWidget *PACK_RADIO_BUTTON(Q8tkWidget *box, Q8tkWidget *button, const 
   q8tk_signal_connect(b, "clicked", callback, parm);
 
   if (on)
-    q8tk_toggle_button_set_state(b, TRUE);
+    q8tk_toggle_button_set_state(b, true);
 
   if (box)
     q8tk_box_pack_start(box, b);
@@ -1782,7 +1782,7 @@ static Q8tkWidget *PACK_COMBO(Q8tkWidget *box, const t_menudata *p, int count, i
   q8tk_combo_set_text(combo, initstr ? initstr : " ");
   q8tk_signal_connect(combo, "activate", act_callback, act_parm);
   if (chg_callback) {
-    q8tk_combo_set_editable(combo, TRUE);
+    q8tk_combo_set_editable(combo, true);
     q8tk_signal_connect(combo, "changed", chg_callback, chg_parm);
   }
   q8tk_widget_show(combo);
@@ -1855,7 +1855,7 @@ static void PACK_CHECK_BUTTONS(Q8tkWidget *box, const t_menudata *p, int count, 
     button = q8tk_check_button_new_with_label(p->str[menu_lang]);
 
     if ((*f_initval)(p->val))
-      q8tk_toggle_button_set_state(button, TRUE);
+      q8tk_toggle_button_set_state(button, true);
 
     q8tk_signal_connect(button, "toggled", callback, (void *)((intptr_t)p->val));
 
@@ -1889,7 +1889,7 @@ static Q8List *PACK_RADIO_BUTTONS(Q8tkWidget *box, const t_menudata *p, int coun
     q8tk_signal_connect(button, "clicked", callback, (void *)((intptr_t)p->val));
 
     if (initval == p->val) {
-      q8tk_toggle_button_set_state(button, TRUE);
+      q8tk_toggle_button_set_state(button, true);
     }
   }
   return q8tk_radio_button_get_list(button);
@@ -1911,9 +1911,9 @@ static Q8tkWidget *PACK_HSCALE(Q8tkWidget *box, const t_volume *p, int initval, 
   q8tk_signal_connect(adj, "value_changed", callback, parm);
 
   scale = q8tk_hscale_new(adj);
-  q8tk_adjustment_set_arrow(scale->stat.scale.adj, TRUE);
+  q8tk_adjustment_set_arrow(scale->stat.scale.adj, true);
   /*q8tk_adjustment_set_length(scale->stat.scale.adj, 11);*/
-  q8tk_scale_set_draw_value(scale, TRUE);
+  q8tk_scale_set_draw_value(scale, true);
   q8tk_scale_set_value_pos(scale, Q8TK_POS_LEFT);
 
   q8tk_widget_show(scale);
@@ -2195,7 +2195,7 @@ static void dialog_set_check_button(const char *label, int on, Q8tkSignalFunc ca
   }
 
   if (on)
-    q8tk_toggle_button_set_state(b, TRUE);
+    q8tk_toggle_button_set_state(b, true);
 
   q8tk_box_pack_start(Q8TK_DIALOG(dialog_main)->vbox, b);
   q8tk_widget_show(b);

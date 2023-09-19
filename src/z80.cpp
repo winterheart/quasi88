@@ -32,7 +32,7 @@
  *                  ・PIOアクセスにより、CPUを切り替える時(※2)
  *                  ・メニューモードなどに遷移した時      (※2)
  *              ※1 の場合、ループを抜けた直後は割り込みを無視
- *                  [z80->skip_intr_chk = TRUE をセット]
+ *                  [z80->skip_intr_chk = true をセット]
  *              ※2 の場合は、この関数からも抜ける。
  *                  [z80_state_goal = 1 で、関数を抜ける]
  *
@@ -41,7 +41,7 @@
  *      (z80->intr_update)(); 割り込み発生の判定
  *                (この関数の前回呼出〜今回呼出までの間に処理
  *                 したステート数は z80->state0 となる。)
- *                割込発生時 z80->INT_active = TRUE をセット。
+ *                割込発生時 z80->INT_active = true をセット。
  *                次回割込発生までのステート数 (z80->icount)
  *                も合わせて更新しておく。
  *                メニューモードなどの遷移で、この関数から
@@ -1295,7 +1295,7 @@ INLINE void z80_code_DD(z80arch *z80) {
     z80->PC.W--;
     z80->R--;                  /* ?? の位置にPCを戻す */
     z80->state0 += 4;          /* DD == NOP */
-    z80->skip_intr_chk = TRUE; /* 割り込み判定なし    */
+    z80->skip_intr_chk = true; /* 割り込み判定なし    */
     z80_state_intchk = 0;
     break;
   }
@@ -1332,7 +1332,7 @@ INLINE void z80_code_FD(z80arch *z80) {
     z80->PC.W--;
     z80->R--;                  /* ?? の位置にPCを戻す */
     z80->state0 += 4;          /* FD == NOP */
-    z80->skip_intr_chk = TRUE; /* 割り込み判定なし    */
+    z80->skip_intr_chk = true; /* 割り込み判定なし    */
     z80_state_intchk = 0;
     break;
   }
@@ -1503,7 +1503,7 @@ int z80_emu(z80arch *z80, int state_of_exec) {
     /*  呼び出される関数側の注意点：                  */
     /*      z80->state0 が CPUが処理した時間なのでこれを元に判定する。 */
     /*      (z80->icountは壊されているかもしれないので、あてにしない) */
-    /*      割込発生時は、 z80->INT_active = TRUE をセットする。  */
+    /*      割込発生時は、 z80->INT_active = true をセットする。  */
     /*      z80->icount の更新もこの関数にて行う。         */
     /*      メニュー等への遷移時は、 CPU_BREAKOFF() で処理を終える。    */
 

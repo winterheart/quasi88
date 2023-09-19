@@ -24,7 +24,7 @@ char file_sin[QUASI88_MAX_FILENAME];     /* シリアル出力のファイル名
 char file_sout[QUASI88_MAX_FILENAME];    /* シリアル入力のファイル名 */
 
 int file_coding = 0;             /* ファイル名の漢字コード   */
-int filename_synchronize = TRUE; /* ファイル名を同調させる   */
+int filename_synchronize = true; /* ファイル名を同調させる   */
 
 /*
  * FIXME: documentation is mess.
@@ -59,12 +59,12 @@ static char *assemble_filename(const char *imagename, const char *basedir, const
  *  ステートロード時は、 stateload を真にして、呼び出す。
  *----------------------------------------------------------------------*/
 void imagefile_all_open(int stateload) {
-  int err0 = TRUE;
-  int err1 = TRUE;
-  int err2 = TRUE;
-  int err3 = TRUE;
+  int err0 = true;
+  int err1 = true;
+  int err2 = true;
+  int err3 = true;
 
-  if (stateload == FALSE) {
+  if (!stateload) {
     int i;
     for (i = 0; i < NR_DRIVE; i++) {
       memset(file_disk[i], 0, QUASI88_MAX_FILENAME);
@@ -107,14 +107,14 @@ void imagefile_all_open(int stateload) {
                          /*  % quasi88 file n file     */
                          /*  % quasi88 file file m     */
                          /*  % quasi88 file n file m   */
-    int same = (strcmp(file_disk[0], file_disk[1]) == 0) ? TRUE : FALSE;
+    int same = (strcmp(file_disk[0], file_disk[1]) == 0) ? true : false;
 
     err0 = disk_insert(DRIVE_1, /* ドライブ 1 をセット */
                        file_disk[0], (image_disk[0] < 0) ? 0 : image_disk[0], readonly_disk[0]);
 
     if (same) { /* 同一ファイルの場合は */
 
-      if (err0 == FALSE) { /* 1: → 2: 転送 */
+      if (!err0) { /* 1: → 2: 転送 */
         err1 = disk_insert_A_to_B(DRIVE_1, DRIVE_2, (image_disk[1] < 0) ? 0 : image_disk[1]);
       }
 
@@ -125,7 +125,7 @@ void imagefile_all_open(int stateload) {
     }
 
     /* 両ドライブで同じファイル かつ イメージ指定自動の場合の処理 */
-    if (err0 == FALSE && err1 == FALSE && drive[DRIVE_1].fp == drive[DRIVE_2].fp && image_disk[0] < 0 &&
+    if (!err0 && !err1 && drive[DRIVE_1].fp == drive[DRIVE_2].fp && image_disk[0] < 0 &&
         image_disk[1] < 0) {
       disk_change_image(DRIVE_2, 1); /* 2: は イメージ2へ */
     }
@@ -135,12 +135,12 @@ void imagefile_all_open(int stateload) {
                                 /*  % quasi88 file num       */
     err0 = disk_insert(DRIVE_1, file_disk[0], (image_disk[0] < 0) ? 0 : image_disk[0], readonly_disk[0]);
 
-    if (err0 == FALSE) {
+    if (!err0) {
       if (image_disk[0] < 0 &&            /* イメージ番号指定なしなら */
           disk_image_num(DRIVE_1) >= 2) { /* ドライブ2にもセット      */
 
         err1 = disk_insert_A_to_B(DRIVE_1, DRIVE_2, 1);
-        if (err1 == FALSE) {
+        if (!err1) {
           memcpy(file_disk[1], file_disk[0], QUASI88_MAX_FILENAME);
         }
       }
@@ -177,12 +177,12 @@ void imagefile_all_open(int stateload) {
 
   /* ファイル名にあわせて、スナップショットファイル名も設定 */
   if (filename_synchronize) {
-    if (err0 == FALSE || err1 == FALSE /*|| err2 == FALSE*/) {
-      if (stateload == FALSE) {
-        filename_init_state(TRUE);
+    if (!err0 || !err1 /*|| err2 == FALSE*/) {
+      if (!stateload) {
+        filename_init_state(true);
       }
-      filename_init_snap(TRUE);
-      filename_init_wav(TRUE);
+      filename_init_snap(true);
+      filename_init_wav(true);
     }
   }
 
@@ -524,7 +524,7 @@ char *filename_alloc_diskname(const char *filename) {
     if (base == NULL)
       continue;
 
-    if (osd_path_join(base, filename, file, OSD_MAX_FILENAME) == FALSE) {
+    if (!osd_path_join(base, filename, file, OSD_MAX_FILENAME)) {
       return NULL;
     }
 
@@ -561,7 +561,7 @@ char *filename_alloc_romname(const char *filename) {
         return NULL;
       strcpy(buf, filename);
     } else {
-      if (dir == NULL || osd_path_join(dir, filename, buf, OSD_MAX_FILENAME) == FALSE) {
+      if (dir == NULL || !osd_path_join(dir, filename, buf, OSD_MAX_FILENAME)) {
         return NULL;
       }
     }
@@ -588,7 +588,7 @@ char *filename_alloc_global_cfgname(void) {
   char *p;
   char buf[OSD_MAX_FILENAME];
 
-  if (dir == NULL || osd_path_join(dir, file, buf, OSD_MAX_FILENAME) == FALSE) {
+  if (dir == NULL || !osd_path_join(dir, file, buf, OSD_MAX_FILENAME)) {
     return NULL;
   }
 
@@ -624,7 +624,7 @@ char *filename_alloc_keyboard_cfgname(void) {
   char *p;
   char buf[OSD_MAX_FILENAME];
 
-  if (dir == NULL || osd_path_join(dir, file, buf, OSD_MAX_FILENAME) == FALSE)
+  if (dir == NULL || !osd_path_join(dir, file, buf, OSD_MAX_FILENAME))
     return NULL;
 
   p = (char *)malloc(strlen(buf) + 1);

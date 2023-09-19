@@ -678,7 +678,7 @@ static void status_puts(int pos, const char *str) {
             ((0x20 <= c && c <= 0x7f) ||  /* ASCII    */
              (0xa0 <= c && c <= 0xdf))) { /* カタカナ */
           p = &kanji_rom[0][c * 8][0];
-          h16 = TRUE;
+          h16 = true;
         } else {
           p = &font_mem[c * 8];
           h16 = false;
@@ -740,7 +740,7 @@ void status_init(void) {
     else
       disp = STATUS_DISP_FDD;
 
-    status_wk[i].dirty = TRUE;
+    status_wk[i].dirty = true;
     status_wk[i].disp = disp;
     status_wk[i].timer = 0;
     status_wk[i].timeup_disp = disp;
@@ -763,7 +763,7 @@ void status_setup(int show) {
   int i;
   if (show) { /* 表示するなら  */
     for (i = 0; i < 3; i++)
-      status_wk[i].dirty = TRUE; /* 描画フラグON  */
+      status_wk[i].dirty = true; /* 描画フラグON  */
   }
 }
 
@@ -779,7 +779,7 @@ void status_message_default(int pos, const char *msg) {
   if (msg) { /* メッセージ指定ある場合 */
 
     status_puts(pos, msg);
-    status_wk[pos].dirty = TRUE;
+    status_wk[pos].dirty = true;
 
     status_wk[pos].disp = STATUS_DISP_MSG;
     status_wk[pos].timeup_disp = STATUS_DISP_MSG;
@@ -794,13 +794,13 @@ void status_message_default(int pos, const char *msg) {
     case STATUS_DISP_MSG:
       if (status_imagename == false) {
         status_puts(pos, "");
-        status_wk[pos].dirty = TRUE;
+        status_wk[pos].dirty = true;
 
         status_wk[pos].msg[0] = '\0';
       } else {
         const char *s = status_get_filename();
         status_puts(pos, s);
-        status_wk[pos].dirty = TRUE;
+        status_wk[pos].dirty = true;
 
         strcpy(status_wk[pos].msg, s);
       }
@@ -830,7 +830,7 @@ void status_message(int pos, int frames, const char *msg) {
   if (frames) {
 
     status_puts(pos, msg);
-    status_wk[pos].dirty = TRUE;
+    status_wk[pos].dirty = true;
 
     status_wk[pos].disp = STATUS_DISP_TIMEUP;
     status_wk[pos].timer = frames;
@@ -905,7 +905,7 @@ static void status_mode(int pos) {
     }
 
     status_puts(pos, (const char *)buf);
-    status_wk[pos].dirty = TRUE;
+    status_wk[pos].dirty = true;
   }
 }
 
@@ -977,7 +977,7 @@ static void status_fdd(int pos) {
     *p = '\0';
 
     status_puts(pos, (const char *)buf);
-    status_wk[pos].dirty = TRUE;
+    status_wk[pos].dirty = true;
   }
 }
 
@@ -1027,7 +1027,7 @@ void status_update(void) {
 
         case STATUS_DISP_MSG:
           status_puts(i, status_wk[i].msg);
-          status_wk[i].dirty = TRUE;
+          status_wk[i].dirty = true;
           break;
 
         case STATUS_DISP_MODE:

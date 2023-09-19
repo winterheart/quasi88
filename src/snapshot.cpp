@@ -29,7 +29,7 @@ char snapshot_cmd[SNAPSHOT_CMD_SIZE]; /* スナップショット後コマンド
 char snapshot_cmd_do = false;         /* コマンド実行の有無      */
 
 #ifdef USE_SSS_CMD
-char snapshot_cmd_enable = TRUE; /* コマンド実行の可否      */
+char snapshot_cmd_enable = true; /* コマンド実行の可否      */
 #else
 char snapshot_cmd_enable = false; /* コマンド実行の可否      */
 #endif
@@ -438,7 +438,7 @@ int screen_snapshot_save(void) {
     if (snap_suffix[i] == nullptr) { /* 見つかった */
       filename[len] = '\0';
       strcat(filename, suffix[snapshot_format]);
-      success = TRUE;
+      success = true;
       break;
     }
   }
@@ -615,7 +615,7 @@ int waveout_save_start(void) {
     if (wav_suffix[i] == nullptr) { /* 見つかった */
       filename[len] = '\0';
       strcat(filename, suffix);
-      success = TRUE;
+      success = true;
       break;
     }
   }

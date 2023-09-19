@@ -12,10 +12,10 @@ typedef struct beep88_f {
     void            *param;
     int             clock;          /* 2400Hz */
     int             sample_rate;    /* 44100/22050 Hz */
-    int             sample_bit_8;   /* TRUE / false */
+    int             sample_bit_8;   /* true / false */
     int             cnt;            /* 0... */
     int             cnt_of_clock;   /* sample_rate/clock */
-    int             cmd_sing;       /* TRUE / false */
+    int             cmd_sing;       /* true / false */
     unsigned char   port40;         /* Output value of port 40 */
 } BEEP88;
 
@@ -95,7 +95,7 @@ void * BEEP88Init(void *param, int index, int clock, int sample_rate)
     BEEP->sample_rate  = sample_rate;
     BEEP->sample_bit_8 = false;   /* ...always false... */
     BEEP->cnt_of_clock = sample_rate * SCALE / clock;
-    BEEP->cmd_sing = TRUE;
+    BEEP->cmd_sing = true;
     BEEP88ResetChip(BEEP);
 
     return BEEP;

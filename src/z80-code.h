@@ -403,11 +403,11 @@
       z80->IFF = INT_ENABLE;
       if( z80->state0 < z80_state_intchk ){ /* まだ内側ループ抜けない場合*/
     if( z80->INT_active ){              /* 保留割込があれば  */
-      z80->skip_intr_chk = TRUE;            /* ここで抜ける      */
+      z80->skip_intr_chk = true;            /* ここで抜ける      */
       z80_state_intchk = 0;
     }
       }else{                    /* もう抜ける場合 */
-    z80->skip_intr_chk = TRUE;
+    z80->skip_intr_chk = true;
     z80_state_intchk = 0;
       }
       break;
@@ -433,7 +433,7 @@
       break;
 
     case HALT: 
-      z80->HALT = TRUE;
+      z80->HALT = true;
       z80->PC.W --;
       if( z80->INT_active )    z80_state_intchk = 0;
       if( z80->break_if_halt ) z80_state_intchk = 0;

@@ -878,7 +878,7 @@ void quasi88_cfg_key_romaji(int on) {
 
     KEY88_TOGGLE(KEY88_KANA);
     if (IS_KEY88_PRESS(KEY88_KANA)) {
-      romaji_input_mode = TRUE;
+      romaji_input_mode = true;
       romaji_clear();
     } else {
       romaji_input_mode = false;
@@ -1134,7 +1134,7 @@ static int do_func(int func, int on) {
     if (on) {
       if (quasi88_cfg_can_fullscreen()) {
         int now = quasi88_cfg_now_fullscreen();
-        int next = (now) ? false : TRUE;
+        int next = (now) ? false : true;
         quasi88_cfg_set_fullscreen(next);
       }
     }
@@ -1190,7 +1190,7 @@ static int do_func(int func, int on) {
     if (on) {
       KEY88_TOGGLE(KEY88_KANA);
       if (IS_KEY88_PRESS(KEY88_KANA)) {
-        romaji_input_mode = TRUE;
+        romaji_input_mode = true;
         romaji_clear();
       } else {
         romaji_input_mode = false;
@@ -1226,7 +1226,7 @@ static int do_func(int func, int on) {
     if (on) {
       if (quasi88_cfg_can_showstatus()) {
         int now = quasi88_cfg_now_showstatus();
-        int next = (now) ? false : TRUE;
+        int next = (now) ? false : true;
         quasi88_cfg_set_showstatus(next);
       }
     }
@@ -1542,7 +1542,7 @@ int softkey_is_pressed(int code) {
 /* ソフトウェアキーボードを押す */
 void softkey_press(int code) {
   if (IS_KEY88_LATTERTYPE(code)) {
-    do_lattertype(code, TRUE);
+    do_lattertype(code, true);
   }
   KEY88_PRESS(code);
 }
@@ -1556,14 +1556,14 @@ void softkey_release(int code) {
 }
 
 /* ソフトウェアキーボードを全て離す */
-void softkey_release_all(void) {
+void softkey_release_all() {
   size_t i;
   for (i = 0; i < sizeof(key_scan); i++)
     key_scan[i] = 0xff;
 }
 
 /* ソフトウェアキーボードの、キーボードバグを再現 */
-void softkey_bug(void) {
+void softkey_bug() {
   int my_port, your_port;
   uint8_t my_val, your_val, save_val;
 
@@ -1821,10 +1821,10 @@ int statesave_keyboard(void) {
   if (statesave_table(SID4, suspend_keyboard_work4) != STATE_OK)
     return false;
 
-  return TRUE;
+  return true;
 }
 
-int stateload_keyboard(void) {
+int stateload_keyboard() {
   if (stateload_table(SID, suspend_keyboard_work) != STATE_OK)
     return false;
 
@@ -1853,7 +1853,7 @@ int stateload_keyboard(void) {
     printf("stateload : Statefile is old. (ver 0.6.0, 1, 2 or 3?)\n");
   }
 
-  return TRUE;
+  return true;
 
 NOT_HAVE_SID2:
   /* この関数の呼び出し以前に、 stateload_pc88main と stateload_intr が
@@ -1865,7 +1865,7 @@ NOT_HAVE_SID3:
   /* function_f[] を差し替える */
   function_old2new();
 
-  return TRUE;
+  return true;
 }
 
 /****************************************************************************
@@ -2317,8 +2317,8 @@ int config_read_keyconf_file(const char *keyconf_filename,
       err_mes = (identify_callback)(parm1, parm2, parm3);
 
       if (err_mes == nullptr) { /* 有効な識別タグだった */
-        working = TRUE;
-        effective = TRUE;
+        working = true;
+        effective = true;
 
         if (verbose_proc)
           printf("(read start in line %d)\n", line_cnt);
@@ -2395,7 +2395,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
     printf("\n");
   }
 
-  return (effective) ? TRUE : false;
+  return (effective) ? true : false;
 }
 
 static int symbol2int(const char *str, const T_SYMBOL_TABLE table_symbol2int[], int table_size, int table_ignore_case) {

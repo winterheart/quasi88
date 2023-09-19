@@ -224,10 +224,10 @@ int romaji_input(int key) {
         /* list->s のソート済みが前提 */ /* 一致しなくなったら中断 */
       } else {
         if (*s2 == '\0') { /* 完全に一致 */
-          same = TRUE;
+          same = true;
           break;
         } else { /* 途中まで一致 */
-          nearly = TRUE;
+          nearly = true;
         }
       }
     }

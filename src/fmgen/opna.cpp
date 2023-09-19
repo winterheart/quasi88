@@ -1353,7 +1353,7 @@ bool OPNA::LoadRhythmSample(const char* path)
         if( dir==NULL ) break;
 
         sprintf( romfile, "2608_%s.WAV", rhythmname[i] );
-        if( osd_path_join( dir, romfile, buf, 1024 ) == FALSE ) break;
+        if( !osd_path_join( dir, romfile, buf, 1024 ) ) break;
         file = osd_fopen( FTYPE_ROM, buf, "rb" );
 
         if( file==NULL ){

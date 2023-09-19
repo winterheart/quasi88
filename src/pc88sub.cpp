@@ -189,7 +189,7 @@ void sub_INT_init() { FDC_flag = false; }
 
 /*----------------------------------------------------------------------*/
 /* 割り込みを生成する。と同時に、次の割り込みまでの、最小 state も計算    */
-/*  帰り値は、Z80処理強制終了のフラグ(TRUE/false)            */
+/*  帰り値は、Z80処理強制終了のフラグ(true/false)            */
 /*----------------------------------------------------------------------*/
 void sub_INT_update() {
   static int sub_total_state = 0; /* サブCPUが処理した命令数      */
@@ -198,7 +198,7 @@ void sub_INT_update() {
   icount = fdc_ctrl(z80sub_cpu.state0);
 
   if (FDC_flag) {
-    z80sub_cpu.INT_active = TRUE;
+    z80sub_cpu.INT_active = true;
   } else {
     z80sub_cpu.INT_active = false;
   }
@@ -264,11 +264,11 @@ void pc88sub_init(int init) {
   z80sub_cpu.intr_update = sub_INT_update;
   z80sub_cpu.intr_ack = sub_INT_chk;
 
-  z80sub_cpu.break_if_halt = TRUE;
+  z80sub_cpu.break_if_halt = true;
   z80sub_cpu.PC_prev = z80sub_cpu.PC; /* dummy for monitor */
 
 #ifdef DEBUGLOG
-  z80sub_cpu.log = TRUE;
+  z80sub_cpu.log = true;
 #else
   z80sub_cpu.log = false;
 #endif
@@ -440,16 +440,16 @@ static T_SUSPEND_W suspend_pc88sub_work[] = {
     {TYPE_END, nullptr},
 };
 
-int statesave_pc88sub(void) {
+int statesave_pc88sub() {
   if (statesave_table(SID, suspend_pc88sub_work) == STATE_OK)
-    return TRUE;
+    return true;
   else
     return false;
 }
 
-int stateload_pc88sub(void) {
+int stateload_pc88sub() {
   if (stateload_table(SID, suspend_pc88sub_work) == STATE_OK)
-    return TRUE;
+    return true;
   else
     return false;
 }

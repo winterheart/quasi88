@@ -247,9 +247,9 @@ static  T_XMAME_FUNC pc88_fmgen2_func =
     xmame_func_sound = func;                                            \
                                                                         \
     if (options.use_samples) {                                          \
-        has_samples = TRUE;                                             \
+        has_samples = true;                                             \
     } else {                                                            \
-        has_samples = FALSE;                                            \
+        has_samples = false;                                            \
         xmame_func_sound.sample_motoron  = NULL;                        \
         xmame_func_sound.sample_motoroff = NULL;                        \
         xmame_func_sound.sample_headdown = NULL;                        \

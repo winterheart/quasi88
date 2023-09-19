@@ -229,7 +229,7 @@ int sound_init(void)
         wavfile = wav_open("finalmix.wav", Machine->sample_rate, 2);
 
     /* enable sound by default */
-    global_sound_enabled = TRUE;
+    global_sound_enabled = true;
 
 #if 0       /* QUASI88 */
     /* register callbacks */
@@ -984,7 +984,7 @@ int sound_wavfile_open(const char *filename)
     if (wavfile) wavfile_sample_rate = Machine->sample_rate;
     else         wavfile_sample_rate = 0;
 
-    if (wavfile) return TRUE;
+    if (wavfile) return true;
     else         return false;
 }
 
@@ -993,7 +993,7 @@ int sound_wavfile_opened(void)
     if (MAKE_WAVS)
         return false;
 
-    if (wavfile) return TRUE;
+    if (wavfile) return true;
     else         return false;
 }
 
@@ -1019,6 +1019,6 @@ int sound_wavfile_damaged(void)
         return false;
 
     if (wavfile_sample_rate == Machine->sample_rate) return false;
-    else                                             return TRUE;
+    else                                             return true;
 }
 #endif

@@ -49,16 +49,16 @@ extern int screen_dirty_status_show;       /* ステータス領域 初期化*/
 extern int screen_dirty_frame;             /* 全領域 更新     */
 
 #define screen_set_dirty_flag(x) screen_dirty_flag[x] = 1
-#define screen_set_dirty_all() screen_dirty_all = TRUE
+#define screen_set_dirty_all() screen_dirty_all = true
 #define screen_set_dirty_palette()                                                                                     \
   do {                                                                                                                 \
-    screen_dirty_palette = TRUE;                                                                                       \
-    screen_dirty_all = TRUE;                                                                                           \
+    screen_dirty_palette = true;                                                                                       \
+    screen_dirty_all = true;                                                                                           \
   } while (0)
 #define screen_set_dirty_status() screen_dirty_status = 0xff
-#define screen_set_dirty_status_hide() screen_dirty_status_hide = TRUE
-#define screen_set_dirty_status_show() screen_dirty_status_show = TRUE
-#define screen_set_dirty_frame() screen_dirty_frame = TRUE;
+#define screen_set_dirty_status_hide() screen_dirty_status_hide = true
+#define screen_set_dirty_status_show() screen_dirty_status_show = true
+#define screen_set_dirty_frame() screen_dirty_frame = true;
 
 /* その他 */
 

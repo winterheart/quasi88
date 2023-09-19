@@ -30,7 +30,7 @@ double sound_clock_mhz = DEFAULT_SOUND_CLOCK_MHZ; /* SOUND chip Clock [MHz] */
 double vsync_freq_hz = DEFAULT_VSYNC_FREQ_HZ;     /* VSYNC 割込周期   [Hz]  */
 
 int wait_rate = 100;      /* ウエイト調整 比率    [%]  */
-int wait_by_sleep = TRUE; /* ウエイト調整時 sleep する */
+int wait_by_sleep = true; /* ウエイト調整時 sleep する */
 
 #define CPU_CLOCK_MHZ cpu_clock_mhz
 #define SOUND_CLOCK_MHZ sound_clock_mhz
@@ -350,16 +350,16 @@ static void set_INT_active() {
     z80main_cpu.INT_active = false;                /*    割り込みは受け付けない */
   } else if (intr_level >= 1 &&                    /* レベル設定 1 */
              /*intr_sio_enable &&*/ RS232C_flag) { /*    RS232S 受信 割り込み */
-    z80main_cpu.INT_active = TRUE;
+    z80main_cpu.INT_active = true;
   } else if (intr_level >= 2 &&                     /* レベル設定 2 */
              /*intr_vsync_enable &&*/ VSYNC_flag) { /*    VSYNC 割り込み */
-    z80main_cpu.INT_active = TRUE;
+    z80main_cpu.INT_active = true;
   } else if (intr_level >= 3 &&                 /* レベル設定 3 */
              /*intr_rtc_enable &&*/ RTC_flag) { /*    1/600秒 RTC 割り込み */
-    z80main_cpu.INT_active = TRUE;
+    z80main_cpu.INT_active = true;
   } else if (intr_level >= 5 &&                     /* レベル設定 5 */
              /*intr_sound_enable &&*/ SOUND_flag) { /*    SOUND TIMER 割り込み */
-    z80main_cpu.INT_active = TRUE;
+    z80main_cpu.INT_active = true;
   } else {
     z80main_cpu.INT_active = false;
   }
@@ -381,7 +381,7 @@ void main_INT_update(void) {
     rs232c_intr_timer += rs232c_intr_base;
     if (sio_intr()) {
       if (intr_sio_enable)
-        RS232C_flag = TRUE;
+        RS232C_flag = true;
     }
   }
   icount = std::min(icount, rs232c_intr_timer);
@@ -396,7 +396,7 @@ void main_INT_update(void) {
 
     vsync(); /* ウエイト、表示、入力 */
     if (intr_vsync_enable)
-      VSYNC_flag = TRUE; /* VSYNC割り込み    */
+      VSYNC_flag = true; /* VSYNC割り込み    */
 
     ctrl_vrtc = 1;
     vrtc_timer = vrtc_base + z80main_cpu.state0;
@@ -436,7 +436,7 @@ void main_INT_update(void) {
   if (rtc_intr_timer < 0) {
     rtc_intr_timer += rtc_intr_base;
     if (intr_rtc_enable)
-      RTC_flag = TRUE;
+      RTC_flag = true;
   }
   icount = std::min(icount, rtc_intr_timer);
 
@@ -529,12 +529,12 @@ void main_INT_update(void) {
   if (((sound_FLAG_A && sound2_EN_TA) || (sound_FLAG_B && sound2_EN_TB) || (sound2_FLAG_BRDY && sound2_EN_BRDY) ||
        (sound2_FLAG_EOS && sound2_EN_EOS)) &&
       intr_sound_enable) {
-    SOUND_level = TRUE;
+    SOUND_level = true;
   } else {
     SOUND_level = false;
   }
   if ((SOUND_level_old == false) && SOUND_level) {
-    SOUND_flag = TRUE;
+    SOUND_flag = true;
   }
 #else   /* DRAGON が動かない ? */
   if (((sound_FLAG_A && sound2_EN_TA) || (sound_FLAG_B && sound2_EN_TB) || (sound2_FLAG_BRDY && sound2_EN_BRDY) ||
@@ -734,10 +734,10 @@ int statesave_intr(void) {
   if (statesave_table(SID4, suspend_intr_work4) != STATE_OK)
     return false;
 
-  return TRUE;
+  return true;
 }
 
-int stateload_intr(void) {
+int stateload_intr() {
   boost_cnt = 0;
 
   if (stateload_table(SID, suspend_intr_work) != STATE_OK)
@@ -771,7 +771,7 @@ int stateload_intr(void) {
     goto NOT_HAVE_SID4;
   }
 
-  return TRUE;
+  return true;
 
 NOT_HAVE_SID2:
   vrtc_base2 = (int)(vsync_intr_base * VRTC_DISP);
@@ -781,7 +781,7 @@ NOT_HAVE_SID2:
 NOT_HAVE_SID3:
   if ((sound_FLAG_A && sound2_EN_TA) || (sound_FLAG_B && sound2_EN_TB) || (sound2_FLAG_BRDY && sound2_EN_BRDY) ||
       (sound2_FLAG_EOS && sound2_EN_EOS)) {
-    SOUND_level = TRUE;
+    SOUND_level = true;
   } else {
     SOUND_level = false;
   }
@@ -790,5 +790,5 @@ NOT_HAVE_SID3:
 NOT_HAVE_SID4:
   boost = 1;
 
-  return TRUE;
+  return true;
 }
