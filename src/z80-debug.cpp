@@ -6,8 +6,9 @@
 
 #include <cstdio>
 
-extern "C" {
 #include "quasi88.h"
+
+extern "C" {
 #include "z80.h"
 }
 
@@ -1455,7 +1456,7 @@ static Mnemonics Instruction_FD_CB[256] = {
 
 #define M_RDMEM(addr) (z80->mem_read)(addr)
 
-static void printf_head(z80arch *z80, word pc, int num) {
+static void printf_head(z80arch *z80, uint16_t pc, int num) {
   /* アドレス／インストラクションコードの表示 */
 
   printf("%04X ", pc);
@@ -1479,7 +1480,7 @@ static void printf_head(z80arch *z80, word pc, int num) {
   }
 }
 
-int z80_line_disasm(z80arch *z80, word pc) {
+int z80_line_disasm(z80arch *z80, uint16_t pc) {
   int num;
   Mnemonics *Inst;
 
@@ -1493,6 +1494,8 @@ int z80_line_disasm(z80arch *z80, word pc) {
   case OP_NUM_8:
     num = M_RDMEM(pc + 1);
     printf_head(z80, pc, 2);
+
+    
     printf(Inst->str, num);
     return 2;
 
@@ -1666,7 +1669,7 @@ void z80_debug(z80arch *z80, const char *mes) {
 
 #ifdef DEBUGLOG
 
-static void log_printf_head(z80arch *z80, word pc, int num) {
+static void log_printf_head(z80arch *z80, uint16_t pc, int num) {
   logz80("%04X " pc);
   switch (num) {
   case 1:
@@ -1686,7 +1689,7 @@ static void log_printf_head(z80arch *z80, word pc, int num) {
     break;
   }
 }
-static int log_line_disasm(z80arch *z80, word pc) {
+static int log_line_disasm(z80arch *z80, uint16_t pc) {
   int num;
   Mnemonics *Inst;
 

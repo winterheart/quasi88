@@ -49,18 +49,18 @@ typedef unsigned int bit32;
 
 typedef union {
   struct {
-    byte l, h;
+    uint8_t l, h;
   } B;
-  word W;
+  uint16_t W;
 } pair;
 
 #else /* ビッグエンデイアン */
 
 typedef union {
   struct {
-    byte h, l;
+    uint8_t h, l;
   } B;
-  word W;
+  uint16_t W;
 } pair;
 
 #endif

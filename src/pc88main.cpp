@@ -7,27 +7,30 @@
 #include <cstring>
 #include <ctime>
 
-extern "C" {
 #include "quasi88.h"
-#include "debug.h"
-#include "initval.h"
-#include "pc88main.h"
 
-#include "pc88cpu.h"
 #include "crtcdmac.h"
-#include "screen.h"
+#include "drive.h"
+#include "emu.h"
+#include "fdc.h" /* disk_ex_drv */
+#include "initval.h"
 #include "intr.h"
 #include "keyboard.h"
 #include "memory.h"
+#include "pc88main.h"
+#include "screen.h"
+#include "status.h"
+#include "suspend.h"
+#include "z80.h"
+
+extern "C" {
+#include "debug.h"
+
+#include "pc88cpu.h"
 #include "pio.h"
 #include "soundbd.h"
-#include "fdc.h" /* disk_ex_drv */
 
-#include "emu.h"
-#include "drive.h"
 #include "snddrv.h"
-#include "suspend.h"
-#include "status.h"
 }
 
 static OSD_FILE *fp_so = nullptr;  /* シリアル出力用fp      */
@@ -47,31 +50,31 @@ z80arch z80main_cpu; /* Z80 CPU ( main system )  */
 
 int high_mode; /* 高速モード 1:Yes 0:No   */
 
-static byte dipsw_1;   /* IN[30] ディップスイッチ 1    */
-static byte dipsw_2;   /* IN[31] ディップスイッチ 2    */
-static byte ctrl_boot; /* IN[40] ディスクブート情報   */
-static byte cpu_clock; /* IN[6E] CPU クロック      */
+static uint8_t dipsw_1;   /* IN[30] ディップスイッチ 1    */
+static uint8_t dipsw_2;   /* IN[31] ディップスイッチ 2    */
+static uint8_t ctrl_boot; /* IN[40] ディスクブート情報   */
+static uint8_t cpu_clock; /* IN[6E] CPU クロック      */
 
 int memory_bank; /* OUT[5C-5F] IN[5C] メモリバンク*/
 
-static byte common_out_data;         /* OUT[10] PRT/時計       */
-byte misc_ctrl;                      /* I/O[32] 各種Ctrl       */
-byte ALU1_ctrl;                      /* OUT[34] ALU Ctrl 1       */
-byte ALU2_ctrl;                      /* OUT[35] ALU Ctrl 2       */
-byte ctrl_signal;                    /* OUT[40] コントロール信号出力値保存*/
-byte baudrate_sw = DEFAULT_BAUDRATE; /* I/O[6F] ボーレート      */
-word window_offset;                  /* I/O[70] WINDOW オフセット   */
-byte ext_rom_bank;                   /* I/O[71] 拡張ROM BANK       */
-byte ext_ram_ctrl;                   /* I/O[E2] 拡張RAM制御      */
-byte ext_ram_bank;                   /* I/O[E3] 拡張RAMセレクト    */
+static uint8_t common_out_data;         /* OUT[10] PRT/時計       */
+uint8_t misc_ctrl;                      /* I/O[32] 各種Ctrl       */
+uint8_t ALU1_ctrl;                      /* OUT[34] ALU Ctrl 1       */
+uint8_t ALU2_ctrl;                      /* OUT[35] ALU Ctrl 2       */
+uint8_t ctrl_signal;                    /* OUT[40] コントロール信号出力値保存*/
+uint8_t baudrate_sw = DEFAULT_BAUDRATE; /* I/O[6F] ボーレート      */
+uint16_t window_offset;                  /* I/O[70] WINDOW オフセット   */
+uint8_t ext_rom_bank;                   /* I/O[71] 拡張ROM BANK       */
+uint8_t ext_ram_ctrl;                   /* I/O[E2] 拡張RAM制御      */
+uint8_t ext_ram_bank;                   /* I/O[E3] 拡張RAMセレクト    */
 
 static pair kanji1_addr; /* OUT[E8-E9] 漢字ROM(第1) ADDR  */
 static pair kanji2_addr; /* OUT[EC-ED] 漢字ROM(第2) ADDR  */
 
-byte jisho_rom_bank; /* OUT[F0] 辞書ROMセレクト    */
-byte jisho_rom_ctrl; /* OUT[F1] 辞書ROMバンク   */
+uint8_t jisho_rom_bank; /* OUT[F0] 辞書ROMセレクト    */
+uint8_t jisho_rom_ctrl; /* OUT[F1] 辞書ROMバンク   */
 
-int calendar_stop = FALSE;     /* 時計停止フラグ        */
+int calendar_stop = false;     /* 時計停止フラグ        */
 static char calendar_data[7] = /* 時計停止時刻 (年月日曜時分秒)*/
     {
         85, 0, 1, 0, 0, 0, 0,
@@ -81,26 +84,26 @@ int cmt_speed = 0;   /* テープ速度(BPS)、 0は自動   */
 int cmt_intr = TRUE; /* 真で、テープ読込に割込使用  */
 int cmt_wait = TRUE; /* 真で、テープ読込ウェイトあり   */
 
-int highspeed_mode = FALSE; /* 真で、高速 BASIC 処理あり   */
+int highspeed_mode = false; /* 真で、高速 BASIC 処理あり   */
 
-int use_siomouse = FALSE; /* 真で、シリアルマウスあり */
+int use_siomouse = false; /* 真で、シリアルマウスあり */
 
 /* 以下はテープイメージのファイル依存情報なので、ステートセーブしない */
 
 static int cmt_is_t88;      /* 真…T88、偽…CMT        */
 static int cmt_block_size;  /* データタグ内のサイズ(T88)  */
 static long cmt_size;       /* イメージのサイズ     */
-static int cmt_EOF = FALSE; /* 真で、テープ入力 EOF     */
-static int com_EOF = FALSE; /* 真で、シリアル入力 EOF  */
+static int cmt_EOF = false; /* 真で、テープ入力 EOF     */
+static int com_EOF = false; /* 真で、シリアル入力 EOF  */
 static long com_size;       /* イメージのサイズ     */
 
-static byte sio_in_data();    /* IN[20] RS232C入力 (データ)  */
-static byte sio_in_status();  /* IN[21] RS232C入力 (制御) */
-static byte in_ctrl_signal(); /* IN[40] コントロール信号入力    */
+static uint8_t sio_in_data();    /* IN[20] RS232C入力 (データ)  */
+static uint8_t sio_in_status();  /* IN[21] RS232C入力 (制御) */
+static uint8_t in_ctrl_signal(); /* IN[40] コントロール信号入力    */
 
-static void sio_out_data(byte);    /* OUT[20] RS232C出力 (データ) */
-static void sio_out_command(byte); /* OUT[21] RS232C出力 (コマンド)*/
-static void out_ctrl_signal(byte); /* OUT[40] コントロール信号出力   */
+static void sio_out_data(uint8_t);    /* OUT[20] RS232C出力 (データ) */
+static void sio_out_command(uint8_t); /* OUT[21] RS232C出力 (コマンド)*/
+static void out_ctrl_signal(uint8_t); /* OUT[40] コントロール信号出力   */
 
 static void sio_tape_highspeed_load();
 static void sio_set_intr_base();
@@ -127,7 +130,7 @@ static void sio_check_cmt_error();
 
 #define DMA_WAIT (9)
 
-static int mem_wait_highram = FALSE;
+static int mem_wait_highram = false;
 
 /************************************************************************/
 /* PCG-8100                             */
@@ -135,12 +138,12 @@ static int mem_wait_highram = FALSE;
 static int pcg_data;
 static int pcg_addr;
 
-static void pcg_out_data(byte data) { pcg_data = data; }
+static void pcg_out_data(uint8_t data) { pcg_data = data; }
 
-static void pcg_out_addr_low(byte addr) { pcg_addr = (pcg_addr & 0xff00) | addr; }
+static void pcg_out_addr_low(uint8_t addr) { pcg_addr = (pcg_addr & 0xff00) | addr; }
 
-static void pcg_out_addr_high(byte addr) {
-  byte src;
+static void pcg_out_addr_high(uint8_t addr) {
+  uint8_t src;
 
   pcg_addr = (pcg_addr & 0x00ff) | ((int)addr << 8);
 
@@ -164,15 +167,15 @@ static void pcg_out_addr_high(byte addr) {
  * 高速 BASIC 処理は、peach氏により提供されました。
  */
 
-static word ret_addr = 0xffff;
+static uint16_t ret_addr = 0xffff;
 static int hs_icount = 0;
 
-int highspeed_flag = FALSE;          /* 現在、高速BASIC 処理中   */
-static int highspeed_n88rom = FALSE; /* MAIN-ROM バンク選択時、真    */
+int highspeed_flag = false;          /* 現在、高速BASIC 処理中   */
+static int highspeed_n88rom = false; /* MAIN-ROM バンク選択時、真    */
                                      /* (この時、高速BASIC 処理可能)   */
 
 /* 高速 BASIC モードに入るときのアドレス (BIOS依存かも?) */
-word highspeed_routine[] = {
+uint16_t highspeed_routine[] = {
     0x6e9a, /* PSET   */
     0x6eae, /* LINE   */
     0x6eca, /* ROLL   */
@@ -233,16 +236,16 @@ word highspeed_routine[] = {
    これにより、テキスト表示処理は常に main_ram を参照すればよいことになる。
 */
 
-static byte *read_mem_0000_5fff; /* メインメモリ リードポインタ */
-static byte *read_mem_6000_7fff;
-static byte *read_mem_8000_83ff;
-static byte *read_mem_c000_efff;
-static byte *read_mem_f000_ffff;
+static uint8_t *read_mem_0000_5fff; /* メインメモリ リードポインタ */
+static uint8_t *read_mem_6000_7fff;
+static uint8_t *read_mem_8000_83ff;
+static uint8_t *read_mem_c000_efff;
+static uint8_t *read_mem_f000_ffff;
 
-static byte *write_mem_0000_7fff; /* メインメモリ ライトポインタ */
-static byte *write_mem_8000_83ff;
-static byte *write_mem_c000_efff;
-static byte *write_mem_f000_ffff;
+static uint8_t *write_mem_0000_7fff; /* メインメモリ ライトポインタ */
+static uint8_t *write_mem_8000_83ff;
+static uint8_t *write_mem_c000_efff;
+static uint8_t *write_mem_f000_ffff;
 
 /*------------------------------------------------------*/
 /* address : 0x0000 〜 0x7fff の メモリ割り当て        */
@@ -251,7 +254,7 @@ static byte *write_mem_f000_ffff;
 /*------------------------------------------------------*/
 #if 1
 INLINE void main_memory_mapping_0000_7fff() {
-  highspeed_n88rom = FALSE; /* デフォルト */
+  highspeed_n88rom = false; /* デフォルト */
 
   switch (ext_ram_ctrl) {
 
@@ -331,7 +334,7 @@ INLINE void main_memory_mapping_0000_7fff() {
 #else /* こう、すっきりさせるほうがいい？ */
 
 INLINE void main_memory_mapping_0000_7fff(void) {
-  highspeed_n88rom = FALSE; /* デフォルト */
+  highspeed_n88rom = false; /* デフォルト */
 
   /* リードは、指定したバンクに応じたメモリから */
 
@@ -408,7 +411,7 @@ INLINE void main_memory_mapping_8000_83ff() {
 /*      misc_ctrl により変化           */
 /*------------------------------------------------------*/
 INLINE void main_memory_mapping_c000_ffff() {
-  mem_wait_highram = FALSE;
+  mem_wait_highram = false;
 
   if (jisho_rom_ctrl) {
     read_mem_c000_efff = &main_ram[0xc000];
@@ -463,12 +466,12 @@ INLINE void main_memory_vram_mapping() {
 /*------------------------------*/
 /* 通常のＶＲＡＭリード       */
 /*------------------------------*/
-INLINE byte vram_read(word addr) { return main_vram[addr][memory_bank]; }
+INLINE uint8_t vram_read(uint16_t addr) { return main_vram[addr][memory_bank]; }
 
 /*------------------------------*/
 /* 通常のＶＲＡＭライト       */
 /*------------------------------*/
-INLINE void vram_write(word addr, byte data) {
+INLINE void vram_write(uint16_t addr, uint8_t data) {
   screen_set_dirty_flag(addr);
 
   main_vram[addr][memory_bank] = data;
@@ -478,8 +481,8 @@ INLINE void vram_write(word addr, byte data) {
 /* ＡＬＵを介したＶＲＡＭリード   */
 /*------------------------------*/
 typedef union {
-  bit8 c[4];
-  bit32 l;
+  uint8_t c[4];
+  uint32_t l;
 } ALU_memory;
 
 static ALU_memory ALU_buf;
@@ -509,7 +512,7 @@ static ALU_memory ALU_comp;
   } while (0)
 #endif
 
-INLINE byte ALU_read(word addr) {
+INLINE uint8_t ALU_read(uint16_t addr) {
   ALU_memory wk;
 
   ALU_buf.l = (main_vram4)[addr];
@@ -521,7 +524,7 @@ INLINE byte ALU_read(word addr) {
 /*------------------------------*/
 /* ＡＬＵを介したＶＲＡＭライト   */
 /*------------------------------*/
-INLINE void ALU_write(word addr, byte data) {
+INLINE void ALU_write(uint16_t addr, uint8_t data) {
   int i, mode;
 
   screen_set_dirty_flag(addr);
@@ -565,7 +568,7 @@ INLINE void ALU_write(word addr, byte data) {
 /*    フェッチ      */
 /*----------------------*/
 
-byte main_fetch(word addr) {
+uint8_t main_fetch(uint16_t addr) {
 
   /* かなり適当な、メモリウェイト処理 */
 
@@ -582,7 +585,7 @@ byte main_fetch(word addr) {
       dma_next_vline += state_of_vsync / (crtc_sz_lines * crtc_font_height);
     }
 
-    if (high_mode == FALSE) { /* 低速モードの場合 */
+    if (high_mode == false) { /* 低速モードの場合 */
 
       z80main_cpu.state0 += 1; /* M1サイクルウェイト */
 
@@ -623,7 +626,7 @@ byte main_fetch(word addr) {
       z80_state_intchk = hs_icount;
       if (z80main_cpu.state0 > z80_state_intchk)
         z80main_cpu.state0 = z80_state_intchk;
-      highspeed_flag = FALSE;
+      highspeed_flag = false;
     }
   }
 
@@ -663,7 +666,7 @@ byte main_fetch(word addr) {
 /*----------------------*/
 /*    メモリ・リード */
 /*----------------------*/
-byte main_mem_read(word addr) {
+uint8_t main_mem_read(uint16_t addr) {
   if (addr < 0x6000)
     return read_mem_0000_5fff[addr];
   else if (addr < 0x8000)
@@ -698,7 +701,7 @@ byte main_mem_read(word addr) {
 /*----------------------*/
 /*     メモリ・ライト    */
 /*----------------------*/
-void main_mem_write(word addr, byte data) {
+void main_mem_write(uint16_t addr, uint8_t data) {
   if (addr < 0x8000)
     write_mem_0000_7fff[addr] = data;
   else if (addr < 0x8400) {
@@ -738,8 +741,8 @@ void main_mem_write(word addr, byte data) {
 /*    ポート・ライト */
 /*----------------------*/
 
-void main_io_out(byte port, byte data) {
-  byte chg;
+void main_io_out(uint8_t port, uint8_t data) {
+  uint8_t chg;
   PC88_PALETTE_T new_pal;
 
   switch (port) {
@@ -845,9 +848,9 @@ void main_io_out(byte port, byte data) {
     }
     if (sound_port & SD_PORT_44_45) {
       intr_sound_enable = (data & INTERRUPT_MASK_SOUND) ^ INTERRUPT_MASK_SOUND;
-      if (highspeed_flag == FALSE)
+      if (highspeed_flag == false)
         CPU_REFRESH_INTERRUPT();
-      /*if( intr_sound_enable == FALSE ) SOUND_flag = FALSE;*/
+      /*if( intr_sound_enable == false ) SOUND_flag = false;*/
     }
     misc_ctrl = data;
     main_memory_mapping_0000_7fff();
@@ -1048,7 +1051,7 @@ void main_io_out(byte port, byte data) {
 
     /* Window オフセットアドレス入出力 */
   case 0x70:
-    window_offset = (word)data << 8;
+    window_offset = (uint16_t)data << 8;
     main_memory_mapping_8000_83ff();
     return;
 
@@ -1079,9 +1082,9 @@ void main_io_out(byte port, byte data) {
   case 0xaa:
     if (sound_port & SD_PORT_A8_AD) {
       intr_sound_enable = (data & INTERRUPT_MASK_SOUND) ^ INTERRUPT_MASK_SOUND;
-      if (highspeed_flag == FALSE)
+      if (highspeed_flag == false)
         CPU_REFRESH_INTERRUPT();
-      /*if( intr_sound_enable == FALSE ) SOUND_flag = FALSE;*/
+      /*if( intr_sound_enable == false ) SOUND_flag = false;*/
     }
     return;
   case 0xac:
@@ -1144,7 +1147,7 @@ void main_io_out(byte port, byte data) {
       intr_level = 7;
     else
       intr_level = data & 0x07;
-    if (highspeed_flag == FALSE) {
+    if (highspeed_flag == false) {
       CPU_REFRESH_INTERRUPT();
 
       /* 'ASHE対策…… */ /* thanks! peach */
@@ -1158,16 +1161,16 @@ void main_io_out(byte port, byte data) {
     intr_vsync_enable = data & INTERRUPT_MASK_VSYNC;
     intr_rtc_enable = data & INTERRUPT_MASK_RTC;
 
-    if (intr_sio_enable == FALSE) {
-      RS232C_flag = FALSE;
+    if (intr_sio_enable == false) {
+      RS232C_flag = false;
       sio_data_clear();
     }
-    if (intr_vsync_enable == FALSE)
-      VSYNC_flag = FALSE;
-    if (intr_rtc_enable == FALSE)
-      RTC_flag = FALSE;
+    if (intr_vsync_enable == false)
+      VSYNC_flag = false;
+    if (intr_rtc_enable == false)
+      RTC_flag = false;
 
-    if (highspeed_flag == FALSE)
+    if (highspeed_flag == false)
       CPU_REFRESH_INTERRUPT();
     return;
 
@@ -1299,7 +1302,7 @@ void main_io_out(byte port, byte data) {
 /*----------------------*/
 /*    ポート・リード */
 /*----------------------*/
-byte main_io_in(byte port) {
+uint8_t main_io_in(uint8_t port) {
   switch (port) {
 
     /* キーボード */
@@ -1323,7 +1326,7 @@ byte main_io_in(byte port) {
 #ifdef USE_KEYBOARD_BUG /* peach氏提供 */
     {
       int i;
-      byte mkey, mkey_old;
+      uint8_t mkey, mkey_old;
 
       mkey = key_scan[port];
       do {
@@ -1375,7 +1378,7 @@ byte main_io_in(byte port) {
       return 0xff;
   case 0x45:
     if (sound_port & SD_PORT_44_45)
-      return sound_in_data(FALSE);
+      return sound_in_data(false);
     else
       return 0xff;
   case 0x46:
@@ -1452,7 +1455,7 @@ byte main_io_in(byte port) {
         return ext_ram_bank;
       return 0xff;
     } else { /* 実機っぽく(?)バンクを割り振った */
-      byte ret = 0xff;
+      uint8_t ret = 0xff;
       if (use_extram && (ext_ram_bank != 0xff)) {
         if (use_extram <= 4) { /* 128KB*4以下 */
           ret = (ext_ram_bank | 0xf0);
@@ -1521,10 +1524,10 @@ byte main_io_in(byte port) {
     /* ＰＩＯ */
 
   case 0xfc: {
-    byte data = pio_read_AB(PIO_SIDE_M, PIO_PORT_A);
+    uint8_t data = pio_read_AB(PIO_SIDE_M, PIO_PORT_A);
     logpio(" %02x<--\n", data);
     /*      {
-        static byte debug_pio_halt[4] = { 0,0,0,0 };
+        static uint8_t debug_pio_halt[4] = { 0,0,0,0 };
         debug_pio_halt[0] = debug_pio_halt[1];
         debug_pio_halt[1] = debug_pio_halt[2];
         debug_pio_halt[2] = debug_pio_halt[3];
@@ -1537,7 +1540,7 @@ byte main_io_in(byte port) {
     return data;
   }
   case 0xfd: {
-    byte data = pio_read_AB(PIO_SIDE_M, PIO_PORT_B);
+    uint8_t data = pio_read_AB(PIO_SIDE_M, PIO_PORT_B);
     logpio(" %02x<==\n", data);
     return data;
   }
@@ -1626,12 +1629,12 @@ byte main_io_in(byte port) {
 /*===========================================================================*/
 
 static int sio_instruction; /* USART のコマンド状態 */
-static byte sio_mode;       /* USART の設定モード   */
-static byte sio_command;    /* USART のコマンド    */
+static uint8_t sio_mode;       /* USART の設定モード   */
+static uint8_t sio_command;    /* USART のコマンド    */
 static int sio_data_exist;  /* 読込未の SIOデータ有 */
-static byte sio_data;       /* SIOデータ            */
+static uint8_t sio_data;       /* SIOデータ            */
 
-static int com_X_flow = FALSE; /* 真で、Xフロー制御中 */
+static int com_X_flow = false; /* 真で、Xフロー制御中 */
 
 static int cmt_dummy_read_cnt = 0; /* 割込未使用時のダミー   */
 static int cmt_skip;               /* 無効データ部の読み飛ばし */
@@ -1643,7 +1646,7 @@ static int cmt_stateload_skip = 0;   /* ステートロード時 skip */
 
 static int sio_getc(int is_cmt, int *tick);
 
-void sio_data_clear(void) { sio_data_exist = FALSE; }
+void sio_data_clear(void) { sio_data_exist = false; }
 
 /*-------- ロード用テープイメージファイルを "rb" で開く --------*/
 
@@ -1660,7 +1663,7 @@ int sio_open_tapeload(const char *filename) {
       printf("\n[[[ %s : Tape load image can't open ]]]\n\n", filename);
   }
   cmt_stateload_chars = 0;
-  return FALSE;
+  return false;
 }
 void sio_close_tapeload(void) {
   if (fp_ti) {
@@ -1685,7 +1688,7 @@ int sio_open_tapesave(const char *filename) {
     if (!quasi88_is_menu())
       printf("\n[[[ %s : Tape save image can't open ]]]\n\n", filename);
   }
-  return FALSE;
+  return false;
 }
 void sio_close_tapesave(void) {
   if (fp_to) {
@@ -1702,7 +1705,7 @@ int sio_open_serialin(const char *filename) {
   if ((fp_si = osd_fopen(FTYPE_COM_LOAD, filename, "rb"))) {
 
     sio_set_intr_base();
-    com_EOF = FALSE;
+    com_EOF = false;
 
     if (osd_fseek(fp_si, 0, SEEK_END))
       goto ERR;
@@ -1722,7 +1725,7 @@ ERR:
   }
   sio_close_serialin();
 
-  return FALSE;
+  return false;
 }
 void sio_close_serialin(void) {
   if (fp_si) {
@@ -1730,7 +1733,7 @@ void sio_close_serialin(void) {
     fp_si = NULL;
   }
   sio_set_intr_base();
-  /* com_X_flow = FALSE; */
+  /* com_X_flow = false; */
 }
 
 /*-------- シリアル出力用のファイルを "ab" で開く --------*/
@@ -1746,7 +1749,7 @@ int sio_open_serialout(const char *filename) {
     if (!quasi88_is_menu())
       printf("\n[[[ %s : Serial output file can't open ]]]\n\n", filename);
   }
-  return FALSE;
+  return false;
 }
 void sio_close_serialout(void) {
   if (fp_so) {
@@ -1786,11 +1789,11 @@ int sio_tape_rewind(void) {
     if (size == sizeof(buf) && memcmp(buf, T88_HEADER_STR, sizeof(buf)) == 0) { /* T88 */
       cmt_is_t88 = TRUE;
       cmt_block_size = 0;
-      cmt_EOF = FALSE;
+      cmt_EOF = false;
       cmt_skip = 0;
     } else { /* CMT */
-      cmt_is_t88 = FALSE;
-      cmt_EOF = FALSE;
+      cmt_is_t88 = false;
+      cmt_EOF = false;
       cmt_skip = 0;
       if (osd_fseek(fp_ti, 0, SEEK_SET))
         goto ERR;
@@ -1815,7 +1818,7 @@ ERR:
   sio_close_tapeload();
 
   cmt_stateload_chars = 0;
-  return FALSE;
+  return false;
 }
 
 /*-------- 開いているテープの現在位置を返す (何%読んだかの確認用) --------*/
@@ -1839,7 +1842,7 @@ int sio_tape_pos(long *cur, long *end) {
   }
   *cur = 0; /* 不明時は、位置=0/終端=0 にし、偽を返す */
   *end = 0;
-  return FALSE;
+  return false;
 }
 
 int sio_com_pos(long *cur, long *end) {
@@ -1861,7 +1864,7 @@ int sio_com_pos(long *cur, long *end) {
   }
   *cur = 0; /* 不明時は、位置=0/終端=0 にし、偽を返す */
   *end = 0;
-  return FALSE;
+  return false;
 }
 
 /*
@@ -1873,7 +1876,7 @@ static int sio_getc(int is_cmt, int *tick) {
   if (tick)
     *tick = 0;
 
-  if (is_cmt == FALSE) { /* シリアル入力 */
+  if (is_cmt == false) { /* シリアル入力 */
 
     if (use_siomouse) {
       c = get_serial_mouse_data();
@@ -2046,7 +2049,7 @@ static void sio_check_cmt_error() {
 static int sio_putc(int is_cmt, int c) {
   OSD_FILE *fp;
 
-  if (is_cmt == FALSE) {
+  if (is_cmt == false) {
     fp = fp_so;
   } /* シリアル出力 */
   else {
@@ -2066,7 +2069,7 @@ static int sio_putc(int is_cmt, int c) {
 static void sio_tape_highspeed_load() {
   int c, sum, addr, size;
 
-  if (sio_tape_readable() == FALSE)
+  if (sio_tape_readable() == false)
     return;
 
   /* マシン語ヘッダを探す */
@@ -2203,17 +2206,17 @@ static void sio_init() {
   sio_instruction = 0;
   sio_command = 0;
   sio_mode = 0;
-  sio_data_exist = FALSE;
+  sio_data_exist = false;
   sio_data = 0; /* 初期値は0。とあるゲームの救済のため… ;_; */
 
-  com_X_flow = FALSE;
+  com_X_flow = false;
 
   cmt_dummy_read_cnt = 0;
 }
 /*
  *
  */
-static void sio_out_command(byte data) {
+static void sio_out_command(uint8_t data) {
   if (sio_instruction == 0) { /* 内部リセット直後は、 */
     sio_mode = data;          /* モード受付け */
     sio_instruction = 1;
@@ -2230,8 +2233,8 @@ static void sio_out_command(byte data) {
     }
 
     if ((sio_command & 0x04) == 0) { /* リセットor受信禁止*/
-      sio_data_exist = FALSE;        /* なら、受信ワーク  */
-      RS232C_flag = FALSE;           /* をクリアする      */
+      sio_data_exist = false;        /* なら、受信ワーク  */
+      RS232C_flag = false;           /* をクリアする      */
     }
 
     sio_set_intr_base();
@@ -2241,14 +2244,14 @@ static void sio_out_command(byte data) {
 /*
  *
  */
-static void sio_out_data(byte data) {
+static void sio_out_data(uint8_t data) {
   int is_cmt;
 
   if ((sio_command & 0x01)) { /* 送信イネーブル */
     if (sys_ctrl & 0x20) {    /* シリアル出力の場合 */
-      is_cmt = FALSE;
+      is_cmt = false;
       if (data == 0x11) { /* ^Q 出力 */
-        com_X_flow = FALSE;
+        com_X_flow = false;
       } else if (data == 0x13) { /* ^S 出力 */
         com_X_flow = TRUE;
       }
@@ -2261,25 +2264,25 @@ static void sio_out_data(byte data) {
 /*
  *
  */
-static byte sio_in_data() {
+static uint8_t sio_in_data() {
   /*printf("->%02x ",sio_data);fflush(stdout);*/
-  sio_data_exist = FALSE;
-  RS232C_flag = FALSE;
+  sio_data_exist = false;
+  RS232C_flag = false;
   return sio_data;
 }
 /*
  *
  */
-static byte sio_in_status() {
+static uint8_t sio_in_status() {
   int c;
-  byte status = 0x80 | 0x04; /* 送信バッファエンプティ */
+  uint8_t status = 0x80 | 0x04; /* 送信バッファエンプティ */
                              /* DSR| TxE */
 
   if (sio_command & 0x04) { /* 現在、受信イネーブルの場合 */
 
     if ((sys_ctrl & 0x20) == 0 && /* テープで、SIO割り込みを  */
         sio_tape_readable() &&    /* 使わない場合、ここで読む */
-        cmt_intr == FALSE) {
+        cmt_intr == false) {
 
       cmt_dummy_read_cnt++; /* IN 21 を 2回実行する度に */
       if (cmt_dummy_read_cnt >= 2) {
@@ -2288,7 +2291,7 @@ static byte sio_in_status() {
         c = sio_getc(TRUE, 0); /* テープから1文字読む */
                                /*printf("[%03x]",c&0xfff);fflush(stdout);*/
         if (c != EOF) {
-          sio_data = (byte)c;
+          sio_data = (uint8_t)c;
           sio_data_exist = TRUE;
         }
       }
@@ -2327,8 +2330,8 @@ int sio_intr(void) {
     if (sys_ctrl & 0x20) { /* シリアル入力 */
 
       if (com_X_flow)
-        return FALSE;
-      c = sio_getc(FALSE, nullptr);
+        return false;
+      c = sio_getc(false, nullptr);
 
     } else { /* テープ入力(割込使用時のみ)*/
       if (cmt_intr) {
@@ -2356,13 +2359,13 @@ int sio_intr(void) {
     }
 
     if (c != EOF) {
-      sio_data = (byte)c;
+      sio_data = (uint8_t)c;
       sio_data_exist = TRUE;
       /*printf("<%02x> ",sio_data);fflush(stdout);*/
       return TRUE; /* RxRDY割り込み発生 */
     }
   }
-  return FALSE;
+  return false;
 }
 
 /*
@@ -2370,9 +2373,9 @@ int sio_intr(void) {
  */
 int tape_exist(void) { return (fp_ti || fp_to); }
 
-int tape_readable(void) { return (fp_ti) ? TRUE : FALSE; }
+int tape_readable(void) { return (fp_ti) ? TRUE : false; }
 
-int tape_writable(void) { return (fp_to) ? TRUE : FALSE; }
+int tape_writable(void) { return (fp_to) ? TRUE : false; }
 
 int tape_reading(void) { return (fp_ti && (sio_command & 4) && ((sys_ctrl & 0x28) == 0x08)); }
 
@@ -2393,7 +2396,7 @@ int printer_open(const char *filename) {
     if (!quasi88_is_menu())
       printf("\n[[[ %s : Printer output file can't open ]]]\n\n", filename);
   }
-  return FALSE;
+  return false;
 }
 void printer_close(void) {
   if (fp_prn) {
@@ -2415,14 +2418,14 @@ void printer_term() {}
 /* カレンダクロック                              */
 /*===========================================================================*/
 
-static Uchar shift_reg[7];
-static Uchar calendar_cdo;
+static uint8_t shift_reg[7];
+static uint8_t calendar_cdo;
 static int calendar_diff;
 
 static void get_calendar_work() {
   struct tm t;
 
-  if (calendar_stop == FALSE) {
+  if (calendar_stop == false) {
     time_t now_time;
     struct tm *tp;
 
@@ -2508,7 +2511,7 @@ void calendar_init() {
 }
 
 void calendar_shift_clock() {
-  byte x = (common_out_data >> 3) & 0x01;
+  uint8_t x = (common_out_data >> 3) & 0x01;
 
   calendar_cdo = shift_reg[0] & 0x01;
   shift_reg[0] = (shift_reg[0] >> 1) | (shift_reg[1] << 7);
@@ -2602,9 +2605,9 @@ void calendar_stlobe() {
 /* コントロール信号入出力                             */
 /*===========================================================================*/
 
-void out_ctrl_signal(byte data) {
-  byte trg_on = ~ctrl_signal & data;
-  byte trg_off = ctrl_signal & ~data;
+void out_ctrl_signal(uint8_t data) {
+  uint8_t trg_on = ~ctrl_signal & data;
+  uint8_t trg_off = ctrl_signal & ~data;
 
   if (trg_on & 0x01)
     printer_stlobe();
@@ -2630,7 +2633,7 @@ void out_ctrl_signal(byte data) {
   ctrl_signal = data;
 }
 
-byte in_ctrl_signal() { return ((ctrl_vrtc << 5) | (calendar_cdo << 4) | ctrl_boot | monitor_15k); }
+uint8_t in_ctrl_signal() { return ((ctrl_vrtc << 5) | (calendar_cdo << 4) | ctrl_boot | monitor_15k); }
 
 /************************************************************************/
 /* メモリの初期化 (電源投入時のみ)                    */
@@ -2639,7 +2642,7 @@ byte in_ctrl_signal() { return ((ctrl_vrtc << 5) | (calendar_cdo << 4) | ctrl_bo
 void    power_on_ram_init( void )
 {
   int   addr, i;
-  Uchar data;
+  uint8_t data;
 
         /* メイン RAM を特殊なパターンで埋める */
 
@@ -2678,7 +2681,7 @@ void    power_on_ram_init( void )
 #else /* FH ではこのような気がするけど……… */
 void power_on_ram_init(void) {
   int addr, i;
-  Uchar data;
+  uint8_t data;
 
   /* メイン RAM を特殊なパターンで埋める */
 
@@ -2803,13 +2806,13 @@ void pc88main_init(int init) {
   z80main_cpu.intr_update = main_INT_update;
   z80main_cpu.intr_ack = main_INT_chk;
 
-  z80main_cpu.break_if_halt = FALSE;    /* for debug */
+  z80main_cpu.break_if_halt = false;    /* for debug */
   z80main_cpu.PC_prev = z80main_cpu.PC; /* dummy for monitor */
 
 #ifdef DEBUGLOG
   z80main_cpu.log = TRUE;
 #else
-  z80main_cpu.log = FALSE;
+  z80main_cpu.log = false;
 #endif
 
   /* RAMを電源投入時パターンで初期化 */
@@ -2856,13 +2859,13 @@ void pc88main_init(int init) {
       dipsw_1 &= ~SW_N88;
       dipsw_2 |= SW_V1;
       dipsw_2 &= ~SW_H;
-      high_mode = FALSE;
+      high_mode = false;
       break;
     case BASIC_V1S:
       dipsw_1 |= SW_N88;
       dipsw_2 |= SW_V1;
       dipsw_2 &= ~SW_H;
-      high_mode = FALSE;
+      high_mode = false;
       break;
     case BASIC_V1H:
       dipsw_1 |= SW_N88;
@@ -2946,7 +2949,7 @@ void pc88main_term(void) {
 /************************************************************************/
 /* ブレークポイント関連                           */
 /************************************************************************/
-INLINE void check_break_point(int type, word addr, byte data, const char *str) {
+INLINE void check_break_point(int type, uint16_t addr, uint8_t data, const char *str) {
   int i;
 
   if (quasi88_is_monitor())
@@ -2962,30 +2965,30 @@ INLINE void check_break_point(int type, word addr, byte data, const char *str) {
   }
 }
 
-byte main_fetch_with_BP(word addr) {
-  byte data = main_fetch(addr);
+uint8_t main_fetch_with_BP(uint16_t addr) {
+  uint8_t data = main_fetch(addr);
   check_break_point(BP_READ, addr, data, "FETCH from");
   return data;
 }
 
-byte main_mem_read_with_BP(word addr) {
-  byte data = main_mem_read(addr);
+uint8_t main_mem_read_with_BP(uint16_t addr) {
+  uint8_t data = main_mem_read(addr);
   check_break_point(BP_READ, addr, data, "READ from");
   return data;
 }
 
-void main_mem_write_with_BP(word addr, byte data) {
+void main_mem_write_with_BP(uint16_t addr, uint8_t data) {
   main_mem_write(addr, data);
   check_break_point(BP_WRITE, addr, data, "WRITE to");
 }
 
-byte main_io_in_with_BP(byte port) {
-  byte data = main_io_in(port);
+uint8_t main_io_in_with_BP(uint8_t port) {
+  uint8_t data = main_io_in(port);
   check_break_point(BP_IN, port, data, "IN from");
   return data;
 }
 
-void main_io_out_with_BP(byte port, byte data) {
+void main_io_out_with_BP(uint8_t port, uint8_t data) {
   main_io_out(port, data);
   check_break_point(BP_OUT, port, data, "OUT to");
 }
@@ -3189,17 +3192,17 @@ int statesave_pc88main(void) {
   /*if( fp_ti ) printf("%d\n",osd_ftell(fp_ti));*/
 
   if (statesave_table(SID, suspend_pc88main_work) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (statesave_table(SID2, suspend_pc88main_work2) != STATE_OK)
-    return FALSE;
+    return false;
 
   return TRUE;
 }
 
 int stateload_pc88main(void) {
   if (stateload_table(SID, suspend_pc88main_work) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (stateload_table(SID2, suspend_pc88main_work2) != STATE_OK) {
 
@@ -3207,7 +3210,7 @@ int stateload_pc88main(void) {
 
     printf("stateload : Statefile is old. (ver 0.6.0, 1, 2 or 3?)\n");
 
-    use_siomouse = FALSE;
+    use_siomouse = false;
   }
 
   cmt_stateload_chars = cmt_read_chars;

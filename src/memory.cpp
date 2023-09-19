@@ -8,16 +8,19 @@
 #include <cstdlib>
 #include <cstring>
 
-extern "C" {
 #include "quasi88.h"
+
+#include "file-op.h"
 #include "initval.h"
 #include "memory.h"
+#include "menu.h" /* menu_lang    */
+#include "suspend.h"
+
+extern "C" {
 
 #include "soundbd.h" /* sound_board, sound2_adpcm    */
 
-#include "menu.h" /* menu_lang    */
-#include "file-op.h"
-#include "suspend.h"
+
 }
 
 int set_version; /* 起動時のバージョン強制変更 '0' 〜 '9'  */
@@ -25,18 +28,18 @@ int rom_version; /* (変更前の) BASIC ROMバージョン      */
 
 int use_extram = DEFAULT_EXTRAM;   /* 拡張RAMのカード数 */
 int use_jisho_rom = DEFAULT_JISHO; /* 辞書ROMを使う   */
-int use_built_in_font = FALSE;     /* 内蔵フォントを使う  */
-int use_pcg = FALSE;               /* PCG-8100サポート */
+int use_built_in_font = false;     /* 内蔵フォントを使う  */
+int use_pcg = false;               /* PCG-8100サポート */
 int font_type = 0;                 /* フォントの種類    */
 int font_loaded = 0;               /* ロードしたフォント種   */
 
-int memory_wait = FALSE; /* メモリウェイトの有無   */
+int memory_wait = false; /* メモリウェイトの有無   */
 
-char *file_compatrom = NULL; /* P88SR emu のROMを使う*/
+char *file_compatrom = nullptr; /* P88SR emu のROMを使う*/
 
-int has_kanji_rom = FALSE; /* 漢字ROMの有無   */
+int has_kanji_rom = false; /* 漢字ROMの有無   */
 
-int linear_ext_ram = TRUE; /* 拡張RAMを連続させる  */
+int linear_ext_ram = true; /* 拡張RAMを連続させる  */
 
 /*----------------------------------------------------------------------*/
 /* 内蔵フォントデータ                          */
@@ -46,7 +49,7 @@ int linear_ext_ram = TRUE; /* 拡張RAMを連続させる  */
 /*----------------------------------------------------------------------*/
 /* 漢字ダミーROM (漢字ROMが無い時のダミー)               */
 /*----------------------------------------------------------------------*/
-byte kanji_dummy_rom[16][2] = {
+uint8_t kanji_dummy_rom[16][2] = {
     {0xaa, 0xaa}, /* o o o o o o o o  */
     {0x00, 0x00}, /*                  */
     {0x80, 0x02}, /* o             o  */
@@ -101,27 +104,27 @@ static const char *rom_list[ROM_END][5] = {
     {"FONT3.ROM", "font3.rom", nullptr, nullptr, nullptr},
 };
 
-byte *main_rom;               /* メイン ROM [0x8000] (32KB)    */
-byte (*main_rom_ext)[0x2000]; /* 拡張 ROM [4][0x2000](8KB *4)   */
-byte *main_rom_n;             /* N-BASIC [0x8000]    (32KB)   */
-byte *main_ram;               /* メイン RAM [0x10000](64KB)    */
-byte *main_high_ram;          /* 高速 RAM(の裏)[0x1000] (4KB) */
-byte (*kanji_rom)[65536][2];  /* 漢字ＲＯＭ[2][65536][2] */
-byte *sub_romram;             /* サブ ROM/RAM [0x8000] (32KB)   */
+uint8_t *main_rom;               /* メイン ROM [0x8000] (32KB)    */
+uint8_t (*main_rom_ext)[0x2000]; /* 拡張 ROM [4][0x2000](8KB *4)   */
+uint8_t *main_rom_n;             /* N-BASIC [0x8000]    (32KB)   */
+uint8_t *main_ram;               /* メイン RAM [0x10000](64KB)    */
+uint8_t *main_high_ram;          /* 高速 RAM(の裏)[0x1000] (4KB) */
+uint8_t (*kanji_rom)[65536][2];  /* 漢字ＲＯＭ[2][65536][2] */
+uint8_t *sub_romram;             /* サブ ROM/RAM [0x8000] (32KB)   */
 
-byte (*ext_ram)[0x8000];   /* 拡張 RAM[4][0x8000](32KB*4〜)*/
-byte (*jisho_rom)[0x4000]; /* 辞書 ROM[32][0x4000](16KB*32)*/
+uint8_t (*ext_ram)[0x8000];   /* 拡張 RAM[4][0x8000](32KB*4〜)*/
+uint8_t (*jisho_rom)[0x4000]; /* 辞書 ROM[32][0x4000](16KB*32)*/
 
-bit8 (*main_vram)[4]; /* VRAM[0x4000][4](=G/R/G/pad)  */
-bit8 *font_rom;       /* フォントイメージROM[8*256*2] */
+uint8_t (*main_vram)[4]; /* VRAM[0x4000][4](=G/R/G/pad)  */
+uint8_t *font_rom;       /* フォントイメージROM[8*256*2] */
 
-bit8 *font_pcg;  /* フォントイメージROM(PCG用)  */
-bit8 *font_mem;  /* フォントイメージROM(固定 ) */
-bit8 *font_mem2; /* フォントイメージROM(固定2) */
-bit8 *font_mem3; /* フォントイメージROM(固定3) */
+uint8_t *font_pcg;  /* フォントイメージROM(PCG用)  */
+uint8_t *font_mem;  /* フォントイメージROM(固定 ) */
+uint8_t *font_mem2; /* フォントイメージROM(固定2) */
+uint8_t *font_mem3; /* フォントイメージROM(固定3) */
 
-byte *dummy_rom; /* ダミーROM (32KB)      */
-byte *dummy_ram; /* ダミーRAM (32KB)      */
+uint8_t *dummy_rom; /* ダミーROM (32KB)      */
+uint8_t *dummy_ram; /* ダミーRAM (32KB)      */
 
 /*----------------------------------------------------------------------
  * メモリアロケート
@@ -134,15 +137,15 @@ static void mem_alloc_start(const char *msg) /* メモリ確保開始 */
     printf("%s", msg);
   }
 
-  mem_alloc_result = TRUE;
+  mem_alloc_result = true;
 }
 
 static void *mem_alloc(size_t size) /* メモリ確保 */
 {
   void *ptr = malloc(size);
 
-  if (ptr == NULL) {
-    mem_alloc_result = FALSE;
+  if (ptr == nullptr) {
+    mem_alloc_result = false;
   }
   return ptr;
 }
@@ -150,7 +153,7 @@ static void *mem_alloc(size_t size) /* メモリ確保 */
 static int mem_alloc_finish(void) /* メモリ確保完了(偽で失敗) */
 {
   if (verbose_proc) {
-    if (mem_alloc_result == FALSE) {
+    if (!mem_alloc_result) {
       printf("FAILED\n");
     } else {
       printf("OK\n");
@@ -166,7 +169,7 @@ static int mem_alloc_finish(void) /* メモリ確保完了(偽で失敗) */
 
 /*
  * 通常のROMイメージロード
- *  int load_rom( char *filelist[], byte *ptr, int size, int disp_flag )
+ *  int load_rom( char *filelist[], uint8_t *ptr, int size, int disp_flag )
  *      filelist … オープンするファイル名一覧のリスト
  *      ptr      … このポインタの先にロードする
  *      size     … ロードするサイズ
@@ -195,7 +198,7 @@ static int mem_alloc_finish(void) /* メモリ確保完了(偽で失敗) */
 #define DISP_RESULT (1)
 #define DISP_IF_EXIST (2)
 
-static int load_rom(const char *filelist[], byte *ptr, int size, int disp) {
+static int load_rom(const char *filelist[], uint8_t *ptr, int size, int disp) {
   OSD_FILE *fp;
   int i = 0, load_size = -1;
   char buf[OSD_MAX_FILENAME];
@@ -204,12 +207,12 @@ static int load_rom(const char *filelist[], byte *ptr, int size, int disp) {
   if (dir) {
     for (i = 0; filelist[i]; i++) {
 
-      if (osd_path_join(dir, filelist[i], buf, OSD_MAX_FILENAME) == FALSE)
+      if (!osd_path_join(dir, filelist[i], buf, OSD_MAX_FILENAME))
         break;
 
       if ((fp = osd_fopen(FTYPE_ROM, buf, "rb"))) {
 
-        load_size = osd_fread(ptr, sizeof(byte), size, fp);
+        load_size = osd_fread(ptr, sizeof(uint8_t), size, fp);
         osd_fclose(fp);
 
         break;
@@ -249,10 +252,10 @@ static int load_rom(const char *filelist[], byte *ptr, int size, int disp) {
  *  OSD_FILE *load_compat_rom_open( void )
  *  void load_compat_rom_close( OSD_FILE *fp )
  *      ファイルを開く / 閉じる
- *  int load_compat_rom( byte *ptr, long pos, int size, OSD_FILE *fp )
+ *  int load_compat_rom( uint8_t *ptr, long pos, int size, OSD_FILE *fp )
  *      ファイルfp の先頭 posバイト目から sizeバイトを ptrにロード。
  *      戻値はロードしたサイズ。シーク失敗なら -1。
- *  途中で1度でも処理に失敗したら、 load_compat_rom_success==FALSE になる
+ *  途中で1度でも処理に失敗したら、 load_compat_rom_success==false になる
  */
 static int load_compat_rom_success;
 
@@ -267,15 +270,15 @@ static OSD_FILE *load_compat_rom_open(void) {
     }
   }
 
-  if (fp == NULL)
-    load_compat_rom_success = FALSE;
+  if (fp == nullptr)
+    load_compat_rom_success = false;
   else
-    load_compat_rom_success = TRUE;
+    load_compat_rom_success = true;
 
   return fp;
 }
 
-static int load_compat_rom(byte *ptr, long pos, int size, OSD_FILE *fp) {
+static int load_compat_rom(uint8_t *ptr, long pos, int size, OSD_FILE *fp) {
   int load_size = -1;
 
   if (fp) {
@@ -289,7 +292,7 @@ static int load_compat_rom(byte *ptr, long pos, int size, OSD_FILE *fp) {
     }
 
     if (load_size != size)
-      load_compat_rom_success = FALSE;
+      load_compat_rom_success = false;
   }
 
   return load_size;
@@ -316,23 +319,23 @@ int memory_allocate() {
 
   mem_alloc_start("Allocating memory for standard ROM/RAM...");
   {
-    main_rom = (byte *)mem_alloc(sizeof(byte) * 0x8000);
-    main_rom_ext = (byte(*)[0x2000])mem_alloc(sizeof(byte) * 0x2000 * 4);
-    main_rom_n = (byte *)mem_alloc(sizeof(byte) * 0x8000);
-    sub_romram = (byte *)mem_alloc(sizeof(byte) * 0x8000);
+    main_rom = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x8000);
+    main_rom_ext = (uint8_t(*)[0x2000])mem_alloc(sizeof(uint8_t) * 0x2000 * 4);
+    main_rom_n = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x8000);
+    sub_romram = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x8000);
 
-    main_ram = (byte *)mem_alloc(sizeof(byte) * 0x10000);
-    main_high_ram = (byte *)mem_alloc(sizeof(byte) * 0x1000);
-    main_vram = (byte(*)[0x4])mem_alloc(sizeof(byte) * 0x4000 * 4);
+    main_ram = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x10000);
+    main_high_ram = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x1000);
+    main_vram = (uint8_t(*)[0x4])mem_alloc(sizeof(uint8_t) * 0x4000 * 4);
 
-    kanji_rom = (byte(*)[65536][2])mem_alloc(sizeof(byte) * 2 * 65536 * 2);
+    kanji_rom = (uint8_t(*)[65536][2])mem_alloc(sizeof(uint8_t) * 2 * 65536 * 2);
 
-    font_pcg = (byte *)mem_alloc(sizeof(byte) * 8 * 256 * 2);
-    font_mem = (byte *)mem_alloc(sizeof(byte) * 8 * 256 * 2);
-    font_mem2 = (byte *)mem_alloc(sizeof(byte) * 8 * 256 * 2);
-    font_mem3 = (byte *)mem_alloc(sizeof(byte) * 8 * 256 * 2);
+    font_pcg = (uint8_t *)mem_alloc(sizeof(uint8_t) * 8 * 256 * 2);
+    font_mem = (uint8_t *)mem_alloc(sizeof(uint8_t) * 8 * 256 * 2);
+    font_mem2 = (uint8_t *)mem_alloc(sizeof(uint8_t) * 8 * 256 * 2);
+    font_mem3 = (uint8_t *)mem_alloc(sizeof(uint8_t) * 8 * 256 * 2);
   }
-  if (mem_alloc_finish() == FALSE) {
+  if (!mem_alloc_finish()) {
     return 0;
   }
 
@@ -378,7 +381,7 @@ int memory_allocate() {
       load_compat_rom(&main_rom_n[0x6000], 0x08000, 0x2000, fp);
       load_compat_rom(sub_romram, 0x14000, 0x2000, fp);
 
-      if (load_compat_rom_success == FALSE) { /* ここ迄で失敗があれば終了 */
+      if (!load_compat_rom_success) { /* ここ迄で失敗があれば終了 */
         if (verbose_proc) {
           printf("FAILED\n");
         }
@@ -407,9 +410,9 @@ int memory_allocate() {
   size = load_rom(rom_list[KNJ1_ROM], kanji_rom[0][0], 0x20000, DISP_RESULT);
 
   if (size == 0x20000) {
-    has_kanji_rom = TRUE;
+    has_kanji_rom = true;
   } else {
-    has_kanji_rom = FALSE;
+    has_kanji_rom = false;
     menu_lang = MENU_ENGLISH;
   }
 
@@ -541,7 +544,7 @@ int memory_allocate() {
 
   /* オプショナルなメモリを確保 */
 
-  if (memory_allocate_additional() == FALSE) {
+  if (!memory_allocate_additional()) {
     return 0;
   }
 
@@ -563,7 +566,7 @@ int memory_allocate_additional() {
     if (use_extram <= 4 || BETWEEN(8, use_extram, 10) || use_extram == 16) {
       ;
     } else {
-      linear_ext_ram = TRUE;
+      linear_ext_ram = true;
     }
 
     /* 確保済みサイズが小さければ、確保しなおし */
@@ -579,14 +582,14 @@ int memory_allocate_additional() {
 
       mem_alloc_start(msg);
 
-      ext_ram = (byte(*)[0x8000])mem_alloc(sizeof(byte) * 0x8000 * 4 * use_extram);
+      ext_ram = (uint8_t(*)[0x8000])mem_alloc(sizeof(uint8_t) * 0x8000 * 4 * use_extram);
 
       if (dummy_rom == nullptr)
-        dummy_rom = (byte *)mem_alloc(sizeof(byte) * 0x8000);
+        dummy_rom = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x8000);
       if (dummy_ram == nullptr)
-        dummy_ram = (byte *)mem_alloc(sizeof(byte) * 0x8000);
+        dummy_ram = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x8000);
 
-      if (mem_alloc_finish() == FALSE) {
+      if (!mem_alloc_finish()) {
         return 0;
       }
 
@@ -606,9 +609,9 @@ int memory_allocate_additional() {
 
       mem_alloc_start("Allocating memory for Jisho ROM...");
 
-      jisho_rom = (byte(*)[0x4000])mem_alloc(sizeof(byte) * 0x4000 * 32);
+      jisho_rom = (uint8_t(*)[0x4000])mem_alloc(sizeof(uint8_t) * 0x4000 * 32);
 
-      if (mem_alloc_finish() == FALSE) {
+      if (!mem_alloc_finish()) {
         return 0;
       }
 
@@ -624,9 +627,9 @@ int memory_allocate_additional() {
 
       mem_alloc_start("Allocating memory for ADPCM RAM...");
 
-      sound2_adpcm = (byte *)mem_alloc(sizeof(byte) * 0x40000);
+      sound2_adpcm = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x40000);
 
-      if (mem_alloc_finish() == FALSE) {
+      if (!mem_alloc_finish()) {
         return 0;
       }
     }
@@ -642,7 +645,7 @@ int memory_allocate_additional() {
  *  PCGフォントデータを通常のフォントで初期化
  *****************************************************************************/
 void memory_reset_font() {
-  memcpy(font_pcg, font_mem, sizeof(byte) * 8 * 256 * 2);
+  memcpy(font_pcg, font_mem, sizeof(uint8_t) * 8 * 256 * 2);
 
   memory_set_font();
 }
@@ -736,40 +739,40 @@ static T_SUSPEND_W suspend_memory_work2[] = {
 
 int statesave_memory(void) {
   if (statesave_table(SID, suspend_memory_work) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (statesave_table(SID2, suspend_memory_work2) != STATE_OK)
-    return FALSE;
+    return false;
 
   /* 通常メモリ */
 
   if (statesave_block(SID_MAIN, main_ram, 0x10000) != STATE_OK)
-    return FALSE;
+    return false;
   if (statesave_block(SID_HIGH, main_high_ram, 0x1000) != STATE_OK)
-    return FALSE;
+    return false;
   if (statesave_block(SID_SUB, &sub_romram[0x4000], 0x4000) != STATE_OK)
-    return FALSE;
+    return false;
   if (statesave_block(SID_VRAM, main_vram, 4 * 0x4000) != STATE_OK)
-    return FALSE;
+    return false;
   if (statesave_block(SID_PCG, font_pcg, 8 * 256 * 2) != STATE_OK)
-    return FALSE;
+    return false;
 
   /* オプショナルなメモリ */
 
   if (sound_board == SOUND_II) {
     if (statesave_block(SID_ADPCM, sound2_adpcm, 0x40000) != STATE_OK)
-      return FALSE;
+      return false;
   }
   if (use_extram) {
     if (statesave_block(SID_ERAM, ext_ram, 0x8000 * 4 * use_extram) != STATE_OK)
-      return FALSE;
+      return false;
   }
-  return TRUE;
+  return true;
 }
 
 int stateload_memory(void) {
   if (stateload_table(SID, suspend_memory_work) != STATE_OK)
-    return FALSE;
+    return false;
 
   /* 〜0.6.3 はステートセーブ保存時に、 ROMバージョン値をバージョン強制変更値
      として 保存している。(つまり、オプション -server X 指定状態になっている)
@@ -783,34 +786,34 @@ int stateload_memory(void) {
 
     printf("stateload : Statefile is old. (ver 0.6.0, 1, 2 or 3?)\n");
 
-    linear_ext_ram = TRUE;
+    linear_ext_ram = true;
   }
 
   /* 通常メモリ */
 
   if (stateload_block(SID_MAIN, main_ram, 0x10000) != STATE_OK)
-    return FALSE;
+    return false;
   if (stateload_block(SID_HIGH, main_high_ram, 0x1000) != STATE_OK)
-    return FALSE;
+    return false;
   if (stateload_block(SID_SUB, &sub_romram[0x4000], 0x4000) != STATE_OK)
-    return FALSE;
+    return false;
   if (stateload_block(SID_VRAM, main_vram, 4 * 0x4000) != STATE_OK)
-    return FALSE;
+    return false;
   if (stateload_block(SID_PCG, font_pcg, 8 * 256 * 2) != STATE_OK)
-    return FALSE;
+    return false;
 
   /* オプショナルなメモリ */
 
-  if (memory_allocate_additional() == FALSE) {
-    return FALSE;
+  if (memory_allocate_additional() == false) {
+    return false;
   }
   if (sound_board == SOUND_II) {
     if (stateload_block(SID_ADPCM, sound2_adpcm, 0x40000) != STATE_OK)
-      return FALSE;
+      return false;
   }
   if (use_extram) {
     if (stateload_block(SID_ERAM, ext_ram, 0x8000 * 4 * use_extram) != STATE_OK)
-      return FALSE;
+      return false;
   }
-  return TRUE;
+  return true;
 }

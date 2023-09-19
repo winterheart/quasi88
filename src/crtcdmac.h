@@ -4,7 +4,7 @@
 extern int crtc_active;     /* CRTCの状態 0:CRTC作動 1:CRTC停止 */
 extern int crtc_intr_mask;  /* CRTCの割込マスク ==3 で表示     */
 extern int crtc_cursor[2];  /* カーソル位置 非表示の時は(-1,-1) */
-extern byte crtc_format[5]; /* CRTC 期化時のフォーマット      */
+extern uint8_t crtc_format[5]; /* CRTC 期化時のフォーマット      */
 
 extern int crtc_reverse_display;   /* 真…反転表示 / 偽…通常表示  */
 extern int crtc_skip_line;         /* 真…1行飛ばし表示 / 偽…通常 */
@@ -55,31 +55,40 @@ extern int dma_next_vline; /* DMAウェイトを再計算する次のステー�
 /* テキスト処理 */
 
 extern int text_attr_flipflop;
-extern Ushort text_attr_buf[2][2048];
+extern uint16_t text_attr_buf[2][2048];
 
 typedef union {
-  bit8 b[12];
-  bit32 l[3];
+  uint8_t b[12];
+  uint32_t l[3];
 } T_GRYPH;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void get_font_gryph(int attr, T_GRYPH *gryph, int *color);
+
+#ifdef __cplusplus
+}
+#endif
+
 void crtc_make_text_attr();
 
 void crtc_init();
 
-void crtc_out_command(byte data);
-void crtc_out_parameter(byte data);
-byte crtc_in_status();
-byte crtc_in_parameter();
+void crtc_out_command(uint8_t data);
+void crtc_out_parameter(uint8_t data);
+uint8_t crtc_in_status();
+uint8_t crtc_in_parameter();
 
 void dmac_init();
 
-void dmac_out_mode(byte data);
-byte dmac_in_status();
-void dmac_out_address(byte addr, byte data);
-void dmac_out_counter(byte addr, byte data);
-byte dmac_in_address(byte addr);
-byte dmac_in_counter(byte addr);
+void dmac_out_mode(uint8_t data);
+uint8_t dmac_in_status();
+void dmac_out_address(uint8_t addr, uint8_t data);
+void dmac_out_counter(uint8_t addr, uint8_t data);
+uint8_t dmac_in_address(uint8_t addr);
+uint8_t dmac_in_counter(uint8_t addr);
 
 #undef SUPPORT_CRTC_SEND_SYNC_SIGNAL
 

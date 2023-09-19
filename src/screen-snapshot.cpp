@@ -6,12 +6,14 @@
 
 #include <string.h>
 
-extern "C" {
 #include "quasi88.h"
-#include "screen.h"
-#include "screen-func.h"
+
 #include "crtcdmac.h"
 #include "memory.h"
+#include "screen.h"
+
+extern "C" {
+#include "screen-func.h"
 }
 
 extern char screen_snapshot[];

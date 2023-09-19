@@ -1,29 +1,29 @@
 #include <cstdlib>
 #include <cstring>
 
-extern "C" {
 #include "quasi88.h"
+
+#include "drive.h"
+#include "event.h"
 #include "fname.h"
 #include "keyboard.h"
+#include "intr.h"    /* state_of_cpu         */
+#include "menu.h"
+#include "pause.h"
+#include "pc88main.h" /* boot_clock_4mhz      */
 #include "romaji.h"
-#include "event.h"
+#include "screen.h"
+#include "status.h"
+#include "suspend.h"
+#include "utility.h"
+
+extern "C" {
 
 #include "soundbd.h" /* sound_reg[]          */
 #include "pc88cpu.h" /* z80main_cpu          */
-#include "intr.h"    /* state_of_cpu         */
 
 #include "snddrv.h"   /* xmame_XXX            */
-#include "pc88main.h" /* boot_clock_4mhz      */
 
-#include "drive.h"
-
-#include "status.h"
-#include "pause.h"
-#include "menu.h"
-#include "screen.h"
-
-#include "suspend.h"
-#include "utility.h"
 }
 
 /******************************************************************************
@@ -61,7 +61,7 @@ static int jop1_dx;   /* 汎用I/Oポートの値 (マウス x方向変位)   */
 static int jop1_dy;   /* 汎用I/Oポートの値 (マウス y方向変位)   */
 static int jop1_time; /* 汎用I/Oポートのストローブ処理した時  */
 
-int romaji_input_mode = FALSE; /* 真:ローマ字入力中    */
+int romaji_input_mode = false; /* 真:ローマ字入力中    */
 
 /*
   mouse_x, mouse_dx, jop1_dx の関係
@@ -79,7 +79,7 @@ int romaji_input_mode = FALSE; /* 真:ローマ字入力中    */
 int mouse_mode = MOUSE_NONE; /* マウス・ジョイステック処理  */
 
 int mouse_sensitivity = 100;   /* マウス感度          */
-int mouse_swap_button = FALSE; /* マウスボタンを入れ替える     */
+int mouse_swap_button = false; /* マウスボタンを入れ替える     */
 
 int mouse_key_mode = 0;  /* マウス入力をキーに反映    */
 int mouse_key_assign[6]; /*     0:なし 1:テンキー 2:任意 */
@@ -92,11 +92,11 @@ int joy_key_assign[12]; /*     0:なし 1:テンキー 2:任意 */
 static const int joy_key_assign_tenkey[12] = {
     KEY88_KP_8, KEY88_KP_2, KEY88_KP_4, KEY88_KP_6, KEY88_x, KEY88_z, 0, 0, 0, 0, 0, 0,
 };
-int joy_swap_button = FALSE; /* ボタンのABを入れ替える     */
+int joy_swap_button = false; /* ボタンのABを入れ替える     */
 
 int joy2_key_mode = 0;        /* ジョイ２入力をキーに反映 */
 int joy2_key_assign[12];      /*     0:なし 1:テンキー 2:任意 */
-int joy2_swap_button = FALSE; /* ボタンのABを入れ替える     */
+int joy2_swap_button = false; /* ボタンのABを入れ替える     */
 
 int cursor_key_mode = 0;  /* カーソルキーを別キーに反映  */
 int cursor_key_assign[4]; /*     0:なし 1:テンキー 2:任意 */
@@ -108,8 +108,8 @@ static const int cursor_key_assign_tenkey[4] = {
 }; /* Cursor KEY -> 10 KEY , original by funa. (thanks!) */
    /* Cursor Key -> 任意のキー , original by floi. (thanks!) */
 
-int tenkey_emu = FALSE;  /* 真:数字キーをテンキーに   */
-int numlock_emu = FALSE; /* 真:ソフトウェアNumLockを行う   */
+int tenkey_emu = false;  /* 真:数字キーをテンキーに   */
+int numlock_emu = false; /* 真:ソフトウェアNumLockを行う   */
 
 /* ファンクションキーの機能     */
 int function_f[1 + 20] = {
@@ -137,11 +137,11 @@ static OSD_FILE *fp_rec;
 static OSD_FILE *fp_pb;
 
 static struct {  /* キー入力記録構造体      */
-  Uchar key[16]; /*  I/O 00H〜0FH       */
+  uint8_t key[16]; /*  I/O 00H〜0FH       */
   char dx_h;     /*  マウス dx 上位     */
-  Uchar dx_l;    /*  マウス dx 下位     */
+  uint8_t dx_l;    /*  マウス dx 下位     */
   char dy_h;     /*  マウス dy 上位     */
-  Uchar dy_l;    /*  マウス dy 下位     */
+  uint8_t dy_l;    /*  マウス dy 下位     */
   char image[2]; /*  イメージNo -1空,0同,1〜  */
   char resv[2];
 } key_record; /* 24 bytes         */
@@ -261,7 +261,7 @@ void keyboard_switch(void) {
 
       「なし」の欄は、QUASI88には反映されないので、自由にキー割り当て可能。
     */
-    swap = FALSE;
+    swap = false;
 
     switch (mouse_mode) { /* マウスの入力割り当て変更 */
     case MOUSE_NONE:
@@ -309,7 +309,7 @@ void keyboard_switch(void) {
       swap_key_function(KEY88_MOUSE_L, KEY88_MOUSE_R);
     }
 
-    swap = FALSE;
+    swap = false;
 
     switch (mouse_mode) { /* ジョイスティック入力割り当て変更 */
     case MOUSE_NONE:
@@ -691,7 +691,7 @@ static void record_playback() {
     key_record.dy_l = mouse_dy & 0xff;
 
     for (i = 0; i < 2; i++) {
-      if (disk_image_exist(i) && drive_check_empty(i) == FALSE)
+      if (disk_image_exist(i) && drive_check_empty(i) == false)
         img = disk_image_selected(i) + 1;
       else
         img = -1;
@@ -858,7 +858,7 @@ void keyboard_jop1_strobe(void) {
  * カナ（ローマ字）キーロック
  ************************************************************************/
 void quasi88_cfg_key_numlock(int on) {
-  if (((numlock_emu) && (on == FALSE)) || ((numlock_emu == FALSE) && (on))) {
+  if (((numlock_emu) && (on == false)) || ((numlock_emu == false) && (on))) {
 
     if (numlock_emu)
       event_numlock_off();
@@ -867,21 +867,21 @@ void quasi88_cfg_key_numlock(int on) {
   }
 }
 void quasi88_cfg_key_kana(int on) {
-  if (((IS_KEY88_PRESS(KEY88_KANA)) && (on == FALSE)) || ((IS_KEY88_PRESS(KEY88_KANA) == FALSE) && (on))) {
+  if (((IS_KEY88_PRESS(KEY88_KANA)) && (on == false)) || ((IS_KEY88_PRESS(KEY88_KANA) == false) && (on))) {
 
     KEY88_TOGGLE(KEY88_KANA);
-    romaji_input_mode = FALSE;
+    romaji_input_mode = false;
   }
 }
 void quasi88_cfg_key_romaji(int on) {
-  if (((IS_KEY88_PRESS(KEY88_KANA)) && (on == FALSE)) || ((IS_KEY88_PRESS(KEY88_KANA) == FALSE) && (on))) {
+  if (((IS_KEY88_PRESS(KEY88_KANA)) && (on == false)) || ((IS_KEY88_PRESS(KEY88_KANA) == false) && (on))) {
 
     KEY88_TOGGLE(KEY88_KANA);
     if (IS_KEY88_PRESS(KEY88_KANA)) {
       romaji_input_mode = TRUE;
       romaji_clear();
     } else {
-      romaji_input_mode = FALSE;
+      romaji_input_mode = false;
     }
   }
 }
@@ -1134,7 +1134,7 @@ static int do_func(int func, int on) {
     if (on) {
       if (quasi88_cfg_can_fullscreen()) {
         int now = quasi88_cfg_now_fullscreen();
-        int next = (now) ? FALSE : TRUE;
+        int next = (now) ? false : TRUE;
         quasi88_cfg_set_fullscreen(next);
       }
     }
@@ -1182,7 +1182,7 @@ static int do_func(int func, int on) {
   case FN_KANA: /* カナ */
     if (on) {
       KEY88_TOGGLE(KEY88_KANA);
-      romaji_input_mode = FALSE;
+      romaji_input_mode = false;
     }
     return 0;
 
@@ -1193,7 +1193,7 @@ static int do_func(int func, int on) {
         romaji_input_mode = TRUE;
         romaji_clear();
       } else {
-        romaji_input_mode = FALSE;
+        romaji_input_mode = false;
       }
     }
     return 0;
@@ -1226,7 +1226,7 @@ static int do_func(int func, int on) {
     if (on) {
       if (quasi88_cfg_can_showstatus()) {
         int now = quasi88_cfg_now_showstatus();
-        int next = (now) ? FALSE : TRUE;
+        int next = (now) ? false : TRUE;
         quasi88_cfg_set_showstatus(next);
       }
     }
@@ -1550,7 +1550,7 @@ void softkey_press(int code) {
 /* ソフトウェアキーボードを離す */
 void softkey_release(int code) {
   if (IS_KEY88_LATTERTYPE(code)) {
-    do_lattertype(code, FALSE);
+    do_lattertype(code, false);
   }
   KEY88_RELEASE(code);
 }
@@ -1565,7 +1565,7 @@ void softkey_release_all(void) {
 /* ソフトウェアキーボードの、キーボードバグを再現 */
 void softkey_bug(void) {
   int my_port, your_port;
-  byte my_val, your_val, save_val;
+  uint8_t my_val, your_val, save_val;
 
   save_val = key_scan[8] & 0xf0; /* port 8 の 上位 4bit は対象外 */
   key_scan[8] |= 0xf0;
@@ -1810,23 +1810,23 @@ int statesave_keyboard(void) {
   function_new2old();
 
   if (statesave_table(SID, suspend_keyboard_work) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (statesave_table(SID2, suspend_keyboard_work2) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (statesave_table(SID3, suspend_keyboard_work3) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (statesave_table(SID4, suspend_keyboard_work4) != STATE_OK)
-    return FALSE;
+    return false;
 
   return TRUE;
 }
 
 int stateload_keyboard(void) {
   if (stateload_table(SID, suspend_keyboard_work) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (stateload_table(SID2, suspend_keyboard_work2) != STATE_OK) {
 
@@ -2224,8 +2224,8 @@ int config_read_keyconf_file(const char *keyconf_filename,
                              const char *(*setting_callback)(int type, int code, int key88, int numlock_key88)) {
   const char *filename;
   OSD_FILE *fp = nullptr;
-  int working = FALSE;
-  int effective = FALSE;
+  int working = false;
+  int effective = false;
 
   int line_cnt = 0;
   char line[MAX_KEYFILE_LINE];
@@ -2260,7 +2260,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
   }
 
   if (fp == nullptr)
-    return FALSE; /* 開けなかったら偽を返す */
+    return false; /* 開けなかったら偽を返す */
 
   /* キー設定ファイルを1行づつ解析 */
 
@@ -2334,7 +2334,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
           fprintf(stderr, "warning: %s in %d (ignored)\n", err_mes, line_cnt);
         }
 
-        working = FALSE;
+        working = false;
       }
 
     } else { /* 「設定行」を処理 */
@@ -2387,7 +2387,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
       printf("(read end   in line %d)\n", line_cnt - 1);
   }
 
-  if (effective == FALSE) {
+  if (effective == false) {
     fprintf(stderr, "warning: not configured (use initial config)\n");
   }
 
@@ -2395,7 +2395,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
     printf("\n");
   }
 
-  return (effective) ? TRUE : FALSE;
+  return (effective) ? TRUE : false;
 }
 
 static int symbol2int(const char *str, const T_SYMBOL_TABLE table_symbol2int[], int table_size, int table_ignore_case) {

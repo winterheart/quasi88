@@ -102,7 +102,7 @@ set(COMMON_SOURCES
 	src/event.cpp
 	src/fdc.cpp
 	src/file-op.cpp
-	src/fname.c
+	src/fname.cpp
 	src/getconf.cpp
 	src/image.cpp
 	src/intr.cpp
@@ -125,10 +125,10 @@ set(COMMON_SOURCES
 	src/soundbd.cpp
 	src/status.cpp
 	src/suspend.cpp
-	src/q8tk.c
-	src/q8tk-glib.c
+	src/q8tk.cpp
+	src/q8tk-glib.cpp
 	src/quasi88.cpp
-	src/utility.c
+	src/utility.cpp
 	src/z80.cpp
 	src/z80-debug.cpp
 )

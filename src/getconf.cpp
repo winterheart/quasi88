@@ -7,31 +7,34 @@
 #include <cstdlib>
 #include <cstring>
 
-extern "C" {
 #include "quasi88.h"
-#include "debug.h"
-#include "initval.h"
-#include "getconf.h"
 
-#include "pc88main.h"
-#include "pc88sub.h"
+#include "emu.h"
+#include "fdc.h"
+#include "file-op.h"
+#include "fname.h"
+#include "initval.h"
 #include "intr.h"
 #include "keyboard.h"
 #include "memory.h"
-#include "monitor.h"
-#include "screen.h"
-#include "soundbd.h"
-#include "fdc.h"
-
-#include "emu.h"
-#include "file-op.h"
-#include "fname.h"
 #include "menu.h"
-#include "status.h"
-#include "snddrv.h"
+#include "monitor.h"
+#include "pc88main.h"
+#include "screen.h"
 #include "snapshot.h"
+#include "status.h"
 #include "suspend.h"
 #include "utility.h"
+
+extern "C" {
+#include "debug.h"
+
+#include "getconf.h"
+#include "pc88sub.h"
+#include "soundbd.h"
+
+
+#include "snddrv.h"
 }
 
 /*----------------------------------------------------------------------*/
@@ -81,7 +84,7 @@ static signed char opt_prioroty[OPT_GROUPS];
 T_CONFIG_IMAGE config_image; /* 引数で指定されたイメージファイル */
 
 static int load_config = TRUE; /* 真で、起動時に設定読み込む */
-int save_config = FALSE;       /* 真で、終了時に設定保存する */
+int save_config = false;       /* 真で、終了時に設定保存する */
 
 /* ヘルプ表示用の、コマンド (argv[0]) */
 static const char *command = "QUASI88";
@@ -254,25 +257,25 @@ static int o_monitor(UNUSED_ARG) {
 static int oo_resumefilename(char *filename, int force) {
   if (filename && (strlen(filename) >= QUASI88_MAX_FILENAME)) {
     fprintf(stderr, "filename %s too long, ignored\n", filename);
-    resume_flag = FALSE;
-    resume_force = FALSE;
-    resume_file = FALSE;
+    resume_flag = false;
+    resume_force = false;
+    resume_file = false;
     filename_set_state(nullptr);
   } else {
     resume_flag = TRUE;
     resume_force = force;
-    resume_file = (filename) ? TRUE : FALSE;
+    resume_file = (filename) ? TRUE : false;
     filename_set_state(filename);
   }
   return 0;
 }
-static int o_resume(UNUSED_ARG) { return oo_resumefilename(nullptr, FALSE); }
-static int o_resumefile(char *fname) { return oo_resumefilename(fname, FALSE); }
+static int o_resume(UNUSED_ARG) { return oo_resumefilename(nullptr, false); }
+static int o_resumefile(char *fname) { return oo_resumefilename(fname, false); }
 static int o_resumeforce(char *fname) { return oo_resumefilename(fname, TRUE); }
 
 static int oo_setdir(int type, char *dir) {
   const char *opt = "";
-  int result = FALSE;
+  int result = false;
 
   switch (type) {
   case 0:
@@ -356,7 +359,7 @@ static const T_CONFIG_TABLE option_table[] = {
     {1, "v1h", X_FIX, &boot_basic, BASIC_V1H, 0, nullptr, OPT_SAVE},
     {1, "v2", X_FIX, &boot_basic, BASIC_V2, 0, nullptr, OPT_SAVE},
     {2, "4mhz", X_FIX, &boot_clock_4mhz, TRUE, 0, o_4mhz, OPT_SAVE},
-    {2, "8mhz", X_FIX, &boot_clock_4mhz, FALSE, 0, o_8mhz, OPT_SAVE},
+    {2, "8mhz", X_FIX, &boot_clock_4mhz, false, 0, o_8mhz, OPT_SAVE},
     {3, "sd", X_FIX, &sound_board, SOUND_I, 0, nullptr, OPT_SAVE},
     {3, "sd2", X_FIX, &sound_board, SOUND_II, 0, nullptr, OPT_SAVE},
     {4, "dipsw", X_INT, &boot_dipsw, 0x0000, 0xffff, nullptr, OPT_SAVE},
@@ -366,21 +369,21 @@ static const T_CONFIG_TABLE option_table[] = {
     {7, "extram", X_INT, &use_extram, 0, 64, nullptr, OPT_SAVE},
     {7, "noextram", X_FIX, &use_extram, 0, 0, nullptr, OPT_SAVE},
     {8, "jisho", X_FIX, &use_jisho_rom, TRUE, 0, nullptr, OPT_SAVE},
-    {8, "nojisho", X_FIX, &use_jisho_rom, FALSE, 0, nullptr, OPT_SAVE},
+    {8, "nojisho", X_FIX, &use_jisho_rom, false, 0, nullptr, OPT_SAVE},
     {9, "mouse", X_FIX, &mouse_mode, MOUSE_MOUSE, 0, nullptr, OPT_SAVE},
     {9, "nomouse", X_FIX, &mouse_mode, MOUSE_NONE, 0, nullptr, OPT_SAVE},
     {9, "joymouse", X_FIX, &mouse_mode, MOUSE_JOYMOUSE, 0, nullptr, OPT_SAVE},
     {9, "joystick", X_FIX, &mouse_mode, MOUSE_JOYSTICK, 0, nullptr, OPT_SAVE},
     {10, "analog", X_FIX, &monitor_analog, TRUE, 0, nullptr, OPT_SAVE},
-    {10, "digital", X_FIX, &monitor_analog, FALSE, 0, nullptr, OPT_SAVE},
+    {10, "digital", X_FIX, &monitor_analog, false, 0, nullptr, OPT_SAVE},
     {11, "24k", X_FIX, &monitor_15k, 0x00, 0, nullptr, OPT_SAVE},
     {11, "15k", X_FIX, &monitor_15k, 0x02, 0, nullptr, OPT_SAVE},
     {12, "pcg", X_FIX, &use_pcg, TRUE, 0, nullptr, OPT_SAVE},
-    {12, "nopcg", X_FIX, &use_pcg, FALSE, 0, nullptr, OPT_SAVE},
+    {12, "nopcg", X_FIX, &use_pcg, false, 0, nullptr, OPT_SAVE},
     {13, "tapeload", X_STR, &config_image.t[CLOAD], 0, 0, o_tapeload, nullptr},
     {14, "tapesave", X_STR, &config_image.t[CSAVE], 0, 0, o_tapesave, nullptr},
     {15, "serialmouse", X_FIX, &use_siomouse, TRUE, 0, nullptr, OPT_SAVE},
-    {15, "noserialmouse", X_FIX, &use_siomouse, FALSE, 0, nullptr, OPT_SAVE},
+    {15, "noserialmouse", X_FIX, &use_siomouse, false, 0, nullptr, OPT_SAVE},
 
     /*  31〜60 : エミュレーション設定オプション */
 
@@ -392,24 +395,24 @@ static const T_CONFIG_TABLE option_table[] = {
     {35, "clock", X_DBL, &cpu_clock_mhz, 0.001, 65536.0, nullptr, OPT_SAVE},
     {36, "speed", X_INT, &wait_rate, 5, 5000, nullptr, OPT_SAVE},
     {37, "nowait", X_FIX, &no_wait, TRUE, 0, nullptr, OPT_SAVE},
-    {37, "wait", X_FIX, &no_wait, FALSE, 0, nullptr, OPT_SAVE},
+    {37, "wait", X_FIX, &no_wait, false, 0, nullptr, OPT_SAVE},
     {38, "boost", X_INT, &boost, 1, 100, nullptr, OPT_SAVE},
     {39, "cmt_intr", X_FIX, &cmt_intr, TRUE, 0, nullptr, OPT_SAVE},
-    {39, "cmt_poll", X_FIX, &cmt_intr, FALSE, 0, nullptr, OPT_SAVE},
+    {39, "cmt_poll", X_FIX, &cmt_intr, false, 0, nullptr, OPT_SAVE},
     {40, "cmt_speed", X_INT, &cmt_speed, 0, 0xffff, nullptr, OPT_SAVE},
     {41, "hsbasic", X_FIX, &highspeed_mode, TRUE, 0, nullptr, OPT_SAVE},
-    {41, "nohsbasic", X_FIX, &highspeed_mode, FALSE, 0, nullptr, OPT_SAVE},
+    {41, "nohsbasic", X_FIX, &highspeed_mode, false, 0, nullptr, OPT_SAVE},
     {42, "mem_wait", X_FIX, &memory_wait, TRUE, 0, nullptr, OPT_SAVE},
-    {42, "mem_nowait", X_FIX, &memory_wait, FALSE, 0, nullptr, OPT_SAVE},
+    {42, "mem_nowait", X_FIX, &memory_wait, false, 0, nullptr, OPT_SAVE},
     {43, "setver", X_INT, &set_version, 0, 9, o_set_version, save_ver},
     {44, "exchange", X_FIX, &disk_exchange, TRUE, 0, nullptr, OPT_SAVE},
-    {44, "noexchange", X_FIX, &disk_exchange, FALSE, 0, nullptr, OPT_SAVE},
+    {44, "noexchange", X_FIX, &disk_exchange, false, 0, nullptr, OPT_SAVE},
 
     /*  61〜90 : 画面表示設定オプション */
 
     {61, "frameskip", X_INT, &frameskip_rate, 1, 65536, nullptr, OPT_SAVE},
     {62, "autoskip", X_FIX, &use_auto_skip, TRUE, 0, nullptr, OPT_SAVE},
-    {62, "noautoskip", X_FIX, &use_auto_skip, FALSE, 0, nullptr, OPT_SAVE},
+    {62, "noautoskip", X_FIX, &use_auto_skip, false, 0, nullptr, OPT_SAVE},
     {63, "half", X_FIX, &screen_size, SCREEN_SIZE_HALF, 0, nullptr, OPT_SAVE},
     {63, "full", X_FIX, &screen_size, SCREEN_SIZE_FULL, 0, nullptr, OPT_SAVE},
 #ifdef SUPPORT_DOUBLE
@@ -419,13 +422,13 @@ static const T_CONFIG_TABLE option_table[] = {
 #endif
     {64, "fullscreen", X_FIX, &use_fullscreen, TRUE, 0, nullptr, OPT_SAVE},
     {64, "dga", X_FIX, &use_fullscreen, TRUE, 0, nullptr, nullptr},
-    {64, "window", X_FIX, &use_fullscreen, FALSE, 0, nullptr, OPT_SAVE},
-    {64, "nodga", X_FIX, &use_fullscreen, FALSE, 0, nullptr, nullptr},
+    {64, "window", X_FIX, &use_fullscreen, false, 0, nullptr, OPT_SAVE},
+    {64, "nodga", X_FIX, &use_fullscreen, false, 0, nullptr, nullptr},
     {65, "aspect", X_DBL, &mon_aspect, 0.0, 10.0, nullptr, OPT_SAVE},
     {66, "width", X_INT, &WIDTH, 1, 65536, o_width, nullptr},
     {67, "height", X_INT, &HEIGHT, 1, 65536, o_height, nullptr},
     {68, "interp", X_FIX, &use_half_interp, TRUE, 0, nullptr, OPT_SAVE},
-    {68, "nointerp", X_FIX, &use_half_interp, FALSE, 0, nullptr, OPT_SAVE},
+    {68, "nointerp", X_FIX, &use_half_interp, false, 0, nullptr, OPT_SAVE},
     {69, "skipline", X_FIX, &use_interlace, SCREEN_INTERLACE_SKIP, 0, nullptr, OPT_SAVE},
     {69, "noskipline", X_FIX, &use_interlace, SCREEN_INTERLACE_NO, 0, nullptr, OPT_SAVE},
     {69, "interlace", X_FIX, &use_interlace, SCREEN_INTERLACE_YES, 0, nullptr, OPT_SAVE},
@@ -437,18 +440,18 @@ static const T_CONFIG_TABLE option_table[] = {
     {71, "ungrab_mouse", X_FIX, &grab_mouse, UNGRAB_MOUSE, 0, nullptr, OPT_SAVE},
     {71, "auto_grab", X_FIX, &grab_mouse, AUTO_MOUSE, 0, nullptr, OPT_SAVE},
     {72, "status", X_FIX, &show_status, TRUE, 0, nullptr, OPT_SAVE},
-    {72, "nostatus", X_FIX, &show_status, FALSE, 0, nullptr, OPT_SAVE},
+    {72, "nostatus", X_FIX, &show_status, false, 0, nullptr, OPT_SAVE},
     {73, "status_fg", X_INT, &status_fg, 0, 0xffffff, nullptr, OPT_SAVE},
     {74, "status_bg", X_INT, &status_bg, 0, 0xffffff, nullptr, OPT_SAVE},
     {75, "statusimage", X_FIX, &status_imagename, TRUE, 0, nullptr, OPT_SAVE},
-    {75, "nostatusimage", X_FIX, &status_imagename, FALSE, 0, nullptr, OPT_SAVE},
+    {75, "nostatusimage", X_FIX, &status_imagename, false, 0, nullptr, OPT_SAVE},
 
     /*  91〜160: キー設定オプション */
 
     {91, "tenkey", X_FIX, &tenkey_emu, TRUE, 0, nullptr, OPT_SAVE},
-    {91, "notenkey", X_FIX, &tenkey_emu, FALSE, 0, nullptr, OPT_SAVE},
+    {91, "notenkey", X_FIX, &tenkey_emu, false, 0, nullptr, OPT_SAVE},
     {92, "numlock", X_FIX, &numlock_emu, TRUE, 0, nullptr, OPT_SAVE},
-    {92, "nonumlock", X_FIX, &numlock_emu, FALSE, 0, nullptr, OPT_SAVE},
+    {92, "nonumlock", X_FIX, &numlock_emu, false, 0, nullptr, OPT_SAVE},
     {93, "cursor_up", X_STR, nullptr, 0, 0, o_setkey_up, save_cur},
     {94, "cursor_down", X_STR, nullptr, 0, 0, o_setkey_down, save_cur},
     {95, "cursor_left", X_STR, nullptr, 0, 0, o_setkey_left, save_cur},
@@ -510,9 +513,9 @@ static const T_CONFIG_TABLE option_table[] = {
     {164, "ppm", X_FIX, &snapshot_format, SNAPSHOT_FMT_PPM, 0, nullptr, OPT_SAVE},
     {164, "raw", X_FIX, &snapshot_format, SNAPSHOT_FMT_RAW, 0, nullptr, OPT_SAVE},
     {165, "swapdrv", X_FIX, &menu_swapdrv, TRUE, 0, nullptr, OPT_SAVE},
-    {165, "noswapdrv", X_FIX, &menu_swapdrv, FALSE, 0, nullptr, OPT_SAVE},
+    {165, "noswapdrv", X_FIX, &menu_swapdrv, false, 0, nullptr, OPT_SAVE},
     {166, "menucursor", X_FIX, &use_swcursor, TRUE, 0, nullptr, nullptr},
-    {166, "nomenucursor", X_FIX, &use_swcursor, FALSE, 0, nullptr, nullptr},
+    {166, "nomenucursor", X_FIX, &use_swcursor, false, 0, nullptr, nullptr},
 
     /* 181〜250: システム設定オプション */
 
@@ -521,23 +524,23 @@ static const T_CONFIG_TABLE option_table[] = {
     {183, "tapedir", X_STR, nullptr, 0, 0, o_tapedir, nullptr},
     {184, "snapdir", X_STR, nullptr, 0, 0, o_snapdir, nullptr},
     {185, "statedir", X_STR, nullptr, 0, 0, o_statedir, nullptr},
-    {186, "noconfig", X_FIX, &load_config, FALSE, 0, nullptr, nullptr},
+    {186, "noconfig", X_FIX, &load_config, false, 0, nullptr, nullptr},
     {187, "compatrom", X_STR, &file_compatrom, 0, 0, nullptr, nullptr},
     {188, "resume", X_NOP, nullptr, 0, 0, o_resume, nullptr},
     {189, "resumefile", X_STR, nullptr, 0, 0, o_resumefile, nullptr},
     {190, "resumeforce", X_STR, nullptr, 0, 0, o_resumeforce, nullptr},
     {191, "focus", X_FIX, &need_focus, TRUE, 0, nullptr, nullptr},
-    {191, "nofocus", X_FIX, &need_focus, FALSE, 0, nullptr, nullptr},
+    {191, "nofocus", X_FIX, &need_focus, false, 0, nullptr, nullptr},
     {192, "sleep", X_FIX, &wait_by_sleep, TRUE, 0, nullptr, OPT_SAVE},
-    {192, "nosleep", X_FIX, &wait_by_sleep, FALSE, 0, nullptr, OPT_SAVE},
+    {192, "nosleep", X_FIX, &wait_by_sleep, false, 0, nullptr, OPT_SAVE},
     /*193  削除 */
     {194, "ro", X_FIX, &menu_readonly, TRUE, 0, nullptr, nullptr},
-    {194, "rw", X_FIX, &menu_readonly, FALSE, 0, nullptr, nullptr},
+    {194, "rw", X_FIX, &menu_readonly, false, 0, nullptr, nullptr},
     {195, "ignore_ro", X_FIX, &fdc_ignore_readonly, TRUE, 0, nullptr, nullptr},
-    {195, "noignore_ro", X_FIX, &fdc_ignore_readonly, FALSE, 0, nullptr, nullptr},
+    {195, "noignore_ro", X_FIX, &fdc_ignore_readonly, false, 0, nullptr, nullptr},
     {196, "diskimage", X_STR, &config_image.d[DRIVE_1], 0, 0, o_diskimage, nullptr},
     {197, "saveconfig", X_FIX, &save_config, TRUE, 0, nullptr, OPT_SAVE},
-    {197, "nosaveconfig", X_FIX, &save_config, FALSE, 0, nullptr, OPT_SAVE},
+    {197, "nosaveconfig", X_FIX, &save_config, false, 0, nullptr, OPT_SAVE},
 
     /* 251〜299: デバッグ用オプション */
 
@@ -553,15 +556,15 @@ static const T_CONFIG_TABLE option_table[] = {
     {260, "soundclock", X_DBL, &sound_clock_mhz, 0.001, 65536.0, nullptr, nullptr},
     {261, "subload", X_INT, &sub_load_rate, 0, 65536, nullptr, nullptr},
     {262, "cmt_wait", X_FIX, &cmt_wait, TRUE, 0, nullptr, nullptr},
-    {262, "cmt_nowait", X_FIX, &cmt_wait, FALSE, 0, nullptr, nullptr},
+    {262, "cmt_nowait", X_FIX, &cmt_wait, false, 0, nullptr, nullptr},
     {263, "linear_ram", X_FIX, &linear_ext_ram, TRUE, 0, nullptr, nullptr},
-    {263, "nolinear_ram", X_FIX, &linear_ext_ram, FALSE, 0, nullptr, nullptr},
+    {263, "nolinear_ram", X_FIX, &linear_ext_ram, false, 0, nullptr, nullptr},
     {264, "cmd_sing", X_FIX, &use_cmdsing, TRUE, 0, nullptr, nullptr},
-    {264, "no_cmd_sing", X_FIX, &use_cmdsing, FALSE, 0, nullptr, nullptr},
+    {264, "no_cmd_sing", X_FIX, &use_cmdsing, false, 0, nullptr, nullptr},
 
 #ifdef USE_MONITOR
     {271, "debug", X_FIX, &debug_mode, TRUE, 0, nullptr, nullptr},
-    {271, "nodebug", X_FIX, &debug_mode, FALSE, 0, nullptr, nullptr},
+    {271, "nodebug", X_FIX, &debug_mode, false, 0, nullptr, nullptr},
     {272, "monitor", X_FIX, &debug_mode, TRUE, 0, o_monitor, nullptr},
     {273, "fdcdebug", X_FIX, &fdc_debug_mode, TRUE, 0, nullptr, nullptr},
 #else
@@ -571,7 +574,7 @@ static const T_CONFIG_TABLE option_table[] = {
 #endif
 
     {281, "nofont", X_FIX, &use_built_in_font, TRUE, 0, nullptr, nullptr},
-    {281, "font", X_FIX, &use_built_in_font, FALSE, 0, nullptr, nullptr},
+    {281, "font", X_FIX, &use_built_in_font, false, 0, nullptr, nullptr},
     {282, "profiler", X_INT, &debug_profiler, 0x00, 0xff, nullptr, nullptr},
     {283, "pio_debug", X_INT, &pio_debug, 0, 3, nullptr, nullptr},
     {284, "fdc_debug", X_INT, &fdc_debug, 0, 3, nullptr, nullptr},
@@ -754,9 +757,9 @@ static int check_option(char *opt1, char *opt2, int priority, const T_CONFIG_TAB
   if (priority < opt_prioroty[op->group]) {
     ignore = TRUE;
   } else {
-    ignore = FALSE;
+    ignore = false;
   }
-  applied = FALSE;
+  applied = false;
 
   /* オプションのタイプ別に処理します */
 
@@ -928,7 +931,7 @@ static int get_option(int argc, char *argv[], int priority, const T_CONFIG_TABLE
           p = (char *)malloc(strlen(fname) + 1);
           if (p == nullptr) {
             fprintf(stderr, "error: malloc failed for arg\n");
-            return FALSE;
+            return false;
           }
           strcpy(p, fname);
 
@@ -958,7 +961,7 @@ static int get_option(int argc, char *argv[], int priority, const T_CONFIG_TABLE
             p = (char *)malloc(strlen(fname) + 1);
             if (p == nullptr) {
               fprintf(stderr, "error: malloc failed for arg\n");
-              return FALSE;
+              return false;
             }
             strcpy(p, fname);
 
@@ -986,7 +989,7 @@ static int get_option(int argc, char *argv[], int priority, const T_CONFIG_TABLE
 
       j = check_option(argv[i], (i + 1 < argc) ? argv[i + 1] : nullptr, priority, osd_options, sound_options);
       if (j < 0) { /* 致命的エラーなら、解析失敗 */
-        return FALSE;
+        return false;
       }
       if (j == 0) { /* 未知のオプションは、スキップ */
         fprintf(stderr, "error: unknown option %s\n", argv[i]);
@@ -1061,7 +1064,7 @@ static int get_config_file(OSD_FILE *fp, int priority, const T_CONFIG_TABLE *osd
       if ((result == 1 && parm2 == nullptr) || (result == 2 && parm2)) {
         ;
       } else if (result < 0) { /* 致命的エラーなら、解析失敗 */
-        return FALSE;
+        return false;
       } else { /* エラー時は エラー行を表示 */
         fprintf(stderr, "warning: error in line %d\n", line_cnt);
       }
@@ -1100,7 +1103,7 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
   for (i = 0; i < NR_DRIVE; i++) {
     config_image.d[i] = nullptr;
     config_image.n[i] = 0;
-    config_image.ro[i] = FALSE;
+    config_image.ro[i] = false;
   }
   config_image.t[CLOAD] = nullptr;
   config_image.t[CSAVE] = nullptr;
@@ -1117,19 +1120,19 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
   /* 設定ファイルのディレクトリ名などを初期化 */
 
   if (!osd_file_config_init()) {
-    return FALSE;
+    return false;
   }
 
   /* 起動時のオプションを解析 */
 
   if (!get_option(argc, argv, 2, option_table_osd, option_table_sound)) {
-    return FALSE;
+    return false;
   }
 
   /* ディスクイメージ指定ありなら、そのファイル名(パス名)を補完する */
 
   if (!resume_flag) {
-    int same = FALSE;
+    int same = false;
 
     /* 同じファイル(名)を指定しているかを、チェック */
     if (config_image.d[DRIVE_1] && config_image.d[DRIVE_2] &&
@@ -1222,7 +1225,7 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
       int result = get_config_file(fp, 1, option_table_osd, option_table_sound);
       osd_fclose(fp);
       if (!result)
-        return FALSE;
+        return false;
     }
   }
 
@@ -1312,13 +1315,13 @@ static int save_normal(const struct T_CONFIG_TABLE *op, char opt_arg[255]) {
     break;
 
   case X_NOP:
-    return FALSE;
+    return false;
 
   case X_INV:
-    return FALSE;
+    return false;
   }
 
-  return FALSE;
+  return false;
 }
 
 static int save_bau(const struct T_CONFIG_TABLE *op, char opt_arg[255]) {
@@ -1326,7 +1329,7 @@ static int save_bau(const struct T_CONFIG_TABLE *op, char opt_arg[255]) {
     sprintf(opt_arg, "%d", baudrate_table[baudrate_sw]);
     return TRUE;
   }
-  return FALSE;
+  return false;
 }
 
 static int save_ver(const struct T_CONFIG_TABLE *op, char opt_arg[255]) {
@@ -1336,7 +1339,7 @@ static int save_ver(const struct T_CONFIG_TABLE *op, char opt_arg[255]) {
     opt_arg[1] = '\0';
     return TRUE;
   }
-  return FALSE;
+  return false;
 }
 
 typedef struct {
@@ -1415,7 +1418,7 @@ static int save_key_sub(int type, const struct T_CONFIG_TABLE *op, char opt_arg[
     nr_table = COUNTOF(table_joy);
     break;
   default:
-    return FALSE;
+    return false;
   }
 
   for (key = 0; key < nr_table; key++) {
@@ -1442,7 +1445,7 @@ static int save_key_sub(int type, const struct T_CONFIG_TABLE *op, char opt_arg[
     }
   }
 
-  return FALSE;
+  return false;
 }
 
 static int save_fn(const struct T_CONFIG_TABLE *op, char opt_arg[255]) { return save_key_sub(0, op, opt_arg); }
@@ -1483,22 +1486,22 @@ int config_save(const char *fname) {
   OSD_FILE *fp_bak = nullptr;
   char *fname_bak = nullptr;
   int backup_ok;
-  int need_lf = FALSE;
-  int malloc_fname = FALSE;
+  int need_lf = false;
+  int malloc_fname = false;
 
   /*** 引数 fname が NULL なら、共通設定ファイルのファイル名を使用 ***/
 
   if (fname == nullptr) {
     fname = filename_alloc_global_cfgname();
     if (fname == nullptr) {
-      return FALSE;
+      return false;
     }
     malloc_fname = TRUE;
   }
 
   /*** 設定ファイルをバックアップする ***/
 
-  backup_ok = FALSE;
+  backup_ok = false;
 
   fp = osd_fopen(FTYPE_CFG, fname, "rb"); /* 設定ファイルを開く */
   if (fp) {
@@ -1527,7 +1530,7 @@ int config_save(const char *fname) {
         /* コピーする */
         while ((i = osd_fgetc(fp)) != EOF) {
           if (osd_fputc(i, fp_bak) == EOF) {
-            backup_ok = FALSE;
+            backup_ok = false;
             break;
           }
         }
@@ -1554,7 +1557,7 @@ int config_save(const char *fname) {
   if (backup_ok) { /* バックアップファイル開く */
     fp_bak = osd_fopen(FTYPE_CFG, fname_bak, "r");
     if (fp_bak == nullptr) {
-      backup_ok = FALSE;
+      backup_ok = false;
     }
     free(fname_bak);
   }
@@ -1566,7 +1569,7 @@ int config_save(const char *fname) {
       if (malloc_fname) {
         free((void *)fname);
       }
-      return FALSE;
+      return false;
     }
 
     /* バックアップファイルから設定ファイルにコピーする。
@@ -1582,7 +1585,7 @@ int config_save(const char *fname) {
         osd_fputs(line, fp);
 
         if (line[flen - 1] == '\n') {
-          need_lf = FALSE;
+          need_lf = false;
         } else {
           need_lf = TRUE;
         }
@@ -1598,7 +1601,7 @@ int config_save(const char *fname) {
       if (malloc_fname) {
         free((void *)fname);
       }
-      return FALSE;
+      return false;
     }
   }
 

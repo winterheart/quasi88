@@ -1,6 +1,5 @@
 #include <cstring>
 
-extern "C" {
 #include "quasi88.h"
 
 #include "drive.h"
@@ -9,12 +8,15 @@ extern "C" {
 #include "intr.h"
 #include "menu.h"
 #include "pc88main.h"
-#include "pc88sub.h"
 #include "snapshot.h"
-#include "soundbd.h"
 #include "status.h"
 #include "suspend.h"
 #include "wait.h"
+
+extern "C" {
+
+#include "pc88sub.h"
+#include "soundbd.h"
 
 #if USE_RETROACHIEVEMENTS
 #include "retroachievements.h"
@@ -33,21 +35,21 @@ int quasi88_stateload(int serial) {
   if (verbose_proc)
     printf("Stateload...start (%s)\n", filename_get_state());
 
-  if (stateload_check_file_exist() == FALSE) { /* ファイルなし */
+  if (stateload_check_file_exist() == false) { /* ファイルなし */
     if (quasi88_is_exec()) {
       status_message(1, STATUS_INFO_TIME, "State-Load file not found !");
     } /* メニューではダイアログ表示するので、ステータス表示は無しにする */
 
     if (verbose_proc)
       printf("State-file not found\n");
-    return FALSE;
+    return false;
   }
 
 #if USE_RETROACHIEVEMENTS
   if (!RA_WarnDisableHardcore("load a state")) {
     if (verbose_proc)
       printf("State-Load cancelled (RA)\n");
-    return FALSE;
+    return false;
   }
 #endif
 
@@ -63,7 +65,7 @@ int quasi88_stateload(int serial) {
   int success = stateload(); /* ステートロード実行 */
 
   if (now_board != sound_board) { /* サウンドボードが変わったら */
-    menu_sound_restart(FALSE);    /* サウンドドライバの再初期化 */
+    menu_sound_restart(false);    /* サウンドドライバの再初期化 */
   }
 
   if (verbose_proc) {
@@ -75,7 +77,7 @@ int quasi88_stateload(int serial) {
 
   if (success) { /* ステートロード成功したら・・・ */
 
-    imagefile_all_open(TRUE); /* イメージファイルを全て開く*/
+    imagefile_all_open(true); /* イメージファイルを全て開く*/
 
     pc88main_init(INIT_STATELOAD);
     pc88sub_init(INIT_STATELOAD);
@@ -173,7 +175,7 @@ int quasi88_waveout(int start) {
 
   } else {
 
-    success = TRUE;
+    success = true;
 
     waveout_save_stop();
     status_message(1, STATUS_INFO_TIME, "Sound Record Stopped");
@@ -187,24 +189,24 @@ int quasi88_waveout(int start) {
  ************************************************************************/
 int quasi88_drag_and_drop(const char *filename) {
   if (!quasi88_is_exec() && !quasi88_is_pause()) {
-    return FALSE;
+    return false;
   }
 
   int success;
 
 #if USE_RETROACHIEVEMENTS
-  RA_ToggleLoad(FALSE);
+  RA_ToggleLoad(false);
 #endif
 
-  if (quasi88_disk_insert_all(filename, FALSE)) {
+  if (quasi88_disk_insert_all(filename, false)) {
     status_message(1, STATUS_INFO_TIME, "Disk Image Set and Reset");
-    success = TRUE;
+    success = true;
   } else if (quasi88_load_tape_insert(filename)) {
     status_message(1, STATUS_INFO_TIME, "Tape Image Set and Reset");
-    success = TRUE;
+    success = true;
   } else {
     status_message(1, STATUS_WARN_TIME, "D&D Failed !  Disk Unloaded ...");
-    success = FALSE;
+    success = false;
   }
 
 #if USE_RETROACHIEVEMENTS
@@ -303,7 +305,7 @@ void quasi88_cfg_set_no_wait(int enable) {
  ************************************************************************/
 int quasi88_disk_insert_all(const char *filename, int ro) {
   if (!quasi88_disk_eject_all())
-    return FALSE;
+    return false;
 
   int success = quasi88_disk_insert(DRIVE_1, filename, 0, ro);
 
@@ -319,24 +321,24 @@ int quasi88_disk_insert_all(const char *filename, int ro) {
   return success;
 }
 int quasi88_disk_insert(int drv, const char *filename, int image, int ro) {
-  int success = FALSE;
+  int success = false;
 
 #if USE_RETROACHIEVEMENTS
   if (drv == DRIVE_1) {
     if (!RA_PrepareLoadNewRom(filename, FTYPE_DISK))
-      return FALSE;
+      return false;
   }
 #endif
 
   if (!quasi88_disk_eject(drv))
-    return FALSE;
+    return false;
 
   if (strlen(filename) < QUASI88_MAX_FILENAME) {
 
     if (disk_insert(drv, filename, image, ro) == 0)
-      success = TRUE;
+      success = true;
     else
-      success = FALSE;
+      success = false;
 
     if (success) {
 
@@ -347,9 +349,9 @@ int quasi88_disk_insert(int drv, const char *filename, int image, int ro) {
       readonly_disk[drv] = ro;
 
       if (filename_synchronize) {
-        filename_init_state(TRUE);
-        filename_init_snap(TRUE);
-        filename_init_wav(TRUE);
+        filename_init_state(true);
+        filename_init_snap(true);
+        filename_init_wav(true);
       }
 
 #if USE_RETROACHIEVEMENTS
@@ -368,21 +370,21 @@ int quasi88_disk_insert_A_to_B(int src, int dst, int img) {
   int success;
 
   if (!quasi88_disk_eject(dst))
-    return FALSE;
+    return false;
 
   if (disk_insert_A_to_B(src, dst, img) == 0)
-    success = TRUE;
+    success = true;
   else
-    success = FALSE;
+    success = false;
 
   if (success) {
     strcpy(file_disk[dst], file_disk[src]);
     readonly_disk[dst] = readonly_disk[src];
 
     if (filename_synchronize) {
-      filename_init_state(TRUE);
-      filename_init_snap(TRUE);
-      filename_init_wav(TRUE);
+      filename_init_state(true);
+      filename_init_snap(true);
+      filename_init_wav(true);
     }
   }
 
@@ -396,7 +398,7 @@ int quasi88_disk_eject_all(void) {
 
   for (drv = 0; drv < 2; drv++) {
     if (!quasi88_disk_eject(drv))
-      return FALSE;
+      return false;
   }
 
   boot_from_rom = BOOT_ROM;
@@ -405,23 +407,23 @@ int quasi88_disk_eject_all(void) {
     status_message_default(1, nullptr);
   }
 
-  return TRUE;
+  return true;
 }
 int quasi88_disk_eject(int drv) {
   if (disk_image_exist(drv)) {
 #if USE_RETROACHIEVEMENTS
     if (drv == DRIVE_1 && loaded_title != NULL && loaded_title->file_type == FTYPE_DISK) {
       if (!RA_ConfirmLoadNewRom(false))
-        return FALSE;
+        return false;
     }
 #endif
     disk_eject(drv);
     memset(file_disk[drv], 0, QUASI88_MAX_FILENAME);
 
     if (filename_synchronize) {
-      filename_init_state(TRUE);
-      filename_init_snap(TRUE);
-      filename_init_wav(TRUE);
+      filename_init_state(true);
+      filename_init_snap(true);
+      filename_init_wav(true);
     }
 
 #if USE_RETROACHIEVEMENTS
@@ -438,7 +440,7 @@ int quasi88_disk_eject(int drv) {
     status_message_default(1, nullptr);
   }
 
-  return TRUE;
+  return true;
 }
 
 /***********************************************************************
@@ -510,11 +512,11 @@ void quasi88_disk_image_prev(int drv) { disk_image_sub(drv, TYPE_PREV, 0); }
 int quasi88_load_tape_insert(const char *filename) {
 #if USE_RETROACHIEVEMENTS
   if (!RA_PrepareLoadNewRom(filename, FTYPE_TAPE_LOAD))
-    return FALSE;
+    return false;
 #endif
 
   if (!quasi88_load_tape_eject())
-    return FALSE;
+    return false;
 
   if (strlen(filename) < QUASI88_MAX_FILENAME && sio_open_tapeload(filename)) {
 
@@ -524,23 +526,23 @@ int quasi88_load_tape_insert(const char *filename) {
     RA_CommitLoadNewRom();
 #endif
 
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 int quasi88_load_tape_rewind(void) {
   if (sio_tape_rewind()) {
 
-    return TRUE;
+    return true;
   }
   quasi88_load_tape_eject();
-  return FALSE;
+  return false;
 }
 int quasi88_load_tape_eject(void) {
 #if USE_RETROACHIEVEMENTS
   if (loaded_title != NULL && loaded_title->file_type == FTYPE_TAPE_LOAD && loaded_title->data_len > 0) {
     if (!RA_ConfirmLoadNewRom(false))
-      return FALSE;
+      return false;
   }
 #endif
 
@@ -556,7 +558,7 @@ int quasi88_load_tape_eject(void) {
   }
 #endif
 
-  return TRUE;
+  return true;
 }
 
 int quasi88_save_tape_insert(const char *filename) {
@@ -565,15 +567,15 @@ int quasi88_save_tape_insert(const char *filename) {
   if (strlen(filename) < QUASI88_MAX_FILENAME && sio_open_tapesave(filename)) {
 
     strcpy(file_tape[CSAVE], filename);
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 int quasi88_save_tape_eject(void) {
   sio_close_tapesave();
   memset(file_tape[CSAVE], 0, QUASI88_MAX_FILENAME);
 
-  return TRUE;
+  return true;
 }
 
 /*======================================================================
@@ -591,9 +593,9 @@ int quasi88_serial_in_connect(const char *filename) {
   if (strlen(filename) < QUASI88_MAX_FILENAME && sio_open_serialin(filename)) {
 
     strcpy(file_sin, filename);
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 void quasi88_serial_in_remove(void) {
   sio_close_serialin();
@@ -605,9 +607,9 @@ int quasi88_serial_out_connect(const char *filename) {
   if (strlen(filename) < QUASI88_MAX_FILENAME && sio_open_serialout(filename)) {
 
     strcpy(file_sout, filename);
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 void quasi88_serial_out_remove(void) {
   sio_close_serialout();
@@ -619,9 +621,9 @@ int quasi88_printer_connect(const char *filename) {
   if (strlen(filename) < QUASI88_MAX_FILENAME && printer_open(filename)) {
 
     strcpy(file_prn, filename);
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 void quasi88_printer_remove(void) {
   printer_close();

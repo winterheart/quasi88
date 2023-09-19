@@ -9,6 +9,7 @@
 
 ***************************************************************************/
 
+#include <stdbool.h>
 #include "driver.h"
 #include "osdepend.h"
 #include "streams.h"
@@ -971,7 +972,7 @@ int sound_wavfile_open(const char *filename)
 {
     /* to avoid conflicts */
     if (MAKE_WAVS)
-        return FALSE;
+        return false;
 
     /* close if already opened */
     if (wavfile)
@@ -984,16 +985,16 @@ int sound_wavfile_open(const char *filename)
     else         wavfile_sample_rate = 0;
 
     if (wavfile) return TRUE;
-    else         return FALSE;
+    else         return false;
 }
 
 int sound_wavfile_opened(void)
 {
     if (MAKE_WAVS)
-        return FALSE;
+        return false;
 
     if (wavfile) return TRUE;
-    else         return FALSE;
+    else         return false;
 }
 
 void sound_wavfile_close(void)
@@ -1012,12 +1013,12 @@ void sound_wavfile_close(void)
 int sound_wavfile_damaged(void)
 {
     if (MAKE_WAVS)
-        return FALSE;
+        return false;
 
     if (wavfile == NULL)
-        return FALSE;
+        return false;
 
-    if (wavfile_sample_rate == Machine->sample_rate) return FALSE;
+    if (wavfile_sample_rate == Machine->sample_rate) return false;
     else                                             return TRUE;
 }
 #endif

@@ -2,14 +2,15 @@
  * MAME と QUASI88 とのインターフェイス関数
  */
 
+#include <stdbool.h>
 #include    <stdarg.h>
 #include    <ctype.h>
 #include    "mame-quasi88.h"
 
 /*-------------------------------------------------------------------------*/
 
-int use_sound       = TRUE;     /* 1:use sound / 0:not use */
-int close_device    = FALSE;    /* 1:close audio device at menu mode / 0:not */
+int use_sound       = true;     /* 1:use sound / 0:not use */
+int close_device    = false;    /* 1:close audio device at menu mode / 0:not */
 int fmvol           = 100;      /* level of FM    (0-100)[%] */
 int psgvol          =  20;      /* level of PSG   (0-100)[%] */
 int beepvol         =  60;      /* level of BEEP  (0-100)[%] */
@@ -17,9 +18,9 @@ int rhythmvol       = 100;      /* level of RHYTHM(0-100)[%] depend on fmvol */
 int adpcmvol        = 100;      /* level of ADPCM (0-100)[%] depend on fmvol */
 int fmgenvol        = 100;      /* level of fmgen (0-100)[%] */
 int samplevol       =  50;      /* level of SAMPLE(0-100)[%] */
-int use_fmgen       = FALSE;    /* 1:use fmgen / 0:not use */
-int has_samples     = FALSE;    /* 1:use samples / 0:not use */
-int quasi88_is_paused = FALSE;  /* for mame_is_paused() */
+int use_fmgen       = false;    /* 1:use fmgen / 0:not use */
+int has_samples     = false;    /* 1:use samples / 0:not use */
+int quasi88_is_paused = false;  /* for mame_is_paused() */
 
 typedef struct {                /* list of mame-sound-I/F functions */
 
@@ -171,7 +172,7 @@ int     xmame_sound_start(void)
 
     xmame_func = &xmame_func_nosound;
 
-    if (use_sound == FALSE) {
+    if (use_sound == false) {
         if (verbose_proc) printf("Canceled\n");
         return 1;
     }
@@ -215,7 +216,7 @@ int     xmame_sound_start(void)
         }
         BEEP88_set_volume(beepvol/100.0F);
 
-        xmame_dev_beep_cmd_sing((byte) use_cmdsing);
+        xmame_dev_beep_cmd_sing((uint8_t) use_cmdsing);
 
         if (has_samples) {
             sample_set_volume(0, samplevol/100.0F);
@@ -279,7 +280,7 @@ void    xmame_sound_suspend(void)
            (sound_global_enable(0) という関数もあるが、これは特定のポートを叩
            くと無音になるようなハードのエミュレートっぽいので、無関係(?)) */
 
-        quasi88_is_paused = TRUE;   /* mame_is_paused() が真を返すように */
+        quasi88_is_paused = true;   /* mame_is_paused() が真を返すように */
     }
 }
 void    xmame_sound_resume(void)
@@ -289,7 +290,7 @@ void    xmame_sound_resume(void)
             sound_pause(0);
         }
 
-        quasi88_is_paused = FALSE;  /* mame_is_paused() が偽を返すように */
+        quasi88_is_paused = false;  /* mame_is_paused() が偽を返すように */
     }
 }
 void    xmame_sound_reset(void)
@@ -308,27 +309,27 @@ void    xmame_sound_reset(void)
 /****************************************************************
  * サウンドポート入出力毎に呼ぶ
  ****************************************************************/
-byte    xmame_dev_sound_in_data(void)
+uint8_t    xmame_dev_sound_in_data(void)
 {
     if (xmame_func->sound_in_data) return (xmame_func->sound_in_data)(0);
     else                           return 0xff;
 }
-byte    xmame_dev_sound_in_status(void)
+uint8_t    xmame_dev_sound_in_status(void)
 {
     if (xmame_func->sound_in_status) return (xmame_func->sound_in_status)(0);
     else                             return 0;
 }
-void    xmame_dev_sound_out_reg(byte data)
+void    xmame_dev_sound_out_reg(uint8_t data)
 {
     if (xmame_func->sound_out_reg) (xmame_func->sound_out_reg)(0,data);
 }
-void    xmame_dev_sound_out_data(byte data)
+void    xmame_dev_sound_out_data(uint8_t data)
 {
     if (xmame_func->sound_out_data) (xmame_func->sound_out_data)(0,data);
 }
 
 
-byte    xmame_dev_sound2_in_data(void)
+uint8_t    xmame_dev_sound2_in_data(void)
 {
     if (use_sound) {
         if (sound_board == SOUND_I) return 0xff;
@@ -337,26 +338,26 @@ byte    xmame_dev_sound2_in_data(void)
         return 0xff;
     }
 }
-byte    xmame_dev_sound2_in_status(void)
+uint8_t    xmame_dev_sound2_in_status(void)
 {
     if (xmame_func->sound2_in_status) return (xmame_func->sound2_in_status)(0);
     else                              return 0xff;
 }
-void    xmame_dev_sound2_out_reg(byte data)
+void    xmame_dev_sound2_out_reg(uint8_t data)
 {
     if (xmame_func->sound2_out_reg) (xmame_func->sound2_out_reg)(0,data);
 }
-void    xmame_dev_sound2_out_data(byte data)
+void    xmame_dev_sound2_out_data(uint8_t data)
 {
     if (xmame_func->sound2_out_data) (xmame_func->sound2_out_data)(0,data);
 }
 
 
-void    xmame_dev_beep_out_data(byte data)
+void    xmame_dev_beep_out_data(uint8_t data)
 {
     if (xmame_func->beep_out_data) (xmame_func->beep_out_data)(0,data);
 }
-void    xmame_dev_beep_cmd_sing(byte flag)
+void    xmame_dev_beep_cmd_sing(uint8_t flag)
 {
     if (xmame_func->beep_out_ctrl) (xmame_func->beep_out_ctrl)(0,flag);
 }
@@ -405,8 +406,8 @@ void    xmame_dev_sound_timer_over(int timer)
  ****************************************************************/
 int     xmame_has_sound(void)
 {
-    if (use_sound) return TRUE;
-    else           return FALSE;
+    if (use_sound) return true;
+    else           return false;
 }
 
 /****************************************************************
@@ -450,7 +451,7 @@ void    xmame_cfg_set_mixer_volume(int ch, int level)
         case XMAME_MIXER_PSG:
             if (level < PSGVOL_MIN) level = PSGVOL_MIN;
             if (level > PSGVOL_MAX) level = PSGVOL_MAX;
-            if (use_fmgen == FALSE) {
+            if (use_fmgen == false) {
                 if (sound_board == SOUND_I) {
                     YM2203_AY8910_set_volume_0(level/100.0F);
                 } else {
@@ -463,7 +464,7 @@ void    xmame_cfg_set_mixer_volume(int ch, int level)
         case XMAME_MIXER_FM:
             if (level < FMVOL_MIN) level = FMVOL_MIN;
             if (level > FMVOL_MAX) level = FMVOL_MAX;
-            if (use_fmgen == FALSE) {
+            if (use_fmgen == false) {
                 if (sound_board == SOUND_I) {
                     YM2203_set_volume_0(level/100.0F);
                 } else {
@@ -563,7 +564,7 @@ int     xmame_cfg_get_use_fmgen(void)
 #ifdef  USE_FMGEN
     return use_fmgen;
 #else
-    return FALSE;
+    return false;
 #endif
 }
 int     xmame_cfg_set_use_fmgen(int enable)
@@ -572,7 +573,7 @@ int     xmame_cfg_set_use_fmgen(int enable)
     use_fmgen = enable;
     return use_fmgen;
 #else
-    return FALSE;
+    return false;
 #endif
 }
 
@@ -627,7 +628,7 @@ int     xmame_wavout_open(const char *filename)
     if (use_sound) {
         return sound_wavfile_open(filename);
     } else {
-        return FALSE;
+        return false;
     }
 }
 int     xmame_wavout_opened(void)
@@ -635,7 +636,7 @@ int     xmame_wavout_opened(void)
     if (use_sound) {
         return sound_wavfile_opened();
     } else {
-        return FALSE;
+        return false;
     }
 }
 void    xmame_wavout_close(void)
@@ -649,7 +650,7 @@ int     xmame_wavout_damaged(void)
     if (use_sound) {
         return sound_wavfile_damaged();
     } else {
-        return FALSE;
+        return false;
     }
 }
 
@@ -725,7 +726,7 @@ mame_file_error mame_fopen(const char *dummypath, char *filename, UINT32 dummyfl
     }
 
     /* エラー */
-    return TRUE;
+    return true;
 }
 
 

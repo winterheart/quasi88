@@ -3,8 +3,9 @@
  ************************************************************************/
 #include <ctype.h>
 #include <string.h>
+#include <stdbool.h>
 
-#include "quasi88.h"
+#include "utility.h"
 
 /**
  * Case-insensitive string comparison (stricmp/strcasecmp ?)
@@ -225,8 +226,8 @@ char *my_strtok(char *dst, char *src) {
   char *p = &src[0];
   char *q = &dst[0];
 
-  int esc = FALSE;   /* エスケープシーケンス処理中 */
-  int quote = FALSE; /* クォート文字処理中         */
+  int esc = false;   /* エスケープシーケンス処理中 */
+  int quote = false; /* クォート文字処理中         */
 
   *q = '\0';
 
@@ -236,18 +237,18 @@ char *my_strtok(char *dst, char *src) {
 
   while (1) {
 
-    if (quote == FALSE) { /* 通常部分の処理 */
+    if (quote == false) { /* 通常部分の処理 */
 
-      if (esc == FALSE) {
+      if (esc == false) {
         if (*p == '\0' || *p == '\r' || *p == '\n' || *p == ' ' || *p == '\t' || *p == COMMENT) {
           *q = '\0';
           break;
         } else if (*p == QUOTE) {
           p++;
-          quote = TRUE;
+          quote = true;
         } else if (*p == ESCAPE) {
           p++;
-          esc = TRUE;
+          esc = true;
         } else {
           *q++ = *p++;
         }
@@ -257,7 +258,7 @@ char *my_strtok(char *dst, char *src) {
           break;
         } else {
           *q++ = *p++;
-          esc = FALSE;
+          esc = false;
         }
       }
 
@@ -270,10 +271,10 @@ char *my_strtok(char *dst, char *src) {
         if (*(p + 1) == QUOTE) {
           *q++ = QUOTE;
           p += 2;
-          quote = FALSE;
+          quote = false;
         } else {
           p++;
-          quote = FALSE;
+          quote = false;
         }
       else {
         *q++ = *p++;

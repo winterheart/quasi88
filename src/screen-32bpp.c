@@ -5,6 +5,8 @@
 /************************************************************************/
 
 #include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "quasi88.h"
 #include "screen.h"
@@ -15,7 +17,7 @@
 
 #ifdef SUPPORT_32BPP
 
-#define TYPE bit32
+#define TYPE uint32_t
 
 #define SCREEN_WIDTH WIDTH
 #define SCREEN_HEIGHT HEIGHT

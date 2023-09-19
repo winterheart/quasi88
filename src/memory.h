@@ -19,33 +19,33 @@ extern int has_kanji_rom; /* 漢字ROMの有無   */
 
 extern int linear_ext_ram; /* 拡張RAMを連続させる  */
 
-extern byte *main_rom;               /* メイン ROM (32KB) */
-extern byte (*main_rom_ext)[0x2000]; /* 拡張 ROM   (8KB *4)    */
-extern byte *main_rom_n;             /* N-BASIC    (32KB)    */
-extern byte *main_ram;               /* メイン RAM (64KB) */
-extern byte *main_high_ram;          /* 高速 RAM(の裏) (4KB) */
-extern byte *sub_romram;             /* サブ ROM/RAM (32KB)    */
+extern uint8_t *main_rom;               /* メイン ROM (32KB) */
+extern uint8_t (*main_rom_ext)[0x2000]; /* 拡張 ROM   (8KB *4)    */
+extern uint8_t *main_rom_n;             /* N-BASIC    (32KB)    */
+extern uint8_t *main_ram;               /* メイン RAM (64KB) */
+extern uint8_t *main_high_ram;          /* 高速 RAM(の裏) (4KB) */
+extern uint8_t *sub_romram;             /* サブ ROM/RAM (32KB)    */
 
-extern byte (*kanji_rom)[65536][2]; /* 漢字 ROM   (128KB*2)   */
+extern uint8_t (*kanji_rom)[65536][2]; /* 漢字 ROM   (128KB*2)   */
 
-extern byte (*ext_ram)[0x8000];   /* 拡張 RAM   (32KB*4〜)*/
-extern byte (*jisho_rom)[0x4000]; /* 辞書 ROM   (16KB*32)   */
+extern uint8_t (*ext_ram)[0x8000];   /* 拡張 RAM   (32KB*4〜)*/
+extern uint8_t (*jisho_rom)[0x4000]; /* 辞書 ROM   (16KB*32)   */
 
-extern byte (*main_vram)[4]; /* VRAM[0x4000][4]  */
-extern byte *font_rom;       /* フォントイメージ     */
-extern byte *font_pcg;       /* フォントイメージ(PCG)*/
-extern byte *font_mem;       /* フォントイメージ(fix)*/
-extern byte *font_mem2;      /* フォントイメージ(2nd)*/
-extern byte *font_mem3;      /* フォントイメージ(3rd)*/
+extern uint8_t (*main_vram)[4]; /* VRAM[0x4000][4]  */
+extern uint8_t *font_rom;       /* フォントイメージ     */
+extern uint8_t *font_pcg;       /* フォントイメージ(PCG)*/
+extern uint8_t *font_mem;       /* フォントイメージ(fix)*/
+extern uint8_t *font_mem2;      /* フォントイメージ(2nd)*/
+extern uint8_t *font_mem3;      /* フォントイメージ(3rd)*/
 
 /* イリーガルな方法でメモリアクセスする   */
-#define main_vram4 (bit32 *)main_vram /* VRAM long word accrss*/
+#define main_vram4 (uint32_t *)main_vram /* VRAM long word accrss*/
 
 #define ROM_VERSION main_rom[0x79d7]
 
-extern byte *dummy_rom;             /* ダミーROM (32KB)  */
-extern byte *dummy_ram;             /* ダミーRAM (32KB)  */
-extern byte kanji_dummy_rom[16][2]; /* 漢字ダミーROM   */
+extern uint8_t *dummy_rom;             /* ダミーROM (32KB)  */
+extern uint8_t *dummy_ram;             /* ダミーRAM (32KB)  */
+extern uint8_t kanji_dummy_rom[16][2]; /* 漢字ダミーROM   */
 
 int memory_allocate();
 void memory_free();

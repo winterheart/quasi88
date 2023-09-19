@@ -2,7 +2,6 @@
 #define KEY_LOOKUP_H_INCLUDED
 
 #include <SDL2/SDL.h>
-#include "quasi88.h"
 
 #include "keyboard.h"
 

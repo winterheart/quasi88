@@ -1,9 +1,9 @@
 #ifdef STATUS2SCREEN
-void STATUS2SCREEN(int kind, byte pixmap[], int w, int h) {
+void STATUS2SCREEN(int kind, uint8_t pixmap[], int w, int h) {
   int x, y, pos;
   int top, start, end;
   int y_limit = MIN(h, status_sy[kind]);
-  byte *src = pixmap;
+  uint8_t *src = pixmap;
   TYPE *dst = (TYPE *)status_start[kind];
 
   if (dst == NULL)

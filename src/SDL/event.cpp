@@ -6,26 +6,23 @@
 
 #include <SDL2/SDL.h>
 
-#include <string.h>
+#include <cstring>
 
-extern "C" {
 #include "quasi88.h"
-#include "graph.h"
-#include "keyboard.h"
-
-#include "drive.h"
 
 #include "device.h"
-#include "screen.h"
-#include "event.h"
+#include "drive.h"
 
+#include "event.h"
+#include "graph.h"
 #include "intr.h" /* test */
+#include "keyboard.h"
 #include "keymap.h"
+#include "screen.h"
 #include "utility.h"
-}
 
 int show_fps;                      /* test */
-static int display_fps_init(); /* test */
+static bool display_fps_init(); /* test */
 static void display_fps();     /* test */
 
 int use_cmdkey = 1; /* Commandキーでメニューへ遷移     */
@@ -33,7 +30,7 @@ int use_cmdkey = 1; /* Commandキーでメニューへ遷移     */
 int keyboard_type = 1;      /* キーボードの種類                */
 char *file_keyboard = nullptr; /* キー設定ファイル名         */
 
-int use_joydevice = TRUE; /* ジョイスティックデバイスを開く? */
+int use_joydevice = true; /* ジョイスティックデバイスを開く? */
 
 #define JOY_MAX KEY88_PAD_MAX /* ジョイスティック上限(2個) */
 
@@ -151,8 +148,8 @@ void event_init(void) {
 
   /* test */
   if (show_fps) {
-    if (display_fps_init() == FALSE) {
-      show_fps = FALSE;
+    if (display_fps_init() == false) {
+      show_fps = false;
     }
   }
 }
@@ -160,7 +157,7 @@ void event_init(void) {
 /*
  * 約 1/60 毎に呼ばれる
  */
-void event_update(void) {
+void event_update() {
   SDL_Event E;
   SDL_Keycode keysym;
   int key88, x, y;
@@ -360,20 +357,20 @@ void event_get_mouse_pos(int *x, int *y) {
  * Rebind some keys on enabled software Numlock
  * @return always TRUE
  */
-int event_numlock_on(void) {
+int event_numlock_on() {
   keymap_merge();
 
-  return TRUE;
+  return true;
 }
 
-void event_numlock_off(void) { keymap_init(); }
+void event_numlock_off() { keymap_init(); }
 
 /******************************************************************************
  * エミュレート／メニュー／ポーズ／モニターモード の 開始時の処理
  *
  *****************************************************************************/
 
-void event_switch(void) {
+void event_switch() {
   /* 既存のイベントをすべて破棄 */
   /* なんてことは、しない ? */
 }
@@ -405,7 +402,7 @@ static int joystick_init() {
 
   /* ジョイスティックの数を調べて、デバイスオープン */
   max = SDL_NumJoysticks();
-  max = MIN(max, JOY_MAX); /* ワークの数だけ、有効 */
+  max = std::min(max, JOY_MAX); /* ワークの数だけ、有効 */
 
   for (i = 0; i < max; i++) {
     dev = SDL_JoystickOpen(i); /* i番目のジョイスティックをオープン */
@@ -413,7 +410,7 @@ static int joystick_init() {
     if (dev) {
       /* ボタンの数を調べる */
       nr_button = SDL_JoystickNumButtons(dev);
-      nr_button = MIN(nr_button, BUTTON_MAX);
+      nr_button = std::min(nr_button, BUTTON_MAX);
 
       joy_info[i].dev = dev;
       joy_info[i].num = joystick_num++;
@@ -727,7 +724,7 @@ static int analyze_keyconf_file() {
                                   identify_callback,       /* 識別タグ行 関数 */
                                   sdlkeysym_list,          /* 変換テーブル    */
                                   COUNTOF(sdlkeysym_list), /* テーブルサイズ  */
-                                  TRUE,                    /* 大小文字無視    */
+                                  true,                    /* 大小文字無視    */
                                   setting_callback);       /* 設定行 関数     */
 }
 
@@ -738,23 +735,23 @@ static int analyze_keyconf_file() {
 /* test */
 
 #define FPS_INTRVAL (1000) /* 1000ms毎に表示する */
-static Uint32 display_fps_callback(Uint32 interval, void *dummy);
+static uint32_t display_fps_callback(uint32_t interval, void *dummy);
 
-static int display_fps_init() {
-  if (show_fps == FALSE)
-    return TRUE;
+static bool display_fps_init() {
+  if (show_fps == false)
+    return true;
 
   if (!SDL_WasInit(SDL_INIT_TIMER)) {
     if (SDL_InitSubSystem(SDL_INIT_TIMER)) {
-      return FALSE;
+      return false;
     }
   }
 
   SDL_AddTimer(FPS_INTRVAL, display_fps_callback, nullptr);
-  return TRUE;
+  return true;
 }
 
-static Uint32 display_fps_callback(Uint32 interval, void *dummy) {
+static uint32_t display_fps_callback(uint32_t interval, void *dummy) {
 #if 0
 
     /* コールバック関数の内部からウインドウタイトルを変更するのは危険か ?
@@ -785,7 +782,7 @@ static void display_fps() {
   int now_drawn_count;
   int now_vsync_count;
 
-  if (show_fps == FALSE)
+  if (show_fps == false)
     return;
 
   now_drawn_count = quasi88_info_draw_count();

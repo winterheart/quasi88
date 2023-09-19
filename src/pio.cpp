@@ -6,14 +6,16 @@
 
 #include <cstdio>
 
-extern "C" {
 #include "quasi88.h"
+
+#include "emu.h"
+#include "suspend.h"
+
+extern "C" {
 #include "pio.h"
 
 #include "pc88cpu.h"
 
-#include "emu.h"
-#include "suspend.h"
 }
 
 /*
@@ -107,7 +109,7 @@ void pio_init() {
 /*          カウンタが 0 なら諦めて、連続リードする。    */
 /*          カウンタが 1 以上なら、CPU を切替える。     */
 /*----------------------------------------------------------------------*/
-byte pio_read_AB(int side, int port) {
+uint8_t pio_read_AB(int side, int port) {
   /* ポート属性不一致 */
 
   if (pio_AB[side ^ 1][port ^ 1].type == PIO_READ) { /* 相手ポートが READ */
@@ -149,7 +151,7 @@ byte pio_read_AB(int side, int port) {
 /*          カウンタが 0 なら諦めて、連続ライトする。    */
 /*          カウンタが 1 以上なら、CPU を切替える。     */
 /*----------------------------------------------------------------------*/
-void pio_write_AB(int side, int port, byte data) {
+void pio_write_AB(int side, int port, uint8_t data) {
   /* ポート属性不一致 */
 
   if (pio_AB[side ^ 1][port ^ 1].type == PIO_WRITE) { /* 相手のポート WRITE*/
@@ -189,8 +191,8 @@ void pio_write_AB(int side, int port, byte data) {
 /*      自分のポートの設定が WRITE ならエラー表示      */
 /*      リードの際に、CPUを切替え判定を入れる          */
 /*----------------------------------------------------------------------*/
-byte pio_read_C(int side) {
-  byte data;
+uint8_t pio_read_C(int side) {
+  uint8_t data;
 
   /* ポート属性不一致 */
   if (pio_C[side ^ 1][PIO_PORT_CH].type == PIO_READ && pio_C[side ^ 1][PIO_PORT_CL].type == PIO_READ) {
@@ -242,7 +244,7 @@ byte pio_read_C(int side) {
 /*      自分のポートの設定が  READ ならエラー表示      */
 /*      ライトの際に、CPUを切替え判定を入れる          */
 /*----------------------------------------------------------------------*/
-void pio_write_C(int side, byte data) {
+void pio_write_C(int side, uint8_t data) {
   int port;
 
   if (data & 0x08)
@@ -282,7 +284,7 @@ void pio_write_C(int side, byte data) {
 /*--------------------------------------------------------------*/
 /* 直接 Port C に書き込む                    */
 /*--------------------------------------------------------------*/
-void pio_write_C_direct(int side, byte data) {
+void pio_write_C_direct(int side, uint8_t data) {
   /* ポート属性不一致 */
   if (pio_C[side ^ 1][PIO_PORT_CH].type == PIO_WRITE && pio_C[side ^ 1][PIO_PORT_CL].type == PIO_WRITE) {
     pio_mesC("PIO C WRITE PORT Mismatch");
@@ -313,7 +315,7 @@ void pio_write_C_direct(int side, byte data) {
 /*  PA / PB / PCH / PCL の送受信を指定。                */
 /*  モードを設定 (モードは 0 に限定。詳細不明)            */
 /*----------------------------------------------------------------------*/
-void pio_set_mode(int side, byte data) {
+void pio_set_mode(int side, uint8_t data) {
   if (data & 0x60) {
     if (verbose_pio)
       printf("PIO mode A & CH not 0 : side = %s : mode = %d\n", (side != PIO_SIDE_M) ? "M" : "S", (data >> 5) & 0x3);
@@ -417,12 +419,12 @@ int statesave_pio(void) {
   if (statesave_table(SID, suspend_pio_work) == STATE_OK)
     return TRUE;
   else
-    return FALSE;
+    return false;
 }
 
 int stateload_pio(void) {
   if (stateload_table(SID, suspend_pio_work) == STATE_OK)
     return TRUE;
   else
-    return FALSE;
+    return false;
 }

@@ -27,11 +27,11 @@ static int VRAM2SCREEN_DIFF(void) {
   unsigned short old, *old_attr = &text_attr_buf[text_attr_flipflop ^ 1][0];
   T_GRYPH fnt;                                          /* フォントの字形 1文字分   */
   int fnt_idx;                                          /* フォントの字形 参照位置  */
-  bit8 style = 0;                                       /* フォントの字形 8ドット分 */
+  uint8_t style = 0;                                    /* フォントの字形 8ドット分 */
   int tpal;                                             /* フォントの色コード      */
   TYPE tcol;                                            /* フォントの色           */
   DIRTY_TYPE *up = (DIRTY_TYPE *)&screen_dirty_flag[0]; /* VRAM更新フラグへのポインタ*/
-  bit32 *src = main_vram4;                              /* VRAMへのポインタ        */
+  uint32_t *src = main_vram4;                           /* VRAMへのポインタ        */
   DST_DEFINE()                                          /* 描画エリアへのポインタ    */
   WORK_DEFINE()                                         /* 処理に必要なワーク       */
 
@@ -126,11 +126,11 @@ static int VRAM2SCREEN_ALL(void) {
 
   T_GRYPH fnt;    /* フォントの字形 1文字分   */
   int fnt_idx;    /* フォントの字形 参照位置  */
-  bit8 style = 0; /* フォントの字形 8ドット分 */
+  uint8_t style = 0; /* フォントの字形 8ドット分 */
   int tpal;       /* フォントの色コード      */
   TYPE tcol;      /* フォントの色           */
 
-  bit32 *src = main_vram4; /* VRAMへのポインタ        */
+  uint32_t *src = main_vram4; /* VRAMへのポインタ        */
   DST_DEFINE()             /* 描画エリアへのポインタ    */
   WORK_DEFINE()            /* 処理に必要なワーク       */
 

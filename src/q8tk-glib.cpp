@@ -9,11 +9,11 @@
 /************************************************************************/
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "quasi88.h"
 #include "memory.h" /* has_kanji_rom    */
 
-#include "q8tk.h"
 #include "q8tk-glib.h"
 
 #ifdef SUPPORT_UTF8
@@ -36,10 +36,10 @@ static void q8gr_putchar(int x, int y, int fg, int bg, int reverse, int underlin
 static int q8gr_strings(int x, int y, int fg, int bg, int reverse, int underline, int cursor_pos, int code,
                         const char *str, int start, int width);
 
-INLINE void q8gr_putc(int x, int y, int fg, int bg, int c) { q8gr_putchar(x, y, fg, bg, FALSE, FALSE, c); }
+INLINE void q8gr_putc(int x, int y, int fg, int bg, int c) { q8gr_putchar(x, y, fg, bg, false, false, c); }
 
 INLINE int q8gr_puts(int x, int y, int fg, int bg, int code, const char *str) {
-  return q8gr_strings(x, y, fg, bg, FALSE, FALSE, -1, code, str, 0, 0);
+  return q8gr_strings(x, y, fg, bg, false, false, -1, code, str, 0, 0);
 }
 
 /********************************************************/
@@ -74,9 +74,9 @@ void q8gr_clear_screen(void) {
     for (i = 0; i < Q8GR_SCREEN_X; i++) {
       p->background = Q8GR_PALETTE_BACKGROUND;
       p->foreground = Q8GR_PALETTE_FOREGROUND;
-      p->mouse = FALSE;
-      p->reverse = FALSE;
-      p->underline = FALSE;
+      p->mouse = false;
+      p->reverse = false;
+      p->underline = false;
       p->font_type = FONT_ANK;
       p->addr = 0;
       p++;
@@ -87,7 +87,7 @@ void q8gr_clear_screen(void) {
 
   q8gr_reset_screen_mask();
 
-  q8gr_set_cursor_exist(FALSE);
+  q8gr_set_cursor_exist(false);
 }
 
 /********************************************************/
@@ -175,10 +175,10 @@ int q8gr_scan_focus_screen(void *p) {
   for (j = 0; j < Q8GR_SCREEN_Y; j++) {
     for (i = 0; i < Q8GR_SCREEN_X; i++) {
       if (focus_screen[j][i] == p)
-        return TRUE;
+        return true;
     }
   }
-  return FALSE;
+  return false;
 }
 
 /*----------------------------------------------------------------------
@@ -263,7 +263,7 @@ static void draw_normal_box(int x, int y, int sx, int sy, int shadow_type) {
           else
             fg = shadow; /* 右   │ */
         } else {         /* 間      */
-          c = (Uint)' ';
+          c = (uint32_t)' ';
           fg = Q8GR_PALETTE_FOREGROUND;
         }
 
@@ -332,7 +332,7 @@ void q8gr_draw_check_button(int x, int y, int condition, void *p) {
 #if 1 /* チェック部を■で表現 */
   q8gr_putc(x + 1, y, fg_check, bg_check, ((condition == Q8TK_BUTTON_OFF) ? Q8GR_B_UL : Q8GR_B_BOX));
 #else /* チェック部を×で表現 */
-  q8gr_putchar(x + 1, y, fg_check, bg_check, FALSE, TRUE, ((condition == Q8TK_BUTTON_OFF) ? Q8GR_B_UL : Q8GR_B_X));
+  q8gr_putchar(x + 1, y, fg_check, bg_check, false, true, ((condition == Q8TK_BUTTON_OFF) ? Q8GR_B_UL : Q8GR_B_X));
 #endif
 
   q8gr_putc(x + 2, y, fg_edge, bg_edge, Q8GR_L_LEFT);
@@ -412,14 +412,14 @@ void q8gr_draw_notebook(int x, int y, int sx, int sy, Q8tkWidget *notebook, void
   struct notebook_draw *draw = &notebook->stat.notebook.draw;
 
   if (p) {
-    draw->drawing = TRUE;
+    draw->drawing = true;
     draw->x = x;
     draw->y = y;
     draw->x0 = x;
     draw->x1 = x + sx - 1;
-    draw->selected = FALSE;
+    draw->selected = false;
   } else {
-    draw->drawing = FALSE;
+    draw->drawing = false;
   }
 
   /* 上部のタグ部分以外の、ウインドウを描く */
@@ -434,7 +434,7 @@ void q8gr_draw_notepage(int code, const char *tag, int select_flag, int active_f
   int focus_x;
   struct notebook_draw *draw = &notebook->stat.notebook.draw;
 
-  if (draw->drawing == FALSE)
+  if (draw->drawing == false)
     return;
 
   if (select_flag)
@@ -448,7 +448,7 @@ void q8gr_draw_notepage(int code, const char *tag, int select_flag, int active_f
 
     /* 選択したノートページのタグ部分を表示 */
 
-    q8gr_strings(draw->x + 1, draw->y + 1, fg, bg, FALSE, active_flag, -1, code, tag, 0, 0);
+    q8gr_strings(draw->x + 1, draw->y + 1, fg, bg, false, active_flag, -1, code, tag, 0, 0);
 
     q8gr_putc(draw->x, draw->y, light, bg, Q8GR_C_7);
     q8gr_putc(draw->x, draw->y + 1, light, bg, Q8GR_G_I);
@@ -471,13 +471,13 @@ void q8gr_draw_notepage(int code, const char *tag, int select_flag, int active_f
       q8gr_putc(draw->x, draw->y + 2, light, bg, Q8GR_G_1);
     draw->x++;
 
-    draw->selected = TRUE;
+    draw->selected = true;
 
-  } else if (draw->selected == FALSE) {
+  } else if (draw->selected == false) {
 
     /* 選択したノートページより左のページの、タグ部分を表示 */
 
-    q8gr_strings(draw->x + 1, draw->y + 1, fg, bg, FALSE, active_flag, -1, code, tag, 0, 0);
+    q8gr_strings(draw->x + 1, draw->y + 1, fg, bg, false, active_flag, -1, code, tag, 0, 0);
 
     q8gr_putc(draw->x, draw->y, shadow, bg, Q8GR_C_7);
     q8gr_putc(draw->x, draw->y + 1, shadow, bg, Q8GR_G_I);
@@ -495,7 +495,7 @@ void q8gr_draw_notepage(int code, const char *tag, int select_flag, int active_f
 
     /* 選択したノートページより右のページの、タグ部分を表示 */
 
-    q8gr_strings(draw->x, draw->y + 1, fg, bg, FALSE, active_flag, -1, code, tag, 0, 0);
+    q8gr_strings(draw->x, draw->y + 1, fg, bg, false, active_flag, -1, code, tag, 0, 0);
 
     for (i = 0; i < len; i++, draw->x++) {
       q8gr_putc(draw->x, draw->y, shadow, bg, Q8GR_G__);
@@ -554,7 +554,7 @@ void q8gr_draw_entry(int x, int y, int width, int code, const char *text, int di
   int fg = (p) ? Q8GR_PALETTE_FONT_FG : Q8GR_PALETTE_BACKGROUND;
   int bg = (p) ? Q8GR_PALETTE_FONT_BG : Q8GR_PALETTE_SCALE_BAR;
 
-  q8gr_strings(x, y, fg, bg, FALSE, FALSE, cursor_pos, code, text, disp_pos, width);
+  q8gr_strings(x, y, fg, bg, false, false, cursor_pos, code, text, disp_pos, width);
 
   /* 編集可能な場合のみ反応する */
   if (p && (((Q8tkWidget *)p)->stat.entry.editable)) {
@@ -577,9 +577,9 @@ void q8gr_draw_combo(int x, int y, int width, int active, void *p) {
 
     if (p == NULL) fg = Q8GR_PALETTE_SCALE_BAR;
 
-    q8gr_putchar(x+width,  y, fg, bg, TRUE, FALSE, ' ');
-    q8gr_putchar(x+width+1,y, fg, bg, TRUE, FALSE, Q8GR_A_D);
-    q8gr_putchar(x+width+2,y, fg, bg, TRUE, FALSE, ' ');
+    q8gr_putchar(x+width,  y, fg, bg, true, false, ' ');
+    q8gr_putchar(x+width+1,y, fg, bg, true, false, Q8GR_A_D);
+    q8gr_putchar(x+width+2,y, fg, bg, true, false, ' ');
 
     q8gr_set_focus_screen(x+width, y, 3, 1, p);
 
@@ -597,7 +597,7 @@ void q8gr_draw_combo(int x, int y, int width, int active, void *p) {
 #endif
 
   /* エントリ部が編集不可の場合、エントリ部をクリックしても反応する */
-  if (p && (((Q8tkWidget *)p)->stat.combo.entry->stat.entry.editable == FALSE)) {
+  if (p && (((Q8tkWidget *)p)->stat.combo.entry->stat.entry.editable == false)) {
     q8gr_set_focus_screen(x, y, width, 1, p);
   }
 }
@@ -799,7 +799,7 @@ void q8gr_draw_vscale(int x, int y, Q8Adjust *adj, int active, int draw_value, i
  *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 static void kanji2addr(int code, unsigned int *addr, unsigned int *type) {
-  if (has_kanji_rom == FALSE) { /* ---- 漢字ROMない場合 ---- */
+  if (has_kanji_rom == false) { /* ---- 漢字ROMない場合 ---- */
 
     if (code < 0x100) /* 半角文字 */
     {
@@ -939,10 +939,10 @@ static int get_letter(int code, const char **str) {
         } else {
 #ifdef SUPPORT_UTF8
           int i;
-          int found = FALSE;
+          int found = false;
           for (i = 0; jis2uft16[i][0]; i++) {
             if (jis2uft16[i][1] == c) {
-              found = TRUE;
+              found = true;
               break;
             }
           }
@@ -1035,7 +1035,7 @@ static int q8gr_strings(int x, int y, int fg, int bg, int reverse, int underline
     rev = reverse;
     if (0 <= cursor_pos) { /* カーソル位置 */
       if (pos == cursor_pos) {
-        q8gr_set_cursor_exist(TRUE);
+        q8gr_set_cursor_exist(true);
         if (q8gr_get_cursor_blink()) {
           rev = !(rev);
         }
@@ -1101,7 +1101,7 @@ static int q8gr_strings(int x, int y, int fg, int bg, int reverse, int underline
       rev = reverse;
       if (0 <= cursor_pos) { /* カーソル位置 */
         if (pos == cursor_pos) {
-          q8gr_set_cursor_exist(TRUE);
+          q8gr_set_cursor_exist(true);
           if (q8gr_get_cursor_blink()) {
             rev = !(rev);
           }
@@ -1254,7 +1254,7 @@ int q8gr_stradd(int code, char *str, int add_pos, int add_chr) {
   unsigned int h;
 
   if (add_pos < 0)
-    return FALSE;
+    return false;
 
   /* 表示バイト位置が、全角文字の途中なら、全角文字の先頭とする */
   if (q8gr_strchk(code, str, add_pos) == 2)
@@ -1264,7 +1264,7 @@ int q8gr_stradd(int code, char *str, int add_pos, int add_chr) {
     if (count == add_pos) {
       memmove(p + 1, p, strlen(p) + 1);
       *p = (char)add_chr;
-      return TRUE;
+      return true;
     }
 
     if (*p == '\0')
@@ -1279,7 +1279,7 @@ int q8gr_stradd(int code, char *str, int add_pos, int add_chr) {
     else
       count += 2;
   }
-  return FALSE;
+  return false;
 }
 
 /*--------------------------------------------------------------
@@ -1386,7 +1386,7 @@ int q8gr_strcode(const char *buffer, int size) {
   unsigned char c;
   int sz;
 
-  int found_not_ascii = FALSE;
+  int found_not_ascii = false;
 
   /* UTF-8 は値に制約があるので、規定外はすぐにわかる。また、
      日本語の場合は 3バイト長で、EUC や SJIS と値が重なる範囲が狭い。
@@ -1407,7 +1407,7 @@ int q8gr_strcode(const char *buffer, int size) {
       sz--;
       continue;
     } else { /* UTF8 ? */
-      found_not_ascii = TRUE;
+      found_not_ascii = true;
       if (c < 0xc0) { /* ????     10xxxxxx */
         break;        /* NG */
       } else {
@@ -1508,12 +1508,12 @@ int q8gr_strcode(const char *buffer, int size) {
 
 void q8gr_draw_mouse(int x, int y) {
   if (0 <= menu_mouse_x) {
-    menu_screen[menu_screen_current][menu_mouse_y][menu_mouse_x].mouse = FALSE;
+    menu_screen[menu_screen_current][menu_mouse_y][menu_mouse_x].mouse = false;
   }
 
   if (0 <= x && x < Q8GR_SCREEN_X && 0 <= y && y < Q8GR_SCREEN_Y) {
 
-    menu_screen[menu_screen_current][y][x].mouse = TRUE;
+    menu_screen[menu_screen_current][y][x].mouse = true;
     menu_mouse_x = x;
     menu_mouse_y = y;
 
@@ -1545,8 +1545,8 @@ void q8gr_draw_logo(int x, int y) {
         if (!CHECK_MASK_X(x + i)) {
           menu_screen[menu_screen_current][y + j][x + i].background = bg;
           menu_screen[menu_screen_current][y + j][x + i].foreground = fg;
-          menu_screen[menu_screen_current][y + j][x + i].reverse = FALSE;
-          menu_screen[menu_screen_current][y + j][x + i].underline = FALSE;
+          menu_screen[menu_screen_current][y + j][x + i].reverse = false;
+          menu_screen[menu_screen_current][y + j][x + i].underline = false;
           menu_screen[menu_screen_current][y + j][x + i].font_type = FONT_LOGO;
           menu_screen[menu_screen_current][y + j][x + i].addr = addr;
         }
@@ -1559,7 +1559,7 @@ void q8gr_draw_logo(int x, int y) {
 
 /* ロゴの実体はこれ。 192x48ドット == 24文字x3行 */
 
-byte q8gr_logo[Q8GR_LOGO_W * Q8GR_LOGO_H * 16] = {
+uint8_t q8gr_logo[Q8GR_LOGO_W * Q8GR_LOGO_H * 16] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

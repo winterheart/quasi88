@@ -6,16 +6,16 @@
 
 #include <cstdio>
 
-extern "C" {
 #include "quasi88.h"
+
+#include "intr.h"
+#include "pc88main.h"
+#include "suspend.h"
+
+extern "C" {
 #include "initval.h"
 #include "soundbd.h"
-
-#include "pc88main.h"
-#include "intr.h"
-
 #include "snddrv.h"
-#include "suspend.h"
 }
 
 /*
@@ -29,11 +29,11 @@ int intr_sound_enable = 0x00; /* I/O[31] 割り込みマスク SOUND  */
 
 /* サウンドボード I 部 */
 
-int sound_ENABLE_A = FALSE; /* TIMER A 割込を起こすかどうか */
-int sound_ENABLE_B = FALSE; /* TIMER B 割込を起こすかどうか */
+int sound_ENABLE_A = false; /* TIMER A 割込を起こすかどうか */
+int sound_ENABLE_B = false; /* TIMER B 割込を起こすかどうか */
 
-int sound_LOAD_A = FALSE; /* TIMER A を動かすかどうか */
-int sound_LOAD_B = FALSE; /* TIMER B を動かすかどうか */
+int sound_LOAD_A = false; /* TIMER A を動かすかどうか */
+int sound_LOAD_B = false; /* TIMER B を動かすかどうか */
 
 int sound_FLAG_A = 0; /* FLAG A の状態     */
 int sound_FLAG_B = 0; /* FLAG B の状態     */
@@ -44,34 +44,34 @@ int sound_TIMER_B = 0; /* TIMER B 設定時間 reg[0x26]       */
 int sound_prescaler = 6;     /* 1/プリスケーラー (2,3,6)  */
 int sound_prescaler_sel = 2; /* プリスケーラー設定      */
 
-byte sound_reg[0x100]; /* サウンドボード レジスタ   */
+uint8_t sound_reg[0x100]; /* サウンドボード レジスタ   */
 int sound_reg_select = 0x00;
 
 /* サウンドボード II 部 */
 
-int sound2_MSK_TA = FALSE;   /* TIMER A 割り込みマスク    */
-int sound2_MSK_TB = FALSE;   /* TIMER B 割り込みマスク    */
-int sound2_MSK_EOS = FALSE;  /* EOS     割り込みマスク    */
-int sound2_MSK_BRDY = FALSE; /* BRDY    割り込みマスク    */
-int sound2_MSK_ZERO = FALSE; /* ZERO    割り込みマスク    */
+int sound2_MSK_TA = false;   /* TIMER A 割り込みマスク    */
+int sound2_MSK_TB = false;   /* TIMER B 割り込みマスク    */
+int sound2_MSK_EOS = false;  /* EOS     割り込みマスク    */
+int sound2_MSK_BRDY = false; /* BRDY    割り込みマスク    */
+int sound2_MSK_ZERO = false; /* ZERO    割り込みマスク    */
 
 int sound2_EN_TA = 0x01;    /* TIMER A 割り込み許可       */
 int sound2_EN_TB = 0x02;    /* TIMER B 割り込み許可       */
-int sound2_EN_EOS = FALSE;  /* EOS     割り込み許可       */
-int sound2_EN_BRDY = FALSE; /* BDRY    割り込み許可       */
-int sound2_EN_ZERO = FALSE; /* ZERO    割り込み許可       */
+int sound2_EN_EOS = false;  /* EOS     割り込み許可       */
+int sound2_EN_BRDY = false; /* BDRY    割り込み許可       */
+int sound2_EN_ZERO = false; /* ZERO    割り込み許可       */
 
 int sound2_FLAG_EOS = 0;    /* FLAG EOS  の状態      */
 int sound2_FLAG_BRDY = 0;   /* FLAG BRDY の状態      */
 int sound2_FLAG_ZERO = 0;   /* FLAG ZERO の状態      */
 int sound2_FLAG_PCMBSY = 0; /* FLAG PCMBSY の状態        */
 
-byte sound2_reg[0x100]; /* サウンドボードII レジスタ */
+uint8_t sound2_reg[0x100]; /* サウンドボードII レジスタ */
 int sound2_reg_select = 0x00;
 
 /* サウンドボード II  ADPCM 部 */
 
-byte *sound2_adpcm = nullptr; /* ADPCM用 DRAM (256KB)        */
+uint8_t *sound2_adpcm = nullptr; /* ADPCM用 DRAM (256KB)        */
 
 static int sound2_mem = 0;              /* ADPCM メモリ 1:アクセス可能 */
 static int sound2_rec = 0;              /* ADPCM        1:録音 0:再生   */
@@ -92,7 +92,7 @@ int sound2_intr_base = 1;        /* ADPCM 割り込みレート      */
 static int sound2_counter = 0;   /* ADPCM 再生録音カウンタ   */
 static int sound2_counter_old = 0;
 
-int sound2_notice_EOS = FALSE; /* EOSチェックの要不要  */
+int sound2_notice_EOS = false; /* EOSチェックの要不要  */
 
 static int sound2_delay = 0; /* フラグの遅れ           */
 
@@ -121,10 +121,10 @@ void sound_board_init(void) {
   */
   sound_reg[0x29] = 0x03; /* こいつだけは 0x00 だとまずいのでは… */
 
-  sound_ENABLE_A = FALSE;
-  sound_ENABLE_B = FALSE;
-  sound_LOAD_A = FALSE;
-  sound_LOAD_B = FALSE;
+  sound_ENABLE_A = false;
+  sound_ENABLE_B = false;
+  sound_LOAD_A = false;
+  sound_LOAD_B = false;
   sound_FLAG_A = 0;
   sound_FLAG_B = 0;
   sound_TIMER_A = 0;
@@ -138,9 +138,9 @@ void sound_board_init(void) {
   sound2_EN_TA = 0x01;
   sound2_EN_TB = 0x02;
 
-  sound2_EN_EOS = FALSE;
-  sound2_EN_BRDY = FALSE;
-  sound2_EN_ZERO = FALSE;
+  sound2_EN_EOS = false;
+  sound2_EN_BRDY = false;
+  sound2_EN_ZERO = false;
 
   sound2_FLAG_EOS = 0;
   sound2_FLAG_BRDY = 0;
@@ -157,7 +157,7 @@ void sound_board_init(void) {
 /********************************************************/
 /* データを入出力するレジスタの指定         */
 /********************************************************/
-void sound_out_reg(byte data) {
+void sound_out_reg(uint8_t data) {
   sound_reg_select = data & 0xff;
 
   xmame_dev_sound_out_reg(data);
@@ -166,7 +166,7 @@ void sound_out_reg(byte data) {
 /********************************************************/
 /* データを指定したレジスタに出力            */
 /********************************************************/
-void sound_out_data(byte data) {
+void sound_out_data(uint8_t data) {
   static const int pres[4] = {2, 2, 6, 3};
 
   sound_reg[sound_reg_select] = data;
@@ -229,7 +229,7 @@ void sound_out_data(byte data) {
 /********************************************************/
 /* サウンドのステータスを入力              */
 /********************************************************/
-byte sound_in_status(void) {
+uint8_t sound_in_status(void) {
   xmame_dev_sound_in_status();
 
   return (sound_FLAG_B << 1) | sound_FLAG_A; /* 常に ready */
@@ -240,7 +240,7 @@ byte sound_in_status(void) {
 /*  flag が 真なら、つねに SOUND BORD II 扱い */
 /*  flag が 偽なら、判別             */
 /********************************************************/
-byte sound_in_data(int always_sound_II) {
+uint8_t sound_in_data(int always_sound_II) {
   xmame_dev_sound_in_data();
 
   if (sound_reg_select < 0x10) { /* 0x00〜0x0f はリード可 */
@@ -271,7 +271,7 @@ byte sound_in_data(int always_sound_II) {
 /********************************************************/
 /* データを入出力するレジスタの指定         */
 /********************************************************/
-void sound2_out_reg(byte data) {
+void sound2_out_reg(uint8_t data) {
   sound2_reg_select = data & 0xff;
 
   xmame_dev_sound2_out_reg(data);
@@ -280,7 +280,7 @@ void sound2_out_reg(byte data) {
 /********************************************************/
 /* データを指定したレジスタに出力            */
 /********************************************************/
-void sound2_out_data(byte data) {
+void sound2_out_data(uint8_t data) {
   int wk, l;
 
   sound2_reg[sound2_reg_select] = data;
@@ -350,7 +350,7 @@ void sound2_out_data(byte data) {
             sound2_notice_EOS = TRUE;
             interval_work_set_EOS(l + 1);
           } else {
-            sound2_notice_EOS = FALSE;
+            sound2_notice_EOS = false;
           }
 #undef S
 #undef E
@@ -466,7 +466,7 @@ void sound2_out_data(byte data) {
 /********************************************************/
 /* サウンドボードIIのステータス入力          */
 /********************************************************/
-byte sound2_in_status(void) {
+uint8_t sound2_in_status(void) {
   xmame_dev_sound2_in_status();
 
   if (sound2_delay & 0x08) {
@@ -489,8 +489,8 @@ byte sound2_in_status(void) {
 /********************************************************/
 /* 指定したレジスタの内容を入力               */
 /********************************************************/
-byte sound2_in_data(void) {
-  byte data = 0x00;
+uint8_t sound2_in_data(void) {
+  uint8_t data = 0x00;
 
   xmame_dev_sound2_in_data();
 
@@ -600,20 +600,20 @@ static T_SUSPEND_W suspend_sound_work3[] = {
 
 int statesave_sound(void) {
   if (statesave_table(SID, suspend_sound_work) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (statesave_table(SID2, suspend_sound_work2) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (statesave_table(SID3, suspend_sound_work3) != STATE_OK)
-    return FALSE;
+    return false;
 
   return TRUE;
 }
 
 int stateload_sound(void) {
   if (stateload_table(SID, suspend_sound_work) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (stateload_table(SID2, suspend_sound_work2) != STATE_OK) {
 

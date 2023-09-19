@@ -4,18 +4,19 @@
 /*                                  */
 /************************************************************************/
 
-extern "C" {
 #include "quasi88.h"
-#include "initval.h"
-#include "intr.h"
 
-#include "pc88cpu.h"
+#include "intr.h"
 #include "pc88main.h"
 #include "crtcdmac.h"
+#include "suspend.h"
+
+extern "C" {
+#include "initval.h"
+#include "pc88cpu.h"
 #include "soundbd.h"
 
 #include "snddrv.h"
-#include "suspend.h"
 }
 
 int intr_level;        /* OUT[E4] 割り込みレベル    */
@@ -77,16 +78,16 @@ int state_of_cpu = 0; /* メインCPUが処理したステート数   */
 
 int state_of_vsync; /* VSYNC 1周期あたりのステート数 */
 
-int no_wait = FALSE; /* ウエイトなし           */
+int no_wait = false; /* ウエイトなし           */
 
 int boost = 1; /* ブースト         */
 int boost_cnt;
 
-int RS232C_flag = FALSE; /* RS232C */
+int RS232C_flag = false; /* RS232C */
 static int rs232c_intr_base;
 static int rs232c_intr_timer;
 
-int VSYNC_flag = FALSE; /* VSYNC */
+int VSYNC_flag = false; /* VSYNC */
 static int vsync_intr_base;
 static int vsync_intr_timer;
 
@@ -95,13 +96,13 @@ static int vrtc_base;
 static int vrtc_base2;
 static int vrtc_timer;
 
-int RTC_flag = FALSE; /* RTC */
+int RTC_flag = false; /* RTC */
 static int rtc_intr_base;
 static int rtc_intr_timer;
 
-int SOUND_flag = FALSE; /* SOUND Timer-A/Timer-B */
-static int SOUND_level = FALSE;
-static int SOUND_edge = FALSE;
+int SOUND_flag = false; /* SOUND Timer-A/Timer-B */
+static int SOUND_level = false;
+static int SOUND_edge = false;
 static int sd_A_intr_base;
 static int sd_A_intr_timer;
 static int sd_B_intr_base;
@@ -217,12 +218,12 @@ static int sound_prescaler_update = 0;
 
 void change_sound_flags(int port) {
   sound_flags_update = (int)port;
-  if (highspeed_flag == FALSE)
+  if (highspeed_flag == false)
     CPU_REFRESH_INTERRUPT();
 }
 void change_sound_prescaler(int new_prescaler) {
   sound_prescaler_update = new_prescaler;
-  if (highspeed_flag == FALSE)
+  if (highspeed_flag == false)
     CPU_REFRESH_INTERRUPT();
 }
 
@@ -231,7 +232,7 @@ void change_sound_prescaler(int new_prescaler) {
  *  割り込み更新後に呼ばれる。
  */
 static void check_sound_parm_update() {
-  byte data;
+  uint8_t data;
 
   if (sound_prescaler_update) { /* 分周 変更があったら         */
                                 /* タイマ値を (変更後/変更前)倍して */
@@ -346,7 +347,7 @@ int quasi88_info_vsync_count(void) { return vsync_count; }
 
 static void set_INT_active() {
   if (intr_level == 0) {                           /* レベル設定 0 */
-    z80main_cpu.INT_active = FALSE;                /*    割り込みは受け付けない */
+    z80main_cpu.INT_active = false;                /*    割り込みは受け付けない */
   } else if (intr_level >= 1 &&                    /* レベル設定 1 */
              /*intr_sio_enable &&*/ RS232C_flag) { /*    RS232S 受信 割り込み */
     z80main_cpu.INT_active = TRUE;
@@ -360,13 +361,13 @@ static void set_INT_active() {
              /*intr_sound_enable &&*/ SOUND_flag) { /*    SOUND TIMER 割り込み */
     z80main_cpu.INT_active = TRUE;
   } else {
-    z80main_cpu.INT_active = FALSE;
+    z80main_cpu.INT_active = false;
   }
 }
 
 /*----------------------------------------------------------------------*/
 /* 割り込みを生成する。と同時に、次の割り込みまでの、最小 state も計算    */
-/*  帰り値は、Z80処理強制終了のフラグ(TRUE/FALSE)            */
+/*  帰り値は、Z80処理強制終了のフラグ(TRUE/false)            */
 /*----------------------------------------------------------------------*/
 void main_INT_update(void) {
   int SOUND_level_old = SOUND_level;
@@ -383,7 +384,7 @@ void main_INT_update(void) {
         RS232C_flag = TRUE;
     }
   }
-  icount = MIN(icount, rs232c_intr_timer);
+  icount = std::min(icount, rs232c_intr_timer);
 
   /* -------- VSYNC 割り込み -------- */
 
@@ -400,7 +401,7 @@ void main_INT_update(void) {
     ctrl_vrtc = 1;
     vrtc_timer = vrtc_base + z80main_cpu.state0;
   }
-  icount = MIN(icount, vsync_intr_timer);
+  icount = std::min(icount, vsync_intr_timer);
 
   /* -------- VRTC 処理 -------- */
 
@@ -427,7 +428,7 @@ void main_INT_update(void) {
   }
 
   if (ctrl_vrtc < 3)
-    icount = MIN(icount, vrtc_timer);
+    icount = std::min(icount, vrtc_timer);
 
   /* -------- RTC 割り込み -------- */
 
@@ -437,7 +438,7 @@ void main_INT_update(void) {
     if (intr_rtc_enable)
       RTC_flag = TRUE;
   }
-  icount = MIN(icount, rtc_intr_timer);
+  icount = std::min(icount, rtc_intr_timer);
 
   /* -------- SOUND TIMER A 割り込み -------- */
 
@@ -453,7 +454,7 @@ void main_INT_update(void) {
           sound_FLAG_A = 1;
       }
     }
-    icount = MIN(icount, sd_A_intr_timer);
+    icount = std::min(icount, sd_A_intr_timer);
   }
 
   /* -------- SOUND TIMER B 割り込み -------- */
@@ -470,7 +471,7 @@ void main_INT_update(void) {
           sound_FLAG_B = 1;
       }
     }
-    icount = MIN(icount, sd_B_intr_timer);
+    icount = std::min(icount, sd_B_intr_timer);
   }
 
   if (sound2_FLAG_PCMBSY) {
@@ -485,7 +486,7 @@ void main_INT_update(void) {
           sound2_FLAG_BRDY = 1;
       }
     }
-    icount = MIN(icount, sd2_BRDY_intr_timer);
+    icount = std::min(icount, sd2_BRDY_intr_timer);
 
     if (sound2_notice_EOS) {
       sd2_EOS_intr_timer -= z80main_cpu.state0;
@@ -497,10 +498,10 @@ void main_INT_update(void) {
           sound2_FLAG_EOS = 1;
         if (!sound2_repeat)
           sound2_FLAG_PCMBSY = 0;
-        sound2_notice_EOS = FALSE;
+        sound2_notice_EOS = false;
       }
     }
-    icount = MIN(icount, sound2_notice_EOS);
+    icount = std::min(icount, sound2_notice_EOS);
   }
 
   /* サウンドの、割り込みに関わるレジスタが変更されてないか確認 */
@@ -515,14 +516,14 @@ void main_INT_update(void) {
       ( sound2_FLAG_EOS  && sound2_EN_EOS  ) ){
     SOUND_level = TRUE;
   }else{
-    SOUND_level = FALSE;
+    SOUND_level = false;
   }
-  if( (SOUND_level_old == FALSE) && SOUND_level ){
+  if( (SOUND_level_old == false) && SOUND_level ){
     SOUND_edge = TRUE;
   }
   if( SOUND_edge && intr_sound_enable ){
     SOUND_flag = TRUE;
-    SOUND_edge = FALSE;
+    SOUND_edge = false;
   }
 #elif 1 /* これなら OK ? */
   if (((sound_FLAG_A && sound2_EN_TA) || (sound_FLAG_B && sound2_EN_TB) || (sound2_FLAG_BRDY && sound2_EN_BRDY) ||
@@ -530,9 +531,9 @@ void main_INT_update(void) {
       intr_sound_enable) {
     SOUND_level = TRUE;
   } else {
-    SOUND_level = FALSE;
+    SOUND_level = false;
   }
-  if ((SOUND_level_old == FALSE) && SOUND_level) {
+  if ((SOUND_level_old == false) && SOUND_level) {
     SOUND_flag = TRUE;
   }
 #else   /* DRAGON が動かない ? */
@@ -541,7 +542,7 @@ void main_INT_update(void) {
       intr_sound_enable) {
     SOUND_flag = TRUE;
   } else {
-    SOUND_flag = FALSE;
+    SOUND_flag = false;
   }
 #endif
 
@@ -567,12 +568,12 @@ void main_INT_update(void) {
 /* 初期化 (Z80リセット時に呼ぶ)      */
 /*--------------------------------------*/
 void main_INT_init(void) {
-  RS232C_flag = FALSE;
-  VSYNC_flag = FALSE;
-  RTC_flag = FALSE;
-  SOUND_flag = FALSE;
-  SOUND_level = FALSE;
-  SOUND_edge = FALSE;
+  RS232C_flag = false;
+  VSYNC_flag = false;
+  RTC_flag = false;
+  SOUND_flag = false;
+  SOUND_level = false;
+  SOUND_edge = false;
 
   interval_work_init_all();
   ctrl_vrtc = 1;
@@ -611,19 +612,19 @@ int main_INT_chk(void) {
     }
   } else if (intr_level >= 1 &&                    /* レベル設定 1 */
              /*intr_sio_enable &&*/ RS232C_flag) { /*    RS232S 受信 割り込み */
-    RS232C_flag = FALSE;
+    RS232C_flag = false;
     intr_no = 0;
   } else if (intr_level >= 2 &&                     /* レベル設定 2 */
              /*intr_vsync_enable &&*/ VSYNC_flag) { /*    VSYNC 割り込み */
-    VSYNC_flag = FALSE;
+    VSYNC_flag = false;
     intr_no = 1;
   } else if (intr_level >= 3 &&                 /* レベル設定 3 */
              /*intr_rtc_enable &&*/ RTC_flag) { /*    1/600秒 RTC 割り込み */
-    RTC_flag = FALSE;
+    RTC_flag = false;
     intr_no = 2;
   } else if (intr_level >= 5 &&                     /* レベル設定 5 */
              /*intr_sound_enable &&*/ SOUND_flag) { /*    SOUND TIMER 割り込み */
-    SOUND_flag = FALSE;
+    SOUND_flag = false;
     intr_no = 4;
   }
 
@@ -722,16 +723,16 @@ static T_SUSPEND_W suspend_intr_work4[] = {
 
 int statesave_intr(void) {
   if (statesave_table(SID, suspend_intr_work) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (statesave_table(SID2, suspend_intr_work2) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (statesave_table(SID3, suspend_intr_work3) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (statesave_table(SID4, suspend_intr_work4) != STATE_OK)
-    return FALSE;
+    return false;
 
   return TRUE;
 }
@@ -740,7 +741,7 @@ int stateload_intr(void) {
   boost_cnt = 0;
 
   if (stateload_table(SID, suspend_intr_work) != STATE_OK)
-    return FALSE;
+    return false;
 
   if (stateload_table(SID2, suspend_intr_work2) != STATE_OK) {
 
@@ -782,9 +783,9 @@ NOT_HAVE_SID3:
       (sound2_FLAG_EOS && sound2_EN_EOS)) {
     SOUND_level = TRUE;
   } else {
-    SOUND_level = FALSE;
+    SOUND_level = false;
   }
-  SOUND_edge = FALSE;
+  SOUND_edge = false;
 
 NOT_HAVE_SID4:
   boost = 1;

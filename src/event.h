@@ -1,6 +1,8 @@
 #ifndef EVENT_H_INCLUDED
 #define EVENT_H_INCLUDED
 
+#include <stdint.h>
+
 /***********************************************************************
  * イベント処理 (システム依存)
  ************************************************************************/
@@ -18,8 +20,8 @@
  *  この関数は、終了時に 1回だけ呼び出される。
  *
  *****************************************************************************/
-void event_init(void);
-void event_exit(void);
+void event_init();
+void event_exit();
 
 /******************************************************************************
  * イベント処理の再初期化
@@ -30,7 +32,7 @@ void event_exit(void);
  *  (キー入力イベント処理や、メニューバーの設定を変える場合など)
  *
  *****************************************************************************/
-void event_switch(void);
+void event_switch();
 
 /******************************************************************************
  * イベント処理の実行
@@ -81,7 +83,7 @@ void event_switch(void);
  *          quasi88_quit()
  *
  *****************************************************************************/
-void event_update(void);
+void event_update();
 
 /******************************************************************************
  * その他の雑多な関数
@@ -104,12 +106,12 @@ void event_update(void);
  *  使用可能なジョイスティックの数 (0〜2) を返す。
  *
  *****************************************************************************/
-int event_numlock_on(void);
-void event_numlock_off(void);
+int event_numlock_on();
+void event_numlock_off();
 
 void event_get_mouse_pos(int *x, int *y);
 
-int event_get_joystick_num(void);
+int event_get_joystick_num();
 
 /******************************************************************************
  * 以下は、上記のシステム依存な関数より、呼び出される関数
@@ -133,9 +135,9 @@ void quasi88_mouse_move(int x, int y, int abs_flag);
 #define quasi88_mouse_moved_abs(x, y) quasi88_mouse_move(x, y, TRUE)
 #define quasi88_mouse_moved_rel(x, y) quasi88_mouse_move(x, y, FALSE)
 
-void quasi88_expose(void);
-void quasi88_focus_in(void);
-void quasi88_focus_out(void);
+void quasi88_expose();
+void quasi88_focus_in();
+void quasi88_focus_out();
 
 /* 以下は、実装実験中。呼び出しに条件があるでの注意 */
 
@@ -145,7 +147,7 @@ typedef struct {
   int boot_from_rom;
   int boot_clock_4mhz;
   int set_version;
-  byte baudrate_sw;
+  uint8_t baudrate_sw;
   int use_extram;
   int use_jisho_rom;
   int sound_board;
@@ -153,19 +155,19 @@ typedef struct {
 
 int quasi88_stateload(int serial);
 int quasi88_statesave(int serial);
-int quasi88_screen_snapshot(void);
+int quasi88_screen_snapshot();
 int quasi88_waveout(int start);
 int quasi88_drag_and_drop(const char *filename);
 
-int quasi88_cfg_now_wait_rate(void);
+int quasi88_cfg_now_wait_rate();
 void quasi88_cfg_set_wait_rate(int rate);
-int quasi88_cfg_now_no_wait(void);
+int quasi88_cfg_now_no_wait();
 void quasi88_cfg_set_no_wait(int enable);
 
 int quasi88_disk_insert_all(const char *filename, int ro);
 int quasi88_disk_insert(int drv, const char *filename, int image, int ro);
 int quasi88_disk_insert_A_to_B(int src_drv, int dst_drv, int dst_img);
-int quasi88_disk_eject_all(void);
+int quasi88_disk_eject_all();
 int quasi88_disk_eject(int drv);
 
 void quasi88_disk_image_select(int drv, int img);
@@ -174,16 +176,16 @@ void quasi88_disk_image_next(int drv);
 void quasi88_disk_image_prev(int drv);
 
 int quasi88_load_tape_insert(const char *filename);
-int quasi88_load_tape_rewind(void);
-int quasi88_load_tape_eject(void);
+int quasi88_load_tape_rewind();
+int quasi88_load_tape_eject();
 int quasi88_save_tape_insert(const char *filename);
-int quasi88_save_tape_eject(void);
+int quasi88_save_tape_eject();
 
 int quasi88_serial_in_connect(const char *filename);
-void quasi88_serial_in_remove(void);
+void quasi88_serial_in_remove();
 int quasi88_serial_out_connect(const char *filename);
-void quasi88_serial_out_remove(void);
+void quasi88_serial_out_remove();
 int quasi88_printer_connect(const char *filename);
-void quasi88_printer_remove(void);
+void quasi88_printer_remove();
 
 #endif /* EVENT_H_INCLUDED */

@@ -8,17 +8,17 @@
 
 #define FONT_8x16()                                                                                                    \
   font_inc = 1;                                                                                                        \
-  font_dup = FALSE;                                                                                                    \
+  font_dup = false;                                                                                                    \
   font_skip = 1;
 
 #define FONT_16x16()                                                                                                   \
   font_inc = 2;                                                                                                        \
-  font_dup = FALSE;                                                                                                    \
+  font_dup = false;                                                                                                    \
   font_skip = 1;
 
 #define FONT_LOGO8x16()                                                                                                \
   font_inc = Q8GR_LOGO_W;                                                                                              \
-  font_dup = FALSE;                                                                                                    \
+  font_dup = false;                                                                                                    \
   font_skip = 1;
 
 #define WORK_DEFINE()

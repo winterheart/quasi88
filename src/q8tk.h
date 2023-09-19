@@ -1,7 +1,7 @@
 #ifndef Q8TK_H_INCLUDED
 #define Q8TK_H_INCLUDED
 
-#include "quasi88.h"
+//#include "quasi88.h"
 #include "keyboard.h"
 
 /*--------------------------------------------------------------
@@ -30,14 +30,14 @@ enum { /* 構造体 T_Q8GR_SCREEN のメンバ font_type の値 */
 };
 
 typedef struct {
-  Uint background : 4; /* 背景パレットコード (0〜15)     */
-  Uint foreground : 4; /* 表示パレットコード (0〜15)     */
-  Uint rsv : 1;
-  Uint mouse : 1;     /* マウスポインタ    なし=0 あり=1   */
-  Uint reverse : 1;   /* 反転表示     通常=0 反転=1   */
-  Uint underline : 1; /* アンダーライン    なし=0 あり=1   */
-  Uint font_type : 4; /* フォントタイプ (下参照)        */
-  Uint addr : 16;     /* 漢字ROM アドレス           */
+  uint32_t background : 4; /* 背景パレットコード (0〜15)     */
+  uint32_t foreground : 4; /* 表示パレットコード (0〜15)     */
+  uint32_t rsv : 1;
+  uint32_t mouse : 1;     /* マウスポインタ    なし=0 あり=1   */
+  uint32_t reverse : 1;   /* 反転表示     通常=0 反転=1   */
+  uint32_t underline : 1; /* アンダーライン    なし=0 あり=1   */
+  uint32_t font_type : 4; /* フォントタイプ (下参照)        */
+  uint32_t addr : 16;     /* 漢字ROM アドレス           */
 } T_Q8GR_SCREEN;      /* 計32bit == unsigned int と決めつけ (;_;)        */
 
 extern int menu_screen_current;
@@ -50,7 +50,7 @@ extern T_Q8GR_SCREEN menu_screen[2][Q8GR_SCREEN_Y][Q8GR_SCREEN_X];
 #define Q8GR_LOGO_W (24)
 #define Q8GR_LOGO_H (3)
 
-extern byte q8gr_logo[Q8GR_LOGO_W * Q8GR_LOGO_H * 16];
+extern uint8_t q8gr_logo[Q8GR_LOGO_W * Q8GR_LOGO_H * 16];
 
 /*--------------------------------------------------------------
  * メニュー画面のパレットコード
@@ -149,6 +149,13 @@ typedef struct _Q8List Q8List;
 
 typedef void (*Q8tkSignalFunc)();
 
+struct notebook_draw { /* 描画時のワーク    */
+  int drawing;
+  int x, y;
+  int x0, x1;
+  int selected;
+};
+
 struct _Q8tkWidget {
 
   int type;      /* ウィジットの種類 Q8TK_TYPE_  */
@@ -212,12 +219,7 @@ struct _Q8tkWidget {
 
     struct {                 /* ---- ノートブック ---- */
       Q8tkWidget *page;      /* 現在選択中の PAGE  */
-      struct notebook_draw { /* 描画時のワーク    */
-        int drawing;
-        int x, y;
-        int x0, x1;
-        int selected;
-      } draw;
+      struct notebook_draw draw; /* 描画時のワーク    */
       int lost_focus;
     } notebook;
 

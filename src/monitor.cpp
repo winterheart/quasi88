@@ -20,42 +20,43 @@
 #include <langinfo.h>
 #endif /* USE_LOCALE */
 
-extern "C" {
 #include "quasi88.h"
+
+#include "basic.h"
+#include "drive.h"
+#include "emu.h"
+#include "event.h"
+#include "fdc.h"
+#include "file-op.h"
+#include "fname.h"
+#include "initval.h"
+#include "intr.h"
+#include "keyboard.h"
+#include "memory.h"
+#include "menu.h"
+#include "monitor.h"
+#include "pc88main.h"
+#include "screen.h"
+#include "snapshot.h"
+#include "crtcdmac.h"
+#include "status.h"
+#include "suspend.h"
+#include "utility.h"
+
+extern "C" {
 #ifdef DEBUGLOG
 #include "debug.h"
 #endif
-#include "initval.h"
-#include "monitor.h"
 
 #include "pc88cpu.h"
-#include "pc88main.h"
 #include "pc88sub.h"
-#include "crtcdmac.h"
-#include "memory.h"
-#include "intr.h"
-#include "keyboard.h"
 #include "pio.h"
 #include "soundbd.h"
-#include "screen.h"
-#include "fdc.h"
 
-#include "emu.h"
-#include "drive.h"
 #include "image.h"
-#include "file-op.h"
-#include "fname.h"
-#include "status.h"
-#include "menu.h"
 #include "pause.h"
 #include "snddrv.h"
-#include "wait.h"
-#include "suspend.h"
-#include "snapshot.h"
-#include "event.h"
 
-#include "basic.h"
-#include "utility.h"
 }
 
 /************************************************************************/
@@ -63,7 +64,7 @@ extern "C" {
 /*  起動時に -debug オプション指定時のみ。未指定時は終了する。 */
 /************************************************************************/
 
-int debug_mode = FALSE; /* デバッグ機能(モニター)  */
+int debug_mode = false; /* デバッグ機能(モニター)  */
 
 char alt_char = 'X'; /* 代替文字 */
 
@@ -1331,9 +1332,9 @@ static struct {
 /*--------------------------------------------------------------*/
 /* メモリ READ/WRITE 関数                  */
 /*--------------------------------------------------------------*/
-static byte peek_memory(int bank, word addr) {
+static uint8_t peek_memory(int bank, uint16_t addr) {
   int verbose_save;
-  byte wk;
+  uint8_t wk;
 
   switch (bank) {
   case ARG_MAIN:
@@ -1410,7 +1411,7 @@ static byte peek_memory(int bank, word addr) {
   }
   return 0xff;
 }
-static void poke_memory(int bank, word addr, byte data) {
+static void poke_memory(int bank, uint16_t addr, uint8_t data) {
   int verbose_save;
 
   switch (bank) {
@@ -1584,7 +1585,7 @@ static struct {
 } argv;
 
 static void shift() {
-  int i, size = FALSE;
+  int i, size = false;
   char *p, *chk;
 
   if (argv_counter > MAX_ARGS || /* これ以上引数が無い */
@@ -1596,7 +1597,7 @@ static void shift() {
 
     p = d_argv[argv_counter];
     if (*p == '#') {
-      size = TRUE;
+      size = true;
       p++;
     }
 
@@ -1799,7 +1800,7 @@ static int save_dump_addr = -1;
 static int save_dump_bank = ARG_MAIN;
 static void monitor_dump() {
   int i, j;
-  byte c;
+  uint8_t c;
   int bank = save_dump_bank;
   int start = save_dump_addr;
   int size = 256;
@@ -1871,7 +1872,7 @@ static int save_dumpext_bank = ARG_EXT0;
 static int save_dumpext_board = 1;
 static void monitor_dumpext() {
   int i, j;
-  byte c;
+  uint8_t c;
   int bank = save_dumpext_bank;
   int start = save_dumpext_addr;
   int board = save_dumpext_board;
@@ -2004,7 +2005,7 @@ static void monitor_move() {
   int s_bank = ARG_MAIN;
   int d_bank = ARG_MAIN;
   int start, size, dist;
-  byte data;
+  uint8_t data;
 
   if (!exist_argv())
     error();
@@ -2063,7 +2064,7 @@ static void monitor_move() {
 static int save_search_addr = -1;
 static int save_search_size = -1;
 static int save_search_bank = ARG_MAIN;
-static byte save_search_data;
+static uint8_t save_search_data;
 static void monitor_search() {
   int i, j;
 
@@ -2130,7 +2131,7 @@ static void monitor_search() {
 static void monitor_read() {
   int i, j;
   int addr;
-  byte data;
+  uint8_t data;
   int bank = ARG_MAIN;
 
   if (!exist_argv())
@@ -2153,7 +2154,7 @@ static void monitor_read() {
 
   data = peek_memory(bank, addr);
 
-  printf("READ memory %s[ %04XH ] -> %02X  (= %d | %+d | ", argv2str(bank), addr, (Uint)data, (Uint)data,
+  printf("READ memory %s[ %04XH ] -> %02X  (= %d | %+d | ", argv2str(bank), addr, (uint32_t)data, (uint32_t)data,
          (int)((char)data));
   for (i = 0, j = 0x80; i < 8; i++, j >>= 1) {
     printf("%d", (data & j) ? 1 : 0);
@@ -2167,7 +2168,7 @@ static void monitor_read() {
 static void monitor_write() {
   int i, j;
   int addr;
-  byte data;
+  uint8_t data;
   int bank = ARG_MAIN;
 
   if (!exist_argv())
@@ -2195,7 +2196,7 @@ static void monitor_write() {
 
   poke_memory(bank, addr, data);
 
-  printf("WRITE memory %s[ %04XH ] <- %02X  (= %d | %+d | ", argv2str(bank), addr, (Uint)data, (Uint)data,
+  printf("WRITE memory %s[ %04XH ] <- %02X  (= %d | %+d | ", argv2str(bank), addr, (uint32_t)data, (uint32_t)data,
          (int)((char)data));
   for (i = 0, j = 0x80; i < 8; i++, j >>= 1) {
     printf("%d", (data & j) ? 1 : 0);
@@ -2210,7 +2211,7 @@ static void monitor_write() {
 static void monitor_in() {
   int i, j;
   int cpu = ARG_MAIN, port;
-  byte data;
+  uint8_t data;
 
   if (!exist_argv())
     error();
@@ -2249,7 +2250,7 @@ static void monitor_in() {
 static void monitor_out() {
   int i, j;
   int cpu = ARG_MAIN, port;
-  byte data;
+  uint8_t data;
 
   if (!exist_argv())
     error();
@@ -2343,10 +2344,10 @@ static void monitor_reset() {
 
   switch (ck_mode) {
   case ARG_8MHZ:
-    cfg.boot_clock_4mhz = FALSE;
+    cfg.boot_clock_4mhz = false;
     break;
   case ARG_4MHZ:
-    cfg.boot_clock_4mhz = TRUE;
+    cfg.boot_clock_4mhz = true;
     break;
   }
 
@@ -2374,14 +2375,14 @@ static void monitor_reset() {
 /*  レジスタの内容を表示／変更             */
 /*--------------------------------------------------------------*/
 static void monitor_reg() {
-  int all = FALSE;
+  int all = false;
   int cpu = -1, reg = -1, value = 0;
   z80arch *z80;
 
   if (exist_argv()) {
 
     if (argv_is(ARGV_ALL)) { /* all */
-      all = TRUE;
+      all = true;
       shift();
     } else {
 
@@ -2411,7 +2412,7 @@ static void monitor_reg() {
   if (reg == -1) { /* レジスタ表示 */
     if (!all && cpu == -1) {
       if (cpu_timing >= 2)
-        all = TRUE;
+        all = true;
       else {
         if (select_main_cpu)
           cpu = ARG_MAIN;
@@ -2612,14 +2613,14 @@ static void monitor_go() {
 /* trace change                         */
 /*  指定したステップ分またはCPU処理が変わるまで、実行    */
 /*--------------------------------------------------------------*/
-static int save_trace_change = FALSE;
+static int save_trace_change = false;
 static void monitor_trace() {
-  int change = FALSE, step = trace_counter;
+  int change = false, step = trace_counter;
 
   if (exist_argv()) {
 
     if (argv_is(ARGV_CHANGE))
-      change = TRUE; /* [change]  */
+      change = true; /* [change]  */
     else if (argv_is(ARGV_SIZE))
       step = argv.val; /* [<step>]  */
     else if (argv_is(ARGV_NUM))
@@ -2631,9 +2632,9 @@ static void monitor_trace() {
   } else {
 
     if (save_trace_change)
-      change = TRUE;
+      change = true;
     else
-      change = FALSE;
+      change = false;
   }
 
   if (exist_argv())
@@ -2642,11 +2643,11 @@ static void monitor_trace() {
   /*================*/
 
   if (change) {
-    save_trace_change = TRUE;
+    save_trace_change = true;
     quasi88_exec_trace_change();
 
   } else {
-    save_trace_change = FALSE;
+    save_trace_change = false;
     trace_counter = step;
     quasi88_exec_trace();
   }
@@ -2659,22 +2660,22 @@ static void monitor_trace() {
 /*  CALL、DJNZ、LDIR etc のスキップが指定可能       */
 /*--------------------------------------------------------------*/
 static void monitor_step() {
-  int call = FALSE, jp = FALSE, rep = FALSE;
-  int flag = FALSE;
+  int call = false, jp = false, rep = false;
+  int flag = false;
   int cpu;
-  byte code;
-  word addr;
+  uint8_t code;
+  uint16_t addr;
 
   while (exist_argv()) {
     if (argv_is(ARGV_STEP)) {
       if (argv.val == ARG_CALL)
-        call = TRUE;
+        call = true;
       if (argv.val == ARG_JP)
-        jp = TRUE;
+        jp = true;
       if (argv.val == ARG_REP)
-        rep = TRUE;
+        rep = true;
       if (argv.val == ARG_ALL) {
-        call = jp = rep = TRUE;
+        call = jp = rep = true;
       }
       shift();
     } else {
@@ -2708,13 +2709,13 @@ static void monitor_step() {
       if (code == 0xcd ||          /* CALL nn    = 11001101B */
           (code & 0xc7) == 0xc4) { /* CALL cc,nn = 11ccc100B */
         addr += 3;
-        flag = TRUE;
+        flag = true;
       }
     }
     if (jp) {
       if (code == 0x10) { /* DJNZ e     = 00010000B */
         addr += 2;
-        flag = TRUE;
+        flag = true;
       }
     }
     if (rep) {
@@ -2725,7 +2726,7 @@ static void monitor_step() {
           code = sub_mem_read(addr + 1);
         if ((code & 0xf4) == 0xb0) {
           addr += 2;
-          flag = TRUE;
+          flag = true;
         }
       }
     }
@@ -2746,10 +2747,10 @@ static void monitor_step() {
 /*  step all に同じ                      */
 /*--------------------------------------------------------------*/
 static void monitor_stepall() {
-  int flag = FALSE;
+  int flag = false;
   int cpu;
-  byte code;
-  word addr;
+  uint8_t code;
+  uint16_t addr;
 
   if (exist_argv())
     error();
@@ -2772,11 +2773,11 @@ static void monitor_stepall() {
     if (code == 0xcd ||          /* CALL nn    = 11001101B */
         (code & 0xc7) == 0xc4) { /* CALL cc,nn = 11ccc100B */
       addr += 3;
-      flag = TRUE;
+      flag = true;
     }
     if (code == 0x10) { /* DJNZ e     = 00010000B */
       addr += 2;
-      flag = TRUE;
+      flag = true;
     }
     if (code == 0xed) { /* LDIR/LDDR/CPIR/CPDR etc */
       if (select_main_cpu)
@@ -2785,14 +2786,14 @@ static void monitor_stepall() {
         code = sub_mem_read(addr + 1);
       if ((code & 0xf4) == 0xb0) {
         addr += 2;
-        flag = TRUE;
+        flag = true;
       }
     }
     if (code == 0x76 || /* HALT / RST XXH */
         code == 0xc7 || code == 0xcf || code == 0xd7 || code == 0xdf || code == 0xe7 || code == 0xef || code == 0xf7 ||
         code == 0xff) {
       addr += 1;
-      flag = TRUE;
+      flag = true;
     }
     if (flag) {
       break_point[cpu][BP_NUM_FOR_SYSTEM].type = BP_PC;
@@ -2812,7 +2813,7 @@ static void monitor_stepall() {
 /*  ブレークポイントの設定／解除／表示         */
 /*--------------------------------------------------------------*/
 static void monitor_break() {
-  int show = FALSE, i, j;
+  int show = false, i, j;
   const char *s = nullptr;
   int cpu = BP_MAIN, action = ARG_PC, addr = 0, number = 0;
 
@@ -2858,7 +2859,7 @@ static void monitor_break() {
 
   } else {
 
-    show = TRUE;
+    show = true;
   }
 
   if (exist_argv())
@@ -3074,7 +3075,7 @@ static void monitor_savemem() {
 /*              この機能は peach氏により実装されました  */
 /*----------------------------------------------------------------------*/
 static void monitor_fbreak() {
-  int show = FALSE, i;
+  int show = false, i;
   const char *s = nullptr;
   int action = ARG_READ, number = 0;
   int drive = -1, track = -1, sector = -1;
@@ -3109,7 +3110,7 @@ static void monitor_fbreak() {
       shift();
     }
   } else {
-    show = TRUE;
+    show = true;
   }
 
   if (exist_argv())
@@ -3379,7 +3380,7 @@ static void monitor_set_mem_printf() /*** set mem ***/
     } else {
       rF000 = wF000 = "MAIN RAM";
     }
-    if (jisho_rom_ctrl == FALSE) { /*辞書ROM*/
+    if (jisho_rom_ctrl == false) { /*辞書ROM*/
       rC000 = rF000 = "JISHO ROM"; /*jisho_rom_bank*/
     }
   }
@@ -3659,12 +3660,12 @@ static void monitor_set_show_printf(int index) /*** set (print) ***/
 
   case MTYPE_BYTE:
   case MTYPE_BYTE_C:
-    val = *((byte *)monitor_variable[index].var_ptr);
+    val = *((uint8_t *)monitor_variable[index].var_ptr);
     goto MTYPE_numeric_variable;
 
   case MTYPE_WORD:
   case MTYPE_WORD_C:
-    val = *((word *)monitor_variable[index].var_ptr);
+    val = *((uint16_t *)monitor_variable[index].var_ptr);
     goto MTYPE_numeric_variable;
 
   MTYPE_numeric_variable:;
@@ -3746,7 +3747,7 @@ static void monitor_set() {
         break;
     }
     if (index < COUNTOF(monitor_variable_block)) {
-      block = TRUE;
+      block = true;
       set_type = index;
       shift();
     } else {
@@ -3829,10 +3830,10 @@ static void monitor_set() {
       *((int *)var_ptr) = value;
       break;
     case MTYPE_BYTE:
-      *((byte *)var_ptr) = value;
+      *((uint8_t *)var_ptr) = value;
       break;
     case MTYPE_WORD:
-      *((word *)var_ptr) = value;
+      *((uint16_t *)var_ptr) = value;
       break;
     case MTYPE_DOUBLE:
       *((double *)var_ptr) = dvalue;
@@ -3863,7 +3864,7 @@ static void monitor_set() {
     case MTYPE_BEEP:
       *((int *)var_ptr) = value;
 #ifdef USE_SOUND
-      xmame_dev_beep_cmd_sing((byte)use_cmdsing);
+      xmame_dev_beep_cmd_sing((uint8_t)use_cmdsing);
 #endif
       break;
 
@@ -4019,12 +4020,12 @@ static void monitor_resize() {
     break;
   case ARG_FULLSCREEN: /* resize fullscreen */
     if (quasi88_cfg_can_fullscreen()) {
-      quasi88_cfg_set_fullscreen(TRUE);
+      quasi88_cfg_set_fullscreen(true);
     }
     break;
   case ARG_WINDOW: /* resize window */
     if (quasi88_cfg_now_fullscreen()) {
-      quasi88_cfg_set_fullscreen(FALSE);
+      quasi88_cfg_set_fullscreen(false);
     }
     break;
   }
@@ -4177,7 +4178,7 @@ static void monitor_drive() {
         quasi88_disk_eject(drv);
         printf("-- Disk Eject from DRIVE %d: --\n", drv + 1);
       }
-      if (quasi88_disk_insert(drv, filename, img, FALSE)) { /* Success */
+      if (quasi88_disk_insert(drv, filename, img, false)) { /* Success */
         printf("== Disk insert to DRIVE %d: ==\n", drv + 1);
         printf("   file ->[%s] image number ->[%d]\n", filename, img + 1);
       } else { /* Failed */
@@ -4206,7 +4207,7 @@ static void monitor_drive() {
 /*      イメージ名を変更                */
 /*--------------------------------------------------------------*/
 static void monitor_file() {
-  int command, num, drv, img = 0, result = -1, ro = FALSE;
+  int command, num, drv, img = 0, result = -1, ro = false;
   char *filename, *imagename = nullptr;
   long offset;
   OSD_FILE *fp;
@@ -4322,7 +4323,7 @@ static void monitor_file() {
     fp = osd_fopen(FTYPE_DISK, c, "r+b"); /* "r+b" でオープン */
     if (fp == nullptr) {
       fp = osd_fopen(FTYPE_DISK, c, "rb"); /* "rb" でオープン */
-      ro = TRUE;
+      ro = true;
     }
 
     if (fp) { /* オープンできたら */
@@ -4484,7 +4485,7 @@ static void monitor_stateload() {
     filename_set_state(filename);
   }
 
-  if (stateload_check_file_exist() == FALSE) {
+  if (stateload_check_file_exist() == false) {
     printf("state-file \"%s\" not exist or broken\n", filename_get_state());
   } else {
     if (quasi88_stateload(-1)) {
@@ -4571,7 +4572,7 @@ static void monitor_loadfont() {
     int c, i, j, k, l, n;
     int result;
     FILE *fp;
-    bit8 *font;
+    uint8_t *font;
 
     if (type == 1)
       font = font_mem;
@@ -4588,7 +4589,7 @@ static void monitor_loadfont() {
 
       if (format == 0) {
 
-        if (fread(font, sizeof(byte), 8 * 256, fp) != 8 * 256) {
+        if (fread(font, sizeof(uint8_t), 8 * 256, fp) != 8 * 256) {
           printf("file [%s] read error\n", filename);
         }
 
@@ -4686,7 +4687,7 @@ static void monitor_savefont() {
     static const int rev[] = {0x0, 0x8, 0x4, 0xc, 0x2, 0xa, 0x6, 0xe, 0x1, 0x9, 0x5, 0xd, 0x3, 0xb, 0x7, 0xf};
     int c, i, j, k, l, n;
     FILE *fp;
-    bit8 *font;
+    uint8_t *font;
 
     if (type == 1)
       font = font_mem;
@@ -4703,7 +4704,7 @@ static void monitor_savefont() {
 
       if (format == 0) {
 
-        if (fwrite(font, sizeof(byte), 8 * 256, fp) != 8 * 256) {
+        if (fwrite(font, sizeof(uint8_t), 8 * 256, fp) != 8 * 256) {
           printf("file [%s] write error\n", filename);
         }
 
@@ -4947,20 +4948,20 @@ static void monitor_misc() {
 #if 0
   FILE *fp;
   fp = fopen( "log.main","wb");
-  fwrite( main_ram,            sizeof(byte),  0x0f000,  fp );
-  fwrite( main_high_ram,       sizeof(byte),  0x01000,  fp );
+  fwrite( main_ram,            sizeof(uint8_t),  0x0f000,  fp );
+  fwrite( main_high_ram,       sizeof(uint8_t),  0x01000,  fp );
   fclose(fp);
 
   fp = fopen( "log.high","wb");
-  fwrite( &main_ram[0xf000],  sizeof(byte),   0x1000,  fp );
+  fwrite( &main_ram[0xf000],  sizeof(uint8_t),   0x1000,  fp );
   fclose(fp);
 
   fp = fopen( "log.sub","wb");
-  fwrite( &sub_romram[0x4000], sizeof(byte),   0x4000,  fp );
+  fwrite( &sub_romram[0x4000], sizeof(uint8_t),   0x4000,  fp );
   fclose(fp);
 
   fp = fopen( "log.vram","wb");
-  fwrite( main_vram,           sizeof(byte), 4*0x4000,  fp );
+  fwrite( main_vram,           sizeof(uint8_t), 4*0x4000,  fp );
   fclose(fp);
 #endif
 
@@ -4980,7 +4981,7 @@ static void monitor_misc() {
 
   if (quasi88_cfg_can_showstatus()) {
     int now = quasi88_cfg_now_showstatus();
-    int next = (now) ? FALSE : TRUE;
+    int next = (now) ? false : true;
     quasi88_cfg_set_showstatus(next);
   }
 }
@@ -5107,7 +5108,7 @@ void monitor_init() {
   {
     /* 一番最初にモニターモードに入った時は、メッセージを表示 */
 
-    static int enter_monitor_mode_first = TRUE;
+    static int enter_monitor_mode_first = true;
     if (enter_monitor_mode_first) {
       printf("\n"
              "*******************************************************************************\n"
@@ -5121,7 +5122,7 @@ void monitor_init() {
              "*******************************************************************************\n"
              "\n");
 
-      enter_monitor_mode_first = FALSE;
+      enter_monitor_mode_first = false;
 
 #ifdef USE_GNU_READLINE
       initialize_readline();

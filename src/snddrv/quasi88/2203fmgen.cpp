@@ -6,7 +6,6 @@ extern "C" {
 #include "sndintrf.h"
 #include "streams.h"
 #include "driver.h"
-#include "wait.h"
 }
 
 #include "headers.h"

@@ -6,19 +6,22 @@
 
 #include <cstdio>
 
-extern "C" {
 #include "quasi88.h"
-#include "debug.h"
-#include "initval.h"
+
 #include "emu.h"
+#include "event.h"
+#include "initval.h"
+#include "intr.h"
+#include "keyboard.h"
+#include "status.h"
+#include "suspend.h"
+#include "z80.h"
+
+extern "C" {
+#include "debug.h"
 
 #include "pc88cpu.h"
 
-#include "keyboard.h"
-#include "intr.h"
-#include "event.h"
-#include "suspend.h"
-#include "status.h"
 #include "snddrv.h"
 }
 
@@ -27,7 +30,7 @@ break_drive_t break_point_fdc[NR_BP]; /* FDC ブレークポイント     */
 
 int cpu_timing = DEFAULT_CPU; /* SUB-CPU 駆動方式 */
 
-int select_main_cpu = TRUE; /* -cpu 0 実行するCPU   */
+int select_main_cpu = true; /* -cpu 0 実行するCPU   */
                             /* 真なら MAIN CPUを実行*/
 
 int dual_cpu_count = 0; /* -cpu 1 同時処理STEP数*/
@@ -52,7 +55,7 @@ void set_emu_exec_mode(int mode) { emu_mode_execute = mode; }
  ************************************************************************/
 
 void emu_reset() {
-  select_main_cpu = TRUE;
+  select_main_cpu = true;
   dual_cpu_count = 0;
 
   main_state = 0;
@@ -102,9 +105,9 @@ static int check_break_point_PC() {
       break;
 
   if (i == NR_BP && j == NR_BP)
-    return FALSE;
+    return false;
   else
-    return TRUE;
+    return true;
 }
 
 /*------------------------------------------------------------------------*/
@@ -367,14 +370,14 @@ static T_SUSPEND_W suspend_emu_work[] = {
 
 int statesave_emu(void) {
   if (statesave_table(SID, suspend_emu_work) == STATE_OK)
-    return TRUE;
+    return true;
   else
-    return FALSE;
+    return false;
 }
 
 int stateload_emu(void) {
   if (stateload_table(SID, suspend_emu_work) == STATE_OK)
-    return TRUE;
+    return true;
   else
-    return FALSE;
+    return false;
 }

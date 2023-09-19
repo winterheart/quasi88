@@ -34,24 +34,24 @@ extern int high_mode; /* 高速モード 1:Yes 0:No     */
 
 /**** Ｉ／Ｏポート ****/
 
-/*extern byte   dipsw_1;             * IN[30] ディップスイッチ 1 */
-/*extern byte   dipsw_2;             * IN[31] ディップスイッチ 2 */
-/*extern byte   ctrl_boot;           * IN[40] ディスクブート情報 */
-/*extern byte   cpu_clock;           * IN[6E] CPU クロック       */
+/*extern uint8_t   dipsw_1;             * IN[30] ディップスイッチ 1 */
+/*extern uint8_t   dipsw_2;             * IN[31] ディップスイッチ 2 */
+/*extern uint8_t   ctrl_boot;           * IN[40] ディスクブート情報 */
+/*extern uint8_t   cpu_clock;           * IN[6E] CPU クロック       */
 extern int memory_bank; /* OUT[5C-5F] IN[5C] バンク  */
 
-extern byte misc_ctrl;     /* I/O[32] 各種Ctrl       */
-extern byte ALU1_ctrl;     /* OUT[34] ALU Ctrl 1     */
-extern byte ALU2_ctrl;     /* OUT[35] ALU Ctrl 2     */
-extern byte ctrl_signal;   /* OUT[40] コントロール信号*/
-extern byte baudrate_sw;   /* I/O[6F] ボーレート     */
-extern word window_offset; /* I/O[70] WINDOW オフセット*/
-extern byte ext_rom_bank;  /* I/O[71] 拡張ROM BANK   */
-extern byte ext_ram_ctrl;  /* I/O[E2] 拡張RAM制御    */
-extern byte ext_ram_bank;  /* I/O[E3] 拡張RAMセレクト*/
+extern uint8_t misc_ctrl;     /* I/O[32] 各種Ctrl       */
+extern uint8_t ALU1_ctrl;     /* OUT[34] ALU Ctrl 1     */
+extern uint8_t ALU2_ctrl;     /* OUT[35] ALU Ctrl 2     */
+extern uint8_t ctrl_signal;   /* OUT[40] コントロール信号*/
+extern uint8_t baudrate_sw;   /* I/O[6F] ボーレート     */
+extern uint16_t window_offset; /* I/O[70] WINDOW オフセット*/
+extern uint8_t ext_rom_bank;  /* I/O[71] 拡張ROM BANK   */
+extern uint8_t ext_ram_ctrl;  /* I/O[E2] 拡張RAM制御    */
+extern uint8_t ext_ram_bank;  /* I/O[E3] 拡張RAMセレクト*/
 
-extern byte jisho_rom_bank; /* OUT[F0] 辞書ROMセレクト*/
-extern byte jisho_rom_ctrl; /* OUT[F1] 辞書ROMバンク  */
+extern uint8_t jisho_rom_bank; /* OUT[F0] 辞書ROMセレクト*/
+extern uint8_t jisho_rom_ctrl; /* OUT[F1] 辞書ROMバンク  */
 
 #define MISC_CTRL_EBANK (0x03)      /* EROM BANK 00..11        */
 #define MISC_CTRL_AVC (0x0c)        /* AVC                     */
@@ -97,7 +97,7 @@ extern int cmt_wait;  /* 真で、テープ読込ウェイトあり(T88のみ) *
 #define EndofBasicAddr 0xffff
 #define HS_BASIC_COUNT 50000000 /* 割り込みなしで回すステート数 */
 
-extern word highspeed_routine[];
+extern uint16_t highspeed_routine[];
 
 extern int highspeed_flag;
 extern int highspeed_mode; /* 高速 BASIC 処理 するなら 真      */
@@ -113,10 +113,10 @@ void pc88main_term(void);
 void pc88main_bus_setup(void);
 void power_on_ram_init(void);
 
-byte main_mem_read(word addr);
-void main_mem_write(word addr, byte data);
-byte main_io_in(byte port);
-void main_io_out(byte port, byte data);
+uint8_t main_mem_read(uint16_t addr);
+void main_mem_write(uint16_t addr, uint8_t data);
+uint8_t main_io_in(uint8_t port);
+void main_io_out(uint8_t port, uint8_t data);
 
 int sio_open_tapeload(const char *filename);
 void sio_close_tapeload(void);

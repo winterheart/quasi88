@@ -11,7 +11,7 @@ extern int trace_counter; /* TRACE 時のカウンタ */
 
 typedef struct { /* ブレークポイント制御 */
   short type;
-  word addr;
+  uint16_t addr;
 } break_t;
 
 typedef struct { /* FDC ブレークポイント制御 */

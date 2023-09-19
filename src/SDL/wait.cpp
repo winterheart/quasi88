@@ -7,10 +7,9 @@
 #include <cstdio>
 #include <SDL2/SDL.h>
 
-extern "C" {
 #include "quasi88.h"
+
 #include "wait.h"
-}
 
 /*---------------------------------------------------------------------------*/
 static int wait_do_sleep; /* idle時間 sleep する       */
@@ -49,11 +48,11 @@ int wait_vsync_init(void) {
     if (SDL_InitSubSystem(SDL_INIT_TIMER) != 0) {
       if (verbose_wait)
         printf("Error Wait (SDL)\n");
-      return FALSE;
+      return false;
     }
   }
 
-  return TRUE;
+  return true;
 }
 
 void wait_vsync_exit(void) {}
@@ -74,8 +73,8 @@ void wait_vsync_setup(long vsync_cycle_us, int do_sleep) {
  * ウェイト処理
  *****************************************************************************/
 int wait_vsync_update(void) {
-  int slept = FALSE;
-  int on_time = FALSE;
+  bool slept = false;
+  bool on_time = false;
   T_WAIT_TICK diff_ms;
 
   diff_ms = (next_time - GET_TICK()) / 1000;
@@ -87,7 +86,7 @@ int wait_vsync_update(void) {
 
 #if 1                             /* 方法 (1) */
       SDL_Delay((Uint32)diff_ms); /* diff_ms ミリ秒、ディレイ */
-      slept = TRUE;
+      slept = true;
 
 #else /* 方法 (2) */
       if (diff_ms < 10) { /* 10ms未満ならビジーウェイト*/
@@ -95,7 +94,7 @@ int wait_vsync_update(void) {
           ;
       } else { /* 10ms以上ならディレイ      */
         SDL_Delay((Uint32)diff_ms);
-        slept = TRUE;
+        slept = true;
       }
 #endif
 
@@ -105,10 +104,10 @@ int wait_vsync_update(void) {
         ; /* ビジーウェイト */
     }
 
-    on_time = TRUE;
+    on_time = true;
   }
 
-  if (slept == FALSE) { /* 一度も SDL_Delay しなかった場合 */
+  if (!slept) { /* 一度も SDL_Delay しなかった場合 */
     SDL_Delay(1);       /* for AUDIO thread ?? */
   }
 

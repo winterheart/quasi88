@@ -3,22 +3,22 @@
 
 #define FONT_8x8()                                                                                                     \
   font_inc = 1;                                                                                                        \
-  font_dup = FALSE;                                                                                                    \
+  font_dup = false;                                                                                                    \
   font_skip = 2;
 
 #define FONT_8x16()                                                                                                    \
   font_inc = 2;                                                                                                        \
-  font_dup = FALSE;                                                                                                    \
+  font_dup = false;                                                                                                    \
   font_skip = 2;
 
 #define FONT_16x16()                                                                                                   \
   font_inc = 4;                                                                                                        \
-  font_dup = FALSE;                                                                                                    \
+  font_dup = false;                                                                                                    \
   font_skip = 2;
 
 #define FONT_LOGO8x16()                                                                                                \
   font_inc = 2 * Q8GR_LOGO_W;                                                                                          \
-  font_dup = FALSE;                                                                                                    \
+  font_dup = false;                                                                                                    \
   font_skip = 2;
 
 #define WORK_DEFINE() TYPE mg = MIXED_PIXEL(src->foreground, src->background)

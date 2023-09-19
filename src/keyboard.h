@@ -68,7 +68,7 @@ extern int fn_max_boost;
 
 extern int romaji_type; /* ローマ字変換のタイプ        */
 
-extern byte key_scan[0x10]; /* IN[00-0F] キースキャン    */
+extern uint8_t key_scan[0x10]; /* IN[00-0F] キースキャン    */
 
 extern int romaji_input_mode; /* 真:ローマ字入力中         */
 
