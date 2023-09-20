@@ -7,6 +7,7 @@ this file can be found in `document/HISTORY.TXT` file.
 * Removed GTK2 support.
 * Removed old MINI support.
 * Removed X11 support.
+* Project migrated to C++.
 
 ## 0.7.0 - 2022-09-11
 * Removed old Classic Mac OS support.
