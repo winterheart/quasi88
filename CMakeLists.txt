@@ -11,7 +11,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 option(ENABLE_SDL "Enable building for libSDL" ON)
-option(ENABLE_X11 "Enable building for X.org" OFF)
 option(ENABLE_WIN "Enable building for Windows" OFF)
 option(ENABLE_SOUND "Enable sound support" ON)
 option(ENABLE_FMGEN "Enable FM Generator" ON)
