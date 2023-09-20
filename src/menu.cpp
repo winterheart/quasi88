@@ -4,7 +4,7 @@
 /*                                  */
 /************************************************************************/
 
-#include <cstdint>
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 

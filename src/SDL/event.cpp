@@ -5,7 +5,7 @@
  ************************************************************************/
 
 #include <SDL2/SDL.h>
-
+#include <algorithm>
 #include <cstring>
 
 #include "quasi88.h"
