@@ -32,7 +32,7 @@ cmake --build build -j2
 ## Quick start
 
 ```
-cmake -B build -G Ninja -DENABLE_X11=ON -DENABLE_SDL=ON -DENABLE_JOYSTICK=SDL
+cmake -B build -G Ninja -DENABLE_SDL=ON -DENABLE_JOYSTICK=SDL
 cmake --build build -j2
 ```
 
@@ -42,7 +42,7 @@ Call cmake with one of supported backend (SDL, WIN). By default, enabled only SD
 them. Here is example:
 
 ```
-cmake -B build -G Ninja -DENABLE_X11=ON -DENABLE_SDL=ON
+cmake -B build -G Ninja -DENABLE_SDL=ON
 ```
 
 After that you ready to compile quasi88kai:
