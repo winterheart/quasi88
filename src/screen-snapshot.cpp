@@ -11,10 +11,7 @@
 #include "crtcdmac.h"
 #include "memory.h"
 #include "screen.h"
-
-extern "C" {
 #include "screen-func.h"
-}
 
 extern char screen_snapshot[];
 

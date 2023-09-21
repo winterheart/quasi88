@@ -3,16 +3,18 @@
 
 /* --- Z80 CPU のエミュレート構造体 --- */
 
+#include "quasi88.h"
+
 typedef struct {
 
   pair AF, BC, DE, HL;     /* 汎用レジスタ */
   pair IX, IY, PC, SP;     /* 専用レジスタ */
   pair AF1, BC1, DE1, HL1; /*  裏 レジスタ    */
-  uint8_t I, R;               /* 特殊レジスタ */
-  uint8_t R_saved;            /* R reg - bit7 保存用 */
-  uint8_t IFF, IFF2;         /* IFF1 、IFF2 */
-  uint8_t IM;                /* 割込モード  */
-  uint8_t HALT;              /* HALT フラグ   */
+  uint8_t I, R;            /* 特殊レジスタ */
+  uint8_t R_saved;         /* R reg - bit7 保存用 */
+  uint8_t IFF, IFF2;       /* IFF1 、IFF2 */
+  uint8_t IM;              /* 割込モード  */
+  uint8_t HALT;            /* HALT フラグ   */
 
   int INT_active;
   int icount; /* 次の割込発生までのステート数   */
@@ -27,8 +29,8 @@ typedef struct {
   uint8_t (*fetch)(uint16_t);
   uint8_t (*mem_read)(uint16_t);        /* メモリリード関数 */
   void (*mem_write)(uint16_t, uint8_t); /* メモリライト関数 */
-  uint8_t (*io_read)(uint8_t);         /* I/O 入力関数     */
-  void (*io_write)(uint8_t, uint8_t);  /* I/O 出力関数     */
+  uint8_t (*io_read)(uint8_t);          /* I/O 入力関数     */
+  void (*io_write)(uint8_t, uint8_t);   /* I/O 出力関数     */
 
   void (*intr_update)(); /* 割込情報更新関数 */
   int (*intr_ack)();     /* 割込応答関数       */

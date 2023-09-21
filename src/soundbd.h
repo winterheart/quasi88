@@ -1,6 +1,10 @@
 #ifndef SOUND_H_INCLUDED
 #define SOUND_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int sound_board; /* サウンドボード    */
 
 #define SD_PORT_44_45 (0x01) /* ポート 44H〜45H 使用   */
@@ -64,5 +68,9 @@ uint8_t sound2_in_status();
 uint8_t sound2_in_data();
 
 void sound_output_after_stateload();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SOUND_H_INCLUDED */

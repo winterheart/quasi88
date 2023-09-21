@@ -10,24 +10,18 @@
 
 #include "quasi88.h"
 
+#include "debug.h"
 #include "crtcdmac.h"
-
 #include "graph.h"
 #include "initval.h"
 #include "intr.h"
 #include "pause.h" /* pause_event_focus_in_when_pause() */
 #include "pc88main.h"
 #include "screen.h"
+#include "screen-func.h"
 #include "status.h"
 #include "suspend.h"
 #include "q8tk.h"
-
-extern "C" {
-#include "debug.h"
-#include "screen-func.h"
-
-
-}
 
 PC88_PALETTE_T vram_bg_palette; /* OUT[52/54-5B]        */
 PC88_PALETTE_T vram_palette[8]; /*      各種パレット  */

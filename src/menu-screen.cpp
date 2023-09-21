@@ -48,12 +48,9 @@
 
 #include "quasi88.h"
 
+#include "menu-screen.h"
 #include "screen.h"
 #include "q8tk.h"
-
-extern "C" {
-#include "menu-screen.h"
-}
 
 /*----------------------------------------------------------------------*/
 /* メニュー画面のソフトウェアカーソルの字形             */

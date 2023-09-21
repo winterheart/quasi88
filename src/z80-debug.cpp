@@ -8,9 +8,7 @@
 
 #include "quasi88.h"
 
-extern "C" {
 #include "z80.h"
-}
 
 /*
   オペランドの型

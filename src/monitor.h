@@ -1,6 +1,8 @@
 #ifndef MONITOR_H_INCLUDED
 #define MONITOR_H_INCLUDED
 
+#include <cstdio>
+
 extern int debug_mode; /* デバッグ機能(モニター)  */
 extern char alt_char;  /* 代替文字 */
 

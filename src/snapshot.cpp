@@ -14,13 +14,9 @@
 #include "crtcdmac.h"
 #include "file-op.h"
 #include "screen.h"
-#include "snapshot.h"
-
-extern "C" {
 #include "screen-func.h"
-
+#include "snapshot.h"
 #include "snddrv.h"
-}
 
 char file_snap[QUASI88_MAX_FILENAME]; /* スナップショットベース部 */
 int snapshot_format = 0;              /* スナップショットフォーマット   */
@@ -561,7 +557,6 @@ int screen_snapshot_save(void) {
  * サウンド出力をセーブする
  *
  ************************************************************************/
-#include "snddrv.h"
 
 char file_wav[QUASI88_MAX_FILENAME]; /* サウンド出力ベース部   */
 

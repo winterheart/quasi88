@@ -2,6 +2,8 @@
 // QUASI88 - xmame - fmgen interface of YM2203(fmgen)
 //
 
+#include "pc88cpu.h"
+
 extern "C" {
 #include "sndintrf.h"
 #include "streams.h"
@@ -26,7 +28,6 @@ struct fmgen2203_info
 };
 
 
-extern "C" {
 /* update callback from stream.c */
 static void fmgen2203_stream_update(void *param, stream_sample_t **inputs, stream_sample_t **buffer, int length)
 {
@@ -278,6 +279,5 @@ void fmgen2203_get_info(void *token, UINT32 state, sndinfo *info)
         case SNDINFO_STR_CORE_FILE:                     info->s = __FILE__;                     break;
         case SNDINFO_STR_CORE_CREDITS:                  info->s = "Copyright (c) 2003, cisc";   break;
     }
-}
 }
 

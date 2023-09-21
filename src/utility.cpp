@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include "utility.h"
+#include "pc88cpu.h"
 
 /**
  * Case-insensitive string comparison (stricmp/strcasecmp ?)
@@ -286,4 +287,8 @@ char *my_strtok(char *dst, char *src) {
     return NULL;
   else
     return p;
+}
+
+int get_z80main_cpu_state0() {
+  return z80main_cpu.state0;
 }

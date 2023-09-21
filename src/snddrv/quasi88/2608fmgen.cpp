@@ -2,6 +2,8 @@
 // QUASI88 - xmame - fmgen interface of YM2608(fmgen)
 //
 
+#include "pc88cpu.h"
+
 extern "C" {
 #include "sndintrf.h"
 #include "streams.h"
@@ -10,7 +12,6 @@ extern "C" {
 
 #include "headers.h"
 #include "2608fmgen.h"
-
 
 #include "opna.h"
 
@@ -26,7 +27,6 @@ struct fmgen2608_info
 };
 
 
-extern "C" {
 /* update callback from stream.c */
 static void fmgen2608_stream_update(void *param, stream_sample_t **inputs, stream_sample_t **buffer, int length)
 {
@@ -263,6 +263,5 @@ void fmgen2608_get_info(void *token, UINT32 state, sndinfo *info)
         case SNDINFO_STR_CORE_FILE:                     info->s = __FILE__;                     break;
         case SNDINFO_STR_CORE_CREDITS:                  info->s = "Copyright (c) 2003, cisc";   break;
     }
-}
 }
 

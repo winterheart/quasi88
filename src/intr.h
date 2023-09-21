@@ -1,6 +1,10 @@
 #ifndef INTR_H_INCLUDED
 #define INTR_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int intr_level;        /* OUT[E4] 割り込みレベル */
 extern int intr_priority;     /* OUT[E4] 割り込み優先度 */
 extern int intr_sio_enable;   /* OUT[E6] 割込マスク SIO */
@@ -49,5 +53,9 @@ void main_INT_update();
 int main_INT_chk();
 
 int quasi88_info_vsync_count();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* INTR_H_INCLUDED */

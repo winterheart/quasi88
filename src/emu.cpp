@@ -8,22 +8,17 @@
 
 #include "quasi88.h"
 
+#include "debug.h"
 #include "emu.h"
 #include "event.h"
 #include "initval.h"
 #include "intr.h"
 #include "keyboard.h"
+#include "pc88cpu.h"
+#include "snddrv.h"
 #include "status.h"
 #include "suspend.h"
 #include "z80.h"
-
-extern "C" {
-#include "debug.h"
-
-#include "pc88cpu.h"
-
-#include "snddrv.h"
-}
 
 break_t break_point[2][NR_BP];        /* ブレークポイント     */
 break_drive_t break_point_fdc[NR_BP]; /* FDC ブレークポイント     */

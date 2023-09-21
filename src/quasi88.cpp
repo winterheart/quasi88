@@ -24,11 +24,11 @@
 
 #include "quasi88.h"
 
+#include "debug.h"
 #include "drive.h"
 #include "emu.h"
 #include "event.h"
 #include "fname.h"
-#include "graph.h"
 #include "initval.h"
 #include "intr.h"
 #include "keyboard.h"
@@ -37,21 +37,15 @@
 #include "monitor.h"
 #include "screen.h"
 #include "snapshot.h"
+#include "snddrv.h"
+#include "soundbd.h"
 #include "status.h"
 #include "suspend.h"
 #include "pause.h"
 #include "pc88main.h"
+#include "pc88sub.h"
 #include "wait.h"
 #include "z80.h"
-
-extern "C" {
-#include "debug.h"
-
-#include "pc88sub.h"
-
-#include "snddrv.h"
-#include "soundbd.h"
-}
 
 #if USE_RETROACHIEVEMENTS
 #include "retroachievements.h"

@@ -9,17 +9,13 @@
 #include "quasi88.h"
 
 #include "device.h"
-#include "event.h"
+#include "getconf.h"  /* config_init */
 #include "menu.h"     /* menu_about_osd_msg */
 #include "suspend.h"  /* stateload_system */
 
-extern "C" {
-
-#include "getconf.h"  /* config_init */
 #ifdef WIN32
 #include "keyboard.h" /* WIN32 romaji_type */
 #endif
-}
 
 /***********************************************************************
  * オプション
