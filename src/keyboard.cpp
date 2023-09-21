@@ -10,21 +10,15 @@
 #include "intr.h"    /* state_of_cpu         */
 #include "menu.h"
 #include "pause.h"
+#include "pc88cpu.h" /* z80main_cpu          */
 #include "pc88main.h" /* boot_clock_4mhz      */
 #include "romaji.h"
 #include "screen.h"
+#include "snddrv.h"   /* xmame_XXX            */
+#include "soundbd.h" /* sound_reg[]          */
 #include "status.h"
 #include "suspend.h"
 #include "utility.h"
-
-extern "C" {
-
-#include "soundbd.h" /* sound_reg[]          */
-#include "pc88cpu.h" /* z80main_cpu          */
-
-#include "snddrv.h"   /* xmame_XXX            */
-
-}
 
 /******************************************************************************
  *

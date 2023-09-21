@@ -9,4 +9,14 @@ void my_strncpy(char *s, const char *ct, unsigned long n);
 void my_strncat(char *s, const char *ct, unsigned long n);
 char *my_strtok(char *dst, char *src);
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int get_z80main_cpu_state0();
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // UTILITY_H

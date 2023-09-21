@@ -30,6 +30,9 @@ WRITE8_HANDLER( FMGEN2608_control_port_1_A_w );
 WRITE8_HANDLER( FMGEN2608_control_port_1_B_w );
 WRITE8_HANDLER( FMGEN2608_data_port_1_A_w );
 WRITE8_HANDLER( FMGEN2608_data_port_1_B_w );
+
+void fmgen2608_get_info(void *token, UINT32 state, sndinfo *info);
+
 extern void FMGEN2608_set_volume_1(float volume);
 
 #ifdef __cplusplus

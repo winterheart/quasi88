@@ -62,15 +62,7 @@ typedef union {
   uint32_t l[3];
 } T_GRYPH;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void get_font_gryph(int attr, T_GRYPH *gryph, int *color);
-
-#ifdef __cplusplus
-}
-#endif
 
 void crtc_make_text_attr();
 

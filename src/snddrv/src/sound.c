@@ -10,6 +10,10 @@
 ***************************************************************************/
 
 #include <stdbool.h>
+
+#include "intr.h"
+#include "utility.h"
+
 #include "driver.h"
 #include "osdepend.h"
 #include "streams.h"
@@ -777,8 +781,8 @@ void sound_frame_update(void)
 
 static void mixer_update(void *param, stream_sample_t **inputs, stream_sample_t **buffer, int length)
 {
-    speaker_info *speaker = param;
-    int numinputs = speaker->inputs;
+    speaker_info *speaker_in = param;
+    int numinputs = speaker_in->inputs;
     int pos;
 
     VPRINTF(("Mixer_update(%d)\n", length));
@@ -828,9 +832,9 @@ int sound_scalebufferpos(int value)
 int sound_scalebufferpos(int value)
 {
 #if 0   /* ~ ver 0.6.2 */
-    int result = (int)((double)(state_of_cpu + z80main_cpu.state0)/state_of_vsync * value);
+    int result = (int)((double)(state_of_cpu + get_z80main_cpu_state0()/state_of_vsync * value);
 #else   /* ver 0.6.3 ~ */
-    int result = (int)((double)(state_of_cpu + z80main_cpu.state0 + (boost_cnt * state_of_vsync) )
+    int result = (int)((double)(state_of_cpu + get_z80main_cpu_state0() + (boost_cnt * state_of_vsync) )
                                     / (boost * state_of_vsync) * value);
 #endif
     return (result < value) ? result : value;

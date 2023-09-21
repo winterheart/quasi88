@@ -96,7 +96,7 @@ include_directories(
 set(COMMON_SOURCES
 	src/basic.cpp
 	src/crtcdmac.cpp
-	src/debug.c
+	src/debug.cpp
 	src/emu.cpp
 	src/event.cpp
 	src/fdc.cpp
@@ -116,9 +116,9 @@ set(COMMON_SOURCES
 	src/pio.cpp
 	src/romaji.cpp
 	src/screen.cpp
-	src/screen-8bpp.c
-	src/screen-16bpp.c
-	src/screen-32bpp.c
+	src/screen-8bpp.cpp
+	src/screen-16bpp.cpp
+	src/screen-32bpp.cpp
 	src/screen-snapshot.cpp
 	src/snapshot.cpp
 	src/soundbd.cpp

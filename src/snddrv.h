@@ -1,6 +1,10 @@
 #ifndef SNDDRV_H_INCLUDED
 #define SNDDRV_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum {
   XMAME_MIXER_PSG,
   XMAME_MIXER_FM,
@@ -170,6 +174,10 @@ const char *xmame_version_fmgen(void);
 #define xmame_version_mame() ""
 #define xmame_version_fmgen() ""
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* SNDDRV_H_INCLUDED */

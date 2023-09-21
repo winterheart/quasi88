@@ -14,14 +14,8 @@
 #include "initval.h"
 #include "memory.h"
 #include "menu.h" /* menu_lang    */
-#include "suspend.h"
-
-extern "C" {
-
 #include "soundbd.h" /* sound_board, sound2_adpcm    */
-
-
-}
+#include "suspend.h"
 
 int set_version; /* 起動時のバージョン強制変更 '0' 〜 '9'  */
 int rom_version; /* (変更前の) BASIC ROMバージョン      */

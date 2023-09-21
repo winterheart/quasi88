@@ -4,11 +4,11 @@
 /*                                  */
 /************************************************************************/
 
-#include <cstdio>
+#include <cstdio> // for readline
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
-#include <signal.h>
+#include <csignal>
 
 #ifdef USE_GNU_READLINE
 #include <readline/readline.h>
@@ -22,42 +22,34 @@
 
 #include "quasi88.h"
 
+#ifdef DEBUGLOG
+#include "debug.h"
+#endif
+
 #include "basic.h"
+#include "crtcdmac.h"
 #include "drive.h"
 #include "emu.h"
-#include "event.h"
 #include "fdc.h"
-#include "file-op.h"
 #include "fname.h"
+#include "image.h"
 #include "initval.h"
 #include "intr.h"
 #include "keyboard.h"
 #include "memory.h"
 #include "menu.h"
 #include "monitor.h"
+#include "pc88cpu.h"
 #include "pc88main.h"
+#include "pc88sub.h"
+#include "pio.h"
 #include "screen.h"
 #include "snapshot.h"
-#include "crtcdmac.h"
+#include "snddrv.h"
+#include "soundbd.h"
 #include "status.h"
 #include "suspend.h"
 #include "utility.h"
-
-extern "C" {
-#ifdef DEBUGLOG
-#include "debug.h"
-#endif
-
-#include "pc88cpu.h"
-#include "pc88sub.h"
-#include "pio.h"
-#include "soundbd.h"
-
-#include "image.h"
-#include "pause.h"
-#include "snddrv.h"
-
-}
 
 /************************************************************************/
 /* SIGINT発生時 (Ctrl-C) 、モニターモードへ遷移するように設定      */
@@ -4293,7 +4285,6 @@ static void monitor_file() {
       printf("Image number too many (over 255)\n");
       break;
     case D88_SUCCESS:
-      break;
     case D88_NO_IMAGE:
       break;
     case D88_BAD_IMAGE:

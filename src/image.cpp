@@ -10,11 +10,8 @@
 
 #include "drive.h"
 #include "file-op.h"
-#include "initval.h"
-
-extern "C" {
 #include "image.h"
-}
+#include "initval.h"
 
 /***********************************************************************
  * 指定されたオフセット位置から、ヘッダ情報 32バイトを読み出す。

@@ -4,6 +4,8 @@
 /*                                  */
 /************************************************************************/
 
+#ifdef SUPPORT_16BPP
+
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -15,9 +17,7 @@
 #include "memory.h"
 #include "q8tk.h"
 
-#ifdef SUPPORT_16BPP
-
-#define TYPE bit16
+#define TYPE uint16_t
 
 #define SCREEN_WIDTH WIDTH
 #define SCREEN_HEIGHT HEIGHT

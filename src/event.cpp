@@ -8,15 +8,15 @@
 #include "intr.h"
 #include "menu.h"
 #include "pc88main.h"
+#include "pc88sub.h"
 #include "snapshot.h"
 #include "status.h"
+#include "soundbd.h"
 #include "suspend.h"
 #include "wait.h"
 
 extern "C" {
 
-#include "pc88sub.h"
-#include "soundbd.h"
 
 #if USE_RETROACHIEVEMENTS
 #include "retroachievements.h"

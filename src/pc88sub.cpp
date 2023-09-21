@@ -8,21 +8,15 @@
 
 #include "quasi88.h"
 
+#include "debug.h"
 #include "emu.h"
 #include "fdc.h"
+#include "intr.h" /* state_of_vsync */
 #include "memory.h"
+#include "pc88sub.h"
+#include "pio.h"
 #include "suspend.h"
 #include "z80.h"
-
-extern "C" {
-#include "debug.h"
-#include "pc88sub.h"
-
-#include "pc88cpu.h"
-#include "intr.h" /* state_of_vsync */
-#include "pio.h"
-
-}
 
 z80arch z80sub_cpu; /* Z80 CPU ( sub system )   */
 

@@ -17,7 +17,8 @@
 ***************************************************************************/
 
 #include "driver.h"
-
+#include "2203fmgen.h"
+#include "2608fmgen.h"
 
 
 /***************************************************************************
@@ -155,8 +156,6 @@ void s14001a_get_info(void *token, UINT32 state, sndinfo *info);
 
 #if 1       /* QUASI88 */
 void beep88_get_info(void *token, UINT32 state, sndinfo *info);
-void fmgen2203_get_info(void *token, UINT32 state, sndinfo *info);
-void fmgen2608_get_info(void *token, UINT32 state, sndinfo *info);
 #endif      /* QUASI88 */
 
 void filter_volume_get_info(void *token, UINT32 state, sndinfo *info);

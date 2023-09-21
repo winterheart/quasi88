@@ -8,18 +8,15 @@
 
 #include "quasi88.h"
 
-#include "intr.h"
-#include "pc88main.h"
 #include "crtcdmac.h"
-#include "suspend.h"
-
-extern "C" {
 #include "initval.h"
+#include "intr.h"
 #include "pc88cpu.h"
-#include "soundbd.h"
-
+#include "pc88main.h"
 #include "snddrv.h"
-}
+#include "soundbd.h"
+#include "suspend.h"
+#include "z80.h"
 
 int intr_level;        /* OUT[E4] 割り込みレベル    */
 int intr_priority;     /* OUT[E4] 割り込み優先度    */

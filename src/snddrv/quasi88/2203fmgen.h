@@ -32,6 +32,8 @@ WRITE8_HANDLER( FMGEN2203_write_port_4_w );
 WRITE8_HANDLER( FMGEN2203_word_0_w );
 WRITE8_HANDLER( FMGEN2203_word_1_w );
 
+void fmgen2203_get_info(void *token, UINT32 state, sndinfo *info);
+
 extern void FMGEN2203_set_volume_0(float volume);
 extern void FMGEN2203_set_volume_1(float volume);
 

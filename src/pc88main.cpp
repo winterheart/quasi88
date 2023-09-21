@@ -10,28 +10,23 @@
 #include "quasi88.h"
 
 #include "crtcdmac.h"
+#include "debug.h"
 #include "drive.h"
 #include "emu.h"
 #include "fdc.h" /* disk_ex_drv */
+#include "getconf.h"
 #include "initval.h"
 #include "intr.h"
 #include "keyboard.h"
 #include "memory.h"
 #include "pc88main.h"
+#include "pio.h"
 #include "screen.h"
+#include "snddrv.h"
+#include "soundbd.h"
 #include "status.h"
 #include "suspend.h"
 #include "z80.h"
-
-extern "C" {
-#include "debug.h"
-
-#include "pc88cpu.h"
-#include "pio.h"
-#include "soundbd.h"
-
-#include "snddrv.h"
-}
 
 static OSD_FILE *fp_so = nullptr;  /* シリアル出力用fp      */
 static OSD_FILE *fp_si = nullptr;  /*     入力用fp      */

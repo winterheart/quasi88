@@ -8,21 +8,16 @@
 
 #include "quasi88.h"
 
+#include "debug.h"
 #include "drive.h"
 #include "emu.h" /* emu_mode         */
 #include "fdc.h"
 #include "file-op.h"
+#include "image.h"
 #include "initval.h"
+#include "snddrv.h"
 #include "status.h"
 #include "suspend.h"
-
-extern "C" {
-#include "debug.h"
-
-#include "image.h"
-
-#include "snddrv.h"
-}
 
 static int fdc_break_flag = false;
 

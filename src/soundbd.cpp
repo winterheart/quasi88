@@ -8,15 +8,12 @@
 
 #include "quasi88.h"
 
+#include "initval.h"
 #include "intr.h"
 #include "pc88main.h"
-#include "suspend.h"
-
-extern "C" {
-#include "initval.h"
-#include "soundbd.h"
 #include "snddrv.h"
-}
+#include "soundbd.h"
+#include "suspend.h"
 
 /*
  * サウンドボードIIの対応はそうとういい加減です。

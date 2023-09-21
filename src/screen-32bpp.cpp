@@ -4,6 +4,8 @@
 /*                                  */
 /************************************************************************/
 
+#ifdef SUPPORT_32BPP
+
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -14,8 +16,6 @@
 #include "crtcdmac.h"
 #include "memory.h"
 #include "q8tk.h"
-
-#ifdef SUPPORT_32BPP
 
 #define TYPE uint32_t
 

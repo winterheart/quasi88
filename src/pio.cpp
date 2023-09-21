@@ -9,14 +9,10 @@
 #include "quasi88.h"
 
 #include "emu.h"
-#include "suspend.h"
-
-extern "C" {
-#include "pio.h"
-
 #include "pc88cpu.h"
-
-}
+#include "pio.h"
+#include "suspend.h"
+#include "z80.h"
 
 /*
   PIOアクセスと、サブCPUの駆動

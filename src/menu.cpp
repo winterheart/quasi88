@@ -10,11 +10,15 @@
 
 #include "quasi88.h"
 
+#include "debug.h"
 #include "drive.h"
 #include "emu.h"
 #include "event.h"
+#include "fdc.h"
 #include "file-op.h"
 #include "fname.h"
+#include "getconf.h"
+#include "image.h"
 #include "initval.h"
 #include "intr.h"
 #include "keyboard.h"
@@ -22,24 +26,15 @@
 #include "menu.h"
 #include "monitor.h"
 #include "pc88main.h"
-#include "snapshot.h"
+#include "pc88sub.h"
 #include "screen.h"
+#include "snapshot.h"
+#include "snddrv.h"
+#include "soundbd.h"
 #include "status.h"
 #include "suspend.h"
 #include "q8tk.h"
 
-extern "C" {
-#include "debug.h"
-
-#include "pc88sub.h"
-
-#include "image.h"
-#include "snddrv.h"
-#include "fdc.h"
-#include "soundbd.h"
-#include "getconf.h"
-
-}
 
 /* メニューの言語           */
 #if LANG_EN
