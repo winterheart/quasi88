@@ -22,23 +22,20 @@
 #include <cstdio>
 #include <cstdlib>
 
-extern "C"
-{
+#include "quasi88.h"
 
-    #include "device.h"
-    #include "quasi88.h"
+#include "device.h"
+#include "getconf.h"    /* config_init */
+#include "keyboard.h"   /* romaji_type */
+#include "menu.h"       /* menu_about_osd_msg */
+#include "suspend.h"    /* stateload_system */
 
-    #include "getconf.h"    /* config_init */
-    #include "keyboard.h"   /* romaji_type */
-    #include "suspend.h"    /* stateload_system */
-    #include "menu.h"   /* menu_about_osd_msg */
-}
 
 FILE    *debugfp;
 /***********************************************************************
  * メイン処理
  ************************************************************************/
-static  void    finish(void);
+static  void    finish();
 
 int WINAPI WinMain(HINSTANCE hInst,
            HINSTANCE hPrevInst,
@@ -56,7 +53,7 @@ int WINAPI WinMain(HINSTANCE hInst,
 /*
     debugfp = fopen("debug.txt", "w");
 */
-    if (debugfp == NULL) { debugfp = stdout; }
+    if (debugfp == nullptr) { debugfp = stdout; }
 
 
 
@@ -77,8 +74,8 @@ int WINAPI WinMain(HINSTANCE hInst,
 #endif
 
     if (config_init(__argc, __argv,        /* 環境初期化 & 引数処理 */
-            NULL,
-            NULL)) {
+            nullptr,
+            nullptr)) {
 
     quasi88_atexit(finish);     /* quasi88() 実行中に強制終了した際の
                        コールバック関数を登録する */
@@ -96,7 +93,7 @@ int WINAPI WinMain(HINSTANCE hInst,
 /*
  * 強制終了時のコールバック関数 (quasi88_exit()呼出時に、処理される)
  */
-static  void    finish(void)
+static  void    finish()
 {
     config_exit();          /* 引数処理後始末 */
 }
@@ -111,13 +108,13 @@ static  void    finish(void)
  *  必要に応じて、システム固有の情報を付加してもいいかと。
  */
 
-int stateload_system(void)
+int stateload_system()
 {
-    return TRUE;
+    return true;
 }
-int statesave_system(void)
+int statesave_system()
 {
-    return TRUE;
+    return true;
 }
 
 
@@ -147,11 +144,11 @@ int menu_about_osd_msg(int        req_japanese,
 
     *result_code = -1;              /* 文字コード指定なし */
 
-    if (req_japanese == FALSE) {
-    *message = about_en;
+    if (req_japanese) {
+      *message = about_jp;
     } else {
-    *message = about_jp;
+      *message = about_en;
     }
 
-    return TRUE;
+    return true;
 }

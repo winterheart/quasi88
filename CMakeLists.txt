@@ -287,12 +287,12 @@ if(ENABLE_WIN)
 	)
 
 	set(WIN32_SOURCES
-		src/WIN32/audio.c
-		src/WIN32/event.c
+		src/WIN32/audio.cpp
+		src/WIN32/event.cpp
 		src/WIN32/graph.cpp
 		src/WIN32/main.cpp
 		src/WIN32/menubar.cpp
-		src/WIN32/wait.c
+		src/WIN32/wait.cpp
 		src/WIN32/quasi88.rc
 	)
 

@@ -2,7 +2,6 @@
  * メニューバー処理
  ************************************************************************/
 
-extern "C" {
 #include "quasi88.h"
 #include "device.h"
 #include "event.h"
@@ -24,7 +23,7 @@ extern "C" {
 
 #include "resource.h"
 #include "utility.h"
-}
+
 
 #if USE_RETROACHIEVEMENTS
 #include "retroachievements.h"
@@ -42,7 +41,7 @@ static  int menubar_images[NR_DRIVE];
  * モード切り替え時の、メニューバーの処理再設定
  *  エミュモードとメニューモードで、メニューバーの内容を変更する
  *****************************************************************************/
-static void menubar_item_setup(void);
+static void menubar_item_setup();
 static void menubar_item_sensitive(int sensitive);
 
 void    menubar_setup(int active)
@@ -72,7 +71,7 @@ void    menubar_setup(int active)
 
 
 /* メニューアイテムの文字列を変更 */
-static void change_menuitem_label(UINT uItem, char *s)
+void change_menuitem_label(UINT uItem, char *s)
 {
     MENUITEMINFO menuInfo;
 
@@ -155,7 +154,7 @@ static int select_file(int   for_read,
 
 
 /* Reset メニューアイテムのラベルを更新する */
-static void update_sys_reset(void)
+static void update_sys_reset()
 {
     char buf[32];
 
@@ -183,7 +182,7 @@ static void update_sys_reset(void)
 
 
 /* Drive メニューアイテムを生成・削除する */
-static void update_drive(void)
+static void update_drive()
 {
     UINT uItem;
     char buf[64];
@@ -275,7 +274,7 @@ static void update_drive(void)
 }
 
 /* Tape Load メニューアイテムのラベルを変えたり使用不可にしたり */
-static void update_misc_cload(void)
+static void update_misc_cload()
 {
     UINT uItem;
     const char *s;
@@ -305,7 +304,7 @@ static void update_misc_cload(void)
 }
 
 /* Tape Save メニューアイテムのラベルを変えたり使用不可にしたり */
-static void update_misc_csave(void)
+static void update_misc_csave()
 {
     UINT uItem;
     const char *s;
@@ -335,7 +334,7 @@ static void update_misc_csave(void)
 }
 
 /* Sound Record メニューアイテムのチェックを変更する */
-static void update_misc_record(void)
+static void update_misc_record()
 {
     UINT uItem;
     int i;
@@ -352,7 +351,7 @@ static void update_misc_record(void)
 /*======================================================================
  * メニューバーの内容を再初期化
  *======================================================================*/
-static void menubar_item_setup(void)
+static void menubar_item_setup()
 {
     UINT uItem;
     int i;
@@ -640,13 +639,13 @@ static void menubar_item_sensitive(int sensitive)
  * メニューバーコールバック関数
  ************************************************************************/
 
-static  void    f_sys_reset (void);
+static  void    f_sys_reset ();
 static  void    f_sys_basic (UINT uItem, int data);
 static  void    f_sys_clock (UINT uItem, int data);
 static  void    f_sys_sb    (UINT uItem, int data);
-static  void    f_sys_menu  (void);
-static  void    f_sys_save  (void);
-static  void    f_sys_exit  (void);
+static  void    f_sys_menu  ();
+static  void    f_sys_save  ();
+static  void    f_sys_exit  ();
 static  void    f_set_speed (UINT uItem, int data);
 static  void    f_set_nowait    (UINT uItem);
 static  void    f_set_subcpu    (UINT uItem, int data);
@@ -666,17 +665,17 @@ static  void    f_set_buf   (UINT uItem, int data);
 static  void    f_drv_chg   (int data);
 static  void    f_drv_drv1  (UINT uItem, int data);
 static  void    f_drv_drv2  (UINT uItem, int data);
-static  void    f_drv_unset (void);
-static  void    f_misc_capture  (void);
+static  void    f_drv_unset ();
+static  void    f_misc_capture  ();
 static  void    f_misc_record   (UINT uItem);
-static  void    f_misc_cload_s  (void);
-static  void    f_misc_cload_u  (void);
-static  void    f_misc_csave_s  (void);
-static  void    f_misc_csave_u  (void);
+static  void    f_misc_cload_s  ();
+static  void    f_misc_cload_u  ();
+static  void    f_misc_csave_s  ();
+static  void    f_misc_csave_u  ();
 static  void    f_misc_sload    (int data);
 static  void    f_misc_ssave    (int data);
 static  void    f_misc_status   (UINT uItem);
-static  void    f_help_about    (void);
+static  void    f_help_about    ();
 
 
 
@@ -848,7 +847,7 @@ int menubar_event(int id)
  * System メニュー
  *----------------------------------------------------------------------*/
 
-static  void    f_sys_reset(void)
+static  void    f_sys_reset()
 {
     if (menubar_reset_cfg.boot_clock_4mhz) {
     cpu_clock_mhz = CONST_4MHZ_CLOCK;
@@ -901,17 +900,17 @@ static  void    f_sys_sb(UINT uItem, int data)
     }
 }
 
-static  void    f_sys_menu(void)
+static  void    f_sys_menu()
 {
     quasi88_menu();
 }
 
-static  void    f_sys_save(void)
+static  void    f_sys_save()
 {
-    config_save(NULL);
+    config_save(nullptr);
 }
 
-static  void    f_sys_exit(void)
+static  void    f_sys_exit()
 {
     quasi88_quit();
 }
@@ -1244,9 +1243,9 @@ static  void    f_drv_drv2(UINT uItem, int data)
     }
 }
 
-static  void    f_drv_unset(void)
+static  void    f_drv_unset()
 {
-    if (menubar_active == FALSE) { return; }
+    if (!menubar_active) { return; }
 
     quasi88_disk_eject_all();
 
@@ -1257,9 +1256,9 @@ static  void    f_drv_unset(void)
  * Misc メニュー
  *----------------------------------------------------------------------*/
 
-static  void    f_misc_capture(void)
+static  void    f_misc_capture()
 {
-    if (menubar_active == FALSE) { return; }
+    if (!menubar_active) { return; }
 
     quasi88_screen_snapshot();
 }
@@ -1268,17 +1267,17 @@ static  void    f_misc_record(UINT uItem)
 {
     int active;
 
-    if (menubar_active == FALSE) { return; }
+    if (!menubar_active) { return; }
 
     active = xmame_wavout_opened() ? FALSE : TRUE;  /* 逆にする */
 
-    if (active == FALSE) {
+    if (!active) {
     if (xmame_wavout_opened()) {
         quasi88_waveout(FALSE);
     }
     } else {
-    if (xmame_wavout_opened() == FALSE) {
-        if (quasi88_waveout(TRUE) == FALSE) {
+    if (!xmame_wavout_opened()) {
+        if (!quasi88_waveout(TRUE)) {
         active = FALSE;
         }
     }
@@ -1288,7 +1287,7 @@ static  void    f_misc_record(UINT uItem)
           MF_BYCOMMAND | (active ? MFS_CHECKED : MFS_UNCHECKED));
 }
 
-static  void    f_misc_cload_s(void)
+static  void    f_misc_cload_s()
 {
     char filename[QUASI88_MAX_FILENAME];    /* フルパスファイル名 */
     int result;
@@ -1315,16 +1314,16 @@ static  void    f_misc_cload_s(void)
     }
 }
 
-static  void    f_misc_cload_u(void)
+static  void    f_misc_cload_u()
 {
-    if (menubar_active == FALSE) { return; }
+    if (!menubar_active) { return; }
 
     quasi88_load_tape_eject();
 
     update_misc_cload();
 }
 
-static  void    f_misc_csave_s(void)
+static  void    f_misc_csave_s()
 {
     char filename[QUASI88_MAX_FILENAME];    /* フルパスファイル名 */
     int result;
@@ -1351,9 +1350,9 @@ static  void    f_misc_csave_s(void)
     }
 }
 
-static  void    f_misc_csave_u(void)
+static  void    f_misc_csave_u()
 {
-    if (menubar_active == FALSE) { return; }
+    if (!menubar_active) { return; }
 
     quasi88_save_tape_eject();
 
@@ -1362,7 +1361,7 @@ static  void    f_misc_csave_u(void)
 
 static  void    f_misc_sload(int data)
 {
-    if (menubar_active == FALSE) { return; }
+    if (!menubar_active) { return; }
 
     quasi88_stateload((int) data);
 
@@ -1372,7 +1371,7 @@ static  void    f_misc_sload(int data)
 
 static  void    f_misc_ssave(int data)
 {
-    if (menubar_active == FALSE) { return; }
+    if (!menubar_active) { return; }
 
     quasi88_statesave((int) data);
 }
@@ -1382,7 +1381,7 @@ static  void    f_misc_status(UINT uItem)
     int active;
     UINT res;
 
-    if (menubar_active == FALSE) { return; }
+    if (!menubar_active) { return; }
 
     res = GetMenuState(g_hMenu, uItem, MF_BYCOMMAND);
     active = (res & MFS_CHECKED) ? FALSE : TRUE;    /* 逆にする */
@@ -1396,7 +1395,7 @@ static  void    f_misc_status(UINT uItem)
  * Help メニュー
  *----------------------------------------------------------------------*/
 
-static  void    f_help_about (void)
+static  void    f_help_about ()
 {
     MessageBox(g_hWnd,
            Q_TITLE "  ver. " Q_VERSION "  <" Q_COMMENT ">"
