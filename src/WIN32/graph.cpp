@@ -14,21 +14,16 @@
 
 #include "retroachievements.h"
 
+HINSTANCE g_hInstance;
+HWND g_hWnd;
+HMENU g_hMenu;
+int g_keyrepeat;
 
+static T_GRAPH_SPEC graph_spec;          /* 基本情報     */
 
-HINSTANCE   g_hInstance;
-HWND        g_hWnd;
-HMENU       g_hMenu;
-int     g_keyrepeat;
-
-
-
-static  T_GRAPH_SPEC    graph_spec;     /* 基本情報     */
-
-static  int     graph_exist;        /* 真で、画面生成済み  */
-static  T_GRAPH_INFO    graph_info;     /* その時の、画面情報  */
-static  T_GRAPH_INFO    graph_info_windowed; /* ウィンドウモード時の情報 */
-
+static int graph_exist;                  /* 真で、画面生成済み  */
+static T_GRAPH_INFO graph_info;          /* その時の、画面情報  */
+static T_GRAPH_INFO graph_info_windowed; /* ウィンドウモード時の情報 */
 
 /************************************************************************
  *  グラフィック処理の初期化
@@ -36,28 +31,27 @@ static  T_GRAPH_INFO    graph_info_windowed; /* ウィンドウモード時の�
  *  グラフィック処理の終了
  ************************************************************************/
 
-const T_GRAPH_SPEC  *graph_init()
-{
-    if (verbose_proc) {
+const T_GRAPH_SPEC *graph_init() {
+  if (verbose_proc) {
     printf("Initializing Graphic System ... ");
-    }
+  }
 
 #ifdef SUPPORT_DOUBLE
-    graph_spec.window_max_width = 1280;
-    graph_spec.window_max_height = 960;
+  graph_spec.window_max_width = 1280;
+  graph_spec.window_max_height = 960;
 #else
-    graph_spec.window_max_width      = 640;
-    graph_spec.window_max_height     = 480;
+  graph_spec.window_max_width = 640;
+  graph_spec.window_max_height = 480;
 #endif
-    graph_spec.fullscreen_max_width  = GetSystemMetrics(SM_CXSCREEN);
-    graph_spec.fullscreen_max_height = GetSystemMetrics(SM_CYSCREEN);
-    graph_spec.forbid_status         = false;
-    graph_spec.forbid_half           = false;
+  graph_spec.fullscreen_max_width = GetSystemMetrics(SM_CXSCREEN);
+  graph_spec.fullscreen_max_height = GetSystemMetrics(SM_CYSCREEN);
+  graph_spec.forbid_status = false;
+  graph_spec.forbid_half = false;
 
-    if (verbose_proc)
+  if (verbose_proc)
     printf("OK\n");
 
-    return &graph_spec;
+  return &graph_spec;
 }
 
 /************************************************************************/
@@ -69,21 +63,19 @@ static void calc_window_size(int *width, int *height);
 static unsigned char *buffer = nullptr;
 static BITMAPINFO bmpInfo;
 
-const T_GRAPH_INFO  *graph_setup(int width, int height,
-                     int fullscreen, double aspect)
-{
-    int win_width, win_height;
-    int win_offx, win_offy;
-    int scaled_width, scaled_height;
-    int scaled_offx, scaled_offy;
-    int prev_fullscreen = graph_info.fullscreen;
+const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double aspect) {
+  int win_width, win_height;
+  int win_offx, win_offy;
+  int scaled_width, scaled_height;
+  int scaled_offx, scaled_offy;
+  int prev_fullscreen = graph_info.fullscreen;
 
-    win_offx = 0;
-    win_offy = 0;
-    scaled_width = width;
-    scaled_height = height;
-    scaled_offx = 0;
-    scaled_offy = 0;
+  win_offx = 0;
+  win_offy = 0;
+  scaled_width = width;
+  scaled_height = height;
+  scaled_offx = 0;
+  scaled_offy = 0;
 
 #if 0 /* aspectは現在未実装 */
     if (aspect) {
@@ -91,201 +83,196 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
     }
 #endif
 
-    /* オフスクリーンバッファを確保する */
+  /* オフスクリーンバッファを確保する */
 
-    if (buffer) {
+  if (buffer) {
     free(buffer);
-    }
+  }
 
-    buffer = (unsigned char *)malloc(width * height * sizeof(unsigned long));
-    if (!buffer) {
+  buffer = (unsigned char *)malloc(width * height * sizeof(unsigned long));
+  if (!buffer) {
     return nullptr;
-    }
+  }
 
-    memset(&bmpInfo, 0, sizeof(bmpInfo));
+  memset(&bmpInfo, 0, sizeof(bmpInfo));
 
-    bmpInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
-    bmpInfo.bmiHeader.biWidth       =   width;
-    bmpInfo.bmiHeader.biHeight      = - height;
-    bmpInfo.bmiHeader.biPlanes      = 1;
-    bmpInfo.bmiHeader.biBitCount    = 32;
-    bmpInfo.bmiHeader.biCompression = BI_RGB;
+  bmpInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+  bmpInfo.bmiHeader.biWidth = width;
+  bmpInfo.bmiHeader.biHeight = -height;
+  bmpInfo.bmiHeader.biPlanes = 1;
+  bmpInfo.bmiHeader.biBitCount = 32;
+  bmpInfo.bmiHeader.biCompression = BI_RGB;
 
+  /* ウインドウの生成、ないしリサイズ */
 
-    /* ウインドウの生成、ないしリサイズ */
-
-    if (!graph_exist) {     /* ウインドウが無ければ生成 */
+  if (!graph_exist) { /* ウインドウが無ければ生成 */
 
     if (!create_window(scaled_width, scaled_height)) {
-        free(buffer);
-        buffer = nullptr;
-        return nullptr;
+      free(buffer);
+      buffer = nullptr;
+      return nullptr;
+    }
+  }
+
+  /* ウインドウが有ればリサイズ */
+
+  DWORD style = GetWindowLong(g_hWnd, GWL_STYLE);
+  RECT win_rect;
+
+  if (fullscreen) {
+    if (!prev_fullscreen) {
+      GetWindowRect(g_hWnd, &win_rect);
+      graph_info.window_offx = win_rect.left;
+      graph_info.window_offy = win_rect.top;
+
+      /* ウィンドウモードの画面情報を保存 */
+      graph_info_windowed = graph_info;
     }
 
+    MONITORINFO mi = {sizeof(MONITORINFO)};
+
+    if (!GetMonitorInfo(MonitorFromWindow(g_hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
+      free(buffer);
+      buffer = nullptr;
+      return nullptr;
     }
 
-    /* ウインドウが有ればリサイズ */
+    win_width = mi.rcMonitor.right - mi.rcMonitor.left;
+    win_height = mi.rcMonitor.bottom - mi.rcMonitor.top;
 
-    DWORD style = GetWindowLong(g_hWnd, GWL_STYLE);
-    RECT win_rect;
-        
-    if (fullscreen) {
-        if (!prev_fullscreen) {
-            GetWindowRect(g_hWnd, &win_rect);
-            graph_info.window_offx = win_rect.left;
-            graph_info.window_offy = win_rect.top;
+    int scale_factor =
+        MIN(win_width / width, win_height / (height - (graph_spec.forbid_status || !show_status ? STATUS_HEIGHT : 0)));
+    scaled_width = width * scale_factor;
+    scaled_height = height * scale_factor;
+    scaled_offx = (win_width - scaled_width) / 2;
+    scaled_offy = (win_height - scaled_height) / 2;
 
-            /* ウィンドウモードの画面情報を保存 */
-            graph_info_windowed = graph_info;
-        }
+    SetWindowLong(g_hWnd, GWL_STYLE, style & ~winStyle);
+    SetWindowPos(g_hWnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top - GetSystemMetrics(SM_CYMENU), win_width,
+                 win_height + GetSystemMetrics(SM_CYMENU), SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 
-        MONITORINFO mi = { sizeof(MONITORINFO) };
-            
-        if (!GetMonitorInfo(MonitorFromWindow(g_hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
-            free(buffer);
-            buffer = nullptr;
-            return nullptr;
-        }
+    /* 残像を消す為に画面を更新する */
+    HDC hdc = GetDC(g_hWnd);
+    GetWindowRect(g_hWnd, &win_rect);
+    FillRect(hdc, &win_rect, (HBRUSH)GetStockObject(BLACK_BRUSH));
+    ReleaseDC(g_hWnd, hdc);
+  } else {
+    win_width = scaled_width;
+    win_height = scaled_height;
 
-        win_width = mi.rcMonitor.right - mi.rcMonitor.left;
-        win_height = mi.rcMonitor.bottom - mi.rcMonitor.top;
-
-        int scale_factor = MIN(win_width / width, win_height / (height - (graph_spec.forbid_status || !show_status ? STATUS_HEIGHT : 0)));
-        scaled_width = width * scale_factor;
-        scaled_height = height * scale_factor;
-        scaled_offx = (win_width - scaled_width) / 2;
-        scaled_offy = (win_height - scaled_height) / 2;
-
-        SetWindowLong(g_hWnd, GWL_STYLE, style & ~winStyle);
-        SetWindowPos(g_hWnd, HWND_TOP,
-            mi.rcMonitor.left, mi.rcMonitor.top - GetSystemMetrics(SM_CYMENU),
-            win_width, win_height + GetSystemMetrics(SM_CYMENU),
-            SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-
-        /* 残像を消す為に画面を更新する */
-        HDC hdc = GetDC(g_hWnd);
-        GetWindowRect(g_hWnd, &win_rect);
-        FillRect(hdc, &win_rect, (HBRUSH)GetStockObject(BLACK_BRUSH));
-        ReleaseDC(g_hWnd, hdc);
-    }
-    else {
-        win_width = scaled_width;
-        win_height = scaled_height;
-
-        if (prev_fullscreen) {
-            win_offx = graph_info_windowed.window_offx;
-            win_offy = graph_info_windowed.window_offy;
-        }
-
-        calc_window_size(&win_width, &win_height);
-        SetWindowLong(g_hWnd, GWL_STYLE, style | winStyle);
-        SetWindowPos(g_hWnd, HWND_TOP,
-            win_offx, win_offy,       /* ウィンドウのオフセット */
-            win_width, win_height,    /* ウィンドウの幅・高さ   */
-            (prev_fullscreen ? 0 : SWP_NOMOVE) | SWP_NOZORDER | SWP_FRAMECHANGED);
+    if (prev_fullscreen) {
+      win_offx = graph_info_windowed.window_offx;
+      win_offy = graph_info_windowed.window_offy;
     }
 
-    /* graph_info に諸言をセットする */
+    calc_window_size(&win_width, &win_height);
+    SetWindowLong(g_hWnd, GWL_STYLE, style | winStyle);
+    SetWindowPos(g_hWnd, HWND_TOP, win_offx, win_offy, /* ウィンドウのオフセット */
+                 win_width, win_height,                /* ウィンドウの幅・高さ   */
+                 (prev_fullscreen ? 0 : SWP_NOMOVE) | SWP_NOZORDER | SWP_FRAMECHANGED);
+  }
 
-    graph_info.fullscreen       = fullscreen;
-    graph_info.width            = width;
-    graph_info.height           = height;
-    graph_info.scaled_width     = scaled_width;
-    graph_info.scaled_height    = scaled_height;
-    graph_info.scaled_offx      = scaled_offx;
-    graph_info.scaled_offy      = scaled_offy;
-    graph_info.window_offx      = win_offx;
-    graph_info.window_offy      = win_offy;
-    graph_info.byte_per_pixel   = 4;
-    graph_info.byte_per_line    = width * 4;
-    graph_info.buffer           = buffer;
-    graph_info.nr_color         = 255;
-    graph_info.write_only       = false;
-    graph_info.broken_mouse     = false;
-    graph_info.draw_start       = nullptr;
-    graph_info.draw_finish      = nullptr;
-    graph_info.dont_frameskip   = false;
+  /* graph_info に諸言をセットする */
 
-    graph_exist = true;
+  graph_info.fullscreen = fullscreen;
+  graph_info.width = width;
+  graph_info.height = height;
+  graph_info.scaled_width = scaled_width;
+  graph_info.scaled_height = scaled_height;
+  graph_info.scaled_offx = scaled_offx;
+  graph_info.scaled_offy = scaled_offy;
+  graph_info.window_offx = win_offx;
+  graph_info.window_offy = win_offy;
+  graph_info.byte_per_pixel = 4;
+  graph_info.byte_per_line = width * 4;
+  graph_info.buffer = buffer;
+  graph_info.nr_color = 255;
+  graph_info.write_only = false;
+  graph_info.broken_mouse = false;
+  graph_info.draw_start = nullptr;
+  graph_info.draw_finish = nullptr;
+  graph_info.dont_frameskip = false;
 
-    return &graph_info;
+  graph_exist = true;
+
+  return &graph_info;
 }
-
-
 
 /*
  * ウインドウを生成する
  */
-static int create_window(int width, int height)
-{
-    WNDCLASSEX wc;
-    int win_width, win_height;
+static int create_window(int width, int height) {
+  WNDCLASSEX wc;
+  int win_width, win_height;
 
-    /* ウィンドウクラスの情報を設定 */
-    wc.cbSize = sizeof(wc);         /* 構造体サイズ */
-    wc.style = 0;               /* ウインドウスタイル */
-    wc.lpfnWndProc = WndProc;           /* ウィンドウプロシージャ */
-    wc.cbClsExtra = 0;              /* 拡張情報 */
-    wc.cbWndExtra = 0;              /* 拡張情報 */
-    wc.hInstance = g_hInstance;         /* インスタンスハンドル */
-    wc.hIcon = nullptr;                /* アイコン */
-/*
-    wc.hIcon = (HICON)LoadImage(NULL, MAKEINTRESOURCE(IDI_APPLICATION),
-                IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
-*/
-    wc.hIconSm = wc.hIcon;          /* 小さいアイコン */
-    wc.hCursor = nullptr;              /* マウスカーソル */
-/*
-    wc.hCursor = (HCURSOR)LoadImage(NULL, MAKEINTRESOURCE(IDC_ARROW),
-                    IMAGE_CURSOR, 0, 0,
-                    LR_DEFAULTSIZE | LR_SHARED);
-*/
-                        /* ウィンドウ背景 */
-    wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-/*  wc.lpszMenuName = NULL;*/           /* メニュー名 */
-    wc.lpszMenuName = "QUASI88";        /* メニュー名 → quasi88.rc */
-    wc.lpszClassName = "Win32App";      /* ウィンドウクラス名 適当 */
+  /* ウィンドウクラスの情報を設定 */
+  wc.cbSize = sizeof(wc);        /* 構造体サイズ */
+  wc.style = 0;                  /* ウインドウスタイル */
+  wc.lpfnWndProc = WndProc;      /* ウィンドウプロシージャ */
+  wc.cbClsExtra = 0;             /* 拡張情報 */
+  wc.cbWndExtra = 0;             /* 拡張情報 */
+  wc.hInstance = g_hInstance;    /* インスタンスハンドル */
+  wc.hIcon = nullptr;            /* アイコン */
+                                 /*
+                                     wc.hIcon = (HICON)LoadImage(NULL, MAKEINTRESOURCE(IDI_APPLICATION),
+                                                 IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+                                 */
+  wc.hIconSm = wc.hIcon;         /* 小さいアイコン */
+  wc.hCursor = nullptr;          /* マウスカーソル */
+                                 /*
+                                     wc.hCursor = (HCURSOR)LoadImage(NULL, MAKEINTRESOURCE(IDC_ARROW),
+                                                     IMAGE_CURSOR, 0, 0,
+                                                     LR_DEFAULTSIZE | LR_SHARED);
+                                 */
+                                 /* ウィンドウ背景 */
+  wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+  /*  wc.lpszMenuName = NULL;*/  /* メニュー名 */
+  wc.lpszMenuName = "QUASI88";   /* メニュー名 → quasi88.rc */
+  wc.lpszClassName = "Win32App"; /* ウィンドウクラス名 適当 */
 
-    /* ウィンドウクラスを登録する */
-    if (RegisterClassEx(&wc) == 0) { return false; }
+  /* ウィンドウクラスを登録する */
+  if (RegisterClassEx(&wc) == 0) {
+    return false;
+  }
 
-    /* ウィンドウスタイルはこれ */
-    winStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+  /* ウィンドウスタイルはこれ */
+  winStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 
-    /* ウィンドウサイズの計算 */
-    win_width  = width;
-    win_height = height;
-    calc_window_size(&win_width, &win_height);
+  /* ウィンドウサイズの計算 */
+  win_width = width;
+  win_height = height;
+  calc_window_size(&win_width, &win_height);
 
-    /* ウィンドウを作成する */
-    g_hWnd = CreateWindowEx(WS_EX_ACCEPTFILES,  /* 拡張ウィンドウスタイル */
-                wc.lpszClassName,   /* ウィンドウクラス名    */
-                "QUASI88 win32",    /* タイトルバー文字列    */
-                winStyle,       /* ウィンドウスタイル    */
-                CW_USEDEFAULT,  /* ウィンドウのx座標      */
-                CW_USEDEFAULT,  /* ウィンドウのy座標      */
-                win_width,      /* ウィンドウの幅      */
-                win_height,     /* ウィンドウの高さ   */
-                nullptr,       /* 親ウィンドウのハンドル */
-                nullptr,       /* メニューハンドル   */
-                g_hInstance,    /* インスタンスハンドル     */
-                nullptr);      /* 付加情報       */
+  /* ウィンドウを作成する */
+  g_hWnd = CreateWindowEx(WS_EX_ACCEPTFILES, /* 拡張ウィンドウスタイル */
+                          wc.lpszClassName,  /* ウィンドウクラス名    */
+                          "QUASI88 win32",   /* タイトルバー文字列    */
+                          winStyle,          /* ウィンドウスタイル    */
+                          CW_USEDEFAULT,     /* ウィンドウのx座標      */
+                          CW_USEDEFAULT,     /* ウィンドウのy座標      */
+                          win_width,         /* ウィンドウの幅      */
+                          win_height,        /* ウィンドウの高さ   */
+                          nullptr,           /* 親ウィンドウのハンドル */
+                          nullptr,           /* メニューハンドル   */
+                          g_hInstance,       /* インスタンスハンドル     */
+                          nullptr);          /* 付加情報       */
 
-    if (g_hWnd == nullptr) { return false; }
+  if (g_hWnd == nullptr) {
+    return false;
+  }
 
-    /* ウィンドウを表示する */
-    ShowWindow(g_hWnd, SW_SHOW);
-    UpdateWindow(g_hWnd);
+  /* ウィンドウを表示する */
+  ShowWindow(g_hWnd, SW_SHOW);
+  UpdateWindow(g_hWnd);
 
-    /* メニューハンドル */
-    g_hMenu = GetMenu(g_hWnd);
-    
-    /* Drag & Drop の許可 */
+  /* メニューハンドル */
+  g_hMenu = GetMenu(g_hWnd);
+
+  /* Drag & Drop の許可 */
 #if 0
     /* ウインドウの作成時に、 WS_EX_ACCEPTFILES をつけているので、これは不要 */
     DragAcceptFiles(g_hWnd, true);
 #endif
-
 
 #if 0
     if (verbose_proc) { /* ディスプレイ情報 */
@@ -297,39 +284,35 @@ static int create_window(int width, int height)
     ReleaseDC(g_hWnd, hdc);
     }
 #endif
-    return true;
+  return true;
 }
-
-
 
 /*
  * 本当のウインドウサイズを計算する
  */
-static void calc_window_size(int *width, int *height)
-{
-    RECT rect;
+static void calc_window_size(int *width, int *height) {
+  RECT rect;
 
-    rect.left = 0;  rect.right  = *width;
-    rect.top  = 0;  rect.bottom = *height;
+  rect.left = 0;
+  rect.right = *width;
+  rect.top = 0;
+  rect.bottom = *height;
 
-    AdjustWindowRectEx(&rect,           /* クライアント矩形       */
-               winStyle,        /* ウィンドウスタイル     */
-               true,            /* メニューフラグ         */
-               0);          /* 拡張ウィンドウスタイル */
+  AdjustWindowRectEx(&rect,         /* クライアント矩形       */
+                     winStyle,      /* ウィンドウスタイル     */
+                     true,          /* メニューフラグ         */
+                     0);            /* 拡張ウィンドウスタイル */
 
-    *width  = rect.right - rect.left;       /* 本当のウィンドウの幅   */
-    *height = rect.bottom - rect.top;       /* 本当のウィンドウの高さ */
+  *width = rect.right - rect.left;  /* 本当のウィンドウの幅   */
+  *height = rect.bottom - rect.top; /* 本当のウィンドウの高さ */
 }
-
-
 
 /************************************************************************/
 
-void    graph_exit()
-{
-    if (buffer) {
+void graph_exit() {
+  if (buffer) {
     free(buffer);
-    }
+  }
 }
 
 /************************************************************************
@@ -337,141 +320,124 @@ void    graph_exit()
  *  色の解放
  ************************************************************************/
 
-void    graph_add_color(const PC88_PALETTE_T color[],
-            int nr_color, unsigned long pixel[])
-{
-    int i;
-    for (i=0; i<nr_color; i++) {
+void graph_add_color(const PC88_PALETTE_T color[], int nr_color, unsigned long pixel[]) {
+  int i;
+  for (i = 0; i < nr_color; i++) {
 
-    pixel[i] = ((((unsigned long) color[i].red)   << 16) |
-                (((unsigned long) color[i].green) <<  8) |
-                (((unsigned long) color[i].blue)));
+    pixel[i] = ((((unsigned long)color[i].red) << 16) | (((unsigned long)color[i].green) << 8) |
+                (((unsigned long)color[i].blue)));
 
     /* RGB()マクロは、順序が反転しているので使えない */
-    }
+  }
 }
 
 /************************************************************************/
 
-void    graph_remove_color(int nr_pixel, unsigned long pixel[])
-{
-    /* 色に関しては何も管理しないので、ここでもなにもしない */
+void graph_remove_color(int nr_pixel, unsigned long pixel[]) {
+  /* 色に関しては何も管理しないので、ここでもなにもしない */
 }
 
 /************************************************************************
  *  グラフィックの更新
  ************************************************************************/
 
-static  int graph_update_counter = 0;
+static int graph_update_counter = 0;
 
-int graph_update_WM_PAINT()
-{
-    int drawn;
-    HDC hdc;
-    PAINTSTRUCT ps;
+int graph_update_WM_PAINT() {
+  int drawn;
+  HDC hdc;
+  PAINTSTRUCT ps;
 
-    hdc = BeginPaint(g_hWnd, &ps);
+  hdc = BeginPaint(g_hWnd, &ps);
 
 #if USE_RETROACHIEVEMENTS
-    HDC hdc_main = hdc;
-    HDC hdc_buffer = CreateCompatibleDC(hdc);
-    HBITMAP hbm_buffer = CreateCompatibleBitmap(hdc,
-        graph_info.width, graph_info.height);
-    SelectObject(hdc_buffer, hbm_buffer);
+  HDC hdc_main = hdc;
+  HDC hdc_buffer = CreateCompatibleDC(hdc);
+  HBITMAP hbm_buffer = CreateCompatibleBitmap(hdc, graph_info.width, graph_info.height);
+  SelectObject(hdc_buffer, hbm_buffer);
 
-    hdc = hdc_buffer;
+  hdc = hdc_buffer;
 #endif
 
-    /* graph_update() により、 WM_PAINT イベントが発生した場合、描画する。
-       OS が勝手に発生させた WM_PAINT イベントの場合は、なにもしない。
-       (quasi88_expose() の処理により、 graph_update() が呼び出されるため) */
+  /* graph_update() により、 WM_PAINT イベントが発生した場合、描画する。
+     OS が勝手に発生させた WM_PAINT イベントの場合は、なにもしない。
+     (quasi88_expose() の処理により、 graph_update() が呼び出されるため) */
 
-    if (graph_update_counter > 0) {
-#if 1   /* どちらの API でもよさげ。速度は？ */
+  if (graph_update_counter > 0) {
+#if 1 /* どちらの API でもよさげ。速度は？ */
 #if USE_RETROACHIEVEMENTS
-        StretchDIBits(hdc,
-            0, 0, graph_info.width, graph_info.height,
-            0, 0, graph_info.width, graph_info.height,
-            buffer, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
+    StretchDIBits(hdc, 0, 0, graph_info.width, graph_info.height, 0, 0, graph_info.width, graph_info.height, buffer,
+                  &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
 #else
-    StretchDIBits(hdc,
-              graph_info.scaled_offx, graph_info.scaled_offy,
-              graph_info.scaled_width, graph_info.scaled_height,
-              0, 0, graph_info.width, graph_info.height,
-              buffer, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
+    StretchDIBits(hdc, graph_info.scaled_offx, graph_info.scaled_offy, graph_info.scaled_width,
+                  graph_info.scaled_height, 0, 0, graph_info.width, graph_info.height, buffer, &bmpInfo, DIB_RGB_COLORS,
+                  SRCCOPY);
 #endif
-#else   /* こっちは、転送先の高さしか指定できない */
-    SetDIBitsToDevice(hdc,
-              0, 0, graph_info.width, graph_info.scaled_height,
-              0, 0, 0, graph_info.height,
-              buffer, &bmpInfo, DIB_RGB_COLORS);
+#else /* こっちは、転送先の高さしか指定できない */
+    SetDIBitsToDevice(hdc, 0, 0, graph_info.width, graph_info.scaled_height, 0, 0, 0, graph_info.height, buffer,
+                      &bmpInfo, DIB_RGB_COLORS);
 #endif
     graph_update_counter = 0;
     drawn = true;
-    } else {
+  } else {
     drawn = false;
-    }
+  }
 
 #if USE_RETROACHIEVEMENTS
-    RA_RenderOverlayFrame(hdc);
-    StretchBlt(hdc_main,
-        graph_info.scaled_offx, graph_info.scaled_offy,
-        graph_info.scaled_width, graph_info.scaled_height,
-        hdc, 0, 0, graph_info.width, graph_info.height, SRCCOPY);
+  RA_RenderOverlayFrame(hdc);
+  StretchBlt(hdc_main, graph_info.scaled_offx, graph_info.scaled_offy, graph_info.scaled_width,
+             graph_info.scaled_height, hdc, 0, 0, graph_info.width, graph_info.height, SRCCOPY);
 
-    DeleteObject(hbm_buffer);
-    DeleteDC(hdc_buffer);
+  DeleteObject(hbm_buffer);
+  DeleteDC(hdc_buffer);
 #endif
 
-/*
-    fprintf(debugfp,
-        "%s %d:(%3d,%3d)-(%3d,%3d)\n",
-        (drawn) ? "update" : "EXPOSE", graph_update_counter, 
-        ps.rcPaint.left,  ps.rcPaint.top,
-        ps.rcPaint.right, ps.rcPaint.bottom);
-*/
-    EndPaint(g_hWnd, &ps);
+  /*
+      fprintf(debugfp,
+          "%s %d:(%3d,%3d)-(%3d,%3d)\n",
+          (drawn) ? "update" : "EXPOSE", graph_update_counter,
+          ps.rcPaint.left,  ps.rcPaint.top,
+          ps.rcPaint.right, ps.rcPaint.bottom);
+  */
+  EndPaint(g_hWnd, &ps);
 
-    return drawn;
+  return drawn;
 }
 
-void    graph_update(int nr_rect, T_GRAPH_RECT rect[])
-{
-    graph_update_counter = 1;
+void graph_update(int nr_rect, T_GRAPH_RECT rect[]) {
+  graph_update_counter = 1;
 
-    InvalidateRect(g_hWnd, nullptr, false);
-    UpdateWindow(g_hWnd);
+  InvalidateRect(g_hWnd, nullptr, false);
+  UpdateWindow(g_hWnd);
 
-    /* ここで、直接ウインドウ描画をしようとしたのだが、なんかうまくいかない。
-       WndProc() の内部でしか、ウインドウ描画はできないのかな？
+  /* ここで、直接ウインドウ描画をしようとしたのだが、なんかうまくいかない。
+     WndProc() の内部でしか、ウインドウ描画はできないのかな？
 
-       とりあえず、 InvalidateRect() をすると、 WM_PAINT イベントが発生する
-       ので、この後の WndProc() の WM_PAINT 処理にて描画させることにしよう。
+     とりあえず、 InvalidateRect() をすると、 WM_PAINT イベントが発生する
+     ので、この後の WndProc() の WM_PAINT 処理にて描画させることにしよう。
 
-       ちなみに、 InvalidateRect() の直後に、 UpdateWindow() を呼び出すと、
-       この関数の内部で WndProc() が呼び出され、 WM_PAINT の処理が行われる
-       らしい。つまり UpdateWindow() が終わった時点で描画は終わっている。
+     ちなみに、 InvalidateRect() の直後に、 UpdateWindow() を呼び出すと、
+     この関数の内部で WndProc() が呼び出され、 WM_PAINT の処理が行われる
+     らしい。つまり UpdateWindow() が終わった時点で描画は終わっている。
 
-       本来ここは nr_rect 回、処理を繰り返すようにすべきなのだが、面倒なので
-       全画面を1回だけ描画させている。(速いマシンなら気にならない ^^;) */
+     本来ここは nr_rect 回、処理を繰り返すようにすべきなのだが、面倒なので
+     全画面を1回だけ描画させている。(速いマシンなら気にならない ^^;) */
 }
-
 
 /************************************************************************
  *  タイトルの設定
  *  属性の設定
  ************************************************************************/
 
-void    graph_set_window_title(const char *title)
-{
-}
+void graph_set_window_title(const char *title) {}
 
 /************************************************************************/
 
-void    graph_set_attribute(int mouse_show, int grab, int keyrepeat_on)
-{
-    g_keyrepeat = keyrepeat_on;
+void graph_set_attribute(int mouse_show, int grab, int keyrepeat_on) {
+  g_keyrepeat = keyrepeat_on;
 
-    if (mouse_show) ShowCursor(true);
-    else            ShowCursor(false);
+  if (mouse_show)
+    ShowCursor(true);
+  else
+    ShowCursor(false);
 }

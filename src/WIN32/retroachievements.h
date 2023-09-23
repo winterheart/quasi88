@@ -12,19 +12,18 @@
 
 #include <RA_Interface.h>
 
-typedef struct FileInfo
-{
-    BYTE *data;
-    unsigned long data_len;
-    char name[1024];
-    unsigned int title_id;
-    /* FTYPE_DISK 又は FTYPE_TAPE_LOAD を保存し、
-    リセット時に Softcore から Harcore へ移行する場合は
-    相当しない方からイメージファイルを取り外す */
-    int file_type;
+typedef struct FileInfo {
+  BYTE *data;
+  unsigned long data_len;
+  char name[1024];
+  unsigned int title_id;
+  /* FTYPE_DISK 又は FTYPE_TAPE_LOAD を保存し、
+  リセット時に Softcore から Harcore へ移行する場合は
+  相当しない方からイメージファイルを取り外す */
+  int file_type;
 } FileInfo;
 
-#define FINFO_DEFAULT FileInfo { 0, 0, { 0 }, 0, 0 };
+#define FINFO_DEFAULT FileInfo{0, 0, {0}, 0, 0};
 
 /* 挿入時のディスク・テープイメージのデータを保存する */
 extern FileInfo loaded_disk;
@@ -49,14 +48,14 @@ extern void CausePause();
 extern void RebuildMenu();
 
 //  sNameOut points to a 64 character buffer.
-//  sNameOut should have copied into it the estimated game title 
+//  sNameOut should have copied into it the estimated game title
 //   for the ROM, if one can be inferred from the ROM.
-extern void GetEstimatedGameTitle(char* sNameOut);
+extern void GetEstimatedGameTitle(char *sNameOut);
 
 extern void ResetEmulation();
 
 //  Called BY the toolset to tell the emulator to load a particular ROM.
-extern void LoadROM(char* sFullPath);
+extern void LoadROM(char *sFullPath);
 
 //  Installs these shared functions into the DLL
 extern void RA_InitShared();
