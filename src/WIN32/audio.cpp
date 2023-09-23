@@ -13,10 +13,10 @@
 
 #include "mame-quasi88.h"
 
-    int g_pcm_bufsize = 100;    /* PCM バッファサイズ [ms] */
+int g_pcm_bufsize = 100;    /* PCM バッファサイズ [ms] */
 static  int use_audiodevice = 1;    /* use audio-devide for audio output */
 
-static int device_opened = FALSE;   /* デバイス初期化済みなら真 */
+static int device_opened = false;   /* デバイス初期化済みなら真 */
 
 /*===========================================================================*/
 /*              QUASI88 から呼び出される、MAME の処理関数                    */
@@ -58,34 +58,34 @@ static  const   T_CONFIG_TABLE xmame_options[] =
 {
   /* 350〜399: サウンド依存オプション */
 
-  { 351, "sound",        X_FIX,  &use_sound,       TRUE,                  0,0, OPT_SAVE },
-  { 351, "nosound",      X_FIX,  &use_sound,       FALSE,                 0,0, OPT_SAVE },
+  { 351, "sound",        X_FIX,  &use_sound,       true,                  0,nullptr, OPT_SAVE },
+  { 351, "nosound",      X_FIX,  &use_sound,       false,                 0,nullptr, OPT_SAVE },
 
-  { 352, "audio",        X_FIX,  &use_audiodevice, TRUE,                  0,0, OPT_SAVE },
-  { 352, "noaudio",      X_FIX,  &use_audiodevice, FALSE,                 0,0, OPT_SAVE },
+  { 352, "audio",        X_FIX,  &use_audiodevice, true,                  0,nullptr, OPT_SAVE },
+  { 352, "noaudio",      X_FIX,  &use_audiodevice, false,                 0,nullptr, OPT_SAVE },
 
-  { 353, "fmgen",        X_FIX,  &use_fmgen,       TRUE,                  0,0, OPT_SAVE },
-  { 353, "nofmgen",      X_FIX,  &use_fmgen,       FALSE,                 0,0, OPT_SAVE },
+  { 353, "fmgen",        X_FIX,  &use_fmgen,       true,                  0,nullptr, OPT_SAVE },
+  { 353, "nofmgen",      X_FIX,  &use_fmgen,       false,                 0,nullptr, OPT_SAVE },
 
-  { 354, "volume",       X_INV,  &invalid_arg,                          0,0,0, 0        },
+  { 354, "volume",       X_INV,  &invalid_arg,                          0,0,nullptr, nullptr },
 
-  { 355, "fmvol",        X_INT,  &fmvol,           0, 100,                  0, OPT_SAVE },
-  { 356, "psgvol",       X_INT,  &psgvol,          0, 100,                  0, OPT_SAVE },
-  { 357, "beepvol",      X_INT,  &beepvol,         0, 100,                  0, OPT_SAVE },
-  { 358, "rhythmvol",    X_INT,  &rhythmvol,       0, 200,                  0, OPT_SAVE },
-  { 359, "adpcmvol",     X_INT,  &adpcmvol,        0, 200,                  0, OPT_SAVE },
-  { 360, "fmgenvol",     X_INT,  &fmgenvol,        0, 100,                  0, OPT_SAVE },
-  { 361, "samplevol",    X_INT,  &samplevol,       0, 100,                  0, OPT_SAVE },
+  { 355, "fmvol",        X_INT,  &fmvol,           0, 100,                  nullptr, OPT_SAVE },
+  { 356, "psgvol",       X_INT,  &psgvol,          0, 100,                  nullptr, OPT_SAVE },
+  { 357, "beepvol",      X_INT,  &beepvol,         0, 100,                  nullptr, OPT_SAVE },
+  { 358, "rhythmvol",    X_INT,  &rhythmvol,       0, 200,                  nullptr, OPT_SAVE },
+  { 359, "adpcmvol",     X_INT,  &adpcmvol,        0, 200,                  nullptr, OPT_SAVE },
+  { 360, "fmgenvol",     X_INT,  &fmgenvol,        0, 100,                  nullptr, OPT_SAVE },
+  { 361, "samplevol",    X_INT,  &samplevol,       0, 100,                  nullptr, OPT_SAVE },
 
-  { 362, "samplefreq",   X_INT,  &options.samplerate, 8000, 48000,          0, OPT_SAVE },
+  { 362, "samplefreq",   X_INT,  &options.samplerate, 8000, 48000,          nullptr, OPT_SAVE },
 
-  { 363, "samples",      X_FIX,  &options.use_samples, 1,                 0,0, OPT_SAVE },
-  { 363, "nosamples",    X_FIX,  &options.use_samples, 0,                 0,0, OPT_SAVE },
+  { 363, "samples",      X_FIX,  &options.use_samples, 1,                 0,nullptr, OPT_SAVE },
+  { 363, "nosamples",    X_FIX,  &options.use_samples, 0,                 0,nullptr, OPT_SAVE },
 
-  { 364, "pcmbufsize",   X_INT,  &g_pcm_bufsize,   10, 1000,                0, OPT_SAVE },
+  { 364, "pcmbufsize",   X_INT,  &g_pcm_bufsize,   10, 1000,                nullptr, OPT_SAVE },
 
   /* 終端 */
-  {   0, NULL,           X_INV,                                       0,0,0,0, 0        },
+  {   0, nullptr,           X_INV,                                       0,0,0,nullptr, nullptr },
 };
 
 const T_CONFIG_TABLE *xmame_config_get_opt_tbl(void)
@@ -223,7 +223,7 @@ T_SNDDRV_CONFIG *xmame_config_get_sndopt_tbl(void)
     if (use_audiodevice) {
     return config;
     } else {
-    return NULL;
+    return nullptr;
     }
 }
 
@@ -243,14 +243,14 @@ T_SNDDRV_CONFIG *xmame_config_get_sndopt_tbl(void)
 int xmame_has_audiodevice(void)
 {
     if (use_sound) {
-    if (device_opened) return TRUE;
+    if (device_opened) return true;
     }
-    return FALSE;
+    return false;
 }
 
 int xmame_has_mastervolume(void)
 {
-    return FALSE;
+    return false;
 }
 
 
@@ -313,7 +313,7 @@ int xmame_has_mastervolume(void)
  *****************************************************************************/
 
 static  int create_sound_device(int stereo);
-static  void    destroy_sound_device(void);
+static  void    destroy_sound_device();
 static  void    write_sound_device(unsigned char *data, int count);
 
 static int samples_per_frame = 0;
@@ -326,7 +326,7 @@ int osd_start_audio_stream(int stereo)
         /* デバイスが開けなくても、気にせず続行 */
     }
     } else {
-    device_opened = FALSE;
+    device_opened = false;
     }
 
     /* calculate samples_per_frame */
@@ -352,7 +352,7 @@ void    osd_stop_audio_stream(void)
 {
     if (device_opened) {
     destroy_sound_device();
-    device_opened = FALSE;
+    device_opened = false;
     }
 }
 
@@ -472,7 +472,7 @@ static  int create_sound_device(int stereo)
                 ) != MMSYSERR_NOERROR) {
 
     fprintf(stderr, "failed opening audio device\n");
-    return FALSE;
+    return false;
 
     /* 成功時は、 MM_WOM_OPEN / WOM_OPEN が発生する */
     }
@@ -480,7 +480,7 @@ static  int create_sound_device(int stereo)
     /* WAVバッファを生成 */
     memset(&whdr, 0, sizeof(whdr));
 
-    err = FALSE;
+    err = false;
     bufsize = Machine->sample_rate * byte_per_sample * g_pcm_bufsize / 1000;
     /* バッファサイズの指定に制約 (2のべき乗とか、上限値とか) は無いの？ */
     for (i=0; i<BUFFER_NUM; i++) {
@@ -488,19 +488,19 @@ static  int create_sound_device(int stereo)
     whdr[i].dwBufferLength  = bufsize;
     whdr[i].dwFlags     = WHDR_BEGINLOOP | WHDR_ENDLOOP;
     whdr[i].dwLoops     = 1;
-    whdr[i].dwUser      = FALSE;    /* FALSE = Started, Need to Write*/
+    whdr[i].dwUser      = false;    /* false = Started, Need to Write*/
 
-    if (whdr[i].lpData == NULL) { err = TRUE; }
+    if (whdr[i].lpData == nullptr) { err = true; }
     }
 
     /* WAVバッファにデータを送るための、中間バッファを生成する */
     /* 中間バッファは、WAVバッファよりも大きくないといけない   */
-    if (err == FALSE) {
+    if (!err) {
     memset(&sample, 0, sizeof(sample));
 
     sample.dataSize = bufsize * 4;  /* バッファの4倍を確保。固定値でいい?*/
-    if (!(sample.data = calloc(1, sample.dataSize))) {
-        err = TRUE;
+    if (!(sample.data = (unsigned char *)calloc(1, sample.dataSize))) {
+        err = true;
     }
     }
 
@@ -510,7 +510,7 @@ static  int create_sound_device(int stereo)
         if (whdr[i].lpData) { free(whdr[i].lpData); }
     }
     waveOutClose(hWaveOut);
-    return FALSE;
+    return false;
     }
 
 
@@ -530,15 +530,15 @@ static  int create_sound_device(int stereo)
     }
     }
 
-    return TRUE;
+    return true;
 }
 
-static  void    destroy_sound_device(void)
+static  void    destroy_sound_device()
 {
     int i;
 
     for (i=0; i<BUFFER_NUM; i++) {
-    whdr[i].dwUser = TRUE;          /* TRUE = Stopped, Never Write */
+    whdr[i].dwUser = true;          /* true = Stopped, Never Write */
     }
     waveOutReset(hWaveOut);
     /* BUFFER_NUM 回、 MM_WOM_DONE / WOM_DONE が発生する */
@@ -557,7 +557,7 @@ static  void    destroy_sound_device(void)
     free(sample.data);
     }
     memset(&sample, 0, sizeof(sample));
-    sample.data = NULL;
+    sample.data = nullptr;
 }
 
 /*
@@ -605,8 +605,6 @@ static  void    write_sound_device(unsigned char *data, int count)
     sample.sound_w_pos += sample.amountWrite;
     }
     /* Unlock */
-        
-    return;
 }
 
 /*
@@ -655,10 +653,10 @@ void    wave_event_open(HWAVEOUT hwo)
  */
 void    wave_event_done(HWAVEOUT hwo, LPWAVEHDR lpwhdr)
 {
-    if (lpwhdr->dwUser) {           /* TRUE = Stopped, Never Write */
+    if (lpwhdr->dwUser) {           /* true = Stopped, Never Write */
     /* printf("S:break\n"); */
     /* DO NOTHING */
-    } else {                    /* FALSE = Started, Need to Write*/
+    } else {                    /* false = Started, Need to Write*/
 
     int result;
     unsigned char *dst = (unsigned char *) (lpwhdr->lpData);

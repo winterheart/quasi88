@@ -7,12 +7,10 @@
 #include <cstdio>
 #include <cstdlib>
 
-extern "C"
-{
-    #include "quasi88.h"
-    #include "graph.h"
-    #include "device.h"
-}
+#include "quasi88.h"
+
+#include "device.h"
+#include "graph.h"
 
 #include "retroachievements.h"
 
@@ -38,7 +36,7 @@ static  T_GRAPH_INFO    graph_info_windowed; /* ウィンドウモード時の�
  *  グラフィック処理の終了
  ************************************************************************/
 
-const T_GRAPH_SPEC  *graph_init(void)
+const T_GRAPH_SPEC  *graph_init()
 {
     if (verbose_proc) {
     printf("Initializing Graphic System ... ");
@@ -68,7 +66,7 @@ static DWORD winStyle;
 static int create_window(int width, int height);
 static void calc_window_size(int *width, int *height);
 
-static unsigned char *buffer = NULL;
+static unsigned char *buffer = nullptr;
 static BITMAPINFO bmpInfo;
 
 const T_GRAPH_INFO  *graph_setup(int width, int height,
@@ -100,8 +98,8 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
     }
 
     buffer = (unsigned char *)malloc(width * height * sizeof(unsigned long));
-    if (buffer == FALSE) {
-    return NULL;
+    if (!buffer) {
+    return nullptr;
     }
 
     memset(&bmpInfo, 0, sizeof(bmpInfo));
@@ -116,12 +114,12 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
 
     /* ウインドウの生成、ないしリサイズ */
 
-    if (graph_exist == FALSE) {     /* ウインドウが無ければ生成 */
+    if (!graph_exist) {     /* ウインドウが無ければ生成 */
 
-    if (create_window(scaled_width, scaled_height) == FALSE) {
+    if (!create_window(scaled_width, scaled_height)) {
         free(buffer);
-        buffer = NULL;
-        return NULL;
+        buffer = nullptr;
+        return nullptr;
     }
 
     }
@@ -145,8 +143,8 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
             
         if (!GetMonitorInfo(MonitorFromWindow(g_hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
             free(buffer);
-            buffer = NULL;
-            return NULL;
+            buffer = nullptr;
+            return nullptr;
         }
 
         win_width = mi.rcMonitor.right - mi.rcMonitor.left;
@@ -202,13 +200,13 @@ const T_GRAPH_INFO  *graph_setup(int width, int height,
     graph_info.byte_per_line    = width * 4;
     graph_info.buffer           = buffer;
     graph_info.nr_color         = 255;
-    graph_info.write_only       = FALSE;
-    graph_info.broken_mouse     = FALSE;
-    graph_info.draw_start       = NULL;
-    graph_info.draw_finish      = NULL;
-    graph_info.dont_frameskip   = FALSE;
+    graph_info.write_only       = false;
+    graph_info.broken_mouse     = false;
+    graph_info.draw_start       = nullptr;
+    graph_info.draw_finish      = nullptr;
+    graph_info.dont_frameskip   = false;
 
-    graph_exist = TRUE;
+    graph_exist = true;
 
     return &graph_info;
 }
@@ -230,13 +228,13 @@ static int create_window(int width, int height)
     wc.cbClsExtra = 0;              /* 拡張情報 */
     wc.cbWndExtra = 0;              /* 拡張情報 */
     wc.hInstance = g_hInstance;         /* インスタンスハンドル */
-    wc.hIcon = NULL;                /* アイコン */
+    wc.hIcon = nullptr;                /* アイコン */
 /*
     wc.hIcon = (HICON)LoadImage(NULL, MAKEINTRESOURCE(IDI_APPLICATION),
                 IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
 */
     wc.hIconSm = wc.hIcon;          /* 小さいアイコン */
-    wc.hCursor = NULL;              /* マウスカーソル */
+    wc.hCursor = nullptr;              /* マウスカーソル */
 /*
     wc.hCursor = (HCURSOR)LoadImage(NULL, MAKEINTRESOURCE(IDC_ARROW),
                     IMAGE_CURSOR, 0, 0,
@@ -249,7 +247,7 @@ static int create_window(int width, int height)
     wc.lpszClassName = "Win32App";      /* ウィンドウクラス名 適当 */
 
     /* ウィンドウクラスを登録する */
-    if (RegisterClassEx(&wc) == 0) { return FALSE; }
+    if (RegisterClassEx(&wc) == 0) { return false; }
 
     /* ウィンドウスタイルはこれ */
     winStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
@@ -268,12 +266,12 @@ static int create_window(int width, int height)
                 CW_USEDEFAULT,  /* ウィンドウのy座標      */
                 win_width,      /* ウィンドウの幅      */
                 win_height,     /* ウィンドウの高さ   */
-                NULL,       /* 親ウィンドウのハンドル */
-                NULL,       /* メニューハンドル   */
+                nullptr,       /* 親ウィンドウのハンドル */
+                nullptr,       /* メニューハンドル   */
                 g_hInstance,    /* インスタンスハンドル     */
-                NULL);      /* 付加情報       */
+                nullptr);      /* 付加情報       */
 
-    if (g_hWnd == NULL) { return FALSE; }
+    if (g_hWnd == nullptr) { return false; }
 
     /* ウィンドウを表示する */
     ShowWindow(g_hWnd, SW_SHOW);
@@ -285,7 +283,7 @@ static int create_window(int width, int height)
     /* Drag & Drop の許可 */
 #if 0
     /* ウインドウの作成時に、 WS_EX_ACCEPTFILES をつけているので、これは不要 */
-    DragAcceptFiles(g_hWnd, TRUE);
+    DragAcceptFiles(g_hWnd, true);
 #endif
 
 
@@ -299,7 +297,7 @@ static int create_window(int width, int height)
     ReleaseDC(g_hWnd, hdc);
     }
 #endif
-    return TRUE;
+    return true;
 }
 
 
@@ -316,7 +314,7 @@ static void calc_window_size(int *width, int *height)
 
     AdjustWindowRectEx(&rect,           /* クライアント矩形       */
                winStyle,        /* ウィンドウスタイル     */
-               TRUE,            /* メニューフラグ         */
+               true,            /* メニューフラグ         */
                0);          /* 拡張ウィンドウスタイル */
 
     *width  = rect.right - rect.left;       /* 本当のウィンドウの幅   */
@@ -327,7 +325,7 @@ static void calc_window_size(int *width, int *height)
 
 /************************************************************************/
 
-void    graph_exit(void)
+void    graph_exit()
 {
     if (buffer) {
     free(buffer);
@@ -366,7 +364,7 @@ void    graph_remove_color(int nr_pixel, unsigned long pixel[])
 
 static  int graph_update_counter = 0;
 
-int graph_update_WM_PAINT(void)
+int graph_update_WM_PAINT()
 {
     int drawn;
     HDC hdc;
@@ -409,9 +407,9 @@ int graph_update_WM_PAINT(void)
               buffer, &bmpInfo, DIB_RGB_COLORS);
 #endif
     graph_update_counter = 0;
-    drawn = TRUE;
+    drawn = true;
     } else {
-    drawn = FALSE;
+    drawn = false;
     }
 
 #if USE_RETROACHIEVEMENTS
@@ -441,7 +439,7 @@ void    graph_update(int nr_rect, T_GRAPH_RECT rect[])
 {
     graph_update_counter = 1;
 
-    InvalidateRect(g_hWnd, NULL, FALSE);
+    InvalidateRect(g_hWnd, nullptr, false);
     UpdateWindow(g_hWnd);
 
     /* ここで、直接ウインドウ描画をしようとしたのだが、なんかうまくいかない。
@@ -474,6 +472,6 @@ void    graph_set_attribute(int mouse_show, int grab, int keyrepeat_on)
 {
     g_keyrepeat = keyrepeat_on;
 
-    if (mouse_show) ShowCursor(TRUE);
-    else            ShowCursor(FALSE);
+    if (mouse_show) ShowCursor(true);
+    else            ShowCursor(false);
 }

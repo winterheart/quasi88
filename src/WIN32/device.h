@@ -1,7 +1,7 @@
 #ifndef DEVICE_H_INCLUDED
 #define DEVICE_H_INCLUDED
 
-
+#define NOMINMAX
 #include <windows.h>
 #include <stdio.h>
 

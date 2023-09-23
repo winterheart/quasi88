@@ -3,12 +3,10 @@
  *
  *  詳細は、 wait.h 参照
  ************************************************************************/
+#define NOMINMAX
 #include <windows.h>
 #include <mmsystem.h>
 
-#include "quasi88.h"
-#include "device.h"
-#include "initval.h"
 #include "wait.h"
 
 
@@ -65,13 +63,13 @@ static  T_WAIT_TICK delta_time;     /* 1 フレームの時間 */
 /****************************************************************************
  * ウェイト調整処理の初期化／終了
  *****************************************************************************/
-int wait_vsync_init(void)
+int wait_vsync_init()
 {
     START_APP_PRECISION();
-    return TRUE;
+    return true;
 }
 
-void    wait_vsync_exit(void)
+void    wait_vsync_exit()
 {
     STOP_APP_PRECISION();
 }
@@ -102,9 +100,9 @@ void    wait_vsync_setup(long vsync_cycle_us, int do_sleep)
 /****************************************************************************
  * ウェイト調整処理の実行
  *****************************************************************************/
-int wait_vsync_update(void)
+int wait_vsync_update()
 {
-    int on_time = FALSE;
+    int on_time = false;
     T_WAIT_TICK diff_ms;
 
 
@@ -125,7 +123,7 @@ int wait_vsync_update(void)
         ;               /* ビジーウェイト */
     }
 
-    on_time = TRUE;
+    on_time = true;
     }
 
     END_PRECISION();        /* △精度を戻す */

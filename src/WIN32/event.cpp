@@ -12,7 +12,7 @@
 
 
 
-static  int now_charcode = FALSE;
+static  int now_charcode = false;
 
 
 /* 仮想キーと、KEY88 の対応 */
@@ -336,7 +336,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
     return 0;
 
     case WM_PAINT:      /* 描画すべきタイミングで送られてくる */
-    if (graph_update_WM_PAINT() == FALSE) {
+    if (!graph_update_WM_PAINT()) {
 /*
         fprintf(debugfp, "Expose\n");
 */
@@ -364,8 +364,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         msg == WM_LBUTTONUP)    { key88 = KEY88_MOUSE_L; }
     else                        { key88 = KEY88_MOUSE_R; }
     if (msg == WM_LBUTTONDOWN ||
-        msg == WM_RBUTTONDOWN) { on = TRUE;   SetCapture(hWnd); }
-    else                       { on = FALSE;  ReleaseCapture(); }
+        msg == WM_RBUTTONDOWN) { on = true;   SetCapture(hWnd); }
+    else                       { on = false;  ReleaseCapture(); }
 /*
     fprintf(debugfp, "%c:%s %d %d\n", (key88 == KEY88_MOUSE_L) ? 'L' : 'R',
         (on ? "On " : "Off"), LOWORD(lp), HIWORD(lp));
@@ -420,12 +420,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         }
     }
 
-    if (msg == WM_KEYUP || msg == WM_SYSKEYUP) { on = FALSE; }
-    else                                       { on = TRUE;  }
+    if (msg == WM_KEYUP || msg == WM_SYSKEYUP) { on = false; }
+    else                                       { on = true;  }
     
 
     /* bit30 は、直前の押下 (つまり連続押下)を表す ↓*/
-    if (on && (g_keyrepeat == FALSE) && (lp & 0x40000000UL)) {
+    if (on && (!g_keyrepeat) && (lp & 0x40000000UL)) {
         /* キーリピートの場合は、条件により無視 */
         return 0;
     }
@@ -436,7 +436,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
     } else {
         /* bit24 は拡張キーフラグ。右Alt、右Ctrl、
             ↓      テンキー以外の方向キー押下時は 1 */
-        if (((lp & (1UL<<24)) == 0) && (now_charcode == FALSE)) {
+        if (((lp & (1UL<<24)) == 0) && (!now_charcode)) {
         /* NumLock なしでテンキー押下なら、キーを読み替える */
         if      (wp == VK_INSERT) wp = VK_NUMPAD0;
         else if (wp == VK_DELETE) wp = VK_DECIMAL;
@@ -456,8 +456,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         /* 最下位ビットはトグル状態を表す ↓ */
         int toggle = GetKeyState(wp) & 0x01;
 
-        if ((on && toggle) ||
-            (on == FALSE && toggle == FALSE)) {
+        if ((on && toggle) || (!on && !toggle)) {
             /* キー押下とトグル状態が一致してればOK */
         } else {
             /* 一致してなければ、キーを無視する */
@@ -524,7 +523,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         DragQueryFile(hDrop, 0, filename, sizeof(filename));
 
         if (quasi88_drag_and_drop(filename)) {
-            menubar_setup(TRUE); /* メニューバーを全て更新 */
+            menubar_setup(true); /* メニューバーを全て更新 */
         }
         }
 
@@ -630,7 +629,7 @@ void    event_update(void)
         /* DO NOTHING */
         } else
         {
-        if (TranslateAccelerator(GetWndHandle(), m_haccel, &msg) == FALSE) {
+        if (!TranslateAccelerator(GetWndHandle(), m_haccel, &msg)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
@@ -705,7 +704,7 @@ int event_numlock_on (void)
     keysym2key88[ 0xbe ]/* . */ = KEY88_KP_PERIOD;
     keysym2key88[ 0xbf ]/* / */ = KEY88_RETURNR;
 
-    return TRUE;
+    return true;
 }
 void    event_numlock_off(void)
 {
@@ -725,15 +724,15 @@ void    event_switch(void)
 {
     if (quasi88_is_exec()) {        /* エミュモードなら */
 
-    now_charcode = FALSE;           /* WM_CHAR イベント無視 */
+    now_charcode = false;           /* WM_CHAR イベント無視 */
 
-    menubar_setup(TRUE);            /* メニューバー有効 */
+    menubar_setup(true);            /* メニューバー有効 */
 
     } else {                /* メニューモードなどなら */
 
-    now_charcode = TRUE;            /* WM_CHAR イベント処理 */
+    now_charcode = true;            /* WM_CHAR イベント処理 */
 
-    menubar_setup(FALSE);           /* メニューバー無効 */
+    menubar_setup(false);           /* メニューバー無効 */
     }
 }
 
@@ -1088,13 +1087,13 @@ static const char *vk_list[256] =
 static void key_event_debug(UINT msg, WPARAM wp, LPARAM lp)
 {
 
-    int on = FALSE;
+    int on = false;
     const char *s;
 
     switch (msg) {
     case WM_SYSKEYDOWN:     /* Alt / F10 オン */
     s = "Sys*On ";
-    on = TRUE;
+    on = true;
     goto KEY_COMMON;
 
     case WM_SYSKEYUP:       /*           オフ */
@@ -1103,7 +1102,7 @@ static void key_event_debug(UINT msg, WPARAM wp, LPARAM lp)
 
     case WM_KEYDOWN:        /* その他キーオン */ 
     s = "KEY On ";
-    on = TRUE;
+    on = true;
     goto KEY_COMMON;
 
     case WM_KEYUP:      /*           オフ */
