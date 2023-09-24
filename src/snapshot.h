@@ -1,7 +1,7 @@
 #ifndef SNAPSHOT_H_INCLUDED
 #define SNAPSHOT_H_INCLUDED
 
-enum { SNAPSHOT_FMT_BMP, SNAPSHOT_FMT_PPM, SNAPSHOT_FMT_RAW };
+enum { SNAPSHOT_FMT_BMP, SNAPSHOT_FMT_PPM, SNAPSHOT_FMT_RAW, SNAPSHOT_FMT_PNG };
 extern int snapshot_format; /* スナップショットフォーマット   */
 
 /* スナップショットコマンド */

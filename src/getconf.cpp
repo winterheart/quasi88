@@ -506,6 +506,7 @@ static const T_CONFIG_TABLE option_table[] = {
     {164, "bmp", X_FIX, &snapshot_format, SNAPSHOT_FMT_BMP, 0, nullptr, OPT_SAVE},
     {164, "ppm", X_FIX, &snapshot_format, SNAPSHOT_FMT_PPM, 0, nullptr, OPT_SAVE},
     {164, "raw", X_FIX, &snapshot_format, SNAPSHOT_FMT_RAW, 0, nullptr, OPT_SAVE},
+    {164, "png", X_FIX, &snapshot_format, SNAPSHOT_FMT_PNG, 0, nullptr, OPT_SAVE},
     {165, "swapdrv", X_FIX, &menu_swapdrv, true, 0, nullptr, OPT_SAVE},
     {165, "noswapdrv", X_FIX, &menu_swapdrv, false, 0, nullptr, OPT_SAVE},
     {166, "menucursor", X_FIX, &use_swcursor, true, 0, nullptr, nullptr},
