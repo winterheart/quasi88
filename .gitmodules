@@ -1,4 +1,7 @@
 [submodule "dependencies/RAIntegration"]
-    path = dependencies/RAIntegration
-    url = https://github.com/RetroAchievements/RAIntegration.git
-    tag = RAIntegration.0.76.3
+	path = dependencies/RAIntegration
+	url = https://github.com/RetroAchievements/RAIntegration.git
+	tag = RAIntegration.0.76.3
+[submodule "dependencies/lodepng"]
+	path = dependencies/lodepng
+	url = https://github.com/lvandeve/lodepng.git
