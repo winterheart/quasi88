@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. An old vers
 this file can be found in `document/HISTORY.TXT` file.
 
 ## 0.8.0 - Unreleased
+* Added PNG snapshot support (via lodepng code).
 * Removed GTK2 support.
 * Removed old MINI support.
 * Removed X11 support.

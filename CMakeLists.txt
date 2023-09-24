@@ -89,11 +89,13 @@ endif()
 #### Common sources
 
 include_directories(
+	dependencies/lodepng
 	src
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
 set(COMMON_SOURCES
+	dependencies/lodepng/lodepng.cpp
 	src/basic.cpp
 	src/crtcdmac.cpp
 	src/debug.cpp

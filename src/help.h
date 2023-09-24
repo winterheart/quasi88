@@ -96,7 +96,7 @@ static  void    help_msg_common(void)
    "    -menu                   start in menu mode\n"
    "    -japanese/-english      Menu mode language is Japanese/English\n"
    "    -euc/-sjis/-utf8        filename decoding is EUC-japan/Shift JIS/UTF-8\n"
-   "    -bmp/-ppm/-raw          Screen snapshot file format [-bmp]\n"
+   "    -bmp/-ppm/-raw/-png     Screen snapshot file format [-bmp]\n"
    "    -swapdrv                Change display position of Menu-Disk-Tab\n"
    "    -menucursor             Display mouse cursor in menu mode\n"
    "  ** MISC **\n"

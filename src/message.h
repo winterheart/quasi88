@@ -938,16 +938,17 @@ enum {
 static const t_menulabel data_misc_snapshot[] = {
     {{" Format   ", " 画像形式   "}},
     {{" Change ", " ベース名変更 "}},
-    {{"                    ", "            "}},
+    {{"            ", "    "}},
     {{" SAVE ", " 保存 "}},
     {{" Input (Select) a screen-snapshot base-filename. ", " 保存するファイル (ベース名) を入力して下さい "}},
     {{"Exec following Command", "次のコマンドを実行する"}},
 };
 
 static const t_menudata data_misc_snapshot_format[] = {
-    {{" BMP ", " BMP "}, 0},
-    {{" PPM ", " PPM "}, 1},
-    {{" RAW ", " RAW "}, 2},
+    {{" BMP ", " BMP "}, SNAPSHOT_FMT_BMP},
+    {{" PPM ", " PPM "}, SNAPSHOT_FMT_PPM},
+    {{" RAW ", " RAW "}, SNAPSHOT_FMT_RAW},
+    {{" PNG ", " PNG "}, SNAPSHOT_FMT_PNG},
 };
 
 enum {

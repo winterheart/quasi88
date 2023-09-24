@@ -4,6 +4,9 @@
 /*                                  */
 /************************************************************************/
 
+#include <algorithm>
+#include <vector>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -13,6 +16,7 @@
 
 #include "crtcdmac.h"
 #include "file-op.h"
+#include "lodepng.h"
 #include "screen.h"
 #include "screen-func.h"
 #include "snapshot.h"
@@ -128,8 +132,20 @@ static void make_snapshot() {
   pal[16].blue = 0;
 }
 
+/* Create raw image from palette screen */
+static std::vector<unsigned char> make_raw_image() {
+  std::vector<unsigned char> raw;
+  raw.reserve(640 * 400 * 3);
+  for (auto i : screen_snapshot) {
+    raw.push_back(pal[i].red);
+    raw.push_back(pal[i].green);
+    raw.push_back(pal[i].blue);
+  }
+  return raw;
+}
+
 /* Output the captured content to a file in bmp format (win) */
-static bool save_snapshot_bmp(OSD_FILE *fp) {
+static bool save_snapshot_bmp(OSD_FILE *fp, std::vector<uint8_t> raw) {
   static const unsigned char header[] = {
       /* Header */
       'B', 'M',               /* BM */
@@ -155,18 +171,15 @@ static bool save_snapshot_bmp(OSD_FILE *fp) {
     return false;
   }
 
-  unsigned char buf[4];
-  char *p;
-  for (int y = 0; y < 400; y++) {
-    p = screen_snapshot + (399 - y) * 640;
-    for (int x = 0; x < 640; x++) {
-      buf[0] = pal[(int)*p].blue;
-      buf[1] = pal[(int)*p].green;
-      buf[2] = pal[(int)*p].red;
-      if (osd_fwrite(buf, sizeof(char), 3, fp) < 3) {
-        return false;
-      }
-      p++;
+  const int length = 3 * 640;
+
+  // BMP creators, shame on you
+  for (int y = 400; y > 0; y--) {
+    auto first = raw.begin() + length * (y - 1);
+    auto last = raw.end() + length * y;
+    std::vector<uint8_t> line(first, last);
+    if (osd_fwrite(reinterpret_cast<char *>(line.data()), sizeof(char), length, fp) < length) {
+      return false;
     }
   }
 
@@ -174,9 +187,8 @@ static bool save_snapshot_bmp(OSD_FILE *fp) {
 }
 
 /* Output the captured content to a file in ppm format (raw) */
-static bool save_snapshot_ppm(OSD_FILE *fp) {
+static bool save_snapshot_ppm(OSD_FILE *fp, std::vector<uint8_t> raw) {
   unsigned char buf[32];
-  char *p = screen_snapshot;
 
   strcpy((char *)buf, "P6\n"
                       "# QUASI88kai\n"
@@ -186,37 +198,30 @@ static bool save_snapshot_ppm(OSD_FILE *fp) {
   if (osd_fwrite(buf, sizeof(char), size_write, fp) < size_write) {
     return false;
   }
-
-  for (int y = 0; y < 400; y++) {
-    for (int x = 0; x < 640; x++) {
-      buf[0] = pal[(int)*p].red;
-      buf[1] = pal[(int)*p].green;
-      buf[2] = pal[(int)*p].blue;
-      if (osd_fwrite(buf, sizeof(char), 3, fp) < 3) {
-        return false;
-      }
-      p++;
-    }
+  if (osd_fwrite(reinterpret_cast<char *>(raw.data()), sizeof(char), raw.size(), fp) < raw.size()) {
+    return false;
   }
 
   return true;
 }
 
 /* Output the captured content to a file in raw format */
-static bool save_snapshot_raw(OSD_FILE *fp) {
-  unsigned char buf[4];
-  char *p = screen_snapshot;
+static bool save_snapshot_raw(OSD_FILE *fp, std::vector<uint8_t> raw) {
+  if (osd_fwrite(reinterpret_cast<char *>(raw.data()), sizeof(char), raw.size(), fp) < raw.size()) {
+    return false;
+  }
 
-  for (int y = 0; y < 400; y++) {
-    for (int x = 0; x < 640; x++) {
-      buf[0] = pal[(int)*p].red;
-      buf[1] = pal[(int)*p].green;
-      buf[2] = pal[(int)*p].blue;
-      if (osd_fwrite(buf, sizeof(char), 3, fp) < 3) {
-        return false;
-      }
-      p++;
-    }
+  return true;
+}
+
+static bool save_snapshot_png(OSD_FILE *fp, std::vector<uint8_t> raw) {
+  unsigned char *buf;
+  size_t length;
+  if (lodepng_encode24(&buf, &length, reinterpret_cast<unsigned char *>(raw.data()), 640, 400)) {
+    return false;
+  }
+  if (osd_fwrite(buf, sizeof(char), length, fp) < length) {
+    return false;
   }
 
   return true;
@@ -305,6 +310,7 @@ int screen_snapshot_save() {
       ".bmp",
       ".ppm",
       ".raw",
+      ".png",
   };
 
   OSD_FILE *fp;
@@ -354,16 +360,20 @@ int screen_snapshot_save() {
     if ((fp = osd_fopen(FTYPE_SNAPSHOT_PPM, filename, "wb"))) {
 
       make_snapshot();
+      std::vector<uint8_t> raw = make_raw_image();
 
       switch (snapshot_format) {
       case SNAPSHOT_FMT_BMP:
-        success = save_snapshot_bmp(fp);
+        success = save_snapshot_bmp(fp, raw);
         break;
       case SNAPSHOT_FMT_PPM:
-        success = save_snapshot_ppm(fp);
+        success = save_snapshot_ppm(fp, raw);
         break;
       case SNAPSHOT_FMT_RAW:
-        success = save_snapshot_raw(fp);
+        success = save_snapshot_raw(fp, raw);
+        break;
+      case SNAPSHOT_FMT_PNG:
+        success = save_snapshot_png(fp, raw);
         break;
       default:
         success = false;

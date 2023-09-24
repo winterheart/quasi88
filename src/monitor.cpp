@@ -993,10 +993,11 @@ enum ArgvName {
 
   ARG_BINARY,
   ARG_ASCII, /* savebas <type> */
-
+  /* snapshot <fmt> */
   ARG_BMP,
   ARG_PPM,
-  ARG_RAW, /* snapshot <fmt> */
+  ARG_RAW,
+  ARG_PNG,
 
   EndofArgName
 };
@@ -1099,6 +1100,7 @@ static struct {
     {"BMP", ARGV_SNAPSHOT, ARG_BMP}, /*snapshot*/
     {"PPM", ARGV_SNAPSHOT, ARG_PPM},
     {"RAW", ARGV_SNAPSHOT, ARG_RAW},
+    {"PNG", ARGV_SNAPSHOT, ARG_PNG},
 };
 
 enum SetType {
@@ -4510,13 +4512,16 @@ static void monitor_snapshot() {
 
   switch (format) {
   case ARG_BMP:
-    snapshot_format = 0;
+    snapshot_format = SNAPSHOT_FMT_BMP;
     break;
   case ARG_PPM:
-    snapshot_format = 1;
+    snapshot_format = SNAPSHOT_FMT_PPM;
     break;
   case ARG_RAW:
-    snapshot_format = 2;
+    snapshot_format = SNAPSHOT_FMT_RAW;
+    break;
+  case ARG_PNG:
+    snapshot_format = SNAPSHOT_FMT_PNG;
     break;
   }
 
