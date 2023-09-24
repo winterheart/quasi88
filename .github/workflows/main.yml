@@ -21,6 +21,8 @@ jobs:
           - { os: windows-latest, cc: "cl", cxx: "cl", opts: "-DCMAKE_TOOLCHAIN_FILE='vcpkg/scripts/buildsystems/vcpkg.cmake' -DENABLE_WIN=ON -DENABLE_SDL=ON -DENABLE_MONITOR=OFF -DENABLE_JOYSTICK=SDL" }
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Install dependencies (ubuntu)
         if: matrix.config.os == 'ubuntu-latest'
         run: |
