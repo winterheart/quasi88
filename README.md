@@ -42,7 +42,11 @@ belongs to its corresponding authors. Please refer to license/MAME.TXT for licen
 The sound processing portion of QUASI88kai also uses source code from the FM audio generator "fmgen". The copyright to
 this source code belongs to cisc. Please refer to license/FMGEN.TXT (in Japanese) for licensing information.
 
+The screenshot processing portion of QUASI88kai also uses source code from
+[lodepng project](https://github.com/lvandeve/lodepng). Please refer to dependencies/lodepng/LICENSE for licensing
+information.
+
 ### Authors
 
 - (c) 1998-2019 S.Fukunaga, R.Zumer
-- (c) 2019-2022 Azamat H. Hackimov
+- (c) 2019-2023 Azamat H. Hackimov

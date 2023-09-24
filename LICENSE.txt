@@ -1,6 +1,7 @@
 BSD 3-Clause License
 
 Copyright (c) 1998-2018, Showzoh Fukunaga, Raphaël Zumer
+Copyright (c) 2019-2023, Azamat H. Hackimov
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
