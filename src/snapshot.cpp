@@ -18,11 +18,11 @@
 #include "snapshot.h"
 #include "snddrv.h"
 
-char file_snap[QUASI88_MAX_FILENAME]; /* スナップショットベース部 */
-int snapshot_format = 0;              /* スナップショットフォーマット   */
+char file_snap[QUASI88_MAX_FILENAME];   /* スナップショットベース部 */
+int snapshot_format = SNAPSHOT_FMT_BMP; /* スナップショットフォーマット   */
 
-char snapshot_cmd[SNAPSHOT_CMD_SIZE]; /* スナップショット後コマンド    */
-char snapshot_cmd_do = false;         /* コマンド実行の有無      */
+char snapshot_cmd[SNAPSHOT_CMD_SIZE];   /* スナップショット後コマンド    */
+char snapshot_cmd_do = false;           /* コマンド実行の有無      */
 
 #ifdef USE_SSS_CMD
 char snapshot_cmd_enable = true; /* コマンド実行の可否      */
@@ -35,10 +35,8 @@ char snapshot_cmd_enable = false; /* コマンド実行の可否      */
 char screen_snapshot[640 * 400];
 static PC88_PALETTE_T pal[16 + 1];
 
-/***********************************************************************
- * スナップショットファイル名などを初期化
- ************************************************************************/
-void screen_snapshot_init(void) {
+/* Initialize snapshot file name etc. */
+void screen_snapshot_init() {
   const char *s;
 
   if (file_snap[0] == '\0') {
@@ -57,12 +55,9 @@ void screen_snapshot_init(void) {
     filename_init_wav(false);
   }
 }
-void screen_snapshot_exit(void) { waveout_save_stop(); }
+void screen_snapshot_exit() { waveout_save_stop(); }
 
-/*----------------------------------------------------------------------*/
-/* 画面イメージを生成する                        */
-/*----------------------------------------------------------------------*/
-
+/* Generate screen image */
 typedef int (*SNAPSHOT_FUNC)();
 
 static void make_snapshot() {
@@ -104,16 +99,20 @@ static void make_snapshot() {
   }
 
   if (grph_ctrl & GRPH_CTRL_VDISP) {
-    if (grph_ctrl & GRPH_CTRL_COLOR) { /* カラー */
+    if (grph_ctrl & GRPH_CTRL_COLOR) {
+      /* Color */
       vram_mode = V_COLOR;
     } else {
-      if (grph_ctrl & GRPH_CTRL_200) { /* 白黒 */
+      if (grph_ctrl & GRPH_CTRL_200) {
+        /* Black and white */
         vram_mode = V_MONO;
-      } else { /* 400ライン */
+      } else {
+        /* 400 lines */
         vram_mode = V_HIRESO;
       }
     }
-  } else { /* 非表示 */
+  } else {
+    /* 非表示 */
     vram_mode = V_UNDISP;
   }
 
@@ -123,196 +122,104 @@ static void make_snapshot() {
 
   screen_get_emu_palette(pal);
 
-  pal[16].red = 0; /* pal[16] は黒固定で使用する */
+  /* pal[16] is used fixed to black */
+  pal[16].red = 0;
   pal[16].green = 0;
   pal[16].blue = 0;
 }
 
-#if 0 /* XPM はサポート対象外 */
-/*----------------------------------------------------------------------*/
-/* キャプチャした内容を、xpm 形式でファイルに出力          */
-/*----------------------------------------------------------------------*/
-static int  save_snapshot_xpm( OSD_FILE *fp )
-{
-  unsigned char buf[80];
-  int i, j, c;
-  char *p = screen_snapshot;
+/* Output the captured content to a file in bmp format (win) */
+static bool save_snapshot_bmp(OSD_FILE *fp) {
+  static const unsigned char header[] = {
+      /* Header */
+      'B', 'M',               /* BM */
+      0x36, 0xb8, 0x0b, 0x00, /* File size (0xbb836 / 768054) */
+      0x00, 0x00, 0x00, 0x00, /* Reserved */
+      0x36, 0x00, 0x00, 0x00, /* Image data offset (0x36) */
+      /* InfoHeader */
+      0x28, 0x00, 0x00, 0x00, /* Information size (0x28) */
+      0x80, 0x02, 0x00, 0x00, /* Horizontal width of bitmap in pixels (0x280 / 640) */
+      0x90, 0x01, 0x00, 0x00, /* Vertical height of bitmap in pixels (0x190 / 400) */
+      0x01, 0x00,             /* Number of Planes */
+      0x18, 0x00,             /* Bits per Pixel (0x18 / 24 - 24bit RGB) */
+      0x00, 0x00, 0x00, 0x00, /* Compression (0 -  BI_RGB, no compression) */
+      0x00, 0x00, 0x00, 0x00, /* (compressed) Size of Image */
+      0x00, 0x00, 0x00, 0x00, /* Horizontal resolution: Pixels/meter */
+      0x00, 0x00, 0x00, 0x00, /* Vertical resolution: Pixels/meter */
+      0x00, 0x00, 0x00, 0x00, /* Number of actually used colors */
+      0x00, 0x00, 0x00, 0x00, /* Number of important colors */
+  };
 
-  if( fp==NULL ) return 0;
-
-  sprintf( buf,
-       "/* XPM */\n"
-       "static char * quasi88_xpm[] = {\n"
-       "\"640 400 16 1\",\n" );
-  osd_fwrite( buf, sizeof(char), strlen(buf), fp );
-
-  for( i=0; i<16; i++ ){
-    sprintf( buf, "\"%1X      c #%04X%04X%04X\",\n",
-         i,
-         (unsigned short)pal[i].red   << 8,
-         (unsigned short)pal[i].green << 8,
-         (unsigned short)pal[i].blue  << 8 );
-    osd_fwrite( buf, sizeof(char), strlen(buf), fp );
+  size_t size_write = sizeof(header);
+  if (osd_fwrite(header, sizeof(char), size_write, fp) < size_write) {
+    return false;
   }
 
-
-  for( i=0; i<400; i++ ){
-
-    osd_fputc( '\"', fp );
-
-    for( j=0; j<640; j++ ){
-      c = *p++;
-      if( c < 10 ) c += '0';
-      else         c += 'A' - 10;
-      osd_fputc( c, fp );
+  unsigned char buf[4];
+  char *p;
+  for (int y = 0; y < 400; y++) {
+    p = screen_snapshot + (399 - y) * 640;
+    for (int x = 0; x < 640; x++) {
+      buf[0] = pal[(int)*p].blue;
+      buf[1] = pal[(int)*p].green;
+      buf[2] = pal[(int)*p].red;
+      if (osd_fwrite(buf, sizeof(char), 3, fp) < 3) {
+        return false;
+      }
+      p++;
     }
-
-    sprintf( buf, "\",\n" );
-    osd_fwrite( buf, sizeof(char), strlen(buf), fp );
-
   }
 
-  sprintf( buf, "};\n" );
-  osd_fwrite( buf, sizeof(char), strlen(buf), fp );
-
-  return 1;
+  return true;
 }
-#endif
 
-/*----------------------------------------------------------------------*/
-/* キャプチャした内容を、ppm 形式(raw)でファイルに出力         */
-/*----------------------------------------------------------------------*/
-static int save_snapshot_ppm(OSD_FILE *fp) {
+/* Output the captured content to a file in ppm format (raw) */
+static bool save_snapshot_ppm(OSD_FILE *fp) {
   unsigned char buf[32];
-  int i, j;
   char *p = screen_snapshot;
-
-  if (fp == nullptr)
-    return 0;
 
   strcpy((char *)buf, "P6\n"
                       "# QUASI88kai\n"
                       "640 400\n"
                       "255\n");
-  osd_fwrite(buf, sizeof(char), strlen((char *)buf), fp);
+  size_t size_write = strlen((char *)buf);
+  if (osd_fwrite(buf, sizeof(char), size_write, fp) < size_write) {
+    return false;
+  }
 
-  for (i = 0; i < 400; i++) {
-    for (j = 0; j < 640; j++) {
+  for (int y = 0; y < 400; y++) {
+    for (int x = 0; x < 640; x++) {
       buf[0] = pal[(int)*p].red;
       buf[1] = pal[(int)*p].green;
       buf[2] = pal[(int)*p].blue;
-      osd_fwrite(buf, sizeof(char), 3, fp);
-      p++;
-    }
-  }
-
-  return 1;
-}
-
-#if 0 /* PPM(ascii)  はサポート対象外 */
-/*----------------------------------------------------------------------*/
-/* キャプチャした内容を、ppm 形式(ascii)でファイルに出力       */
-/*----------------------------------------------------------------------*/
-static int  save_snapshot_ppm_ascii( OSD_FILE *fp )
-{
-  unsigned char buf[32];
-  int i, j, k;
-  char *p = screen_snapshot;
-
-  if( fp==NULL ) return 0;
-
-  strcpy( buf, 
-      "P3\n"
-      "# QUASI88kai\n"
-      "640 400\n"
-      "255\n" );
-  osd_fwrite( buf, sizeof(char), strlen(buf), fp );
-
-  
-  for( i=0; i<400; i++ ){
-    for( j=0; j<640; j+=5 ){
-      for( k=0; k<5; k++ ){
-    sprintf( buf, "%3d %3d %3d ",
-         pal[ (int)*p ].red,
-         pal[ (int)*p ].green,
-         pal[ (int)*p ].blue );
-    osd_fwrite( buf, sizeof(char), strlen(buf), fp );
-    p++;
+      if (osd_fwrite(buf, sizeof(char), 3, fp) < 3) {
+        return false;
       }
-      osd_fputc( '\n', fp );
-    }
-
-  }
-
-  return 1;
-}
-#endif
-
-/*----------------------------------------------------------------------*/
-/* キャプチャした内容を、bmp 形式(win)でファイルに出力         */
-/*----------------------------------------------------------------------*/
-static int save_snapshot_bmp(OSD_FILE *fp) {
-  static const unsigned char header[] = {
-      'B',  'M',                                      /* BM */
-      0x36, 0xb8, 0x0b, 0x00,                         /* ファイルサイズ 0xbb836 */
-      0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00, /* 画像データオフセット 0x36 */
-
-      0x28, 0x00, 0x00, 0x00,                         /* 情報サイズ 0x28 */
-      0x80, 0x02, 0x00, 0x00,                         /* 幅  0x280 */
-      0x90, 0x01, 0x00, 0x00,                         /* 高さ   0x190 */
-      0x01, 0x00, 0x18, 0x00,                         /* 色深度 */
-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 画像サイズ? 0xbb800 */
-      0x00, 0x00, 0x00, 0x00,                         /* 横方向解像度?  */
-      0x00, 0x00, 0x00, 0x00,                         /* 縦方向解像度?  */
-      0x00, 0x00, 0x00, 0x00,                         /* 使用パレット数    */
-      0x00, 0x00, 0x00, 0x00,                         /* 重要?      */
-  };
-
-  unsigned char buf[4];
-  int i, j;
-  char *p;
-
-  if (fp == nullptr)
-    return 0;
-
-  osd_fwrite(header, sizeof(char), sizeof(header), fp);
-
-  for (i = 0; i < 400; i++) {
-    p = screen_snapshot + (399 - i) * 640;
-    for (j = 0; j < 640; j++) {
-      buf[0] = pal[(int)*p].blue;
-      buf[1] = pal[(int)*p].green;
-      buf[2] = pal[(int)*p].red;
-      osd_fwrite(buf, sizeof(char), 3, fp);
       p++;
     }
   }
 
-  return 1;
+  return true;
 }
 
-/*----------------------------------------------------------------------*/
-/* キャプチャした内容を、raw形式でファイルに出力           */
-/*----------------------------------------------------------------------*/
-static int save_snapshot_raw(OSD_FILE *fp) {
+/* Output the captured content to a file in raw format */
+static bool save_snapshot_raw(OSD_FILE *fp) {
   unsigned char buf[4];
-  int i, j;
   char *p = screen_snapshot;
 
-  if (fp == nullptr)
-    return 0;
-
-  for (i = 0; i < 400; i++) {
-    for (j = 0; j < 640; j++) {
+  for (int y = 0; y < 400; y++) {
+    for (int x = 0; x < 640; x++) {
       buf[0] = pal[(int)*p].red;
       buf[1] = pal[(int)*p].green;
       buf[2] = pal[(int)*p].blue;
-      osd_fwrite(buf, sizeof(char), 3, fp);
+      if (osd_fwrite(buf, sizeof(char), 3, fp) < 3) {
+        return false;
+      }
       p++;
     }
   }
 
-  return 1;
+  return true;
 }
 
 /***********************************************************************
@@ -357,7 +264,7 @@ static int save_snapshot_raw(OSD_FILE *fp) {
    suffix は拡張子で、以下のものを対象とする。*/
 static const char *snap_suffix[] = {".ppm",  ".PPM",  ".xpm", ".XPM", ".png",  ".PNG",  ".bmp", ".BMP",  ".rgb",
                                     ".RGB",  ".raw",  ".RAW", ".gif", ".GIF",  ".xwd",  ".XWD", ".pict", ".PICT",
-                                    ".tiff", ".TIFF", ".tif", ".TIF", ".jpeg", ".JPEG", ".jpg", ".JPG",  NULL};
+                                    ".tiff", ".TIFF", ".tif", ".TIF", ".jpeg", ".JPEG", ".jpg", ".JPG",  nullptr};
 static void truncate_filename(char filename[], const char *suffix[]) {
   int i;
   char *p;
@@ -388,9 +295,9 @@ void filename_set_snap_base(const char *filename) {
     filename_init_snap(false);
   }
 }
-const char *filename_get_snap_base(void) { return file_snap; }
+const char *filename_get_snap_base() { return file_snap; }
 
-int screen_snapshot_save(void) {
+int screen_snapshot_save() {
   static char filename[QUASI88_MAX_FILENAME + sizeof("NNNN.suffix")];
   static int snapshot_no = 0; /* 連番 */
 
@@ -401,7 +308,7 @@ int screen_snapshot_save(void) {
   };
 
   OSD_FILE *fp;
-  int i, j, len, success;
+  int i, j, success;
 
   if (snapshot_format >= COUNTOF(suffix))
     return false;
@@ -421,7 +328,7 @@ int screen_snapshot_save(void) {
   success = false;
   for (j = 0; j < 10000; j++) {
 
-    len = sprintf(filename, "%s%04d", file_snap, snapshot_no);
+    size_t len = sprintf(filename, "%s%04d", file_snap, snapshot_no);
     if (++snapshot_no > 9999)
       snapshot_no = 0;
 
@@ -449,15 +356,17 @@ int screen_snapshot_save(void) {
       make_snapshot();
 
       switch (snapshot_format) {
-      case 0:
+      case SNAPSHOT_FMT_BMP:
         success = save_snapshot_bmp(fp);
         break;
-      case 1:
+      case SNAPSHOT_FMT_PPM:
         success = save_snapshot_ppm(fp);
         break;
-      case 2:
+      case SNAPSHOT_FMT_RAW:
         success = save_snapshot_raw(fp);
         break;
+      default:
+        success = false;
       }
 
       osd_fclose(fp);
@@ -472,17 +381,15 @@ int screen_snapshot_save(void) {
 
 #ifdef USE_SSS_CMD
 
-  if (success &&
+  if (success && snapshot_cmd_enable && snapshot_cmd_do && snapshot_cmd[0]) {
 
-      snapshot_cmd_enable && snapshot_cmd_do && snapshot_cmd[0]) {
-
-    int a_len, b_len;
+    size_t a_len, b_len;
     char *cmd, *s, *d;
 
     a_len = strlen(filename);
     b_len = a_len - 4; /* サフィックス ".???" の4文字分減算 */
 
-    len = 0;
+    size_t len = 0;
     s = snapshot_cmd; /* コマンドの %a, %b は置換するので   */
     while (*s) {      /* コマンドの文字長がどうなるか数える */
       if (*s == '%') {
@@ -553,11 +460,7 @@ int screen_snapshot_save(void) {
   return success;
 }
 
-/***********************************************************************
- * サウンド出力をセーブする
- *
- ************************************************************************/
-
+/* Save sound output */
 char file_wav[QUASI88_MAX_FILENAME]; /* サウンド出力ベース部   */
 
 static const char *wav_suffix[] = {".wav", ".WAV", nullptr};
@@ -572,9 +475,10 @@ void filename_set_wav_base(const char *filename) {
     filename_init_wav(false);
   }
 }
-const char *filename_get_wav_base(void) { return file_wav; }
 
-int waveout_save_start(void) {
+const char *filename_get_wav_base() { return file_wav; }
+
+int waveout_save_start() {
   static char filename[QUASI88_MAX_FILENAME + sizeof("NNNN.suffix")];
   static int waveout_no = 0; /* 連番 */
 
@@ -624,7 +528,4 @@ int waveout_save_start(void) {
   return success;
 }
 
-void waveout_save_stop(void) {
-  /*  if (xmame_wavout_opened())*/
-  xmame_wavout_close();
-}
+void waveout_save_stop() { xmame_wavout_close(); }

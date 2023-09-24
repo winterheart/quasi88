@@ -116,9 +116,11 @@ OSD_FILE *osd_fopen(int type, const char *path, const char *mode) {
   st->path = nullptr;
 
   std::filesystem::path fullpath = std::filesystem::absolute(path);
+  /*
   if (!exists(fullpath)) {
     return nullptr;
   }
+  */
 
   switch (type) {
 
