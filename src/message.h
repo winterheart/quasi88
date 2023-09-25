@@ -1299,7 +1299,30 @@ static const char *help_jp[] = {
 };
 
 static const char *help_en[] = {
-    " I'm waiting for translator... ",
+    "When emulating an application that uses a disk image, it may",
+    "not work properly if the \"SUB-CPU Mode\" and \"FDC Wait\" options",
+    "are not appropriate. The combinations of \"SUB-CPU Mode\" and",
+    "\"FDC Wait\" options are as follows.",
+    "",
+    "  Option | SUB-CPU mode | FDC Wait |",
+    "  -------+--------------+----------+-----------",
+    "     (1) |   0 (-cpu 0) |      Off | High speed",
+    "     (2) |   1 (-cpu 1) |      Off | ↑",
+    "     (3) |   1 (-cpu 1) |       On |",
+    "     (4) |   2 (-cpu 2) |      Off | ↓",
+    "     (5) |   2 (-cpu 2) |       On | Accurate",
+    "",
+    "(1)    This is the fastest and most of the applications will run.",
+    "       This is the default.",
+    "(2)    Slightly faster. Some applications may not work.",
+    "(3)    Slightly slow speed. Very few applications may not work.",
+    "(4)(5) The slowest speed. Perhaps all applications should work in",
+    "       this option. Perhaps.",
+    "",
+    "If the application does not work with option (1), try changing to",
+    "(2), (3), etc. Also, if the speed slows down when accessing the",
+    "disk or the sound cuts out, changing this option may improve the",
+    "situation.",
     nullptr,
 };
 
