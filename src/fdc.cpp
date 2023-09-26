@@ -8,6 +8,7 @@
 
 #include "quasi88.h"
 
+#include "byteswap.h"
 #include "debug.h"
 #include "drive.h"
 #include "emu.h" /* emu_mode         */
@@ -729,8 +730,7 @@ static int disk_now_sec(int drv);
 
 static void disk_now_track(int drv, int trk) {
   int error = 0;
-  uint8_t c[4];
-  long track_top;
+  int32_t track_top;
 
   /* シーク可能シリンダのチェック */
 
@@ -752,12 +752,13 @@ static void disk_now_track(int drv, int trk) {
   /* トラックのインデックスで指定されたファイル位置を取得 */
 
   if (osd_fseek(drive[drv].fp, drive[drv].disk_top + DISK_TRACK + trk * 4, SEEK_SET) == 0) {
-    if (osd_fread(c, sizeof(uint8_t), 4, drive[drv].fp) == 4) {
+    int32_t r;
+    if (osd_fread(&r, sizeof(r), 1, drive[drv].fp) == 1) {
 
       /* トラックおよび、先頭セクタの位置を設定   */
       /* そのセクタのセクタ情報および、セクタ数を得る */
 
-      track_top = (long)c[0] + ((long)c[1] << 8) + ((long)c[2] << 16) + ((long)c[3] << 24);
+      track_top = QUASI88::convert_le(r);
       if (track_top != 0) {
         drive[drv].track_top = drive[drv].sec_pos = drive[drv].disk_top + track_top;
         drive[drv].sec_nr = disk_now_sec(drv);
