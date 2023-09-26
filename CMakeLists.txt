@@ -85,6 +85,9 @@ if(SIZEOF_LONG_LONG EQUAL "8")
 	add_definitions(-DHAVE_LONG_LONG)
 endif()
 
+if (BUILD_TESTING)
+	add_subdirectory(tests)
+endif()
 
 #### Common sources
 
