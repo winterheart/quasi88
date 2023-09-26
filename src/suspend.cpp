@@ -11,6 +11,7 @@
 
 #include "quasi88.h"
 
+#include "byteswap.h"
 #include "file-op.h"
 #include "suspend.h"
 #include "utility.h"
@@ -62,68 +63,57 @@ char file_state[QUASI88_MAX_FILENAME]; /* ステートファイル名   */
  *      int 型、 short 型、char 型、pair 型、256バイトブロック、
  *      文字列(1023文字まで)、double型 (1000000倍してintに変換)
  *----------------------------------------------------------------------*/
-INLINE int statesave_int(OSD_FILE *fp, const int *val) {
-  unsigned char c[4];
-  c[0] = (*val) & 0xff;
-  c[1] = (*val >> 8) & 0xff;
-  c[2] = (*val >> 16) & 0xff;
-  c[3] = (*val >> 24) & 0xff;
-  if (osd_fwrite(c, sizeof(char), 4, fp) == 4)
+INLINE bool statesave_int(OSD_FILE *fp, const int32_t *val) {
+  if (osd_fwrite(QUASI88::convert_le(&val), sizeof(&val), 1, fp) == 1)
     return true;
   return false;
 }
 
-INLINE int stateload_int(OSD_FILE *fp, int *val) {
-  unsigned char c[4];
-  if (osd_fread(c, sizeof(char), 4, fp) != 4)
+INLINE bool stateload_int(OSD_FILE *fp, int32_t *val) {
+  int32_t r;
+  if (osd_fread(&r, sizeof(r), 1, fp) != 1)
     return false;
-  *val = (((unsigned int)c[3] << 24) | ((unsigned int)c[2] << 16) | ((unsigned int)c[1] << 8) | (unsigned int)c[0]);
+  *val = QUASI88::convert_le(r);
   return true;
 }
 
-INLINE int statesave_short(OSD_FILE *fp, const short *val) {
-  unsigned char c[2];
-  c[0] = (*val) & 0xff;
-  c[1] = (*val >> 8) & 0xff;
-  if (osd_fwrite(c, sizeof(char), 2, fp) == 2)
+INLINE bool statesave_short(OSD_FILE *fp, const int16_t *val) {
+  if (osd_fwrite(QUASI88::convert_le(&val), sizeof(&val), 1, fp) == 1)
     return true;
   return false;
 }
 
-INLINE int stateload_short(OSD_FILE *fp, short *val) {
-  unsigned char c[2];
-  if (osd_fread(c, sizeof(uint8_t), 2, fp) != 2)
+INLINE int stateload_short(OSD_FILE *fp, int16_t *val) {
+  int16_t r;
+  if (osd_fread(&r, sizeof(r), 1, fp) != 1)
     return false;
-  *val = (((unsigned short)c[1] << 8) | (unsigned short)c[0]);
+  *val = QUASI88::convert_le(r);
   return true;
 }
 
-INLINE int statesave_char(OSD_FILE *fp, char *val) {
-  if (osd_fwrite(val, sizeof(char), 1, fp) == 1)
+INLINE int statesave_char(OSD_FILE *fp, int8_t *val) {
+  if (osd_fwrite(val, sizeof(int8_t), 1, fp) == 1)
     return true;
   return false;
 }
 
-INLINE int stateload_char(OSD_FILE *fp, char *val) {
-  if (osd_fread(val, sizeof(char), 1, fp) != 1)
+INLINE int stateload_char(OSD_FILE *fp, int8_t *val) {
+  if (osd_fread(val, sizeof(int8_t), 1, fp) != 1)
     return false;
   return true;
 }
 
 INLINE int statesave_pair(OSD_FILE *fp, pair *val) {
-  unsigned char c[2];
-  c[0] = ((*val).W) & 0xff;
-  c[1] = ((*val).W >> 8) & 0xff;
-  if (osd_fwrite(c, sizeof(char), 2, fp) == 2)
+  if (osd_fwrite(QUASI88::convert_le(&val->W), sizeof(&val->W), 1, fp) == 1)
     return true;
   return false;
 }
 
 INLINE int stateload_pair(OSD_FILE *fp, pair *val) {
-  unsigned char c[2];
-  if (osd_fread(c, sizeof(char), 2, fp) != 2)
+  int16_t r;
+  if (osd_fread(&r, sizeof(r), 1, fp) != 1)
     return false;
-  (*val).W = (((unsigned short)c[1] << 8) | (unsigned short)c[0]);
+  (*val).W = QUASI88::convert_le(r);
   return true;
 }
 
@@ -159,28 +149,18 @@ INLINE int stateload_str(OSD_FILE *fp, char *str) {
   return true;
 }
 
-INLINE int statesave_double(OSD_FILE *fp, double *val) {
-  unsigned char c[4];
-  int wk;
-
-  wk = (int)((*val) * 1000000.0);
-  c[0] = (wk)&0xff;
-  c[1] = (wk >> 8) & 0xff;
-  c[2] = (wk >> 16) & 0xff;
-  c[3] = (wk >> 24) & 0xff;
-  if (osd_fwrite(c, sizeof(char), 4, fp) == 4)
+INLINE int statesave_double(OSD_FILE *fp, double_t *val) {
+  auto r = (int32_t)(*val * 1000000.0);
+  if (osd_fwrite(QUASI88::convert_le(&r), sizeof(r), 1, fp) == 1)
     return true;
   return false;
 }
-INLINE int stateload_double(OSD_FILE *fp, double *val) {
-  unsigned char c[4];
-  int wk;
 
-  if (osd_fread(c, sizeof(char), 4, fp) != 4)
+INLINE int stateload_double(OSD_FILE *fp, double_t *val) {
+  int32_t r;
+  if (osd_fread(&r, sizeof(r), 1, fp) != 1)
     return false;
-
-  wk = (((unsigned int)c[3] << 24) | ((unsigned int)c[2] << 16) | ((unsigned int)c[1] << 8) | (unsigned int)c[0]);
-  *val = (double)wk / 1000000.0;
+  *val = QUASI88::convert_le(r) / 1000000.0;
   return true;
 }
 
@@ -201,7 +181,7 @@ static int read_id(OSD_FILE *fp, const char id[4]) {
   for (;;) {
     if (osd_fread(c, sizeof(char), 4, fp) != 4)
       return -1;
-    if (stateload_int(fp, &size) == false)
+    if (!stateload_int(fp, &size))
       return -1;
 
     if (memcmp(c, id, 4) == 0) { /* ID合致した */
@@ -221,7 +201,7 @@ static int write_id(OSD_FILE *fp, const char id[4], int size) {
 
   if (osd_fwrite(id, sizeof(char), 4, fp) != 4)
     return -1;
-  if (statesave_int(fp, &size) == false)
+  if (!statesave_int(fp, &size))
     return -1;
 
   return size;
@@ -313,39 +293,39 @@ int statesave_table(const char id[4], T_SUSPEND_W *tbl) {
 
     case TYPE_INT:
     case TYPE_LONG:
-      if (statesave_int(fp, (int *)tbl->work) == false)
+      if (!statesave_int(fp, (int32_t *)tbl->work))
         return STATE_ERR;
       break;
 
     case TYPE_SHORT:
     case TYPE_WORD:
-      if (statesave_short(fp, (short *)tbl->work) == false)
+      if (!statesave_short(fp, (int16_t *)tbl->work))
         return STATE_ERR;
       break;
 
     case TYPE_CHAR:
     case TYPE_BYTE:
-      if (statesave_char(fp, (char *)tbl->work) == false)
+      if (!statesave_char(fp, (int8_t *)tbl->work))
         return STATE_ERR;
       break;
 
     case TYPE_PAIR:
-      if (statesave_pair(fp, (pair *)tbl->work) == false)
+      if (!statesave_pair(fp, (pair *)tbl->work))
         return STATE_ERR;
       break;
 
     case TYPE_DOUBLE:
-      if (statesave_double(fp, (double *)tbl->work) == false)
+      if (!statesave_double(fp, (double_t *)tbl->work))
         return STATE_ERR;
       break;
 
     case TYPE_STR:
-      if (statesave_str(fp, (char *)tbl->work) == false)
+      if (!statesave_str(fp, (char *)tbl->work))
         return STATE_ERR;
       break;
 
     case TYPE_256:
-      if (statesave_256(fp, (char *)tbl->work) == false)
+      if (!statesave_256(fp, (char *)tbl->work))
         return STATE_ERR;
       break;
 
@@ -388,7 +368,7 @@ static int stateload_header() {
       if (memcmp(ver, STATE_VER, sizeof(STATE_VER)) != 0) {
 
         printf("stateload: version mismatch ('%s' != '%s')\n", STATE_VER, ver);
-        if (resume_force == false)
+        if (!resume_force)
           return STATE_ERR;
 
       } else {
@@ -452,45 +432,45 @@ int stateload_table(const char id[4], T_SUSPEND_W *tbl) {
 
     case TYPE_INT:
     case TYPE_LONG:
-      if (stateload_int(fp, (int *)tbl->work) == false)
+      if (!stateload_int(fp, (int *)tbl->work))
         return STATE_ERR;
       size += 4;
       break;
 
     case TYPE_SHORT:
     case TYPE_WORD:
-      if (stateload_short(fp, (short *)tbl->work) == false)
+      if (!stateload_short(fp, (short *)tbl->work))
         return STATE_ERR;
       size += 2;
       break;
 
     case TYPE_CHAR:
     case TYPE_BYTE:
-      if (stateload_char(fp, (char *)tbl->work) == false)
+      if (!stateload_char(fp, (int8_t *)tbl->work))
         return STATE_ERR;
       size += 1;
       break;
 
     case TYPE_PAIR:
-      if (stateload_pair(fp, (pair *)tbl->work) == false)
+      if (!stateload_pair(fp, (pair *)tbl->work))
         return STATE_ERR;
       size += 2;
       break;
 
     case TYPE_DOUBLE:
-      if (stateload_double(fp, (double *)tbl->work) == false)
+      if (!stateload_double(fp, (double *)tbl->work))
         return STATE_ERR;
       size += 4;
       break;
 
     case TYPE_STR:
-      if (stateload_str(fp, (char *)tbl->work) == false)
+      if (!stateload_str(fp, (char *)tbl->work))
         return STATE_ERR;
       size += 1024;
       break;
 
     case TYPE_256:
-      if (stateload_256(fp, (char *)tbl->work) == false)
+      if (!stateload_256(fp, (char *)tbl->work))
         return STATE_ERR;
       size += 256;
       break;
@@ -504,7 +484,7 @@ int stateload_table(const char id[4], T_SUSPEND_W *tbl) {
 }
 
 /* リビジョン取得 */
-int statefile_revision(void) { return statefile_rev; }
+int statefile_revision() { return statefile_rev; }
 
 /***********************************************************************
  *
@@ -554,9 +534,9 @@ int statefile_revision(void) { return statefile_rev; }
     num が負 なら、連番無し。ファイル名の拡張子はそのままとする。
 */
 
-const char *filename_get_state(void) { return file_state; }
+const char *filename_get_state() { return file_state; }
 
-int filename_get_state_serial(void) {
+int filename_get_state_serial() {
   const char *str_sfx = STATE_SUFFIX;          /* ".sta" */
   const size_t len_sfx = strlen(STATE_SUFFIX); /* 4      */
   size_t len = strlen(file_state);
@@ -635,7 +615,7 @@ void filename_set_state_serial(int serial) {
   }
 }
 
-int statesave_check_file_exist(void) {
+int statesave_check_file_exist() {
   OSD_FILE *fp;
 
   if (file_state[0] && (fp = osd_fopen(FTYPE_STATE_LOAD, file_state, "rb"))) {
@@ -645,7 +625,7 @@ int statesave_check_file_exist(void) {
   return false;
 }
 
-int statesave(void) {
+int statesave() {
   int success = false;
 
   if (file_state[0] == '\0') {
@@ -659,29 +639,29 @@ int statesave(void) {
   if ((statesave_fp = osd_fopen(FTYPE_STATE_SAVE, file_state, "wb"))) {
     if (statesave_header() == STATE_OK) {
       do {
-        if (statesave_emu() == false)
+        if (!statesave_emu())
           break;
-        if (statesave_memory() == false)
+        if (!statesave_memory())
           break;
-        if (statesave_pc88main() == false)
+        if (!statesave_pc88main())
           break;
-        if (statesave_crtcdmac() == false)
+        if (!statesave_crtcdmac())
           break;
-        if (statesave_sound() == false)
+        if (!statesave_sound())
           break;
-        if (statesave_pio() == false)
+        if (!statesave_pio())
           break;
-        if (statesave_screen() == false)
+        if (!statesave_screen())
           break;
-        if (statesave_intr() == false)
+        if (!statesave_intr())
           break;
-        if (statesave_keyboard() == false)
+        if (!statesave_keyboard())
           break;
-        if (statesave_pc88sub() == false)
+        if (!statesave_pc88sub())
           break;
-        if (statesave_fdc() == false)
+        if (!statesave_fdc())
           break;
-        if (statesave_system() == false)
+        if (!statesave_system())
           break;
 
         success = true;
@@ -694,7 +674,7 @@ int statesave(void) {
   return success;
 }
 
-int stateload_check_file_exist(void) {
+int stateload_check_file_exist() {
   int success = false;
 
   if (file_state[0] && (stateload_fp = osd_fopen(FTYPE_STATE_LOAD, file_state, "rb"))) {
@@ -710,7 +690,7 @@ int stateload_check_file_exist(void) {
   return success;
 }
 
-int stateload(void) {
+int stateload() {
   int success = false;
 
   if (file_state[0] == '\0') {
@@ -725,30 +705,30 @@ int stateload(void) {
 
     if (stateload_header() == STATE_OK) {
       do {
-        if (stateload_emu() == false)
+        if (!stateload_emu())
           break;
-        if (stateload_sound() == false)
+        if (!stateload_sound())
           break;
-        if (stateload_memory() == false)
+        if (!stateload_memory())
           break;
-        if (stateload_pc88main() == false)
+        if (!stateload_pc88main())
           break;
-        if (stateload_crtcdmac() == false)
+        if (!stateload_crtcdmac())
           break;
         /*if( stateload_sound()    == false ) break; memoryの前に！ */
-        if (stateload_pio() == false)
+        if (!stateload_pio())
           break;
-        if (stateload_screen() == false)
+        if (!stateload_screen())
           break;
-        if (stateload_intr() == false)
+        if (!stateload_intr())
           break;
-        if (stateload_keyboard() == false)
+        if (!stateload_keyboard())
           break;
-        if (stateload_pc88sub() == false)
+        if (!stateload_pc88sub())
           break;
-        if (stateload_fdc() == false)
+        if (!stateload_fdc())
           break;
-        if (stateload_system() == false)
+        if (!stateload_system())
           break;
 
         success = true;
@@ -764,7 +744,7 @@ int stateload(void) {
 /***********************************************************************
  * ステートファイル名を初期化
  ************************************************************************/
-void stateload_init(void) {
+void stateload_init() {
   if (file_state[0] == '\0') {
     filename_init_state(false);
   }

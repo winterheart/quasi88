@@ -8,6 +8,7 @@
 
 #include "quasi88.h"
 
+#include "byteswap.h"
 #include "drive.h"
 #include "file-op.h"
 #include "image.h"
@@ -439,9 +440,9 @@ int d88_write_unformat(OSD_FILE *fp, int drv, int img) {
         sz = READ_SIZE_IN_HEADER(c);                  /* (はみ出し判定用) */
 
         if (osd_fseek(fp, offset + DISK_TRACK, SEEK_SET) == 0) {
-          if (osd_fread(c, sizeof(char), 4, fp) == 4) {
-
-            st = ((long)c[0] + ((long)c[1] << 8) + ((long)c[2] << 16) + ((long)c[3] << 24));
+          int32_t r;
+          if (osd_fread(&r, sizeof(r), 1, fp) == 1) {
+            st = QUASI88::convert_le(r);
 
             memset(c, 0, 256);                     /* 0トラック目の先頭から   */
             if (DISK_TRACK + 4 <= st && st < sz) { /* イメージ末尾まで0ライト */
@@ -573,9 +574,9 @@ int d88_write_format(OSD_FILE *fp, int drv, int img) {
             for (trk = 0; trk < 80; trk++) { /* 80トラック書換え */
 
               if (osd_fseek(fp, offset + (DISK_TRACK + trk * 4), SEEK_SET) == 0) {
-                if (osd_fread(c, sizeof(char), 4, fp) == 4) {
-
-                  st = (long)c[0] + ((long)c[1] << 8) + ((long)c[2] << 16) + ((long)c[3] << 24);
+                int32_t r;
+                if (osd_fread(&r, sizeof(r), 1, fp) == 1) {
+                  st = QUASI88::convert_le(r);
 
                   if (osd_fseek(fp, offset + st, SEEK_SET) == 0) {
 
