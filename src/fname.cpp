@@ -2,12 +2,13 @@
  *          ファイル名制御／管理
  ************************************************************************/
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstring>
 
 #include "quasi88.h"
 
 #include "drive.h"
+#include "fname.h"
 #include "getconf.h"
 #include "file-op.h"
 #include "pc88main.h"
@@ -23,25 +24,25 @@ char file_prn[QUASI88_MAX_FILENAME];     /* パラレル出力のファイル名
 char file_sin[QUASI88_MAX_FILENAME];     /* シリアル出力のファイル名 */
 char file_sout[QUASI88_MAX_FILENAME];    /* シリアル入力のファイル名 */
 
-int file_coding = 0;             /* ファイル名の漢字コード   */
+int file_coding = FILE_CODING_EUC;
 int filename_synchronize = true; /* ファイル名を同調させる   */
 
-/*
- * FIXME: documentation is mess.
- * According to function usage,
- * 0 is Q8TK_KANJI_ANK, 1 is Q8TK_KANJI_EUC, 2 is Q8TK_KANJI_SJIS, 3 is Q8TK_KANJI_UTF8
- */
 /**
  * Get the Kanji code used in file name
- * @return Kanji code:
+ * @return Kanji code
  */
 int osd_kanji_code() {
-  if (file_coding == 2)
-    return 3;
-  else if (file_coding == 1)
-    return 2;
-  else
+  switch (file_coding) {
+  case FILE_CODING_EUC:
     return 1;
+  case FILE_CODING_SJIS:
+    return 2;
+  case FILE_CODING_UTF8:
+    return 3;
+  default:
+    // Default Q8TK_KANJI_ANK
+    return 0;
+  }
 }
 
 static char *assemble_filename(const char *imagename, const char *basedir, const char *suffix);
@@ -112,21 +113,21 @@ void imagefile_all_open(int stateload) {
     err0 = disk_insert(DRIVE_1, /* ドライブ 1 をセット */
                        file_disk[0], (image_disk[0] < 0) ? 0 : image_disk[0], readonly_disk[0]);
 
-    if (same) { /* 同一ファイルの場合は */
-
-      if (!err0) { /* 1: → 2: 転送 */
+    if (same) {
+      /* 同一ファイルの場合は */
+      if (!err0) {
+        /* 1: → 2: 転送 */
         err1 = disk_insert_A_to_B(DRIVE_1, DRIVE_2, (image_disk[1] < 0) ? 0 : image_disk[1]);
       }
 
-    } else { /* 別ファイルの場合は */
-
+    } else {
+      /* 別ファイルの場合は */
       err1 = disk_insert(DRIVE_2, /* ドライブ2 セット */
                          file_disk[1], (image_disk[1] < 0) ? 0 : image_disk[1], readonly_disk[1]);
     }
 
     /* 両ドライブで同じファイル かつ イメージ指定自動の場合の処理 */
-    if (!err0 && !err1 && drive[DRIVE_1].fp == drive[DRIVE_2].fp && image_disk[0] < 0 &&
-        image_disk[1] < 0) {
+    if (!err0 && !err1 && drive[DRIVE_1].fp == drive[DRIVE_2].fp && image_disk[0] < 0 && image_disk[1] < 0) {
       disk_change_image(DRIVE_2, 1); /* 2: は イメージ2へ */
     }
 
@@ -198,7 +199,7 @@ void imagefile_all_open(int stateload) {
   }
 }
 
-void imagefile_all_close(void) {
+void imagefile_all_close() {
   disk_eject(0);
   memset(file_disk[0], 0, QUASI88_MAX_FILENAME);
   disk_eject(1);
@@ -224,43 +225,43 @@ void imagefile_all_close(void) {
 #endif
 }
 
-/***********************************************************************
- *
- *
- ************************************************************************/
 const char *filename_get_disk(int drv) {
   if (file_disk[drv][0] != '\0')
     return file_disk[drv];
   else
-    return NULL;
+    return nullptr;
 }
+
 const char *filename_get_tape(int mode) {
   if (file_tape[mode][0] != '\0')
     return file_tape[mode];
   else
-    return NULL;
+    return nullptr;
 }
-const char *filename_get_prn(void) {
+
+const char *filename_get_prn() {
   if (file_prn[0] != '\0')
     return file_prn;
   else
-    return NULL;
+    return nullptr;
 }
-const char *filename_get_sin(void) {
+
+const char *filename_get_sin() {
   if (file_sin[0] != '\0')
     return file_sin;
   else
-    return NULL;
+    return nullptr;
 }
-const char *filename_get_sout(void) {
+
+const char *filename_get_sout() {
   if (file_sout[0] != '\0')
     return file_sout;
   else
-    return NULL;
+    return nullptr;
 }
 
-/* 指定ドライブないし反対ドライブにディスクがあれば、そのファイル名を、
-   なければ、ディスク用ディレクトリを返す */
+/* If there is a disk in the specified drive or the opposite drive, return the file name,
+ otherwise return the directory for the disk. */
 const char *filename_get_disk_or_dir(int drv) {
   const char *p;
 
@@ -270,14 +271,14 @@ const char *filename_get_disk_or_dir(int drv) {
     p = file_disk[drv ^ 1];
   else {
     p = osd_dir_disk();
-    if (p == NULL)
+    if (p == nullptr)
       p = osd_dir_cwd();
   }
 
   return p;
 }
-/* 指定された区分のテープがセットされていれば、そのファイル名を、
-   なければ、テープ用ディレクトリを返す */
+
+/* If a tape of the specified category is set, return its file name, otherwise return the tape directory. */
 const char *filename_get_tape_or_dir(int mode) {
   const char *p;
 
@@ -285,7 +286,7 @@ const char *filename_get_tape_or_dir(int mode) {
     p = file_tape[mode];
   else {
     p = osd_dir_tape();
-    if (p == NULL)
+    if (p == nullptr)
       p = osd_dir_cwd();
   }
 
@@ -301,8 +302,9 @@ const char *filename_get_disk_name(int drv) {
       return file;
     }
   }
-  return NULL;
+  return nullptr;
 }
+
 const char *filename_get_tape_name(int mode) {
   char dir[OSD_MAX_FILENAME];
   static char file[OSD_MAX_FILENAME];
@@ -312,7 +314,7 @@ const char *filename_get_tape_name(int mode) {
       return file;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /***********************************************************************
@@ -329,7 +331,7 @@ void filename_init_state(int synchronize) {
   const char *dir;
 
   dir = osd_dir_state();
-  if (dir == NULL)
+  if (dir == nullptr)
     dir = osd_dir_cwd();
 
   memset(file_state, 0, QUASI88_MAX_FILENAME);
@@ -365,7 +367,7 @@ void filename_init_snap(int synchronize) {
   const char *dir;
 
   dir = osd_dir_snap();
-  if (dir == NULL)
+  if (dir == nullptr)
     dir = osd_dir_cwd();
 
   memset(file_snap, 0, QUASI88_MAX_FILENAME);
@@ -401,7 +403,7 @@ void filename_init_wav(int synchronize) {
   const char *dir;
 
   dir = osd_dir_snap();
-  if (dir == NULL)
+  if (dir == nullptr)
     dir = osd_dir_cwd();
 
   memset(file_wav, 0, QUASI88_MAX_FILENAME);
@@ -477,7 +479,7 @@ static char *assemble_filename(const char *imagename, const char *basedir, const
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -509,7 +511,7 @@ char *filename_alloc_diskname(const char *filename) {
     }
 
   } else {
-    return NULL;
+    return nullptr;
   }
 
   /* step 0 → step 1 の順に、ファイル有無チェック */
@@ -521,11 +523,11 @@ char *filename_alloc_diskname(const char *filename) {
     else
       base = osd_dir_cwd();
 
-    if (base == NULL)
+    if (base == nullptr)
       continue;
 
     if (!osd_path_join(base, filename, file, OSD_MAX_FILENAME)) {
-      return NULL;
+      return nullptr;
     }
 
     /* 実際に open できるかをチェックする */
@@ -542,7 +544,7 @@ char *filename_alloc_diskname(const char *filename) {
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 char *filename_alloc_romname(const char *filename) {
@@ -558,11 +560,11 @@ char *filename_alloc_romname(const char *filename) {
   for (step = 0; step < 2; step++) {
     if (step == 0) {
       if (OSD_MAX_FILENAME <= strlen(filename))
-        return NULL;
+        return nullptr;
       strcpy(buf, filename);
     } else {
-      if (dir == NULL || !osd_path_join(dir, filename, buf, OSD_MAX_FILENAME)) {
-        return NULL;
+      if (dir == nullptr || !osd_path_join(dir, filename, buf, OSD_MAX_FILENAME)) {
+        return nullptr;
       }
     }
 
@@ -579,17 +581,17 @@ char *filename_alloc_romname(const char *filename) {
       break;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
-char *filename_alloc_global_cfgname(void) {
+char *filename_alloc_global_cfgname() {
   const char *dir = osd_dir_gcfg();
   const char *file = CONFIG_FILENAME CONFIG_SUFFIX;
   char *p;
   char buf[OSD_MAX_FILENAME];
 
-  if (dir == NULL || !osd_path_join(dir, file, buf, OSD_MAX_FILENAME)) {
-    return NULL;
+  if (dir == nullptr || !osd_path_join(dir, file, buf, OSD_MAX_FILENAME)) {
+    return nullptr;
   }
 
   p = (char *)malloc(strlen(buf) + 1);
@@ -600,12 +602,12 @@ char *filename_alloc_global_cfgname(void) {
 }
 
 char *filename_alloc_local_cfgname(const char *imagename) {
-  char *p = NULL;
+  char *p = nullptr;
   char *buf;
   const char *dir = osd_dir_lcfg();
 
-  if (dir == NULL)
-    return NULL;
+  if (dir == nullptr)
+    return nullptr;
 
   buf = assemble_filename(imagename, dir, CONFIG_SUFFIX);
 
@@ -618,14 +620,14 @@ char *filename_alloc_local_cfgname(const char *imagename) {
   return p;
 }
 
-char *filename_alloc_keyboard_cfgname(void) {
+char *filename_alloc_keyboard_cfgname() {
   const char *dir = osd_dir_gcfg();
   const char *file = KEYCONF_FILENAME CONFIG_SUFFIX;
   char *p;
   char buf[OSD_MAX_FILENAME];
 
-  if (dir == NULL || !osd_path_join(dir, file, buf, OSD_MAX_FILENAME))
-    return NULL;
+  if (dir == nullptr || !osd_path_join(dir, file, buf, OSD_MAX_FILENAME))
+    return nullptr;
 
   p = (char *)malloc(strlen(buf) + 1);
   if (p) {
@@ -633,5 +635,5 @@ char *filename_alloc_keyboard_cfgname(void) {
     return p;
   }
 
-  return NULL;
+  return nullptr;
 }
