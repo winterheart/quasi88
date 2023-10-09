@@ -16,9 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: ubuntu-latest, cc: "gcc", cxx: "g++", opts: "-DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
-          - { os: ubuntu-latest, cc: "clang", cxx: "clang++", opts: "-DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL" }
-          - { os: windows-latest, cc: "cl", cxx: "cl", opts: "-DCMAKE_TOOLCHAIN_FILE='vcpkg/scripts/buildsystems/vcpkg.cmake' -DENABLE_WIN=ON -DENABLE_SDL=ON -DENABLE_MONITOR=OFF -DENABLE_JOYSTICK=SDL" }
+          - { os: ubuntu-latest, cc: "gcc", cxx: "g++", opts: "-DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL -DBUILD_TESTING=ON" }
+          - { os: ubuntu-latest, cc: "clang", cxx: "clang++", opts: "-DENABLE_SDL=ON -DENABLE_MONITOR=ON -DENABLE_JOYSTICK=SDL -DBUILD_TESTING=ON" }
+          - { os: windows-latest, cc: "cl", cxx: "cl", opts: "-DCMAKE_TOOLCHAIN_FILE='vcpkg/scripts/buildsystems/vcpkg.cmake' -DENABLE_WIN=ON -DENABLE_SDL=ON -DENABLE_MONITOR=OFF -DENABLE_JOYSTICK=SDL -DBUILD_TESTING=ON" }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,7 +27,7 @@ jobs:
         if: matrix.config.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build libsdl2-dev libreadline-dev
+          sudo apt-get install ninja-build libgmock-dev libsdl2-dev libreadline-dev
       - name: Install dependencies (windows)
         if: matrix.config.os == 'windows-latest'
         run: |
@@ -49,3 +49,4 @@ jobs:
         run: |
           cmake -B build -G Ninja ${{ matrix.config.opts }}
           cmake --build build -j2
+          ctest --test-dir build/tests -j2

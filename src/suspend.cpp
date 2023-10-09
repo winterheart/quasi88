@@ -6,6 +6,7 @@
 /*                                  */
 /************************************************************************/
 
+#include <cmath>    // for double_t on Windows
 #include <cstring>
 #include <cctype>
 
