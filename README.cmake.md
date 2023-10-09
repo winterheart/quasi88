@@ -57,18 +57,19 @@ Compiled binaries can be found in `build` directory.
 
 Here list of all options that can be enabled/disabled via -DENABLE_FOO=ON/OFF directives:
 
-| Option                     | Meaning                           | Default |
-|----------------------------|-----------------------------------|---------|
-| ENABLE_SDL                 | Enable SDL backend                | ON      |
-| ENABLE_WIN                 | Enable Windows backend            | OFF     |
+| Option                     | Meaning                                                                  | Default |
+|----------------------------|--------------------------------------------------------------------------|---------|
+| ENABLE_SDL                 | Enable SDL backend                                                       | ON      |
+| ENABLE_WIN                 | Enable Windows backend                                                   | OFF     |
 | ENABLE_JOYSTICK            | Enable joystick support for X.Org (options: NO, SDL, LINUX_USB, BSD_USB) | NO      |
-| ENABLE_SOUND               | Enable sound support              | ON      |
-| ENABLE_FMGEN               | Enable FM sound generator         | ON      |
-| ENABLE_DOUBLE              | Enable double screen              | ON      |
-| ENABLE_UTF8                | Enable UTF-8                      | ON      |
-| ENABLE_PC8801_KEYBOARD_BUG | Enable emulation of keyboard bug  | OFF     |
-| ENABLE_8BPP                | Enable 8bpp support               | ON      |
-| ENABLE_16BPP               | Enable 16bpp support              | ON      |
-| ENABLE_32BPP               | Enable 32bpp support              | ON      |
-| ENABLE_SNAPSHOT            | Enable snapshot command support   | ON      |
-| ENABLE_MONITOR             | Enable Monitor (Debbuger) support | OFF     |
+| ENABLE_SOUND               | Enable sound support                                                     | ON      |
+| ENABLE_FMGEN               | Enable FM sound generator                                                | ON      |
+| ENABLE_DOUBLE              | Enable double screen                                                     | ON      |
+| ENABLE_UTF8                | Enable UTF-8                                                             | ON      |
+| ENABLE_PC8801_KEYBOARD_BUG | Enable emulation of keyboard bug                                         | OFF     |
+| ENABLE_8BPP                | Enable 8bpp support                                                      | ON      |
+| ENABLE_16BPP               | Enable 16bpp support                                                     | ON      |
+| ENABLE_32BPP               | Enable 32bpp support                                                     | ON      |
+| ENABLE_SNAPSHOT            | Enable snapshot command support                                          | ON      |
+| ENABLE_MONITOR             | Enable Monitor (Debbuger) support                                        | OFF     |
+| BUILD_TESTING              | Enable Unittests (requires GTest)                                        | OFF     |
