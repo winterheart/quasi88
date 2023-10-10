@@ -281,6 +281,16 @@ if(ENABLE_SDL)
 	)
 	target_include_directories(${PROJECT_NAME}.sdl PRIVATE ${SDL_INCLUDES})
 	target_link_libraries(${PROJECT_NAME}.sdl	${COMMON_LIBS} ${SDL_LIBS})
+
+	#### macOS needs rpath set if using a Framework
+	if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+ 		if(SDL2_BINDIR MATCHES ".*SDL2\\.framework.*")
+			add_custom_command(
+				TARGET ${PROJECT_NAME}.sdl POST_BUILD
+				COMMAND install_name_tool -add_rpath ${SDL2_FRAMEWORK_PARENT_PATH} ${PROJECT_NAME}.sdl
+			VERBATIM)
+   		endif()
+	endif()
 endif(ENABLE_SDL)
 
 if(ENABLE_WIN)
