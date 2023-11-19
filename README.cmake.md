@@ -61,7 +61,6 @@ Here list of all options that can be enabled/disabled via -DENABLE_FOO=ON/OFF di
 |----------------------------|--------------------------------------------------------------------------|---------|
 | ENABLE_SDL                 | Enable SDL backend                                                       | ON      |
 | ENABLE_WIN                 | Enable Windows backend                                                   | OFF     |
-| ENABLE_JOYSTICK            | Enable joystick support for X.Org (options: NO, SDL, LINUX_USB, BSD_USB) | NO      |
 | ENABLE_SOUND               | Enable sound support                                                     | ON      |
 | ENABLE_FMGEN               | Enable FM sound generator                                                | ON      |
 | ENABLE_DOUBLE              | Enable double screen                                                     | ON      |

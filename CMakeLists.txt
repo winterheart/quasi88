@@ -23,11 +23,6 @@ option(ENABLE_32BPP "Enable 32bpp support" ON)
 option(ENABLE_SNAPSHOT "Enable snapshot command support" ON)
 option(ENABLE_MONITOR "Enable Monitor (Debugger) support" OFF)
 
-# Joystick select for X
-set(ENABLE_JOYSTICK "SDL" CACHE STRING "Enable Joystick support for X.org (NO/SDL/LINUX_USB/BSD_USB, default NO)")
-set_property(CACHE ENABLE_JOYSTICK PROPERTY STRINGS "NO" "SDL" "LINUX_USB" "BSD_USB")
-
-
 if(ENABLE_MONITOR)
 	option(ENABLE_MONITOR_READLINE "Enable GNU Readline for Monitor support" ON)
 	option(ENABLE_MONITOR_LOCALE "Enable localization of Monitor" ON)
@@ -78,12 +73,6 @@ check_symbol_exists(gettimeofday "sys/time.h" HAVE_GETTIMEOFDAY)
 if(HAVE_GETTIMEOFDAY)
 	add_definitions(-DHAVE_GETTIMEOFDAY)
 endif(HAVE_GETTIMEOFDAY)
-
-include(CheckTypeSize)
-check_type_size("long long" SIZEOF_LONG_LONG)
-if(SIZEOF_LONG_LONG EQUAL "8")
-	add_definitions(-DHAVE_LONG_LONG)
-endif()
 
 if (BUILD_TESTING)
 	add_subdirectory(tests)
@@ -229,25 +218,6 @@ if(ENABLE_MONITOR)
 	endif(ENABLE_MONITOR_LOCALE)
 
 endif(ENABLE_MONITOR)
-
-if(${ENABLE_JOYSTICK} STREQUAL "NO")
-	add_definitions(-DJOY_NOTHING)
-elseif(${ENABLE_JOYSTICK} STREQUAL "SDL")
-	find_package(SDL2 CONFIG REQUIRED)
-	add_definitions(-DJOY_SDL)
-	include_directories(${SDL2_INCLUDE_DIR})
-	list(APPEND COMMON_LIBS SDL2::SDL2)
-elseif(${ENABLE_JOYSTICK} STREQUAL "LINUX_USB")
-	add_definitions(-DJOY_LINUX_USB)
-	include(FindPkgConfig)
-	pkg_check_modules(LIBUSB REQUIRED libusb)
-	include_directories(${LIBUSB_INCLUDE_DIRS})
-	list(APPEND COMMON_LIBS ${LIBUSB_LIBRARIES})
-elseif(${ENABLE_JOYSTICK} STREQUAL "BSD_USB")
-	add_definitions(-DJOY_BSD_USB)
-	add_definitions(-DHAVE_USBHID_H)
-	# FIXME need implementation for *BSD USBHID, -lusbhid
-endif()
 
 #### SDL target
 if(ENABLE_SDL)
