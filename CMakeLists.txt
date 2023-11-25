@@ -88,6 +88,7 @@ include_directories(
 
 set(COMMON_SOURCES
 	dependencies/lodepng/lodepng.cpp
+	src/Core/Quasi88App.cpp
 	src/basic.cpp
 	src/crtcdmac.cpp
 	src/debug.cpp
@@ -230,6 +231,7 @@ if(ENABLE_SDL)
 	)
 
 	set(SDL_SOURCES
+		src/SDL/Quasi88SDLApp.cpp
 		src/SDL/event.cpp
 		src/SDL/graph.cpp
 		src/SDL/keymap.cpp
