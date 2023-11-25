@@ -4,9 +4,10 @@
 /*                                  */
 /************************************************************************/
 
+#include <memory>
 #include <SDL2/SDL.h>
 
-#include "quasi88.h"
+#include "Quasi88SDLApp.h"
 
 #include "device.h"
 #include "getconf.h"  /* config_init */
@@ -68,65 +69,27 @@ static void help_msg_sdl() {
                   "    -show_fps/-hide_fps     Show/Hide FPS (experimentral)\n");
 }
 
-/***********************************************************************
- * メイン処理
- ************************************************************************/
-static void finish();
-
 int main(int argc, char *argv[]) {
-  int x = 1;
-
-  /* エンディアンネスチェック */
-
-#ifdef LSB_FIRST
-  if (*(char *)&x != 1) {
-    fprintf(stderr,
-            "%s CAN'T EXECUTE !\n"
-            "This machine is Big-Endian.\n"
-            "Compile again comment-out 'LSB_FIRST = 1' in Makefile.\n",
-            argv[0]);
-    return -1;
-  }
-#else
-  if (*(char *)&x == 1) {
-    fprintf(stderr,
-            "%s CAN'T EXCUTE !\n"
-            "This machine is Little-Endian.\n"
-            "Compile again comment-in 'LSB_FIRST = 1' in Makefile.\n",
-            argv[0]);
-    return -1;
-  }
-#endif
 
 #ifdef WIN32
-  /* 一部の初期値を改変 (いいやり方はないかな…) */
-  romaji_type = 1; /* ローマ字変換の規則を MS-IME風に */
+  /* Modify some initial values */
+  romaji_type = 1; /* Romaji conversion rules in MS-IME style */
 #endif
 
-  if (config_init(argc, argv, /* 環境初期化 & 引数処理 */
-                  sdl_options, help_msg_sdl)) {
+  try {
+    /* Environment initialization & argument handling */
+    if (config_init(argc, argv, sdl_options, help_msg_sdl)) {
+      std::shared_ptr<QUASI88::Quasi88SDLApp> app;
+      app->run();
 
-    if (sdl_init()) { /* SDL関連の初期化 */
-
-      quasi88_atexit(finish); /* quasi88() 実行中に強制終了した際の
-                     コールバック関数を登録する */
-      quasi88();              /* PC-8801 エミュレーション */
-
-      sdl_exit(); /* SDL関連後始末 */
+      config_exit(); /* 引数処理後始末 */
     }
-
-    config_exit(); /* 引数処理後始末 */
+  } catch (const std::exception& e) {
+    // TODO: Logging exception
+    return 1;
   }
 
   return 0;
-}
-
-/*
- * 強制終了時のコールバック関数 (quasi88_exit()呼出時に、処理される)
- */
-static void finish() {
-  sdl_exit();    /* SDL関連後始末 */
-  config_exit(); /* 引数処理後始末 */
 }
 
 /***********************************************************************
