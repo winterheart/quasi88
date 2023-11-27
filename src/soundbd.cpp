@@ -8,6 +8,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "initval.h"
 #include "intr.h"
 #include "pc88main.h"
@@ -203,20 +205,17 @@ void sound_out_data(uint8_t data) {
     break;
 
   case 0x2d:
-    if (verbose_snd)
-      printf("SOUND out %X\n", sound_reg_select);
+    QLOG_DEBUG("snd", "SOUND out {:X}", sound_reg_select);
     sound_prescaler_sel |= 2;
     change_sound_prescaler(pres[sound_prescaler_sel]); /* 6 */
     break;
   case 0x2e:
-    if (verbose_snd)
-      printf("SOUND out %X\n", sound_reg_select);
+    QLOG_DEBUG("snd", "SOUND out {:X}", sound_reg_select);
     sound_prescaler_sel |= 1;
     change_sound_prescaler(pres[sound_prescaler_sel]); /* 3 */
     break;
   case 0x2f:
-    if (verbose_snd)
-      printf("SOUND out %X\n", sound_reg_select);
+    QLOG_DEBUG("snd", "SOUND out {:X}", sound_reg_select);
     sound_prescaler_sel = 0;
     change_sound_prescaler(pres[sound_prescaler_sel]); /* 2 */
     break;

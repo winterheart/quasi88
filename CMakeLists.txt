@@ -78,6 +78,10 @@ if (BUILD_TESTING)
 	add_subdirectory(tests)
 endif()
 
+find_package(fmt REQUIRED)
+find_package(spdlog REQUIRED)
+list(APPEND COMMON_LIBS fmt::fmt spdlog::spdlog)
+
 #### Common sources
 
 include_directories(
@@ -252,7 +256,7 @@ if(ENABLE_SDL)
 		${PROJECT_NAME}.sdl ${COMMON_SOURCES} ${SDL_SOURCES} ${SOUND_SOURCES} ${SDL_SOUND_SOURCES}
 	)
 	target_include_directories(${PROJECT_NAME}.sdl PRIVATE ${SDL_INCLUDES})
-	target_link_libraries(${PROJECT_NAME}.sdl	${COMMON_LIBS} ${SDL_LIBS})
+	target_link_libraries(${PROJECT_NAME}.sdl ${COMMON_LIBS} ${SDL_LIBS})
 
 	#### macOS needs rpath set if using a Framework
 	if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")

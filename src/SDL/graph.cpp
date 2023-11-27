@@ -9,6 +9,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "device.h"
 #include "graph.h"
 
@@ -27,29 +29,6 @@ static SDL_DisplayMode sdl_display_mode = {SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, nul
 
 static int x_pos = SDL_WINDOWPOS_UNDEFINED, y_pos = SDL_WINDOWPOS_UNDEFINED;
 
-int sdl_init() {
-  if (verbose_proc) {
-    SDL_version libver;
-    SDL_GetVersion(&libver);
-    printf("Initializing SDL (%d.%d.%d) ... ", libver.major, libver.minor, libver.patch);
-    fflush(nullptr);
-  }
-
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
-    if (verbose_proc)
-      printf("Failed\n");
-    fprintf(stderr, "SDL Error: %s\n", SDL_GetError());
-
-    return false;
-  } else {
-    if (verbose_proc)
-      printf("OK\n");
-    return true;
-  }
-}
-
-void sdl_exit() { SDL_Quit(); }
-
 /*
  * Initialize SDL window and renderer
  * Basically, we don't need to know bpp and depth settings of renderer.
@@ -62,22 +41,20 @@ const T_GRAPH_SPEC *graph_init() {
     return nullptr;
   }
 
-  if (verbose_proc) {
-    SDL_RendererInfo ri;
-    if (SDL_GetRendererInfo(sdl_renderer, &ri) < 0) {
-      printf("Failed to get info from SDL: %s\n", SDL_GetError());
-      return nullptr;
-    }
-    printf("Initializing Graphic System (SDL:%s) ... \n", ri.name);
+  SDL_RendererInfo ri;
+  if (SDL_GetRendererInfo(sdl_renderer, &ri) < 0) {
+    QLOG_ERROR("proc", "Failed to get info from SDL: {}", SDL_GetError());
+    return nullptr;
   }
+  QLOG_DEBUG("proc", "Initializing Graphic System (SDL: {}) ...", ri.name);
 
   // Get the highest possible mode
   if (SDL_GetDisplayMode(0, 0, &sdl_display_mode) != 0) {
-    printf("Failed to get info from SDL: %s\n", SDL_GetError());
+    QLOG_ERROR("proc", "Failed to get info from SDL: {}", SDL_GetError());
     return nullptr;
   }
-  printf("  Best mode: %dx%dx%d @ %d Hz\n", sdl_display_mode.w, sdl_display_mode.h,
-         SDL_BITSPERPIXEL(sdl_display_mode.format), sdl_display_mode.refresh_rate);
+  QLOG_DEBUG("proc", "Best mode: {}x{}x{} @ {} Hz", sdl_display_mode.w, sdl_display_mode.h,
+             SDL_BITSPERPIXEL(sdl_display_mode.format), sdl_display_mode.refresh_rate);
 
   graph_spec.window_max_width = sdl_display_mode.w;
   graph_spec.window_max_height = sdl_display_mode.h;
@@ -86,33 +63,28 @@ const T_GRAPH_SPEC *graph_init() {
   graph_spec.forbid_status = false;
   graph_spec.forbid_half = false;
 
-  if (verbose_proc)
-    printf("  INFO: Maxsize=win(%d,%d),full(%d,%d)\n", sdl_display_mode.w, sdl_display_mode.h, sdl_display_mode.w,
-           sdl_display_mode.h);
-
+  QLOG_DEBUG("proc", "Maxsize=win({},{}), full({},{})", sdl_display_mode.w, sdl_display_mode.h, sdl_display_mode.w,
+             sdl_display_mode.h);
   return &graph_spec;
 }
 
 const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double aspect) {
   Uint32 flags = SDL_WINDOW_OPENGL;
   int real_w, real_h;
-  if (verbose_proc) {
-    SDL_RendererInfo ri;
-    SDL_GetRendererInfo(sdl_renderer, &ri);
-    printf("Setting up Graphic System (SDL:%s) ...\n", ri.name);
-  }
+
+  SDL_RendererInfo ri;
+  SDL_GetRendererInfo(sdl_renderer, &ri);
+  QLOG_DEBUG("proc", "Setting up Graphic System (SDL: {})...", ri.name);
 
   if (fullscreen) {
     real_w = sdl_display_mode.w;
     real_h = sdl_display_mode.h;
     flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    if (verbose_proc)
-      printf("  Trying full screen mode ... ");
+    QLOG_DEBUG("proc", "Trying full screen mode...");
   } else {
     real_w = width;
     real_h = height;
-    if (verbose_proc)
-      printf("  Opening window ... ");
+    QLOG_DEBUG("proc", "Opening window...");
   }
 
   SDL_SetWindowSize(sdl_window, real_w, real_h);
@@ -127,20 +99,14 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double as
   }
   SDL_SetWindowPosition(sdl_window, x_pos, y_pos);
 
-  if (verbose_proc)
-    printf("OK (%dx%d -> %dx%d)\n", width, height, real_w, real_h);
-
-  if (verbose_proc)
-    printf("  Allocating screen buffer ... ");
+  QLOG_DEBUG("proc", "OK ({}x{} -> {}x{})", width, height, real_w, real_h);
 
   sdl_texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, width, height);
   sdl_offscreen = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
-  if (verbose_proc) {
-    printf("%s\n", (sdl_offscreen && sdl_texture) ? "OK" : "FAILED");
-  }
-
-  if (sdl_offscreen == nullptr || sdl_texture == nullptr)
+  if (sdl_offscreen == nullptr || sdl_texture == nullptr) {
+    QLOG_ERROR("proc", "Failed to allocate screen buffer");
     return nullptr;
+  }
 
   graph_info.fullscreen = fullscreen;
   graph_info.width = sdl_offscreen->w;
@@ -155,14 +121,13 @@ const T_GRAPH_INFO *graph_setup(int width, int height, int fullscreen, double as
   graph_info.draw_finish = nullptr;
   graph_info.dont_frameskip = false;
 
-  if (verbose_proc) {
-    int w, h;
-    SDL_GetWindowSize(sdl_window, &w, &h);
-    printf("    VideoMode %dx%d -> %dx%dx%d(%d)  %c  R:%x G:%x B:%x\n", width, height, w, h,
-           sdl_offscreen->format->BitsPerPixel, sdl_offscreen->format->BytesPerPixel,
-           (flags & SDL_WINDOW_FULLSCREEN_DESKTOP) ? 'F' : '-', sdl_offscreen->format->Rmask,
-           sdl_offscreen->format->Gmask, sdl_offscreen->format->Bmask);
-  }
+  int w, h;
+  SDL_GetWindowSize(sdl_window, &w, &h);
+  QLOG_DEBUG("proc", "VideoMode {}x{} -> {}x{}x{}({})  {}  R:{:x} G:{:x} B:{:x}",
+             width, height, w, h,
+             sdl_offscreen->format->BitsPerPixel, sdl_offscreen->format->BytesPerPixel,
+             (flags & SDL_WINDOW_FULLSCREEN_DESKTOP) ? 'F' : '-', sdl_offscreen->format->Rmask,
+             sdl_offscreen->format->Gmask, sdl_offscreen->format->Bmask);
 
   return &graph_info;
 }

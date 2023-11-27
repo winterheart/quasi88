@@ -10,6 +10,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "debug.h"
 #include "crtcdmac.h"
 #include "graph.h"
@@ -194,8 +196,7 @@ int screen_init() {
     }
   }
   if (min < 0 || max < 0 || max < min) {
-    if (verbose_proc)
-      printf("  Not found drawable window size (bug?)\n");
+    QLOG_WARN("proc", "Not found drawable window size (bug?)");
     return false;
   }
   screen_size_max = max;

@@ -9,6 +9,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "crtcdmac.h"
 #include "debug.h"
 #include "drive.h"
@@ -1290,8 +1292,7 @@ void main_io_out(uint8_t port, uint8_t data) {
     return;
   }
 
-  if (verbose_io)
-    printf("OUT data %02X to undecoeded port %02XH\n", data, port);
+  QLOG_DEBUG("io", "OUT data {:02X} to undecoded port {:02X}H", data, port);
 }
 
 /*----------------------*/
@@ -1613,8 +1614,7 @@ uint8_t main_io_in(uint8_t port) {
 #endif
   }
 
-  if (verbose_io)
-    printf("IN        from undecoeded port %02XH\n", port);
+  QLOG_WARN("io", "IN        from undecoded port {:02X}H\n", port);
 
   return 0xff;
 }
@@ -2025,8 +2025,7 @@ static void sio_check_cmt_error() {
       cmt_block_size--;
       c = osd_fgetc(fp_ti);
 
-      if (verbose_proc)
-        printf("Tape read: lost 1 byte\n");
+      QLOG_DEBUG("proc", "Tape read: lost 1 byte");
 
       if (c == EOF) {
         cmt_EOF = true;
@@ -2457,9 +2456,8 @@ static void set_calendar_work(int x) {
   static const char *week[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "???"};
 
   if (x == 0) {
-    if (verbose_io)
-      printf("Set Clock %02d/%02x(%s) %02x:%02x:%02x\n", (shift_reg[4] >> 4) & 0x0f, shift_reg[3],
-             week[shift_reg[4] & 0x07], shift_reg[2], shift_reg[1], shift_reg[0]);
+    QLOG_DEBUG("io", "Set Clock {:02d}/{:02d}x({}) {:02x}:{:02x}:{:02x}\n", (shift_reg[4] >> 4) & 0x0f, shift_reg[3],
+               week[shift_reg[4] & 0x07], shift_reg[2], shift_reg[1], shift_reg[0]);
 
     now_time = time(nullptr);
     now_time += (time_t)calendar_diff;
@@ -2467,9 +2465,8 @@ static void set_calendar_work(int x) {
     t.tm_year = tp->tm_year;
 
   } else {
-    if (verbose_io)
-      printf("Set Clock %02x/%02d/%02x(%s) %02x:%02x:%02x\n", shift_reg[5], (shift_reg[4] >> 4) & 0x0f, shift_reg[3],
-             week[shift_reg[4] & 0x07], shift_reg[2], shift_reg[1], shift_reg[0]);
+    QLOG_DEBUG("io", "Set Clock {:02d}/{:02d}x({}) {:02x}:{:02x}:{:02x}\n", (shift_reg[4] >> 4) & 0x0f, shift_reg[3],
+               week[shift_reg[4] & 0x07], shift_reg[2], shift_reg[1], shift_reg[0]);
 
     i = BCD2INT(shift_reg[5]);
     if (i >= 38)

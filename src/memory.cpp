@@ -10,6 +10,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "file-op.h"
 #include "initval.h"
 #include "memory.h"
@@ -125,15 +127,6 @@ uint8_t *dummy_ram; /* ダミーRAM (32KB)      */
  *----------------------------------------------------------------------*/
 static int mem_alloc_result;
 
-static void mem_alloc_start(const char *msg) /* メモリ確保開始 */
-{
-  if (verbose_proc) {
-    printf("%s", msg);
-  }
-
-  mem_alloc_result = true;
-}
-
 static void *mem_alloc(size_t size) /* メモリ確保 */
 {
   void *ptr = malloc(size);
@@ -142,19 +135,6 @@ static void *mem_alloc(size_t size) /* メモリ確保 */
     mem_alloc_result = false;
   }
   return ptr;
-}
-
-static int mem_alloc_finish(void) /* メモリ確保完了(偽で失敗) */
-{
-  if (verbose_proc) {
-    if (!mem_alloc_result) {
-      printf("FAILED\n");
-    } else {
-      printf("OK\n");
-    }
-  }
-
-  return mem_alloc_result;
 }
 
 /*----------------------------------------------------------------------
@@ -220,20 +200,17 @@ static int load_rom(const char *filelist[], uint8_t *ptr, int size, int disp) {
     memset(&ptr[load_size], 0xff, size - load_size);
   }
 
-  if (verbose_proc) {
-    if (load_size < 0) {
-      if (disp == DISP_FNAME)
-        printf("  %-12s ... ", filelist[0]);
-      if (disp == DISP_RESULT)
-        printf("  %-12s ... Not Found\n", filelist[0]);
-    } else {
-      printf("  Found %-12s : Load...", filelist[i]);
-      if (disp == DISP_RESULT) {
-        if (load_size == size) {
-          printf("OK\n");
-        } else {
-          printf("FAILED\n");
-        }
+  if (load_size < 0) {
+    if (disp == DISP_FNAME)
+      QLOG_DEBUG("proc", "{} ... ", filelist[0]);
+    if (disp == DISP_RESULT)
+      QLOG_DEBUG("proc", "{} ... Not Found", filelist[0]);
+  } else {
+    if (disp == DISP_RESULT) {
+      if (load_size == size) {
+        QLOG_DEBUG("proc", "Found and loaded {}", filelist[i]);
+      } else {
+        QLOG_WARN("proc", "Found but failed to load {}", filelist[i]);
       }
     }
   }
@@ -256,12 +233,10 @@ static int load_compat_rom_success;
 static OSD_FILE *load_compat_rom_open(void) {
   OSD_FILE *fp = osd_fopen(FTYPE_ROM, file_compatrom, "rb");
 
-  if (verbose_proc) {
-    if (fp) {
-      printf("  Found %-12s : Load...", file_compatrom);
-    } else {
-      printf("  %-12s ... Not Found\n", file_compatrom);
-    }
+  if (fp) {
+    QLOG_DEBUG("proc", "Found {}: Load...", file_compatrom);
+  } else {
+    QLOG_DEBUG("proc", "Not found {}: Ignoring...", file_compatrom);
   }
 
   if (fp == nullptr)
@@ -311,7 +286,8 @@ int memory_allocate() {
 
   /* 標準メモリを確保 */
 
-  mem_alloc_start("Allocating memory for standard ROM/RAM...");
+  QLOG_DEBUG("proc", "Allocating memory for standard ROM/RAM...");
+  mem_alloc_result = true;
   {
     main_rom = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x8000);
     main_rom_ext = (uint8_t(*)[0x2000])mem_alloc(sizeof(uint8_t) * 0x2000 * 4);
@@ -329,7 +305,8 @@ int memory_allocate() {
     font_mem2 = (uint8_t *)mem_alloc(sizeof(uint8_t) * 8 * 256 * 2);
     font_mem3 = (uint8_t *)mem_alloc(sizeof(uint8_t) * 8 * 256 * 2);
   }
-  if (!mem_alloc_finish()) {
+  if (!mem_alloc_result) {
+    QLOG_ERROR("proc", "Failed to allocate memory for standard ROM/RAM!");
     return 0;
   }
 
@@ -346,16 +323,14 @@ int memory_allocate() {
 
     size = load_rom(rom_list[SUB_ROM], sub_romram, 0x2000, DISP_FNAME);
     {
-      if (verbose_proc) {
-        if (size < 0) {
-          printf("Not Found\n");
-        } else if (size == 0x800) {
-          printf("OK(2D-type)\n");
-        } else if (size == 0x2000) {
-          printf("OK(2HD-type)\n");
-        } else {
-          printf("FAILED\n");
-        }
+      if (size < 0) {
+        QLOG_DEBUG("proc", "Not Found");
+      } else if (size == 0x800) {
+        QLOG_DEBUG("proc", "OK (2D-type)");
+      } else if (size == 0x2000) {
+        QLOG_DEBUG("proc", "OK (2HD-type)");
+      } else {
+        QLOG_DEBUG("proc", "FAILED");
       }
       if (size <= 0x800) {
         memcpy(&sub_romram[0x0800], &sub_romram[0x0000], 0x0800);
@@ -375,20 +350,17 @@ int memory_allocate() {
       load_compat_rom(&main_rom_n[0x6000], 0x08000, 0x2000, fp);
       load_compat_rom(sub_romram, 0x14000, 0x2000, fp);
 
-      if (!load_compat_rom_success) { /* ここ迄で失敗があれば終了 */
-        if (verbose_proc) {
-          printf("FAILED\n");
-        }
+      /* ここ迄で失敗があれば終了 */
+      if (!load_compat_rom_success) {
+        QLOG_DEBUG("proc", "FAILED");
       } else { /* 成功なら N-BASIC ロード */
         size = load_compat_rom(main_rom_n, 0x16000, 0x6000, fp);
-        if (verbose_proc) {
-          if (size == 0) {
-            printf("OK (Without N-BASIC)\n");
-          } else if (size == 0x6000) {
-            printf("OK (With N-BASIC)\n");
-          } else {
-            printf("FAILED\n");
-          }
+        if (size == 0) {
+          QLOG_DEBUG("proc", "OK (Without N-BASIC)");
+        } else if (size == 0x6000) {
+          QLOG_DEBUG("proc", "OK (With N-BASIC)");
+        } else {
+          QLOG_DEBUG("proc", "FAILED");
         }
       }
 
@@ -424,20 +396,18 @@ int memory_allocate() {
     size = load_rom(rom_list[FONT_ROM], font_mem, FONT_SZ, DISP_FNAME);
     font_loaded |= 1;
 
-    if (verbose_proc) {
-      if (size == FONT_SZ) {
-        printf("OK\n");
+    if (size == FONT_SZ) {
+      QLOG_DEBUG("proc", "OK");
+    } else {
+      if (size < 0) {
+        QLOG_DEBUG("proc", "Not Found");
       } else {
-        if (size < 0) {
-          printf("Not Found ");
-        } else {
-          printf("FAILED ");
-        }
-        if (has_kanji_rom) {
-          printf("(Use KANJI-ROM font)\n");
-        } else {
-          printf("(Use built-in font)\n");
-        }
+        QLOG_DEBUG("proc", "FAILED");
+      }
+      if (has_kanji_rom) {
+        QLOG_DEBUG("proc", "(Use KANJI-ROM font)");
+      } else {
+        QLOG_DEBUG("proc", "(Use built-in font)");
       }
     }
 
@@ -465,16 +435,14 @@ int memory_allocate() {
     size = load_rom(rom_list[FONT2_ROM], font_mem2, FONT_SZ * 2, DISP_IF_EXIST);
     font_loaded |= 2;
 
-    if (verbose_proc) {
-      if (size == -1)
-        ;
-      else if (size == FONT_SZ * 2) {
-        printf("OK(with semi-graphic-font)\n");
-      } else if (size == FONT_SZ) {
-        printf("OK\n");
-      } else {
-        printf("FAILED\n");
-      }
+    if (size == -1) {
+      ;
+    } else if (size == FONT_SZ * 2) {
+      QLOG_DEBUG("proc", "OK (with semi-graphic-font)");
+    } else if (size == FONT_SZ) {
+      QLOG_DEBUG("proc", "OK");
+    } else {
+      QLOG_DEBUG("proc", "FAILED");
     }
 
     if (size == FONT_SZ * 2) {
@@ -501,16 +469,14 @@ int memory_allocate() {
     size = load_rom(rom_list[FONT3_ROM], font_mem3, FONT_SZ * 2, DISP_IF_EXIST);
     font_loaded |= 4;
 
-    if (verbose_proc) {
-      if (size == -1)
-        ;
-      else if (size == FONT_SZ * 2) {
-        printf("OK(with semi-graphic-font)\n");
-      } else if (size == FONT_SZ) {
-        printf("OK\n");
-      } else {
-        printf("FAILED\n");
-      }
+    if (size == -1) {
+      ;
+    } else if (size == FONT_SZ * 2) {
+      QLOG_DEBUG("proc", "OK (with semi-graphic-font)");
+    } else if (size == FONT_SZ) {
+      QLOG_DEBUG("proc", "OK");
+    } else {
+      QLOG_DEBUG("proc", "FAILED");
     }
 
     if (size == FONT_SZ * 2) {
@@ -570,11 +536,8 @@ int memory_allocate_additional() {
     }
 
     if (ext_ram == nullptr) {
-
-      char msg[80];
-      sprintf(msg, "Allocating memory for Extended RAM(%dKB)...", use_extram * 128);
-
-      mem_alloc_start(msg);
+      QLOG_DEBUG("proc", "Allocating memory for Extended RAM ({} KB)...", use_extram * 128);
+      mem_alloc_result = true;
 
       ext_ram = (uint8_t(*)[0x8000])mem_alloc(sizeof(uint8_t) * 0x8000 * 4 * use_extram);
 
@@ -583,7 +546,8 @@ int memory_allocate_additional() {
       if (dummy_ram == nullptr)
         dummy_ram = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x8000);
 
-      if (!mem_alloc_finish()) {
+      if (!mem_alloc_result) {
+        QLOG_ERROR("proc", "Failed to allocate memory for Extended RAM...");
         return 0;
       }
 
@@ -600,12 +564,13 @@ int memory_allocate_additional() {
   if (use_jisho_rom) {
 
     if (jisho_rom == nullptr) {
-
-      mem_alloc_start("Allocating memory for Jisho ROM...");
+      QLOG_DEBUG("proc", "Allocating memory for Jisho ROM...");
+      mem_alloc_result = true;
 
       jisho_rom = (uint8_t(*)[0x4000])mem_alloc(sizeof(uint8_t) * 0x4000 * 32);
 
-      if (!mem_alloc_finish()) {
+      if (!mem_alloc_result) {
+        QLOG_ERROR("proc", "Failed to allocate memory for Jisho ROM!");
         return 0;
       }
 
@@ -618,12 +583,13 @@ int memory_allocate_additional() {
   if (sound_board == SOUND_II) {
 
     if (sound2_adpcm == nullptr) {
-
-      mem_alloc_start("Allocating memory for ADPCM RAM...");
+      QLOG_DEBUG("proc", "Allocating memory for ADPCM RAM...");
+      mem_alloc_result = true;
 
       sound2_adpcm = (uint8_t *)mem_alloc(sizeof(uint8_t) * 0x40000);
 
-      if (!mem_alloc_finish()) {
+      if (!mem_alloc_result) {
+        QLOG_ERROR("proc", "Failed to allocate memory for ADPCM RAM!");
         return 0;
       }
     }

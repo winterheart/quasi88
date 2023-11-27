@@ -8,6 +8,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "byteswap.h"
 #include "debug.h"
 #include "drive.h"
@@ -447,15 +449,6 @@ int drive_check_empty(int drv) { return drive[drv].empty; }
     disk_eject(drv);                                                                                                   \
   } while (0)
 
-/* 警告表示( fmt は、"%s %d \n" を含む)。 ディスクはそのまま */
-
-#define DISK_WARNING(fmt, s, n)                                                                                        \
-  do {                                                                                                                 \
-    if (verbose_proc) {                                                                                                \
-      printf(fmt, s, n);                                                                                               \
-    }                                                                                                                  \
-  } while (0)
-
 int disk_insert(int drv, const char *filename, int img, int readonly) {
   int exit_flag;
   char c[32];
@@ -506,21 +499,19 @@ int disk_insert(int drv, const char *filename, int img, int readonly) {
     memcpy(&drive[drv].image, &drive[drv ^ 1].image, sizeof(drive[drv].image));
 
     if (drv == 0) {
-      DISK_WARNING(" (( %s : Set in drive %d: <- 2: ))\n", filename, drv + 1);
+      QLOG_DEBUG("proc", "(( {} : Set in drive {}: <- 2: ))", filename, drv + 1);
     } else {
-      DISK_WARNING(" (( %s : Set in drive 1: -> %d: ))\n", filename, drv + 1);
+      QLOG_DEBUG("proc", "(( %s : Set in drive {}: -> {}: ))", filename, drv + 1);
     }
 
   } else { /* 反対ドライブと違う場合 */
 
     if (open_as_readonly) {
       drive[drv].read_only = true;
-
-      DISK_WARNING(" (( %s : Set in drive %d: as read only ))\n", filename, drv + 1);
+      QLOG_DEBUG("proc", "(( {} : Set in drive {}: as read only ))", filename, drv + 1);
     } else {
       drive[drv].read_only = false;
-
-      DISK_WARNING(" (( %s : Set in drive %d: ))\n", filename, drv + 1);
+      QLOG_DEBUG("proc", "(( {} : Set in drive {}: ))", filename, drv + 1);
     }
 
     /*
@@ -556,11 +547,11 @@ int disk_insert(int drv, const char *filename, int img, int readonly) {
         num++;
 
         if (num >= MAX_NR_IMAGE) { /* イメージ数が多い時は中断 */
-          DISK_WARNING(" (( %s : Too many images [>=%d] ))\n", filename, MAX_NR_IMAGE);
+          QLOG_WARN("proc", "(( {} : Too many images [>={}] ))", filename, MAX_NR_IMAGE);
           drive[drv].over_image = true;
           exit_flag = true;
         } else if (offset < 0) { /* イメージサイズが大きすぎ? */
-          DISK_WARNING(" (( %s : Too big image? [%d] ))\n", filename, num + 1);
+          QLOG_WARN("proc", "(( {} : Too big image? [{}] ))", filename, num + 1);
           drive[drv].detect_broken_image = true;
           exit_flag = true;
         }
@@ -571,13 +562,13 @@ int disk_insert(int drv, const char *filename, int img, int readonly) {
         break;
 
       case D88_BAD_IMAGE: /* このイメージは壊れている */
-        DISK_WARNING(" (( %s : Image No. %d Broken? ))\n", filename, num + 1);
+        QLOG_WARN("proc", "(( {} : Image No. {} Broken? ))", filename, num + 1);
         drive[drv].detect_broken_image = true;
         exit_flag = true;
         break;
 
       default: /* ??? */
-        DISK_WARNING(" (( %s : Image No. %d Error? ))\n", filename, num + 1);
+        QLOG_WARN("proc", "(( {} : Image No. {} Error? ))", filename, num + 1);
         drive[drv].detect_broken_image = true;
         exit_flag = true;
         break;
@@ -595,7 +586,7 @@ int disk_insert(int drv, const char *filename, int img, int readonly) {
   /* disk_top をimg 枚目のディスクイメージの先頭に設定  */
 
   if (img < 0 || img >= drive[drv].image_nr) {
-    DISK_WARNING(" (( %s : Image No. %d Not exist ))\n", filename, img + 1);
+    QLOG_WARN("proc", "(( {} : Image No. {} not exist ))", filename, img + 1);
     drive_set_empty(drv);
   } else {
     disk_change_image(drv, img);
@@ -1073,8 +1064,7 @@ static int fdc_check_unit() {
       disk_now_track(drv, ((drive[drv].track & ~1) | fdc.hd));
       fdc.carry = 0;
       logfdc("\n<< sector reload >>\t\t\t");
-      if (verbose_fdc)
-        printf("FDC log : sec_buf reload $$$$\n");
+      QLOG_DEBUG("fdc", "FDC log: sec_buf reload $$$$");
 
     } else
 
@@ -1461,19 +1451,17 @@ static int fdc_write_data() {
       fdc.st1 = 0;
       fdc.st2 = ((fdc.command == WRITE_DELETED_DATA) ? ST2_CM : 0);
 
-      if (verbose_fdc) {
-        printf("FDC %s : Drive %d Write Skipped (write protected)\n", cmd_name[fdc.command], drv + 1);
-      }
+      QLOG_DEBUG("fdc", "FDC {}: Drive {} Write Skipped (write protected)", cmd_name[fdc.command], drv + 1);
+
       status_message(1, STATUS_WARN_TIME, "Disk Write Skipped");
 
     } else {
 
-      if (verbose_fdc) {
-        if (write_protected)
-          printf("FDC %s : Drive %d Write Failed (write protected)\n", cmd_name[fdc.command], drv + 1);
-        else
-          printf("FDC %s : Drive %d Write Failed (file changed ?)\n", cmd_name[fdc.command], drv + 1);
-      }
+      if (write_protected)
+        QLOG_DEBUG("fdc", "FDC {}: Drive {} Write Failed (write protected)", cmd_name[fdc.command], drv + 1);
+      else
+        QLOG_DEBUG("fdc", "FDC {}: Drive {} Write Failed (file changed?)", cmd_name[fdc.command], drv + 1);
+
       status_message(1, STATUS_WARN_TIME, "Disk Write Failed");
     }
     return 1;
@@ -1527,11 +1515,12 @@ static int fdc_write_data() {
       /* 次のトラックのデータを破壊するおそれあり。うーん。*/
     }
 
-    if (verbose_fdc) {
-      if (gap4_wrote == false)
-        printf("FDC %s : Sector Overlap in track %d (DRIVE %d:)\n", cmd_name[fdc.command], drive[drv].track, drv + 1);
-      else
-        printf("FDC %s : GAP4 Overlap in track %d (DRIVE %d:)\n", cmd_name[fdc.command], drive[drv].track, drv + 1);
+    if (gap4_wrote) {
+      QLOG_DEBUG("fdc", "FDC {}: GAP4 Overlap in track {} (DRIVE {}:)",
+                 cmd_name[fdc.command], drive[drv].track, drv + 1);
+    } else {
+      QLOG_DEBUG("fdc", "FDC {}: Sector Overlap in track {} (DRIVE {}:)",
+                 cmd_name[fdc.command], drive[drv].track, drv + 1);
     }
 
   } /* ----------------------------------------- */
@@ -1638,21 +1627,18 @@ static int fdc_write_id() {
       fdc.st1 = 0;
       fdc.st2 = 0;
 
-      if (verbose_fdc) {
-        printf("FDC %s : Drive %d Write Skipped (write protected)\n", cmd_name[fdc.command], drv + 1);
-      }
+      QLOG_DEBUG("fdc", "FDC {}: Drive {} Write Skipped (write protected)", cmd_name[fdc.command], drv + 1);
       status_message(1, STATUS_WARN_TIME, "Disk Write Skipped");
 
     } else {
 
-      if (verbose_fdc) {
-        if (write_protected)
-          printf("FDC %s : Drive %d Format Failed (write protected)\n", cmd_name[fdc.command], drv + 1);
-        else if (!disk_not_exist(drv) && disk_unformatable(drv))
-          printf("FDC %s : Drive %d Format Failed (no file space)\n", cmd_name[fdc.command], drv + 1);
-        else
-          printf("FDC %s : Drive %d Format Failed (file changed ?)\n", cmd_name[fdc.command], drv + 1);
-      }
+      if (write_protected)
+        QLOG_DEBUG("fdc", "FDC {}: Drive {} Format Failed (write protected)", cmd_name[fdc.command], drv + 1);
+      else if (!disk_not_exist(drv) && disk_unformatable(drv))
+        QLOG_DEBUG("fdc", "FDC {}: Drive {} Format Failed (no file space)", cmd_name[fdc.command], drv + 1);
+      else
+        QLOG_DEBUG("fdc", "FDC {}: Drive {} Format Failed (file changed?)", cmd_name[fdc.command], drv + 1);
+
       status_message(1, STATUS_WARN_TIME, "Disk Write Failed");
     }
     return 1;
@@ -1677,9 +1663,8 @@ static int fdc_write_id() {
     SZ_GAP0 = 0; /* とりあえず、GAP0 の分は越えても支障ナシ */
     max_sec = (SZ_BYTE - SZ_GAP0) / (SZ_AM + SZ_DAM + 128 * (1 << (fdc.n & 7)) + fdc.gpl);
     if (fdc.sc > max_sec) {
-
-      if (verbose_fdc)
-        printf("FDC %s : Over Sector %d -> fixed %d (DRIVE %d:)\n", cmd_name[fdc.command], fdc.sc, max_sec, drv + 1);
+      QLOG_DEBUG("fdc", "FDC {}: Over Sector {} -> fixed {} (DRIVE {}:){}",
+                 cmd_name[fdc.command], fdc.sc, max_sec, drv + 1);
 
       id_ptr = (fdc.sc - max_sec) * 4;
       fdc.sc = max_sec;
@@ -1727,9 +1712,9 @@ static int fdc_write_id() {
       id[DISK_SEC_SZ] = (128 * (1 << (fdc.n & 7))) & 0xff;
       id[DISK_SEC_SZ + 1] = (128 * (1 << (fdc.n & 7)) >> 8) & 0xff;
 
-      if (verbose_fdc)
-        if (id[DISK_N] != fdc.n)
-          printf("FDC %s : Mix Sector in track %d (DRIVE %d:)\n", cmd_name[fdc.command], drive[drv].track, drv + 1);
+      if (id[DISK_N] != fdc.n)
+        QLOG_DEBUG("fdc", "FDC {}: Mix Sector in track {} (DRIVE {}:)",
+                   cmd_name[fdc.command], drive[drv].track, drv + 1);
 
       if (format_pos + 16 <= drive[drv].disk_end) {
         if (osd_fseek(drive[drv].fp, format_pos, SEEK_SET) == 0) {
@@ -1898,9 +1883,8 @@ static void c_phase() {
         fdc.intr_unit = i;      /* このドライブは    */
         fdc_cancel_interrupt(); /* SENSE INT で通知  */
 
-        if (verbose_fdc)
-          if (fdc.command != SENSE_INT_STATUS)
-            printf("FDC log : Missing SENSE INT STATUS $$$$\n");
+        if (fdc.command != SENSE_INT_STATUS)
+          QLOG_DEBUG("fdc", "Missing SENSE INT STATUS $$$$");
       }
 
       cmd = (fdc.c0 & 0x1f);
@@ -1914,9 +1898,7 @@ static void c_phase() {
       switch (fdc.command) { /* コマンド別の処理  */
 
       case READ_DIAGNOSTIC: /* READ系 */
-        if (verbose_fdc) {
-          printf("FDC %s : Drive %d Track %d\n", cmd_name[fdc.command], fdc.us + 1, fdc.ncn[fdc.us] * 2 + fdc.hd);
-        }
+        QLOG_DEBUG("fdc", "FDC {} : Drive {} Track {}", cmd_name[fdc.command], fdc.us + 1, fdc.ncn[fdc.us] * 2 + fdc.hd);
         fdc.sk = 0;
         fdc.mt = 0; /* FALLTHROUGH */
       case READ_DATA:
@@ -1926,9 +1908,8 @@ static void c_phase() {
         fdc.phase = E_PHASE;
 
         if (fdc.command == READ_ID) {
-          if (verbose_fdc) {
-            printf("FDC %s : Drive %d Track %d\n", cmd_name[fdc.command], fdc.us + 1, fdc.ncn[fdc.us] * 2 + fdc.hd);
-          }
+          QLOG_DEBUG("fdc", "FDC {}: Drive {} Track {}",
+                     cmd_name[fdc.command], fdc.us + 1, fdc.ncn[fdc.us] * 2 + fdc.hd);
           logfdc("%s mf%d us%d hd%d\n", cmd_name[fdc.command], fdc.mf, fdc.us, fdc.hd);
         } else {
           logfdc("%s sk%d mf%d mt%d us%d hd%d eot=%d gpl=%d dtl=%d\n", cmd_name[fdc.command], fdc.sk, fdc.mf, fdc.mt,
@@ -2292,9 +2273,8 @@ static int e_phase_read_recv(int interval) {
   if (fdc.limit < 0) { /* 一定時間経過でオーバーラン */
     /* fdc.st1 |= ST1_OR; */
     fdc.limit = 0;
-    if (verbose_fdc)
-      if (fdc_wait)
-        printf("FDC %s : Over Run\n", cmd_name[fdc.command]);
+    if (fdc_wait)
+      QLOG_DEBUG("fdc", "FDC {}: Over Run", cmd_name[fdc.command]);
   }
 
   if (fdc.TC) { /* TC信号ありの場合 */
@@ -2443,8 +2423,7 @@ static int e_phase_writeid_search() {
       fdc.data_ptr = 0;
       if (fdc.sc == 0) {
         fdc.counter = 256 * 4;
-        if (verbose_fdc)
-          printf("FDC %s : no sector\n", cmd_name[fdc.command]);
+        QLOG_DEBUG("fdc", "FDC {}: no sector", cmd_name[fdc.command]);
       } else {
         fdc.counter = fdc.sc * 4;
       }
@@ -2533,9 +2512,8 @@ static int e_phase_write_respond(int interval) {
   if (fdc.limit < 0) { /* 一定時間経過でオーバーラン */
     /* fdc.st1 |= ST1_OR; */
     fdc.limit = 0;
-    if (verbose_fdc)
-      if (fdc_wait)
-        printf("FDC %s : Over Run\n", cmd_name[fdc.command]);
+    if (fdc_wait)
+      QLOG_DEBUG("fdc", "FDC {}: Over Run\n", cmd_name[fdc.command]);
   }
 
   if (fdc.TC) { /* TC信号ありの場合 */
@@ -2594,8 +2572,7 @@ static int e_phase_writeid_track() {
 
   fdc.TC = false; /* TC信号があれば消す */
   if (fdc.counter != 0) {
-    if (verbose_fdc)
-      printf("FDC %s : CHRN missing\n", cmd_name[fdc.command]);
+    QLOG_DEBUG("fdc", "FDC {}: CHRN missing", cmd_name[fdc.command]);
 
     while ((fdc.counter % 4) != 0) {   /* 4バイトに満たない */
       data_buf[fdc.data_ptr++] = 0x00; /* 部分は00Hで埋める */
