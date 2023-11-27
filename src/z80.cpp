@@ -78,9 +78,11 @@
  *
  *****************************************************************************/
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "quasi88.h"
+
+#include "Core/Log.h"
 
 #include "z80.h"
 
@@ -1259,8 +1261,7 @@ INLINE void z80_code_ED(z80arch *z80) {
   switch (opcode) {
 #include "z80-codeED.h" /* ED XX */
   default:              /* ED ?? */
-    if (verbose_z80)
-      printf("Unrecognized instruction: ED %02X at PC=%04X\n", M_RDMEM(z80->PC.W - 1), z80->PC.W - 2);
+    QLOG_WARN("z80", "Unrecognized instruction: ED {:02X} at PC={:04X}", M_RDMEM(z80->PC.W - 1), z80->PC.W - 2);
     z80->state0 += 8; /* ED ?? == NOP NOP */
   }
 }
@@ -1285,13 +1286,13 @@ INLINE void z80_code_DD(z80arch *z80) {
     switch (opcode) {
 #include "z80-codeXXCB.h" /* DD CB XX XX */
     default:              /* DD CB ?? ?? */
-      printf("!! Internal Error in Z80-Emulator !!\n");
-      printf("  PC = %04x : code = DD CB %02X %02X\n", z80->PC.W - 4, M_RDMEM(z80->PC.W - 2), M_RDMEM(z80->PC.W - 1));
+      QLOG_WARN("z80", "Internal Error in Z80-Emulator!");
+      QLOG_WARN("z80", "PC = {:04x} : code = DD CB {:02X} {:02X}",
+                z80->PC.W - 4, M_RDMEM(z80->PC.W - 2), M_RDMEM(z80->PC.W - 1));
     }
     break;
   default: /* DD ?? */
-    if (verbose_z80)
-      printf("Unrecognized instruction: DD %02X at PC=%04X\n", M_RDMEM(z80->PC.W - 1), z80->PC.W - 2);
+    QLOG_WARN("z80", "Unrecognized instruction: DD {:02X} at PC={:04X}", M_RDMEM(z80->PC.W - 1), z80->PC.W - 2);
     z80->PC.W--;
     z80->R--;                  /* ?? の位置にPCを戻す */
     z80->state0 += 4;          /* DD == NOP */
@@ -1322,13 +1323,13 @@ INLINE void z80_code_FD(z80arch *z80) {
     switch (opcode) {
 #include "z80-codeXXCB.h" /* FD CB XX XX */
     default:              /* FD CB ?? ?? */
-      printf("!! Internal Error in Z80-Emulator !!\n");
-      printf("  PC = %04x : code = FD CB %02X %02X\n", z80->PC.W - 4, M_RDMEM(z80->PC.W - 2), M_RDMEM(z80->PC.W - 1));
+      QLOG_WARN("z80", "Internal Error in Z80-Emulator!");
+      QLOG_WARN("z80", "PC = {:04x} : code = FD CB {:02X} {:02X}",
+                z80->PC.W - 4, M_RDMEM(z80->PC.W - 2), M_RDMEM(z80->PC.W - 1));
     }
     break;
   default: /* FD ?? */
-    if (verbose_z80)
-      printf("Unrecognized instruction: FD %02X at PC=%04X\n", M_RDMEM(z80->PC.W - 1), z80->PC.W - 2);
+    QLOG_WARN("z80", "Unrecognized instruction: FD {:02X} at PC={:04X}", M_RDMEM(z80->PC.W - 1), z80->PC.W - 2);
     z80->PC.W--;
     z80->R--;                  /* ?? の位置にPCを戻す */
     z80->state0 += 4;          /* FD == NOP */
@@ -1372,8 +1373,7 @@ static int z80_im0_interrupt(z80arch *z80, int level) {
     z80->BC.B.l = M_RDMEM(z80->PC.W++);
     break;
   default:
-    if (verbose_z80)
-      printf("Unexpected interrupt signal %X\n", level);
+    QLOG_WARN("Unexpected interrupt signal {:X}", level);
     break;
   }
 

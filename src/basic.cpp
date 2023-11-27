@@ -22,6 +22,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "basic.h"
 #include "memory.h"
 #include "monitor.h"
@@ -194,18 +196,12 @@ static void pseudo_z80_init() {
 /* 仮想メモリ初期化                 */
 /*------------------------------------------------------*/
 static int pseudo_mem_init() {
-  if (verbose_proc)
-    printf("Allocating 64kB for pseudo ram...");
   pseudo_ram = (uint8_t *)malloc(sizeof(uint8_t) * 0x10000);
   if (pseudo_ram == nullptr) {
-    if (verbose_proc) {
-      printf("FAILED\n");
-    }
-    return (0);
+    QLOG_ERROR("proc", "Failed to allocate 64kB for pseudo RAM.");
+    return 0;
   } else {
-    if (verbose_proc) {
-      printf("OK\n");
-    }
+    QLOG_DEBUG("proc", "Successfully allocated 64kb for pseudo RAM.");
   }
   memset(pseudo_ram, 0x00, 0x10000);
 
@@ -217,7 +213,7 @@ static int pseudo_mem_init() {
     WRITE_BYTE(pseudo_ram, 0xe69d, 0x10);
     memset(&pseudo_ram[0xed00], 0xc9, 0x100);
   }
-  return (1);
+  return 1;
 }
 
 /*------------------------------------------------------*/

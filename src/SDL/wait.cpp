@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <SDL2/SDL.h>
 
-#include "quasi88.h"
+#include "Core/Log.h"
 
 #include "wait.h"
 
@@ -46,8 +46,7 @@ static T_WAIT_TICK delta_time; /* 1 フレームの時間 */
 int wait_vsync_init(void) {
   if (!SDL_WasInit(SDL_INIT_TIMER)) {
     if (SDL_InitSubSystem(SDL_INIT_TIMER) != 0) {
-      if (verbose_wait)
-        printf("Error Wait (SDL)\n");
+      QLOG_WARN("wait", "Error Wait (SDL)");
       return false;
     }
   }

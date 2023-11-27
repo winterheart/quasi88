@@ -2,6 +2,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "drive.h"
 #include "event.h"
 #include "fname.h"
@@ -32,16 +34,14 @@ int quasi88_stateload(int serial) {
     filename_set_state_serial(serial); /* 連番を設定する */
   }
 
-  if (verbose_proc)
-    printf("Stateload...start (%s)\n", filename_get_state());
+  QLOG_DEBUG("proc", "Stateload: starting {}", filename_get_state());
 
   if (stateload_check_file_exist() == false) { /* ファイルなし */
     if (quasi88_is_exec()) {
       status_message(1, STATUS_INFO_TIME, "State-Load file not found !");
     } /* メニューではダイアログ表示するので、ステータス表示は無しにする */
 
-    if (verbose_proc)
-      printf("State-file not found\n");
+    QLOG_WARN("proc", "State-file not found");
     return false;
   }
 
@@ -68,11 +68,10 @@ int quasi88_stateload(int serial) {
     menu_sound_restart(false);    /* サウンドドライバの再初期化 */
   }
 
-  if (verbose_proc) {
-    if (success) {
-      printf("Stateload...done\n");
-    } else
-      printf("Stateload...Failed, Reset start\n");
+  if (success) {
+    QLOG_DEBUG("proc", "Stateload: done");
+  } else {
+    QLOG_WARN("proc", "Stateload: failed, Reset start");
   }
 
   if (success) { /* ステートロード成功したら・・・ */
@@ -115,16 +114,14 @@ int quasi88_statesave(int serial) {
     filename_set_state_serial(serial); /* 連番を設定する */
   }
 
-  if (verbose_proc)
-    printf("Statesave...start (%s)\n", filename_get_state());
+  QLOG_DEBUG("proc", "Statesave: start ({})", filename_get_state());
 
   int success = statesave(); /* ステートセーブ実行 */
 
-  if (verbose_proc) {
-    if (success) {
-      printf("Statesave...done\n");
-    } else
-      printf("Statesave...Failed, Reset done\n");
+  if (success) {
+    QLOG_DEBUG("proc", "Statesave: done");
+  } else {
+    QLOG_WARN("proc", "Statesave: failed, Reset start");
   }
 
   if (quasi88_is_exec()) {

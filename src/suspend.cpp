@@ -12,6 +12,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "byteswap.h"
 #include "file-op.h"
 #include "suspend.h"
@@ -358,25 +360,19 @@ static int stateload_header() {
     title = header;
     ver = title + strlen(title) + 1;
     rev = ver + strlen(ver) + 1;
-    if (verbose_suspend) {
-      printf("stateload: file header is \"%s\", \"%s\", \"%s\".\n", title, ver, rev);
-    }
+    QLOG_DEBUG("suspend", "Stateload: file header is \"{}\", \"{}\", \"{}\".", title, ver, rev);
 
     if (memcmp(title, STATE_ID, sizeof(STATE_ID)) != 0) {
-
-      printf("stateload: ID mismatch ('%s' != '%s')\n", STATE_ID, title);
+      QLOG_WARN("suspend", "Stateload: ID mismatch ('{}' != '{}')", STATE_ID, title);
     } else {
       if (memcmp(ver, STATE_VER, sizeof(STATE_VER)) != 0) {
-
-        printf("stateload: version mismatch ('%s' != '%s')\n", STATE_VER, ver);
+        QLOG_ERROR("suspend", "Stateload: version mismatch ('{}' != '{}')", STATE_VER, ver);
         if (!resume_force)
           return STATE_ERR;
 
       } else {
-        if (verbose_suspend) {
-          if (memcmp(rev, STATE_REV, sizeof(STATE_REV)) != 0) {
-            printf("stateload: older revision ('%s' != '%s')\n", STATE_REV, rev);
-          }
+        if (memcmp(rev, STATE_REV, sizeof(STATE_REV)) != 0) {
+          QLOG_WARN("suspend", "Stateload: older revision ('{}' != '{}')", STATE_REV, rev);
         }
       }
 
@@ -630,12 +626,11 @@ int statesave() {
   int success = false;
 
   if (file_state[0] == '\0') {
-    printf("state-file name not defined\n");
+    QLOG_WARN("suspend", "state-file name not defined");
     return false;
   }
 
-  if (verbose_suspend)
-    printf("statesave : %s\n", file_state);
+  QLOG_DEBUG("suspend", "statesave: {}", file_state);
 
   if ((statesave_fp = osd_fopen(FTYPE_STATE_SAVE, file_state, "wb"))) {
     if (statesave_header() == STATE_OK) {
@@ -685,9 +680,7 @@ int stateload_check_file_exist() {
     osd_fclose(stateload_fp);
   }
 
-  if (verbose_suspend) {
-    printf("stateload: file check ... %s\n", (success) ? "OK" : "FAILED");
-  }
+  QLOG_DEBUG("suspend", "Stateload: file check ... {}", (success) ? "OK" : "FAILED");
   return success;
 }
 
@@ -699,8 +692,7 @@ int stateload() {
     return false;
   }
 
-  if (verbose_suspend)
-    printf("stateload: %s\n", file_state);
+  QLOG_DEBUG("suspend", "Stateload: {}", file_state);
 
   if ((stateload_fp = osd_fopen(FTYPE_STATE_LOAD, file_state, "rb"))) {
 

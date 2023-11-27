@@ -7,6 +7,7 @@
 #include <memory>
 #include <SDL2/SDL.h>
 
+#include "Core/Log.h"
 #include "Quasi88SDLApp.h"
 
 #include "device.h"
@@ -80,12 +81,15 @@ int main(int argc, char *argv[]) {
     /* Environment initialization & argument handling */
     if (config_init(argc, argv, sdl_options, help_msg_sdl)) {
       std::shared_ptr<QUASI88::Quasi88SDLApp> app;
+      SDL_version libver;
+      SDL_GetVersion(&libver);
+      QLOG_DEBUG("proc", "SDL {}.{}.{} initialized successfully", libver.major, libver.minor, libver.patch);
       app->run();
 
       config_exit(); /* 引数処理後始末 */
     }
   } catch (const std::exception& e) {
-    // TODO: Logging exception
+    QLOG_CRITICAL("proc", "SDL error: {}", e.what());
     return 1;
   }
 

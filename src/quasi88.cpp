@@ -24,6 +24,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "debug.h"
 #include "drive.h"
 #include "emu.h"
@@ -76,11 +78,8 @@ void quasi88(void) {
 
 /* =========================== メイン処理の初期化 ========================== */
 
-#define SET_PROC(n)                                                                                                    \
-  proc = n;                                                                                                            \
-  if (verbose_proc)                                                                                                    \
-    printf("\n");                                                                                                      \
-  fflush(NULL);
+#define SET_PROC(n) proc = n;
+
 static int proc = 0;
 
 void quasi88_start(void) {
@@ -98,12 +97,10 @@ void quasi88_start(void) {
   if (resume_flag) { /* ステートロード        */
     SET_PROC(2);
     if (stateload() == false) {
-      fprintf(stderr, "stateload: Failed ! (filename = %s)\n", filename_get_state());
+      QLOG_ERROR("proc", "stateload: Failed! (filename = {})\n", filename_get_state());
       quasi88_exit(-1);
     }
-    if (verbose_proc)
-      printf("Stateload...OK\n");
-    fflush(nullptr);
+    QLOG_DEBUG("proc", "Stateload: OK");
   }
   SET_PROC(3);
 
@@ -153,8 +150,7 @@ void quasi88_start(void) {
 
   emu_breakpoint_init();
 
-  if (verbose_proc)
-    printf("Running QUASI88kai...\n");
+  QLOG_DEBUG("proc", "Running QUASI88");
 }
 
 /* ======================== メイン処理のメインループ ======================= */
@@ -190,12 +186,11 @@ void quasi88_main(void) {
 
 void quasi88_stop(int normal_exit) {
   if (normal_exit) {
-    if (verbose_proc)
-      printf("Shutting down.....\n");
+    QLOG_DEBUG("proc", "Shutting down...");
   }
 
   /* 初期化途中の場合、verbose による詳細表示がなければ、エラー表示する */
-#define ERR_DISP(n) ((proc == (n)) && (verbose_proc == 0))
+#define ERR_DISP(n) (proc == (n))
 
   switch (proc) {
   case 6: /* 初期化 正常に終わっている */
@@ -211,20 +206,20 @@ void quasi88_stop(int normal_exit) {
 
   case 5: /* タイマーの初期化でNG */
     if (ERR_DISP(5))
-      printf("timer initialize failed!\n");
+      QLOG_ERROR("proc", "timer initialize failed!");
     xmame_sound_stop();
     /* FALLTHROUGH */
 
   case 4: /* サウンドの初期化でNG */
     if (ERR_DISP(4))
-      printf("sound system initialize failed!\n");
+      QLOG_ERROR("proc", "sound system initialize failed!");
     event_exit();
     screen_exit();
     /* FALLTHROUGH */
 
   case 3: /* グラフィックの初期化でNG */
     if (ERR_DISP(3))
-      printf("graphic system initialize failed!\n");
+      QLOG_ERROR("proc", "graphic system initialize failed!");
     /* FALLTHROUGH */
 
   case 2: /* ステートロードでNG */
@@ -232,7 +227,7 @@ void quasi88_stop(int normal_exit) {
 
   case 1: /* メモリの初期化でNG */
     if (ERR_DISP(2))
-      printf("memory allocate failed!\n");
+      QLOG_ERROR("proc", "memory allocate failed!");
     memory_free();
     /* FALLTHROUGH */
 
@@ -620,8 +615,7 @@ void quasi88_reset(const T_RESET_CFG *cfg) {
   int sb_changed = false;
   int empty[2];
 
-  if (verbose_proc)
-    printf("Reset QUASI88kai...start\n");
+  QLOG_DEBUG("proc", "Resetting Quasi88: start");
 
   pc88main_term();
   pc88sub_term();
@@ -715,7 +709,5 @@ void quasi88_reset(const T_RESET_CFG *cfg) {
 #endif
 
   emu_reset();
-
-  if (verbose_proc)
-    printf("Reset QUASI88kai...done\n");
+  QLOG_DEBUG("proc", "Resetting Quasi88: done");
 }

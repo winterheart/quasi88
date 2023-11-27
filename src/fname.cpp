@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "quasi88.h"
+#include "Core/Log.h"
 
 #include "drive.h"
 #include "fname.h"
@@ -187,14 +187,11 @@ void imagefile_all_open(int stateload) {
     }
   }
 
-  if (verbose_proc) {
-    int i;
-    for (i = 0; i < 2; i++) {
-      if (disk_image_exist(i)) {
-        printf("DRIVE %d: <= %s [%d]\n", i + 1, file_disk[i], disk_image_selected(i) + 1);
-      } else {
-        printf("DRIVE %d: <= (empty)\n", i + 1);
-      }
+  for (int i = 0; i < 2; i++) {
+    if (disk_image_exist(i)) {
+      QLOG_DEBUG("proc", "DRIVE {}: <= {} [{}]", i + 1, file_disk[i], disk_image_selected(i) + 1);
+    } else {
+      QLOG_DEBUG("proc", "DRIVE {}: <= (empty)", i + 1);
     }
   }
 }

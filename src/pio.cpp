@@ -8,6 +8,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "emu.h"
 #include "pc88cpu.h"
 #include "pio.h"
@@ -89,12 +91,10 @@ void pio_init() {
 /* verbose 指定時のメッセージ表示マクロ                   */
 
 #define pio_mesAB(s)                                                                                                   \
-  if (verbose_pio)                                                                                                     \
-  printf(s " : side = %s : port = %s\n", (side == PIO_SIDE_M) ? "M" : "S", (port == PIO_PORT_A) ? "A" : "B")
+  QLOG_DEBUG("pio", s " : side = {} : port = {}", (side == PIO_SIDE_M) ? "M" : "S", (port == PIO_PORT_A) ? "A" : "B")
 
 #define pio_mesC(s)                                                                                                    \
-  if (verbose_pio)                                                                                                     \
-  printf(s " : side = %s\n", (side == PIO_SIDE_M) ? "M" : "S")
+  QLOG_DEBUG("pio", s " : side = {}", (side == PIO_SIDE_M) ? "M" : "S")
 
 /*----------------------------------------------------------------------*/
 /* PIO A or B からリード                       */
@@ -313,8 +313,8 @@ void pio_write_C_direct(int side, uint8_t data) {
 /*----------------------------------------------------------------------*/
 void pio_set_mode(int side, uint8_t data) {
   if (data & 0x60) {
-    if (verbose_pio)
-      printf("PIO mode A & CH not 0 : side = %s : mode = %d\n", (side != PIO_SIDE_M) ? "M" : "S", (data >> 5) & 0x3);
+    QLOG_DEBUG("pio", "PIO mode A & CH not 0 : side = {} : mode = {}",
+               (side != PIO_SIDE_M) ? "M" : "S", (data >> 5) & 0x3);
   }
   /* PIO A */
 
@@ -337,8 +337,8 @@ void pio_set_mode(int side, uint8_t data) {
   pio_C[side][PIO_PORT_CH].cont_f = 1;
 
   if (data & 0x04) {
-    if (verbose_pio)
-      printf("PIO mode B & CL not 0 : side = %s : mode = %d\n", (side != PIO_SIDE_M) ? "M" : "S", (data >> 2) & 0x1);
+    QLOG_DEBUG("pio", "PIO mode B & CL not 0 : side = {} : mode = {}",
+               (side != PIO_SIDE_M) ? "M" : "S", (data >> 2) & 0x1);
   }
   /* PIO B */
 

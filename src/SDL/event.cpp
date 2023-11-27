@@ -10,6 +10,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "device.h"
 #include "drive.h"
 
@@ -135,15 +137,11 @@ void event_init(void) {
 
   /* Joystick initialization */
   if (use_joydevice) {
-    if (verbose_proc)
-      printf("Initializing Joystick System ... ");
     int i = joystick_init();
-    if (verbose_proc) {
-      if (i >= 0)
-        printf("OK (found %d joystick(s))\n", i);
-      else
-        printf("FAILED\n");
-    }
+    if (i >= 0)
+      QLOG_DEBUG("proc", "Initialized Joystick System ({} found)", i);
+    else
+      QLOG_ERROR("proc", "Failed to initialize Joystick System");
   }
 
   /* test */
@@ -173,9 +171,8 @@ void event_update() {
       keysym = E.key.keysym.sym;
       key88 = keymap2key88(keysym);
       if (key88 != KEY88_INVALID) {
-        if (verbose_proc)
-          printf("Found key: %s / %s (KEY88 %d)\n", E.type == SDL_KEYDOWN ? "DOWN" : "UP  ", SDL_GetKeyName(keysym),
-                 key88);
+        QLOG_DEBUG("proc", "Found key: {} / {} (KEY88 {})",
+                   E.type == SDL_KEYDOWN ? "DOWN" : "UP  ", SDL_GetKeyName(keysym), key88);
         quasi88_key(key88, (E.type == SDL_KEYDOWN));
       }
       break;
@@ -293,8 +290,7 @@ void event_update() {
       break;
 
     case SDL_QUIT: /*------------------------------------------*/
-      if (verbose_proc)
-        printf("Window Closed !\n");
+      QLOG_DEBUG("proc", "Windows Closed!");
       quasi88_quit();
       break;
 

@@ -8,6 +8,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "debug.h"
 #include "emu.h"
 #include "fdc.h"
@@ -71,8 +73,7 @@ void sub_mem_write(uint16_t addr, uint8_t data) {
 
   } else {
 
-    if (verbose_io)
-      printf("SUB Memory Write BAD %04x\n", addr);
+    QLOG_DEBUG("io", "SUB Memory Write BAD {:04x}", addr);
     if ((addr & 0x4000) == 0x4000) {
       sub_romram[addr & 0x7fff] = data;
     }
@@ -123,8 +124,7 @@ void sub_io_out(uint8_t port, uint8_t data) {
     return;
   }
 
-  if (verbose_io)
-    printf("SUB OUT data %02X to undecoeded port %02XH\n", data, port);
+  QLOG_DEBUG("io", "SUB OUT data {:02X} to undecoded port {:02X}H", data, port);
 }
 
 /*----------------------*/
@@ -162,8 +162,7 @@ uint8_t sub_io_in(uint8_t port) {
     return pio_read_C(PIO_SIDE_S);
   }
 
-  if (verbose_io)
-    printf("SUB IN        from undecoeded port %02XH\n", port);
+  QLOG_DEBUG("io", "SUB IN        from undecoded port {:%02X}H", port);
 
   return 0xff;
 }

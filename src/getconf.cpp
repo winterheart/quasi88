@@ -9,6 +9,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "debug.h"
 #include "emu.h"
 #include "fdc.h"
@@ -93,6 +95,16 @@ static const T_CONFIG_TABLE *option_table_osd;
 static const T_CONFIG_TABLE *option_table_sound;
 
 /*----------------------------------------------------------------------*/
+
+// Loggers
+auto z80_log = QUASI88::make_log("z80");
+auto proc_log = QUASI88::make_log("proc");
+auto io_log = QUASI88::make_log("io");
+auto pio_log = QUASI88::make_log("pio");
+auto fdc_log = QUASI88::make_log("fdc");
+auto suspend_log = QUASI88::make_log("suspend");
+auto snd_log = QUASI88::make_log("snd");
+auto wait_log = QUASI88::make_log("wait");
 
 /* コールバック関数の引数 (char *) が未使用の場合、
  * ワーニングが出て鬱陶しいので、 gcc に頼んで許してもらう。 */
@@ -1075,14 +1087,22 @@ static int get_config_file(OSD_FILE *fp, int priority, const T_CONFIG_TABLE *osd
  ************************************************************************/
 
 static void set_verbose() {
-  verbose_proc = verbose_level & 0x01;
-  verbose_z80 = verbose_level & 0x02;
-  verbose_io = verbose_level & 0x04;
-  verbose_pio = verbose_level & 0x08;
-  verbose_fdc = verbose_level & 0x10;
-  verbose_wait = verbose_level & 0x20;
-  verbose_suspend = verbose_level & 0x40;
-  verbose_snd = verbose_level & 0x80;
+  if ((verbose_proc = verbose_level & 0x01))
+    spdlog::get("proc")->set_level(spdlog::level::debug);
+  if ((verbose_z80 = verbose_level & 0x02))
+    spdlog::get("z80")->set_level(spdlog::level::debug);
+  if ((verbose_io = verbose_level & 0x04))
+    spdlog::get("io")->set_level(spdlog::level::debug);
+  if ((verbose_pio = verbose_level & 0x08))
+    spdlog::get("pio")->set_level(spdlog::level::debug);
+  if ((verbose_fdc = verbose_level & 0x10))
+    spdlog::get("fdc")->set_level(spdlog::level::debug);
+  if ((verbose_wait = verbose_level & 0x20))
+    spdlog::get("wait")->set_level(spdlog::level::debug);
+  if ((verbose_suspend = verbose_level & 0x40))
+    spdlog::get("suspend")->set_level(spdlog::level::debug);
+  if ((verbose_snd = verbose_level & 0x80))
+    spdlog::get("snd")->set_level(spdlog::level::debug);
 }
 
 int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void (*osd_help)()) {
@@ -1206,12 +1226,10 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
     else
       fp = nullptr;
 
-    if (verbose_proc) {
-      if (fp) {
-        printf("\"%s\" read and initialize\n", fname);
-      } else {
-        printf("\"%s\" open failed\n", (fname) ? fname : alias);
-      }
+    if (fp) {
+      QLOG_DEBUG("proc", "\"{}\" read and initialize", fname);
+    } else {
+      QLOG_ERROR("proc", "\"{}\" open failed", (fname) ? fname : alias);
     }
     if (fname)
       free(fname);
@@ -1244,32 +1262,30 @@ int config_init(int argc, char *argv[], const T_CONFIG_TABLE *osd_options, void 
 
   /* 各種ディレクトリの表示 (デバッグ用) */
 
-  if (verbose_proc) {
-    const char *d;
-    d = osd_dir_cwd();
-    printf("cwd  directory = %s\n", d ? d : "(undef)");
-    d = osd_dir_rom();
-    printf("rom  directory = %s\n", d ? d : "(undef)");
-    d = osd_dir_disk();
-    printf("disk directory = %s\n", d ? d : "(undef)");
-    d = osd_dir_tape();
-    printf("tape directory = %s\n", d ? d : "(undef)");
-    d = osd_dir_snap();
-    printf("snap directory = %s\n", d ? d : "(undef)");
-    d = osd_dir_state();
-    printf("stat directory = %s\n", d ? d : "(undef)");
-    d = osd_dir_save();
-    printf("save directory = %s\n", d ? d : "(undef)");
-    d = osd_dir_gcfg();
-    printf("gcfg directory = %s\n", d ? d : "(undef)");
-    d = osd_dir_lcfg();
-    printf("lcfg directory = %s\n", d ? d : "(undef)");
-  }
+  const char *d;
+  d = osd_dir_cwd();
+  QLOG_DEBUG("proc", "cwd  directory = {}", d ? d : "(undef)");
+  d = osd_dir_rom();
+  QLOG_DEBUG("proc", "rom  directory = {}", d ? d : "(undef)");
+  d = osd_dir_disk();
+  QLOG_DEBUG("proc", "disk directory = {}", d ? d : "(undef)");
+  d = osd_dir_tape();
+  QLOG_DEBUG("proc", "tape directory = {}", d ? d : "(undef)");
+  d = osd_dir_snap();
+  QLOG_DEBUG("proc", "snap directory = {}", d ? d : "(undef)");
+  d = osd_dir_state();
+  QLOG_DEBUG("proc", "stat directory = {}", d ? d : "(undef)");
+  d = osd_dir_save();
+  QLOG_DEBUG("proc", "save directory = {}", d ? d : "(undef)");
+  d = osd_dir_gcfg();
+  QLOG_DEBUG("proc", "gcfg directory = {}", d ? d : "(undef)");
+  d = osd_dir_lcfg();
+  QLOG_DEBUG("proc", "lcfg directory = {}", d ? d : "(undef)");
 
   return true;
 }
 
-void config_exit(void) {
+void config_exit() {
   if (save_config) {
     config_save(nullptr);
   }

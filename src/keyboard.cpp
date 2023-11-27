@@ -3,6 +3,8 @@
 
 #include "quasi88.h"
 
+#include "Core/Log.h"
+
 #include "drive.h"
 #include "event.h"
 #include "fname.h"
@@ -631,10 +633,9 @@ void key_record_playback_init(void) {
     fp_pb = osd_fopen(FTYPE_KEY_PB, file_pb, "rb");
 
     if (fp_pb) {
-      if (verbose_proc)
-        printf("Key-Input Playback file <%s> ... OK\n", file_pb);
+      QLOG_DEBUG("proc", "Key-Input Playback file <{}> ... OK", file_pb);
     } else {
-      printf("Can't open <%s>\nKey-Input PlayBack is invalid\n", file_pb);
+      QLOG_WARN("proc", "Can't open {}: Key-Input PlayBack is invalid", file_pb);
     }
   }
 
@@ -643,10 +644,9 @@ void key_record_playback_init(void) {
     fp_rec = osd_fopen(FTYPE_KEY_REC, file_rec, "wb");
 
     if (fp_rec) {
-      if (verbose_proc)
-        printf("Key-Input Record file <%s> ... OK\n", file_rec);
+      QLOG_DEBUG("proc", "Key-Input Record file <{}> ... OK", file_rec);
     } else {
-      printf("Can't open <%s>\nKey-Input Record is invalid\n", file_rec);
+      QLOG_WARN("proc", "Can't open <{}>: Key-Input Record is invalid", file_rec);
     }
   }
 }
@@ -698,7 +698,7 @@ static void record_playback() {
     if (osd_fwrite(&key_record, sizeof(char), sizeof(key_record), fp_rec) == sizeof(key_record)) {
       ;
     } else {
-      printf("Can't write Record file <%s>\n", file_rec);
+      QLOG_WARN("proc", "Can't write Record file <{}>", file_rec);
       osd_fclose(fp_rec);
       fp_rec = nullptr;
     }
@@ -725,7 +725,7 @@ static void record_playback() {
       }
 
     } else {
-      printf(" (( %s : Playback file EOF ))\n", file_pb);
+      QLOG_INFO("proc", "(( {} : Playback file EOF ))", file_pb);
       status_message(1, STATUS_INFO_TIME, "Playback  [EOF]");
       osd_fclose(fp_pb);
       fp_pb = nullptr;
@@ -1826,7 +1826,7 @@ int stateload_keyboard() {
 
     /* 旧バージョンなら、みのがす */
 
-    printf("stateload : Statefile is old. (ver 0.6.0 or 1?)\n");
+    QLOG_WARN("proc", "Stateload: Statefile is old. (ver 0.6.0 or 1?)");
 
     goto NOT_HAVE_SID2;
   }
@@ -1835,7 +1835,7 @@ int stateload_keyboard() {
 
     /* 旧バージョンなら、みのがす */
 
-    printf("stateload : Statefile is old. (ver 0.6.0, 1 or 2?)\n");
+    QLOG_WARN("proc", "Stateload: Statefile is old. (ver 0.6.0, 1 or 2?)");
 
     goto NOT_HAVE_SID3;
   }
@@ -1844,7 +1844,7 @@ int stateload_keyboard() {
 
     /* 旧バージョンなら、みのがす */
 
-    printf("stateload : Statefile is old. (ver 0.6.0, 1, 2 or 3?)\n");
+    QLOG_WARN("proc", "Stateload: Statefile is old. (ver 0.6.0, 1, 2 or 3?)");
   }
 
   return true;
@@ -2219,7 +2219,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
   const char *filename;
   OSD_FILE *fp = nullptr;
   int working = false;
-  int effective = false;
+  bool effective = false;
 
   int line_cnt = 0;
   char line[MAX_KEYFILE_LINE];
@@ -2240,13 +2240,10 @@ int config_read_keyconf_file(const char *keyconf_filename,
 
   if (filename) {
     fp = osd_fopen(FTYPE_CFG, filename, "r");
-    if (verbose_proc) {
-      if (fp) {
-        printf("\"%s\" read and initialize\n", filename);
-      } else {
-        printf("can't open keyboard configuration file \"%s\"\n", filename);
-        printf("\n");
-      }
+    if (fp) {
+      QLOG_DEBUG("proc", "\"{}\" read and initialize", filename);
+    } else {
+      QLOG_WARN("proc", "Can't open keyboard configuration file \"{}\"", filename);
     }
     if (keyconf_filename == nullptr) { /* デフォルトならば */
       free((void *)filename);       /* メモリ解放しとく */
@@ -2299,7 +2296,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
     /* トークンが四個以上あれば、その行はエラーなので次の行へ */
     if (parm4 != nullptr) {
       if (working) {
-        fprintf(stderr, "warning: too many argument in line %d\n", line_cnt);
+        QLOG_WARN("proc", "too many argument in line {}", line_cnt);
       }
       continue;
     }
@@ -2314,18 +2311,16 @@ int config_read_keyconf_file(const char *keyconf_filename,
         working = true;
         effective = true;
 
-        if (verbose_proc)
-          printf("(read start in line %d)\n", line_cnt);
+        QLOG_DEBUG("proc", "(read start in line {})", line_cnt);
 
       } else { /* 無効な識別タグだった */
 
         if (working) { /* 処理中なら終了 */
-          if (verbose_proc)
-            printf("(read stop  in line %d)\n", line_cnt - 1);
+          QLOG_DEBUG("proc", "(read stop  in line {})", line_cnt - 1);
         } /* でなければ無視 */
 
         if (err_mes[0] != '\0') {
-          fprintf(stderr, "warning: %s in %d (ignored)\n", err_mes, line_cnt);
+          QLOG_WARN("proc", "{} in {} (ignored)", err_mes, line_cnt);
         }
 
         working = false;
@@ -2337,7 +2332,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
 
         /* 「設定行」で、トークン一個だけは、エラー。次の行へ */
         if (parm2 == nullptr) {
-          fprintf(stderr, "warning: error in line %d (ignored)\n", line_cnt);
+          QLOG_WARN("proc", "error in line {} (ignored)", line_cnt);
         } else {
 
           code = symbol2int(parm1, table_symbol2int, table_size, table_ignore_case);
@@ -2350,7 +2345,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
           }
 
           if (code < 0 || key88 < 0 || (parm3 && numlock_key88 < 0)) {
-            fprintf(stderr, "warning: error in line %d (ignored)\n", line_cnt);
+            QLOG_WARN("proc", "error in line {} (ignored)", line_cnt);
           } else {
 
             if (parm1[0] == '<') {
@@ -2366,7 +2361,7 @@ int config_read_keyconf_file(const char *keyconf_filename,
             } else { /* 無効な設定だった */
               /* NG */
               if (err_mes[0] != '\0') {
-                fprintf(stderr, "warning: %s in %d (ignored)\n", err_mes, line_cnt);
+                QLOG_WARN("proc", "{} in {} (ignored)", err_mes, line_cnt);
               }
             }
           }
@@ -2377,19 +2372,14 @@ int config_read_keyconf_file(const char *keyconf_filename,
   osd_fclose(fp);
 
   if (working) {
-    if (verbose_proc)
-      printf("(read end   in line %d)\n", line_cnt - 1);
+    QLOG_DEBUG("proc", "(read end in line {})", line_cnt - 1);
   }
 
-  if (effective == false) {
-    fprintf(stderr, "warning: not configured (use initial config)\n");
+  if (!effective) {
+    QLOG_WARN("proc", "not configured (use initial config)");
   }
 
-  if (verbose_proc) {
-    printf("\n");
-  }
-
-  return (effective) ? true : false;
+  return effective;
 }
 
 static int symbol2int(const char *str, const T_SYMBOL_TABLE table_symbol2int[], int table_size, int table_ignore_case) {
