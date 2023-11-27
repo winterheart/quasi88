@@ -2,7 +2,9 @@
   "name": "quasi88",
   "version-string": "0.7.0-dev",
   "dependencies": [
+    "fmt",
     "gtest",
-    "sdl2"
+    "sdl2",
+    "spdlog"
   ]
 }
