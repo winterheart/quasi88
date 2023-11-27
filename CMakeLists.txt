@@ -296,7 +296,7 @@ if(ENABLE_WIN)
 	set_target_properties(${PROJECT_NAME}.win PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 	target_include_directories(${PROJECT_NAME}.win PRIVATE ${WIN32_INCLUDES})
 	target_link_options(${PROJECT_NAME}.win PRIVATE /DYNAMICBASE:NO)
-	target_link_libraries(${PROJECT_NAME}.win imm32.lib winmm.lib)
+	target_link_libraries(${PROJECT_NAME}.win ${COMMON_LIBS} imm32.lib winmm.lib)
 	# libraries for RA: odbc32.lib odbccp32.lib winhttp.lib
 endif(ENABLE_WIN)
 
