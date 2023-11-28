@@ -251,22 +251,6 @@ void quasi88_stop(int normal_exit) {
 static void (*exit_function[MAX_ATEXIT])(void);
 
 /*
- * 関数を最大 MAX_ATEXIT 個、登録できる。ここで登録した関数は、
- * quasi88_exit() を呼び出した時に、登録した順と逆順で、呼び出される。
- */
-void quasi88_atexit(void (*function)()) {
-  int i;
-  for (i = 0; i < MAX_ATEXIT; i++) {
-    if (exit_function[i] == nullptr) {
-      exit_function[i] = function;
-      return;
-    }
-  }
-  printf("quasi88_atexit: out of array\n");
-  quasi88_exit(-1);
-}
-
-/*
  * quasi88 を強制終了する。
  * quasi88_atexit() で登録した関数を呼び出した後に、 exit() する
  */

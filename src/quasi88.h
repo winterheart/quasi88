@@ -126,7 +126,6 @@ void quasi88_stop(int normal_exit);
 enum { QUASI88_LOOP_EXIT, QUASI88_LOOP_ONE, QUASI88_LOOP_BUSY };
 int quasi88_loop();
 
-void quasi88_atexit(void (*function)());
 void quasi88_exit(int status);
 
 void quasi88_exec();
