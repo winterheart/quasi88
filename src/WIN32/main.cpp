@@ -21,8 +21,10 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 
-#include "quasi88.h"
+#include "Core/Log.h"
+#include "Quasi88WinApp.h"
 
 #include "device.h"
 #include "getconf.h"  /* config_init */
@@ -31,10 +33,6 @@
 #include "suspend.h"  /* stateload_system */
 
 FILE *debugfp;
-/***********************************************************************
- * メイン処理
- ************************************************************************/
-static void finish();
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int showCmd) {
   g_hInstance = hInst;
@@ -69,22 +67,15 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int sho
 
   if (config_init(__argc, __argv, /* 環境初期化 & 引数処理 */
                   nullptr, nullptr)) {
-
-    quasi88_atexit(finish); /* quasi88() 実行中に強制終了した際の
-                   コールバック関数を登録する */
-
-    quasi88();              /* PC-8801 エミュレーション */
+    std::shared_ptr<QUASI88::Quasi88WinApp> app;
+    QLOG_DEBUG("proc", "WinApp initialized successfully");
+    app->run();
 
     config_exit();          /* 引数処理後始末 */
   }
 
   return 0;
 }
-
-/*
- * 強制終了時のコールバック関数 (quasi88_exit()呼出時に、処理される)
- */
-static void finish() { config_exit(); /* 引数処理後始末 */ }
 
 /***********************************************************************
  * ステートロード／ステートセーブ
