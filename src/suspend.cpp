@@ -67,9 +67,8 @@ char file_state[QUASI88_MAX_FILENAME]; /* ステートファイル名   */
  *      文字列(1023文字まで)、double型 (1000000倍してintに変換)
  *----------------------------------------------------------------------*/
 INLINE bool statesave_int(OSD_FILE *fp, const int32_t *val) {
-  if (osd_fwrite(QUASI88::convert_le(&val), sizeof(&val), 1, fp) == 1)
-    return true;
-  return false;
+  int32_t r = QUASI88::convert_le(*val);
+  return (osd_fwrite(&r, sizeof(r), 1, fp) == 1);
 }
 
 INLINE bool stateload_int(OSD_FILE *fp, int32_t *val) {
@@ -81,9 +80,8 @@ INLINE bool stateload_int(OSD_FILE *fp, int32_t *val) {
 }
 
 INLINE bool statesave_short(OSD_FILE *fp, const int16_t *val) {
-  if (osd_fwrite(QUASI88::convert_le(&val), sizeof(&val), 1, fp) == 1)
-    return true;
-  return false;
+  int16_t r = QUASI88::convert_le(*val);
+  return (osd_fwrite(&r, sizeof(r), 1, fp) == 1);
 }
 
 INLINE int stateload_short(OSD_FILE *fp, int16_t *val) {
@@ -95,9 +93,7 @@ INLINE int stateload_short(OSD_FILE *fp, int16_t *val) {
 }
 
 INLINE int statesave_char(OSD_FILE *fp, int8_t *val) {
-  if (osd_fwrite(val, sizeof(int8_t), 1, fp) == 1)
-    return true;
-  return false;
+  return (osd_fwrite(val, sizeof(int8_t), 1, fp) == 1);
 }
 
 INLINE int stateload_char(OSD_FILE *fp, int8_t *val) {
@@ -107,13 +103,12 @@ INLINE int stateload_char(OSD_FILE *fp, int8_t *val) {
 }
 
 INLINE int statesave_pair(OSD_FILE *fp, pair *val) {
-  if (osd_fwrite(QUASI88::convert_le(&val->W), sizeof(&val->W), 1, fp) == 1)
-    return true;
-  return false;
+  uint16_t r = QUASI88::convert_le(val->W);
+  return (osd_fwrite(QUASI88::convert_le(&r), sizeof(r), 1, fp) == 1);
 }
 
 INLINE int stateload_pair(OSD_FILE *fp, pair *val) {
-  int16_t r;
+  uint16_t r;
   if (osd_fread(&r, sizeof(r), 1, fp) != 1)
     return false;
   (*val).W = QUASI88::convert_le(r);
@@ -121,9 +116,7 @@ INLINE int stateload_pair(OSD_FILE *fp, pair *val) {
 }
 
 INLINE int statesave_256(OSD_FILE *fp, char *array) {
-  if (osd_fwrite(array, sizeof(char), 256, fp) == 256)
-    return true;
-  return false;
+  return (osd_fwrite(array, sizeof(char), 256, fp) == 256);
 }
 
 INLINE int stateload_256(OSD_FILE *fp, char *array) {
@@ -141,9 +134,7 @@ INLINE int statesave_str(OSD_FILE *fp, char *str) {
   memset(wk, 0, 1024);
   strcpy(wk, str);
 
-  if (osd_fwrite(wk, sizeof(char), 1024, fp) == 1024)
-    return true;
-  return false;
+  return (osd_fwrite(wk, sizeof(char), 1024, fp) == 1024);
 }
 
 INLINE int stateload_str(OSD_FILE *fp, char *str) {
@@ -154,9 +145,7 @@ INLINE int stateload_str(OSD_FILE *fp, char *str) {
 
 INLINE int statesave_double(OSD_FILE *fp, double_t *val) {
   auto r = (int32_t)(*val * 1000000.0);
-  if (osd_fwrite(QUASI88::convert_le(&r), sizeof(r), 1, fp) == 1)
-    return true;
-  return false;
+  return (osd_fwrite(QUASI88::convert_le(&r), sizeof(r), 1, fp) == 1);
 }
 
 INLINE int stateload_double(OSD_FILE *fp, double_t *val) {
