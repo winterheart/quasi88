@@ -113,21 +113,11 @@ static struct Samplesinterface quasi88_samples_interface = {
     nullptr               /* Function to call when initialization is successful */
 };
 
-static void SAMPLE_motoron() {
-  sample_start(0, SAMPLE_NUM_MOTORON, 0);
-}
-static void SAMPLE_motoroff() {
-  sample_start(1, SAMPLE_NUM_MOTOROFF, 0);
-}
-static void SAMPLE_headdown() {
-  sample_start(2, SAMPLE_NUM_HEADDOWN, 0);
-}
-static void SAMPLE_headup() {
-  sample_start(3, SAMPLE_NUM_HEADUP, 0);
-}
-static void SAMPLE_seek() {
-  sample_start(4, SAMPLE_NUM_SEEK, 0);
-}
+static void SAMPLE_motoron() { sample_start(0, SAMPLE_NUM_MOTORON, 0); }
+static void SAMPLE_motoroff() { sample_start(1, SAMPLE_NUM_MOTOROFF, 0); }
+static void SAMPLE_headdown() { sample_start(2, SAMPLE_NUM_HEADDOWN, 0); }
+static void SAMPLE_headup() { sample_start(3, SAMPLE_NUM_HEADUP, 0); }
+static void SAMPLE_seek() { sample_start(4, SAMPLE_NUM_SEEK, 0); }
 
 static T_XMAME_FUNC pc88_sound_func = {
     YM2203_timer_over_0,

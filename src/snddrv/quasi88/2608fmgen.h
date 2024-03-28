@@ -7,29 +7,28 @@ extern "C" {
 
 #include "2608intf.h"
 
-
 /************************************************/
 /* Chip 0 functions             */
 /************************************************/
-READ8_HANDLER( FMGEN2608_status_port_0_A_r );
-READ8_HANDLER( FMGEN2608_status_port_0_B_r );
-READ8_HANDLER( FMGEN2608_read_port_0_r );
-WRITE8_HANDLER( FMGEN2608_control_port_0_A_w );
-WRITE8_HANDLER( FMGEN2608_control_port_0_B_w );
-WRITE8_HANDLER( FMGEN2608_data_port_0_A_w );
-WRITE8_HANDLER( FMGEN2608_data_port_0_B_w );
+READ8_HANDLER(FMGEN2608_status_port_0_A_r);
+READ8_HANDLER(FMGEN2608_status_port_0_B_r);
+READ8_HANDLER(FMGEN2608_read_port_0_r);
+WRITE8_HANDLER(FMGEN2608_control_port_0_A_w);
+WRITE8_HANDLER(FMGEN2608_control_port_0_B_w);
+WRITE8_HANDLER(FMGEN2608_data_port_0_A_w);
+WRITE8_HANDLER(FMGEN2608_data_port_0_B_w);
 extern void FMGEN2608_set_volume_0(float volume);
 
 /************************************************/
 /* Chip 1 functions             */
 /************************************************/
-READ8_HANDLER( FMGEN2608_status_port_1_A_r );
-READ8_HANDLER( FMGEN2608_status_port_1_B_r );
-READ8_HANDLER( FMGEN2608_read_port_1_r );
-WRITE8_HANDLER( FMGEN2608_control_port_1_A_w );
-WRITE8_HANDLER( FMGEN2608_control_port_1_B_w );
-WRITE8_HANDLER( FMGEN2608_data_port_1_A_w );
-WRITE8_HANDLER( FMGEN2608_data_port_1_B_w );
+READ8_HANDLER(FMGEN2608_status_port_1_A_r);
+READ8_HANDLER(FMGEN2608_status_port_1_B_r);
+READ8_HANDLER(FMGEN2608_read_port_1_r);
+WRITE8_HANDLER(FMGEN2608_control_port_1_A_w);
+WRITE8_HANDLER(FMGEN2608_control_port_1_B_w);
+WRITE8_HANDLER(FMGEN2608_data_port_1_A_w);
+WRITE8_HANDLER(FMGEN2608_data_port_1_B_w);
 
 void fmgen2608_get_info(void *token, UINT32 state, sndinfo *info);
 
