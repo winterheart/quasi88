@@ -170,7 +170,7 @@ if(ENABLE_SOUND)
 	set(SOUND_SOURCES
 		src/snddrv/quasi88/beep.c
 		src/snddrv/quasi88/beepintf.c
-		src/snddrv/quasi88/mame-quasi88.c
+		src/snddrv/quasi88/mame-quasi88.cpp
 		src/snddrv/src/sound/2203intf.c
 		src/snddrv/src/sound/2608intf.c
 		src/snddrv/src/sound/ay8910.c

@@ -276,8 +276,8 @@ struct _machine_config
     sound_config        sound[MAX_SOUND];           /* array of sound chips in the system */
     speaker_config      speaker[MAX_SPEAKER];       /* array of speakers in the system */
 
-    int                 (*sound_start)(void);       /* one-time sound start callback */
-    void                (*sound_reset)(void);       /* sound reset callback */
+    int                 (*sound_start)();       /* one-time sound start callback */
+    void                (*sound_reset)();       /* sound reset callback */
 };
 
 

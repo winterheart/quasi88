@@ -90,13 +90,13 @@ void quasi88_start(void) {
   SET_PROC(1);
 
   /* エミュレート用メモリの確保  */
-  if (memory_allocate() == false) {
+  if (!memory_allocate()) {
     quasi88_exit(-1);
   }
 
   if (resume_flag) { /* ステートロード        */
     SET_PROC(2);
-    if (stateload() == false) {
+    if (!stateload()) {
       QLOG_ERROR("proc", "stateload: Failed! (filename = {})\n", filename_get_state());
       quasi88_exit(-1);
     }
@@ -105,7 +105,7 @@ void quasi88_start(void) {
   SET_PROC(3);
 
   /* グラフィックシステム初期化  */
-  if (screen_init() == false) {
+  if (!screen_init()) {
     quasi88_exit(-1);
   }
   SET_PROC(4);
@@ -122,13 +122,13 @@ void quasi88_start(void) {
 #endif /* (ここもscreen_initの後で) */
 
   /* サウンドドライバ初期化    */
-  if (xmame_sound_start() == false) {
+  if (!xmame_sound_start()) {
     quasi88_exit(-1);
   }
   SET_PROC(5);
 
   /* ウエイト用タイマー初期化 */
-  if (wait_vsync_init() == false) {
+  if (!wait_vsync_init()) {
     quasi88_exit(-1);
   }
   SET_PROC(6);
@@ -255,11 +255,9 @@ static void (*exit_function[MAX_ATEXIT])(void);
  * quasi88_atexit() で登録した関数を呼び出した後に、 exit() する
  */
 void quasi88_exit(int status) {
-  int i;
-
   quasi88_stop(false);
 
-  for (i = MAX_ATEXIT - 1; i >= 0; i--) {
+  for (int i = MAX_ATEXIT - 1; i >= 0; i--) {
     if (exit_function[i]) {
       (*exit_function[i])();
       exit_function[i] = nullptr;

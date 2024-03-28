@@ -2,9 +2,8 @@
  * MAME と QUASI88 とのインターフェイス関数
  */
 
-#include <stdbool.h>
-#include <stdarg.h>
-#include <ctype.h>
+#include <cstdarg>
+#include <cctype>
 
 #include "mame-quasi88.h"
 
@@ -51,17 +50,18 @@ typedef struct {               /* list of mame-sound-I/F functions */
   void (*beep_out_data)(ATTR_UNUSED offs_t offset, ATTR_UNUSED UINT8 data);
   void (*beep_out_ctrl)(ATTR_UNUSED offs_t offset, ATTR_UNUSED UINT8 data);
 
-  void (*sample_motoron)(void);
-  void (*sample_motoroff)(void);
-  void (*sample_headdown)(void);
-  void (*sample_headup)(void);
-  void (*sample_seek)(void);
+  void (*sample_motoron)();
+  void (*sample_motoroff)();
+  void (*sample_headdown)();
+  void (*sample_headup)();
+  void (*sample_seek)();
 
 } T_XMAME_FUNC;
 
 static T_XMAME_FUNC xmame_func_sound;
 static T_XMAME_FUNC xmame_func_nosound = {
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 static T_XMAME_FUNC *xmame_func = &xmame_func_nosound;
@@ -73,57 +73,59 @@ static T_XMAME_FUNC *xmame_func = &xmame_func_nosound;
 // was in machine.c
 
 static struct YM2203interface ym2203_interface = {
-    0, /* SSG port-A リード時に呼ばれる関数 */
-    0, /* SSG port-B リード時の呼ばれる関数 */
-    0, /* SSG port-A ライト時の呼ばれる関数 */
-    0, /* SSG port-B ライト時の呼ばれる関数 */
-    0  /* 割込フラグが立った時に呼ばれる関数 */
+    nullptr, /* SSG port-A reader function */
+    nullptr, /* SSG port-B reader function */
+    nullptr, /* SSG port-A writer function */
+    nullptr, /* SSG port-B writer function */
+    nullptr  /* callback function on interruption flag set */
 };
 
 static struct YM2608interface ym2608_interface = {
-    0, /* SSG port-A リード時に呼ばれる関数 */
-    0, /* SSG port-B リード時の呼ばれる関数 */
-    0, /* SSG port-A ライト時の呼ばれる関数 */
-    0, /* SSG port-B ライト時の呼ばれる関数 */
-    0, /* 割込フラグが立った時に呼ばれる関数 */
-    0  /* ADPCMのメモリ番号(QUASI88では未使用) */
+    nullptr, /* SSG port-A reader function */
+    nullptr, /* SSG port-B reader function */
+    nullptr, /* SSG port-A writer function */
+    nullptr, /* SSG port-B writer function */
+    nullptr, /* callback function on interruption flag set */
+    0        /* ADPCM memory number (unused in QUASI88) */
 };
 
 /* サンプルファイルは、モノラルであれば、bit数、周波数は不問 */
-enum { SAMPLE_NUM_MOTORON, SAMPLE_NUM_MOTOROFF, SAMPLE_NUM_HEADDOWN, SAMPLE_NUM_HEADUP, SAMPLE_NUM_SEEK };
+enum {
+  SAMPLE_NUM_MOTORON,
+  SAMPLE_NUM_MOTOROFF,
+  SAMPLE_NUM_HEADDOWN,
+  SAMPLE_NUM_HEADUP,
+  SAMPLE_NUM_SEEK,
+};
+
 static const char *quasi88_sample_names[] = {
-    "motoron.wav",  /* サンプル番号 0 */
-    "motoroff.wav", /* サンプル番号 1 */
-    "headdown.wav", /* サンプル番号 2 */
-    "headup.wav",   /* サンプル番号 3 */
-    "seek.wav",     /* サンプル番号 4 */
-    0               /* end of array */
+    "motoron.wav",  /* sample 0 */
+    "motoroff.wav", /* sample 1 */
+    "headdown.wav", /* sample 2 */
+    "headup.wav",   /* sample 3 */
+    "seek.wav",     /* sample 4 */
+    nullptr         /* end of array */
 };
 
 static struct Samplesinterface quasi88_samples_interface = {
-    5,                    /* 同時に発音するチャンネル数  */
-    quasi88_sample_names, /* サンプルファイル名一覧        */
-    NULL                  /* 初期化成功時に呼び出す関数  */
+    5,                    /* Number of channels that sound simultaneously */
+    quasi88_sample_names, /* Sample file name list */
+    nullptr               /* Function to call when initialization is successful */
 };
 
-static void SAMPLE_motoron(void) {
-  /*  if (sample_loaded(SAMPLE_NUM_MOTORON))*/
+static void SAMPLE_motoron() {
   sample_start(0, SAMPLE_NUM_MOTORON, 0);
 }
-static void SAMPLE_motoroff(void) {
-  /*  if (sample_loaded(SAMPLE_NUM_MOTOROFF))*/
+static void SAMPLE_motoroff() {
   sample_start(1, SAMPLE_NUM_MOTOROFF, 0);
 }
-static void SAMPLE_headdown(void) {
-  /*  if (sample_loaded(SAMPLE_NUM_HEADDOWN))*/
+static void SAMPLE_headdown() {
   sample_start(2, SAMPLE_NUM_HEADDOWN, 0);
 }
-static void SAMPLE_headup(void) {
-  /*  if (sample_loaded(SAMPLE_NUM_HEADUP))*/
+static void SAMPLE_headup() {
   sample_start(3, SAMPLE_NUM_HEADUP, 0);
 }
-static void SAMPLE_seek(void) {
-  /*  if (sample_loaded(SAMPLE_NUM_SEEK))*/
+static void SAMPLE_seek() {
   sample_start(4, SAMPLE_NUM_SEEK, 0);
 }
 
@@ -133,10 +135,10 @@ static T_XMAME_FUNC pc88_sound_func = {
     YM2203_status_port_0_r,
     YM2203_control_port_0_w,
     YM2203_write_port_0_w,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     BEEP88_write_port_0_w,
     BEEP88_control_port_0_w,
     SAMPLE_motoron,
@@ -152,7 +154,7 @@ static T_XMAME_FUNC pc88_sound2_func = {
     YM2608_status_port_0_A_r,
     YM2608_control_port_0_A_w,
     YM2608_data_port_0_A_w,
-    NULL,
+    nullptr,
     YM2608_status_port_0_B_r,
     YM2608_control_port_0_B_w,
     YM2608_data_port_0_B_w,
@@ -167,15 +169,15 @@ static T_XMAME_FUNC pc88_sound2_func = {
 
 #ifdef USE_FMGEN
 static T_XMAME_FUNC pc88_fmgen_func = {
-    NULL,
+    nullptr,
     FMGEN2203_read_port_0_r,
     FMGEN2203_status_port_0_r,
     FMGEN2203_control_port_0_w,
     FMGEN2203_write_port_0_w,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     BEEP88_write_port_0_w,
     BEEP88_control_port_0_w,
     SAMPLE_motoron,
@@ -186,12 +188,12 @@ static T_XMAME_FUNC pc88_fmgen_func = {
 };
 
 static T_XMAME_FUNC pc88_fmgen2_func = {
-    NULL,
+    nullptr,
     FMGEN2608_read_port_0_r,
     FMGEN2608_status_port_0_A_r,
     FMGEN2608_control_port_0_A_w,
     FMGEN2608_data_port_0_A_w,
-    NULL,
+    nullptr,
     FMGEN2608_status_port_0_B_r,
     FMGEN2608_control_port_0_B_w,
     FMGEN2608_data_port_0_B_w,
@@ -207,7 +209,7 @@ static T_XMAME_FUNC pc88_fmgen2_func = {
 
 /* void construct_quasi88(machine_config *machine) */
 static void construct_quasi88(machine_config *machine) {
-  sound_config *sound = NULL;
+  sound_config *sound;
 
   /* basic machine hardware */
   machine->frames_per_second = (float)vsync_freq_hz;
@@ -216,7 +218,7 @@ static void construct_quasi88(machine_config *machine) {
   driver_add_speaker(machine, "left", -0.2f, 0.0f, 1.0f);
   driver_add_speaker(machine, "right", 0.2f, 0.0f, 1.0f);
 
-  sound = driver_add_sound(machine, NULL, SOUND_YM2203, 4000000);
+  sound = driver_add_sound(machine, nullptr, SOUND_YM2203, 4000000);
   if (sound) {
     sound->config = &(ym2203_interface);
 
@@ -232,7 +234,7 @@ static void construct_quasi88(machine_config *machine) {
   }
   /* 0 = PSG(1ch), 1 = PSG(2ch), 2 = PSG(3ch), 3 = FM */
 
-  sound = driver_add_sound(machine, NULL, SOUND_BEEP88, 2400);
+  sound = driver_add_sound(machine, nullptr, SOUND_BEEP88, 2400);
   if (sound) {
     sound->route[sound->routes].output = -1;
     sound->route[sound->routes].target = "left";
@@ -247,7 +249,7 @@ static void construct_quasi88(machine_config *machine) {
   /* 0 = BEEP */
 
   if (options.use_samples) {
-    sound = driver_add_sound(machine, NULL, SOUND_SAMPLES, 0);
+    sound = driver_add_sound(machine, nullptr, SOUND_SAMPLES, 0);
     if (sound) {
       sound->config = &(quasi88_samples_interface);
 
@@ -269,17 +271,17 @@ static void construct_quasi88(machine_config *machine) {
     has_samples = 1;
   } else {
     has_samples = 0;
-    xmame_func_sound.sample_motoron = NULL;
-    xmame_func_sound.sample_motoroff = NULL;
-    xmame_func_sound.sample_headdown = NULL;
-    xmame_func_sound.sample_headup = NULL;
-    xmame_func_sound.sample_seek = NULL;
+    xmame_func_sound.sample_motoron = nullptr;
+    xmame_func_sound.sample_motoroff = nullptr;
+    xmame_func_sound.sample_headdown = nullptr;
+    xmame_func_sound.sample_headup = nullptr;
+    xmame_func_sound.sample_seek = nullptr;
   }
 }
 
 /* void construct_quasi88sd2(machine_config *machine) */
 static void construct_quasi88sd2(machine_config *machine) {
-  sound_config *sound = NULL;
+  sound_config *sound;
 
   /* basic machine hardware */
   machine->frames_per_second = ((float)(vsync_freq_hz));
@@ -288,10 +290,10 @@ static void construct_quasi88sd2(machine_config *machine) {
   driver_add_speaker(machine, "left", -0.2f, 0.0f, 1.0f);
   driver_add_speaker(machine, "right", 0.2f, 0.0f, 1.0f);
 
-  sound = driver_add_sound(machine, NULL, SOUND_YM2608, 8000000);
-  if (sound)
-    sound->config = &(ym2608_interface);
+  sound = driver_add_sound(machine, nullptr, SOUND_YM2608, 8000000);
   if (sound) {
+    sound->config = &(ym2608_interface);
+
     sound->route[sound->routes].output = 0;
     sound->route[sound->routes].target = "left";
     sound->route[sound->routes].gain = 1.0f;
@@ -314,7 +316,7 @@ static void construct_quasi88sd2(machine_config *machine) {
   }
   /* 0 = PSG, 1 = FM(L), 2 = FM(R) */
 
-  sound = driver_add_sound(machine, NULL, SOUND_BEEP88, 2400);
+  sound = driver_add_sound(machine, nullptr, SOUND_BEEP88, 2400);
   if (sound) {
     sound->route[sound->routes].output = -1;
     sound->route[sound->routes].target = "left";
@@ -329,7 +331,7 @@ static void construct_quasi88sd2(machine_config *machine) {
   /* 0 = BEEP */
 
   if (options.use_samples) {
-    sound = driver_add_sound(machine, NULL, SOUND_SAMPLES, 0);
+    sound = driver_add_sound(machine, nullptr, SOUND_SAMPLES, 0);
     if (sound) {
       sound->config = &(quasi88_samples_interface);
 
@@ -351,18 +353,18 @@ static void construct_quasi88sd2(machine_config *machine) {
     has_samples = 1;
   } else {
     has_samples = 0;
-    xmame_func_sound.sample_motoron = NULL;
-    xmame_func_sound.sample_motoroff = NULL;
-    xmame_func_sound.sample_headdown = NULL;
-    xmame_func_sound.sample_headup = NULL;
-    xmame_func_sound.sample_seek = NULL;
+    xmame_func_sound.sample_motoron = nullptr;
+    xmame_func_sound.sample_motoroff = nullptr;
+    xmame_func_sound.sample_headdown = nullptr;
+    xmame_func_sound.sample_headup = nullptr;
+    xmame_func_sound.sample_seek = nullptr;
   }
 }
 
 #ifdef USE_FMGEN
 /* void construct_quasi88fmgen(machine_config *machine) */
 static void construct_quasi88fmgen(machine_config *machine) {
-  sound_config *sound = NULL;
+  sound_config *sound = nullptr;
 
   /* basic machine hardware */
   machine->frames_per_second = (float)(vsync_freq_hz);
@@ -371,7 +373,7 @@ static void construct_quasi88fmgen(machine_config *machine) {
   driver_add_speaker(machine, "left", -0.2f, 0.0f, 1.0f);
   driver_add_speaker(machine, "right", 0.2f, 0.0f, 1.0f);
 
-  sound = driver_add_sound(machine, NULL, SOUND_FMGEN2203, 4000000);
+  sound = driver_add_sound(machine, nullptr, SOUND_FMGEN2203, 4000000);
   if (sound) {
     sound->route[sound->routes].output = -1;
     sound->route[sound->routes].target = "left";
@@ -385,7 +387,7 @@ static void construct_quasi88fmgen(machine_config *machine) {
   }
   /* 0 = PSG/FM(L), 1 = PSG/FM(R) */
 
-  sound = driver_add_sound(machine, NULL, SOUND_BEEP88, 2400);
+  sound = driver_add_sound(machine, nullptr, SOUND_BEEP88, 2400);
   if (sound) {
     sound->route[sound->routes].output = -1;
     sound->route[sound->routes].target = "left";
@@ -400,7 +402,7 @@ static void construct_quasi88fmgen(machine_config *machine) {
   /* 0 = BEEP */
 
   if (options.use_samples) {
-    sound = driver_add_sound(machine, NULL, SOUND_SAMPLES, 0);
+    sound = driver_add_sound(machine, nullptr, SOUND_SAMPLES, 0);
     if (sound) {
       sound->config = &(quasi88_samples_interface);
 
@@ -422,17 +424,17 @@ static void construct_quasi88fmgen(machine_config *machine) {
     has_samples = 1;
   } else {
     has_samples = 0;
-    xmame_func_sound.sample_motoron = NULL;
-    xmame_func_sound.sample_motoroff = NULL;
-    xmame_func_sound.sample_headdown = NULL;
-    xmame_func_sound.sample_headup = NULL;
-    xmame_func_sound.sample_seek = NULL;
+    xmame_func_sound.sample_motoron = nullptr;
+    xmame_func_sound.sample_motoroff = nullptr;
+    xmame_func_sound.sample_headdown = nullptr;
+    xmame_func_sound.sample_headup = nullptr;
+    xmame_func_sound.sample_seek = nullptr;
   }
 }
 
 /* void construct_quasi88fmgen2(machine_config *machine) */
 static void construct_quasi88fmgen2(machine_config *machine) {
-  sound_config *sound = NULL;
+  sound_config *sound;
 
   /* basic machine hardware */
   machine->frames_per_second = ((float)(vsync_freq_hz));
@@ -441,7 +443,7 @@ static void construct_quasi88fmgen2(machine_config *machine) {
   driver_add_speaker(machine, "left", -0.2f, 0.0f, 1.0f);
   driver_add_speaker(machine, "right", 0.2f, 0.0f, 1.0f);
 
-  sound = driver_add_sound(machine, NULL, SOUND_FMGEN2608, 8000000);
+  sound = driver_add_sound(machine, nullptr, SOUND_FMGEN2608, 8000000);
   if (sound) {
     sound->route[sound->routes].output = 0;
     sound->route[sound->routes].target = "left";
@@ -455,7 +457,7 @@ static void construct_quasi88fmgen2(machine_config *machine) {
   }
   /* 0 = PSG/FM(L), 1 = PSG/FM(R) */
 
-  sound = driver_add_sound(machine, NULL, SOUND_BEEP88, 2400);
+  sound = driver_add_sound(machine, nullptr, SOUND_BEEP88, 2400);
   if (sound) {
     sound->route[sound->routes].output = -1;
     sound->route[sound->routes].target = "left";
@@ -470,7 +472,7 @@ static void construct_quasi88fmgen2(machine_config *machine) {
   /* 0 = BEEP */
 
   if (options.use_samples) {
-    sound = driver_add_sound(machine, NULL, SOUND_SAMPLES, 0);
+    sound = driver_add_sound(machine, nullptr, SOUND_SAMPLES, 0);
     if (sound) {
       sound->config = &(quasi88_samples_interface);
 
@@ -492,11 +494,11 @@ static void construct_quasi88fmgen2(machine_config *machine) {
     has_samples = 1;
   } else {
     has_samples = 0;
-    xmame_func_sound.sample_motoron = NULL;
-    xmame_func_sound.sample_motoroff = NULL;
-    xmame_func_sound.sample_headdown = NULL;
-    xmame_func_sound.sample_headup = NULL;
-    xmame_func_sound.sample_seek = NULL;
+    xmame_func_sound.sample_motoron = nullptr;
+    xmame_func_sound.sample_motoroff = nullptr;
+    xmame_func_sound.sample_headdown = nullptr;
+    xmame_func_sound.sample_headup = nullptr;
+    xmame_func_sound.sample_seek = nullptr;
   }
 }
 
@@ -513,14 +515,14 @@ static machine_config internal_drv;
 
 /* various game options filled in by the OSD */
 global_options options = {
-    44100, /* サンプリングレート   8000 〜 48000 */
-    0,     /* サンプル音使用可否   1:可 0:否     */
+    44100, /* sampling rate         8000 〜 48000 */
+    0,     /* can samples be used   1: yes 0: no  */
 };
 
 /*  run_game()          [src/mame.c] */
 /*  create_machine()    [src/mame.c] */
 /*  init_machine()      [src/mame.c] */
-static void f_create_machine(void) {
+static void f_create_machine() {
 
   /* create_machine() [src/mame.c] -------------------------------- */
 
@@ -576,8 +578,8 @@ static void f_create_machine(void) {
 }
 
 /*  destroy_machine()   [src/mame.c] */
-static void f_destroy_machine(void) {
-  Machine = NULL;
+static void f_destroy_machine() {
+  Machine = nullptr;
 
   /* ここで、 auto_malloc されたメモリをすべて free する */
   end_resource_tracking();
@@ -1091,18 +1093,18 @@ char *assemble_3_strings(const char *dummy1, const char *summy2, const char *s3)
 
 /*  mame_fopen()            [src/fileio.c] */
 mame_file_error mame_fopen(const char *dummypath, char *filename, UINT32 dummyflags, mame_file **file) {
-  OSD_FILE *fp = NULL;
+  OSD_FILE *fp = nullptr;
   char buf[1024] = "";
   const char *dir = osd_dir_rom();
 
-  *file = NULL;
+  *file = nullptr;
 
   if (dir) {
     if (osd_path_join(dir, filename, buf, 1024)) {
       fp = osd_fopen(FTYPE_ROM, buf, "rb");
     }
 
-    if (fp == NULL) { /* 開けなかったら、小文字のファイル名を試す */
+    if (fp == nullptr) { /* 開けなかったら、小文字のファイル名を試す */
       char *p = filename;
       for (; *p; p++) {
         *p = tolower(*p);
@@ -1113,7 +1115,7 @@ mame_file_error mame_fopen(const char *dummypath, char *filename, UINT32 dummyfl
       }
     }
 
-    if (fp == NULL) { /* 開けなかったら、大文字のファイル名を試す */
+    if (fp == nullptr) { /* 開けなかったら、大文字のファイル名を試す */
       char *p = filename;
       for (; *p; p++) {
         *p = toupper(*p);
